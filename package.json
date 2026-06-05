@@ -1,0 +1,30 @@
+{
+  "name": "blazeaudit",
+  "productName": "BlazeAudit",
+  "version": "0.0.0",
+  "description": "Offline fire-inspection documentation desktop app by SubraLab.",
+  "author": "SubraLab",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "main": "dist-electron/main/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "echo \"[Phase 1] dev script will start Electron + Vite\" && exit 0",
+    "build": "echo \"[Phase 1+] build script will bundle and package with electron-builder\" && exit 0",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}
