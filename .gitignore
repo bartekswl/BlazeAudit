@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build output
+dist/
+dist-electron/
+out/
+build/output/
+release/
+*.exe
+*.msi
+*.nsis
+
+# Vite
+.vite/
+
+# Local databases (do not commit user data)
+*.sqlite
+*.sqlite3
+*.db
+data/
+.electron-dev/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Cursor / AI tooling local artifacts
+.cursor/cache/
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Local design scratch — sketches, mockups, notes. NEVER committed/uploaded.
+sandbox/
+
+# Branding assets kept local only (logos, colors, mockups, source files).
+branding/
+
+# Local-only agent context file (not shared/uploaded).
+AGENTS.md
+
+# Misc
+*.tsbuildinfo

@@ -1,0 +1,145 @@
+import { contextBridge, ipcRenderer } from 'electron';
+import { IpcChannels } from '../shared/ipc';
+import type {
+  ActivateInput,
+  AuthStatus,
+  LoginInput,
+  SecuritySettings,
+  SetPasswordInput,
+} from '../shared/auth';
+import type { LoginPolicy } from '../shared/loginPolicy';
+import type { Template, TemplateInput, TemplateSummary } from '../shared/document';
+import type {
+  CreateInspectionInput,
+  DashboardStats,
+  Inspection,
+  InspectionInput,
+  InspectionSummary,
+} from '../shared/inspection';
+import type {
+  BusinessProfile,
+  BusinessProfileInput,
+  Inspector,
+  InspectorInput,
+} from '../shared/profile';
+import type { Client, ClientInput } from '../shared/types';
+
+const api = {
+  window: {
+    minimize: (): void => ipcRenderer.send(IpcChannels.windowMinimize),
+    toggleMaximize: (): void => ipcRenderer.send(IpcChannels.windowToggleMaximize),
+    close: (): void => ipcRenderer.send(IpcChannels.windowClose),
+    isMaximized: (): Promise<boolean> => ipcRenderer.invoke(IpcChannels.windowIsMaximized),
+    /** Subscribe to maximize/unmaximize changes. Returns an unsubscribe function. */
+    onMaximizeChange: (callback: (isMaximized: boolean) => void): (() => void) => {
+      const listener = (_event: unknown, isMaximized: boolean) => callback(isMaximized);
+      ipcRenderer.on(IpcChannels.windowMaximizeChanged, listener);
+      return () => ipcRenderer.removeListener(IpcChannels.windowMaximizeChanged, listener);
+    },
+  },
+  app: {
+    getVersion: (): Promise<string> => ipcRenderer.invoke(IpcChannels.appVersion),
+  },
+  clients: {
+    list: (): Promise<Client[]> => ipcRenderer.invoke(IpcChannels.clientsList),
+    get: (id: string): Promise<Client | null> => ipcRenderer.invoke(IpcChannels.clientsGet, id),
+    create: (input: ClientInput): Promise<Client> =>
+      ipcRenderer.invoke(IpcChannels.clientsCreate, input),
+    update: (id: string, input: ClientInput): Promise<Client> =>
+      ipcRenderer.invoke(IpcChannels.clientsUpdate, id, input),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.clientsDelete, id),
+  },
+  auth: {
+    getStatus: (): Promise<AuthStatus> => ipcRenderer.invoke(IpcChannels.authGetStatus),
+    activate: (input: ActivateInput): Promise<{ email: string }> =>
+      ipcRenderer.invoke(IpcChannels.authActivate, input),
+    setPassword: (input: SetPasswordInput): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.authSetPassword, input),
+    login: (input: LoginInput): Promise<void> => ipcRenderer.invoke(IpcChannels.authLogin, input),
+    logOut: (): Promise<void> => ipcRenderer.invoke(IpcChannels.authLogOut),
+    selectAccount: (accountId: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.authSelectAccount, accountId),
+    beginAddAccount: (): Promise<void> => ipcRenderer.invoke(IpcChannels.authBeginAddAccount),
+    returnToLogin: (): Promise<void> => ipcRenderer.invoke(IpcChannels.authReturnToLogin),
+    getSecuritySettings: (): Promise<SecuritySettings> =>
+      ipcRenderer.invoke(IpcChannels.authGetSecuritySettings),
+    setLoginPolicy: (policy: LoginPolicy): Promise<LoginPolicy> =>
+      ipcRenderer.invoke(IpcChannels.authSetLoginPolicy, policy),
+  },
+  database: {
+    exportClientsCsv: (): Promise<{ saved: false } | { saved: true; filePath: string }> =>
+      ipcRenderer.invoke(IpcChannels.databaseExportClientsCsv),
+    getDataDir: (): Promise<string> => ipcRenderer.invoke(IpcChannels.databaseGetDataDir),
+    openDataFolder: (): Promise<{ opened: true; path: string }> =>
+      ipcRenderer.invoke(IpcChannels.databaseOpenDataFolder),
+    exportSchemaKit: (): Promise<{ saved: false } | { saved: true; directory: string }> =>
+      ipcRenderer.invoke(IpcChannels.templatesExportSchemaKit),
+    importTemplateJson: (): Promise<
+      { imported: false } | { imported: true; templateId: string; filePath: string }
+    > => ipcRenderer.invoke(IpcChannels.templatesImportJson),
+  },
+  templates: {
+    list: (): Promise<TemplateSummary[]> => ipcRenderer.invoke(IpcChannels.templatesList),
+    get: (id: string): Promise<Template | null> => ipcRenderer.invoke(IpcChannels.templatesGet, id),
+    create: (input: TemplateInput): Promise<Template> =>
+      ipcRenderer.invoke(IpcChannels.templatesCreate, input),
+    update: (id: string, input: TemplateInput): Promise<Template> =>
+      ipcRenderer.invoke(IpcChannels.templatesUpdate, id, input),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.templatesDelete, id),
+    duplicate: (id: string): Promise<Template> =>
+      ipcRenderer.invoke(IpcChannels.templatesDuplicate, id),
+    exportJson: (id: string): Promise<{ saved: false } | { saved: true; filePath: string }> =>
+      ipcRenderer.invoke(IpcChannels.templatesExportJson, id),
+    importJson: (): Promise<
+      { imported: false } | { imported: true; templateId: string; filePath: string }
+    > => ipcRenderer.invoke(IpcChannels.templatesImportJson),
+    exportSchemaKit: (): Promise<{ saved: false } | { saved: true; directory: string }> =>
+      ipcRenderer.invoke(IpcChannels.templatesExportSchemaKit),
+  },
+  inspections: {
+    list: (options?: { clientId?: string }): Promise<InspectionSummary[]> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsList, options),
+    get: (id: string): Promise<Inspection | null> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsGet, id),
+    create: (input: CreateInspectionInput): Promise<Inspection> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsCreate, input),
+    update: (id: string, input: InspectionInput): Promise<Inspection> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsUpdate, id, input),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.inspectionsDelete, id),
+    getDashboard: (): Promise<DashboardStats> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsDashboard),
+    getClientStats: (
+      clientId: string,
+    ): Promise<{
+      documentCount: number;
+      lastDocumentDate: string | null;
+      nextInspectionDue: string | null;
+    }> => ipcRenderer.invoke(IpcChannels.inspectionsClientStats, clientId),
+    exportPdf: (id: string): Promise<{ saved: false } | { saved: true; filePath: string }> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsExportPdf, id),
+    importPdf: (): Promise<
+      { imported: false } | { imported: true; inspectionId: string; filePath: string }
+    > => ipcRenderer.invoke(IpcChannels.inspectionsImportPdf),
+  },
+  profile: {
+    getBusiness: (): Promise<BusinessProfile> =>
+      ipcRenderer.invoke(IpcChannels.profileGetBusiness),
+    updateBusiness: (input: BusinessProfileInput): Promise<BusinessProfile> =>
+      ipcRenderer.invoke(IpcChannels.profileUpdateBusiness, input),
+    getLogo: (): Promise<string | null> => ipcRenderer.invoke(IpcChannels.profileGetLogo),
+    pickLogo: (): Promise<BusinessProfile> => ipcRenderer.invoke(IpcChannels.profilePickLogo),
+    removeLogo: (): Promise<BusinessProfile> => ipcRenderer.invoke(IpcChannels.profileRemoveLogo),
+    listInspectors: (): Promise<Inspector[]> =>
+      ipcRenderer.invoke(IpcChannels.profileListInspectors),
+    createInspector: (input: InspectorInput): Promise<Inspector> =>
+      ipcRenderer.invoke(IpcChannels.profileCreateInspector, input),
+    updateInspector: (id: string, input: InspectorInput): Promise<Inspector> =>
+      ipcRenderer.invoke(IpcChannels.profileUpdateInspector, id, input),
+    deleteInspector: (id: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.profileDeleteInspector, id),
+  },
+};
+
+contextBridge.exposeInMainWorld('blazeaudit', api);
+
+export type BlazeAuditApi = typeof api;

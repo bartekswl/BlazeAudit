@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blazeaudit.local/schema/document-v1.json",
+  "title": "BlazeAudit Document",
+  "type": "object",
+  "required": ["schemaVersion", "meta", "blocks"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "meta": {
+      "type": "object",
+      "required": ["title", "clientId", "inspectionType", "inspectionDate"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "clientId": { "type": ["string", "null"] },
+        "inspectionType": { "type": "string" },
+        "inspectionDate": { "type": ["string", "null"] },
+        "branding": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "company": { "type": "string" }
+          }
+        }
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/block" }
+    }
+  },
+  "$defs": {
+    "block": {
+      "type": "object",
+      "required": ["id", "type", "config", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "enum": [
+            "heading",
+            "paragraph",
+            "textField",
+            "lines",
+            "checklist",
+            "table",
+            "signature",
+            "section",
+            "spacer",
+            "image"
+          ]
+        },
+        "label": { "type": "string" },
+        "config": { "type": "object" },
+        "value": {},
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/block" }
+        }
+      }
+    }
+  }
+}
