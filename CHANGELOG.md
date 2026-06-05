@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffolding and professional documentation set (Phase 0):
   - Git hygiene: `.gitignore`, `.gitattributes`, `.editorconfig`.
-  - Proprietary `LICENSE` (SubraLab).
+  - No license granted (all rights reserved); license note in `README.md`.
   - `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`.
   - Documentation: PRD, architecture, data model, roadmap, and ADR-0001
     (tech-stack decision).

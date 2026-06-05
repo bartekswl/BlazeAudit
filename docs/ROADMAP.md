@@ -10,7 +10,7 @@ A phased delivery plan. Phases are sequential but boundaries are flexible.
 ## Phase 0 — Project setup & documentation ✅ (current)
 
 - Git initialization and hygiene (`.gitignore`, `.gitattributes`, `.editorconfig`).
-- Proprietary license and core docs (README, CONTRIBUTING, CHANGELOG).
+- Core docs (README, CONTRIBUTING, CHANGELOG); no license granted (all rights reserved).
 - Documentation set: PRD, architecture, data model, ADRs, roadmap.
 - Toolchain configuration: `package.json`, TypeScript, ESLint, Prettier.
 

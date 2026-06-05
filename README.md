@@ -114,4 +114,9 @@ BlazeAudit/
 
 ## License
 
-Proprietary © 2026 SubraLab. All rights reserved. See [`LICENSE`](LICENSE).
+No license is granted. © 2026 SubraLab. All rights reserved.
+
+This repository is public (source-available) for visibility, but it is **not**
+open source. Absent an explicit license, all rights are reserved by default: you
+may view the code, but you may not use, copy, modify, or distribute it without
+the prior written permission of SubraLab.

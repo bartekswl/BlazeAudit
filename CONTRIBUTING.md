@@ -1,8 +1,9 @@
 # Contributing to BlazeAudit
 
-BlazeAudit is a proprietary SubraLab project. This guide documents the
-development workflow and conventions so the codebase stays consistent and
-maintainable.
+BlazeAudit is a SubraLab project. The repository is public (source-available)
+but not open source — no license is granted and all rights are reserved. This
+guide documents the development workflow and conventions so the codebase stays
+consistent and maintainable.
 
 ## Prerequisites
 

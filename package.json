@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "description": "Offline fire-inspection documentation desktop app by SubraLab.",
   "author": "SubraLab",
-  "license": "UNLICENSED",
+  "license": "SEE LICENSE IN README.md",
   "private": true,
   "type": "module",
   "main": "dist-electron/main/index.js",
