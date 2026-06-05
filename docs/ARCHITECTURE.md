@@ -1,13 +1,20 @@
 # BlazeAudit — Architecture
 
+> **BlazeAudit** is a product by **SubraLab**.
+
 | | |
 | --- | --- |
-| **Status** | Draft (Phase 0) |
+| **Status** | Living draft — provisional, expect change |
 | **Last updated** | 2026-06-05 |
 
-This document describes the high-level architecture of BlazeAudit. For the
-underlying technology decision, see
-[`adr/0001-tech-stack.md`](adr/0001-tech-stack.md).
+> ⚠️ **This is a living document, not a fixed design.** Everything below is a
+> starting hypothesis to guide early development. Concrete designs will be made
+> incrementally, step by step, as we build. Do not treat any structure here as
+> final. The only firm decision so far is the technology stack — see
+> [`adr/0001-tech-stack.md`](adr/0001-tech-stack.md). Other significant changes
+> should be captured as new ADRs.
+
+This document sketches a high-level direction for BlazeAudit's architecture.
 
 ## 1. Overview
 

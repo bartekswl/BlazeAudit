@@ -1,18 +1,23 @@
 # BlazeAudit — Data Model
 
+> **BlazeAudit** is a product by **SubraLab**.
+
 | | |
 | --- | --- |
-| **Status** | Draft (Phase 0) |
+| **Status** | Living draft — provisional, expect change |
 | **Last updated** | 2026-06-05 |
 
-This document defines two related things:
+> ⚠️ **Nothing here is final.** This is an early exploration of how data *might*
+> be shaped, written to give development a starting point. The schema, block
+> types, and field names will be designed and refined iteratively as we build —
+> do not commit to this as the one true model. Treat it as a sketch to react to,
+> not a specification.
 
-1. The **relational schema** (SQLite) for persistence.
-2. The **document/block model** (JSON) used by templates, inspections, the editor,
-   and PDF export.
+This document sketches two related ideas:
 
-> This is a design draft. Exact column types and migrations will be finalized when
-> the data layer is implemented in Phase 2.
+1. A possible **relational schema** (SQLite) for persistence.
+2. A possible **document/block model** (JSON) for templates, inspections, the
+   editor, and PDF export.
 
 ## 1. Relational schema (SQLite)
 

@@ -1,8 +1,10 @@
 # BlazeAudit — Roadmap
 
+> **BlazeAudit** is a product by **SubraLab**.
+
 | | |
 | --- | --- |
-| **Status** | Draft (Phase 0) |
+| **Status** | Living draft — phases & scope will shift |
 | **Last updated** | 2026-06-05 |
 
 A phased delivery plan. Phases are sequential but boundaries are flexible.
