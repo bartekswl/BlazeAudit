@@ -1,5 +1,6 @@
 import { Flame } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { TitleBar } from '../../components/TitleBar';
 
 export function AuthShell({
   title,
@@ -12,6 +13,7 @@ export function AuthShell({
 }) {
   return (
     <div className="flex h-screen flex-col bg-neutral-950 text-neutral-200">
+      <TitleBar />
       <div className="flex min-h-0 flex-1 items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">

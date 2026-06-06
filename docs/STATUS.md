@@ -6,7 +6,7 @@
 | --- | --- |
 | **Status** | Living snapshot — update as the project evolves |
 | **Last updated** | 2026-06-06 |
-| **Current phase** | Phase 3 complete; next is Phase 4 (document model & templates) |
+| **Current phase** | Phase 6 complete; next is Phase 7 (backups) |
 
 ## How to use this file
 
@@ -27,13 +27,11 @@ Inspired by fire-forms.com but a focused local tool, not a cloud SaaS. A compani
 
 ## Snapshot
 
-- **Done:** Phases 0–3. Encrypted SQLite (SQLCipher), client CRUD, polished **Customers**
-  UI (search, detail view, breadcrumb, CSV export via **Database**), and **accounts/login**:
-  activation → set password → offline login; key X wrapped with **Argon2id** + **DPAPI**;
-  DB unlocks only after login. Dev data in **`<project>/data/`** (gitignored).
-- **Next:** Phase 4 — document model, template builder, JSON portability.
-- **Not started:** inspections workflow, PDF export, backups, license server (Phase 8),
-  packaging.
+- **Done:** Phases 0–6. Through inspections + **PDF export/import**: branded A4 reports
+  (title, client, inspector, body blocks) with embedded JSON for lossless BlazeAudit
+  PDF re-import; everything through Phase 5.
+- **Next:** Phase 7 — encrypted backup file + restore.
+- **Not started:** license server (Phase 8), packaging.
 
 ## Tech stack (ADR-0001)
 
@@ -112,10 +110,49 @@ print-to-PDF fallback). Windows-only for v1. Proprietary (all rights reserved).
 - **Customers + Database UI** — see git history / prior STATUS sections; still valid.
 - **Dev paths:** DB + auth → `<project>/data/`; Electron runtime → `.electron-dev/`.
 
+## Phase 4 notes (as built)
+
+- **Schema v3:** `templates` table (`id`, optional `seed_id`, `name`, `description`,
+  `document` JSON, `version`, timestamps). Seeding tracked in `app_meta.templates_seeded_v1`.
+- **Document model:** `src/shared/document/` — types, validation, tree mutations, factory,
+  bundled defaults, JSON Schema (`schema.json`), schema-kit README.
+- **Default templates** (seeded once per account DB): Annual Sprinkler, Fire Extinguisher
+  Survey, General Fire Safety Walkthrough.
+- **Main:** `src/main/db/templates.ts`, `seedTemplates.ts` (runs after migrations on unlock),
+  `src/main/ipc/templates.ts`.
+- **IPC:** `window.blazeaudit.templates.*` — list, get, create, update, remove, duplicate,
+  exportJson, importJson, exportSchemaKit. Database screen also exposes schema kit + JSON import.
+- **UI:** `src/renderer/features/templates/` — list, editor with block tree, per-type settings,
+  reorder, add/remove blocks. Templates nav uses breadcrumb when editing (like Customers).
+
+## Phase 5 notes (as built)
+
+- **Schema v4:** `inspections` table — client/template FKs, title, status (`draft`|`complete`),
+  inspector, document JSON snapshot, `inspected_at`, `cadence`, `next_due_at`, timestamps.
+- **Create flow:** pick client + template → snapshot template blocks with empty fill-in values.
+- **Fill-in editor:** `Documents` nav — text fields, checklist pass/fail/na, table cells,
+  optional sections; autosave ~900ms debounce; mark complete computes `next_due_at`.
+- **Cadence:** monthly, quarterly, annual, none (+ ISO duration helper for custom later).
+- **Dashboard:** live stats, recent inspections, due/overdue reminders list.
+- **Customers:** detail page shows inspection history, stats, new/open inspection shortcuts.
+- **IPC:** `window.blazeaudit.inspections.*` — list, get, create, update, remove,
+  getDashboard, getClientStats.
+
+## Phase 6 notes (as built)
+
+- **Export:** `Save as PDF` on inspection editor → A4 report via Chromium print-to-PDF.
+- **Layout:** BlazeAudit header, title, client + inspection info cards, full body
+  (tables, checklists, lines, signatures, sections).
+- **Embed:** `%BLAZEAUDIT_JSON_V1%` + base64 payload appended to PDF bytes (lossless round-trip).
+- **Import:** Database → **Import from BlazeAudit PDF** (or `inspections.importPdf` IPC);
+  restores document snapshot as a new inspection when client exists in DB.
+- **Code:** `src/main/pdf/` (`renderInspectionHtml`, `exportInspectionPdf`, `embed`,
+  `importInspectionPdf`), `src/shared/pdf.ts`.
+
 ## Immediate next step
 
-**Phase 4 — document model & template builder.** Block tree, template CRUD, JSON
-export/import, schema kit. See [`ROADMAP.md`](ROADMAP.md) and [`TEMPLATES.md`](TEMPLATES.md).
+**Phase 7 — backups & recovery.** Single encrypted backup file, restore on fresh install.
+See [`ROADMAP.md`](ROADMAP.md).
 
 ## Conventions / notes
 

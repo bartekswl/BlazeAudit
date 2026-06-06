@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { AuthStatus } from '../../../shared/auth';
 import { cn } from '../../lib/cn';
+import { TitleBar } from '../../components/TitleBar';
 import { ActivationScreen } from './ActivationScreen';
 import { AuthRefreshContext } from './authContext';
 import { LoginScreen } from './LoginScreen';
@@ -82,8 +83,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   if (!status) {
     return (
-      <div className="grid h-screen place-items-center bg-neutral-950 text-sm text-neutral-500">
-        Loading…
+      <div className="flex h-screen flex-col bg-neutral-950">
+        <TitleBar />
+        <div className="grid flex-1 place-items-center text-sm text-neutral-500">Loading…</div>
       </div>
     );
   }

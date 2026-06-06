@@ -8,6 +8,14 @@ import type {
   SetPasswordInput,
 } from '../shared/auth';
 import type { LoginPolicy } from '../shared/loginPolicy';
+import type { Template, TemplateInput, TemplateSummary } from '../shared/document';
+import type {
+  CreateInspectionInput,
+  DashboardStats,
+  Inspection,
+  InspectionInput,
+  InspectionSummary,
+} from '../shared/inspection';
 import type { Client, ClientInput } from '../shared/types';
 
 const api = {
@@ -58,6 +66,54 @@ const api = {
     getDataDir: (): Promise<string> => ipcRenderer.invoke(IpcChannels.databaseGetDataDir),
     openDataFolder: (): Promise<{ opened: true; path: string }> =>
       ipcRenderer.invoke(IpcChannels.databaseOpenDataFolder),
+    exportSchemaKit: (): Promise<{ saved: false } | { saved: true; directory: string }> =>
+      ipcRenderer.invoke(IpcChannels.templatesExportSchemaKit),
+    importTemplateJson: (): Promise<
+      { imported: false } | { imported: true; templateId: string; filePath: string }
+    > => ipcRenderer.invoke(IpcChannels.templatesImportJson),
+  },
+  templates: {
+    list: (): Promise<TemplateSummary[]> => ipcRenderer.invoke(IpcChannels.templatesList),
+    get: (id: string): Promise<Template | null> => ipcRenderer.invoke(IpcChannels.templatesGet, id),
+    create: (input: TemplateInput): Promise<Template> =>
+      ipcRenderer.invoke(IpcChannels.templatesCreate, input),
+    update: (id: string, input: TemplateInput): Promise<Template> =>
+      ipcRenderer.invoke(IpcChannels.templatesUpdate, id, input),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.templatesDelete, id),
+    duplicate: (id: string): Promise<Template> =>
+      ipcRenderer.invoke(IpcChannels.templatesDuplicate, id),
+    exportJson: (id: string): Promise<{ saved: false } | { saved: true; filePath: string }> =>
+      ipcRenderer.invoke(IpcChannels.templatesExportJson, id),
+    importJson: (): Promise<
+      { imported: false } | { imported: true; templateId: string; filePath: string }
+    > => ipcRenderer.invoke(IpcChannels.templatesImportJson),
+    exportSchemaKit: (): Promise<{ saved: false } | { saved: true; directory: string }> =>
+      ipcRenderer.invoke(IpcChannels.templatesExportSchemaKit),
+  },
+  inspections: {
+    list: (options?: { clientId?: string }): Promise<InspectionSummary[]> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsList, options),
+    get: (id: string): Promise<Inspection | null> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsGet, id),
+    create: (input: CreateInspectionInput): Promise<Inspection> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsCreate, input),
+    update: (id: string, input: InspectionInput): Promise<Inspection> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsUpdate, id, input),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.inspectionsDelete, id),
+    getDashboard: (): Promise<DashboardStats> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsDashboard),
+    getClientStats: (
+      clientId: string,
+    ): Promise<{
+      documentCount: number;
+      lastDocumentDate: string | null;
+      nextInspectionDue: string | null;
+    }> => ipcRenderer.invoke(IpcChannels.inspectionsClientStats, clientId),
+    exportPdf: (id: string): Promise<{ saved: false } | { saved: true; filePath: string }> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsExportPdf, id),
+    importPdf: (): Promise<
+      { imported: false } | { imported: true; inspectionId: string; filePath: string }
+    > => ipcRenderer.invoke(IpcChannels.inspectionsImportPdf),
   },
 };
 

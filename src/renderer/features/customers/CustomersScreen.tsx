@@ -37,8 +37,12 @@ export type CustomerDetailBreadcrumb = {
 
 export function CustomersScreen({
   onDetailChange,
+  onNewInspection,
+  onOpenInspection,
 }: {
   onDetailChange?: (detail: CustomerDetailBreadcrumb | null) => void;
+  onNewInspection?: (clientId: string) => void;
+  onOpenInspection?: (inspectionId: string) => void;
 }) {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +99,8 @@ export function CustomersScreen({
           key={`${selectedId}-${detailRefreshKey}`}
           clientId={selectedId}
           onEdit={(client) => setEditor({ mode: 'edit', client })}
+          onNewInspection={(clientId) => onNewInspection?.(clientId)}
+          onOpenInspection={(inspectionId) => onOpenInspection?.(inspectionId)}
         />
         {editor.mode !== 'closed' && (
           <ClientEditor

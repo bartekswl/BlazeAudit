@@ -10,9 +10,16 @@ import {
   Upload,
 } from 'lucide-react';
 
-export function DatabaseScreen() {
+export function DatabaseScreen({
+  onInspectionImported,
+}: {
+  onInspectionImported?: (inspectionId: string) => void;
+}) {
   const [dataDir, setDataDir] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [exportingKit, setExportingKit] = useState(false);
+  const [importingJson, setImportingJson] = useState(false);
+  const [importingPdf, setImportingPdf] = useState(false);
   const [openingFolder, setOpeningFolder] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +41,55 @@ export function DatabaseScreen() {
       setError(e instanceof Error ? e.message : 'Export failed.');
     } finally {
       setExporting(false);
+    }
+  };
+
+  const exportSchemaKit = async () => {
+    setExportingKit(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const result = await window.blazeaudit.database.exportSchemaKit();
+      if (result.saved) {
+        setMessage(`Schema kit exported to ${result.directory}`);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Export failed.');
+    } finally {
+      setExportingKit(false);
+    }
+  };
+
+  const importTemplateJson = async () => {
+    setImportingJson(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const result = await window.blazeaudit.database.importTemplateJson();
+      if (result.imported) {
+        setMessage(`Template imported from ${result.filePath}`);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Import failed.');
+    } finally {
+      setImportingJson(false);
+    }
+  };
+
+  const importInspectionPdf = async () => {
+    setImportingPdf(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const result = await window.blazeaudit.inspections.importPdf();
+      if (result.imported) {
+        setMessage(`Inspection imported from ${result.filePath}`);
+        onInspectionImported?.(result.inspectionId);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'PDF import failed.');
+    } finally {
+      setImportingPdf(false);
     }
   };
 
@@ -95,13 +151,26 @@ export function DatabaseScreen() {
         title="Schema & PDF portability"
         description="Export a schema kit (JSON Schema, example, and prompt) for an external AI/LLM to turn legacy PDFs into JSON that matches our document model — you run the AI off-app, then bring the result back here. Import that AI-generated JSON, or a BlazeAudit PDF to read embedded document JSON losslessly (no OCR)."
       >
-        <ActionButton icon={Download} label="Export schema kit" disabled hint="Coming soon" />
-        <ActionButton icon={Upload} label="Import AI-generated JSON" disabled hint="Coming soon" />
+        <ActionButton
+          icon={Download}
+          label="Export schema kit"
+          loadingLabel="Exporting…"
+          onClick={() => void exportSchemaKit()}
+          loading={exportingKit}
+        />
+        <ActionButton
+          icon={Upload}
+          label="Import AI-generated JSON"
+          loadingLabel="Importing…"
+          onClick={() => void importTemplateJson()}
+          loading={importingJson}
+        />
         <ActionButton
           icon={FileText}
           label="Import from BlazeAudit PDF"
-          disabled
-          hint="Coming soon"
+          loadingLabel="Importing…"
+          onClick={() => void importInspectionPdf()}
+          loading={importingPdf}
         />
       </Section>
 

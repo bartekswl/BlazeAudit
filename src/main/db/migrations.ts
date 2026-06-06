@@ -52,6 +52,51 @@ const migrations: Migration[] = [
       `);
     },
   },
+  {
+    version: 3,
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE templates (
+          id          TEXT PRIMARY KEY,
+          seed_id     TEXT UNIQUE,
+          name        TEXT NOT NULL,
+          description TEXT NOT NULL DEFAULT '',
+          document    TEXT NOT NULL,
+          version     INTEGER NOT NULL DEFAULT 1,
+          created_at  TEXT NOT NULL,
+          updated_at  TEXT NOT NULL
+        );
+
+        CREATE INDEX idx_templates_name ON templates (name);
+      `);
+    },
+  },
+  {
+    version: 4,
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE inspections (
+          id           TEXT PRIMARY KEY,
+          client_id    TEXT NOT NULL REFERENCES clients(id),
+          template_id  TEXT REFERENCES templates(id),
+          title        TEXT NOT NULL,
+          status       TEXT NOT NULL DEFAULT 'draft',
+          inspector    TEXT NOT NULL DEFAULT '',
+          document     TEXT NOT NULL,
+          inspected_at TEXT,
+          cadence      TEXT NOT NULL DEFAULT 'annual',
+          next_due_at  TEXT,
+          created_at   TEXT NOT NULL,
+          updated_at   TEXT NOT NULL
+        );
+
+        CREATE INDEX idx_inspections_client ON inspections (client_id);
+        CREATE INDEX idx_inspections_status ON inspections (status);
+        CREATE INDEX idx_inspections_next_due ON inspections (next_due_at);
+        CREATE INDEX idx_inspections_updated ON inspections (updated_at);
+      `);
+    },
+  },
 ];
 
 /** Applies any migrations newer than the database's current `user_version`. */
