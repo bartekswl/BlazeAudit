@@ -1,14 +1,9 @@
 import Database from 'better-sqlite3-multiple-ciphers';
-import { app } from 'electron';
-import path from 'node:path';
 import { getOrCreateDbKey } from './key';
+import { dbFilePath } from './paths';
 import type { Db } from './types';
 
 let db: Db | null = null;
-
-function dbFilePath(): string {
-  return path.join(app.getPath('userData'), 'data', 'blazeaudit.db');
-}
 
 /**
  * Opens (and unlocks) the encrypted database. The connection is created once and

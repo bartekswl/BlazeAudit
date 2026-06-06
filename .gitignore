@@ -21,6 +21,7 @@ release/
 *.sqlite3
 *.db
 data/
+.electron-dev/
 
 # Logs
 logs/

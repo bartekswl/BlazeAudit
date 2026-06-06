@@ -34,6 +34,24 @@ const migrations: Migration[] = [
       `);
     },
   },
+  {
+    version: 2,
+    up: (db) => {
+      db.exec(`
+        ALTER TABLE clients ADD COLUMN street TEXT NOT NULL DEFAULT '';
+        ALTER TABLE clients ADD COLUMN unit TEXT NOT NULL DEFAULT '';
+        ALTER TABLE clients ADD COLUMN city TEXT NOT NULL DEFAULT '';
+        ALTER TABLE clients ADD COLUMN post_code TEXT NOT NULL DEFAULT '';
+        ALTER TABLE clients ADD COLUMN country TEXT NOT NULL DEFAULT '';
+        ALTER TABLE clients ADD COLUMN province TEXT NOT NULL DEFAULT '';
+      `);
+      db.exec(`
+        UPDATE clients
+           SET street = address
+         WHERE street = '' AND address != '';
+      `);
+    },
+  },
 ];
 
 /** Applies any migrations newer than the database's current `user_version`. */

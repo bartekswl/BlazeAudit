@@ -6,7 +6,7 @@
 | --- | --- |
 | **Status** | Living snapshot — update as the project evolves |
 | **Last updated** | 2026-06-06 |
-| **Current phase** | Phase 2 complete (encrypted data layer + clients); next is Phase 3 (accounts/login) |
+| **Current phase** | Phase 2 complete (+ customer polish); next is Phase 3 (accounts/login) |
 
 ## How to use this file
 
@@ -14,8 +14,8 @@ This is the **onboarding extract for a new chat/agent**. Read this first, then r
 the linked docs as needed. Suggested kickoff prompt for a fresh chat:
 
 > Read `docs/STATUS.md`, then the docs it links (PRD, ARCHITECTURE, DATA_MODEL,
-> SECURITY, TEMPLATES, UX, ROADMAP, and the ADRs). We've finished Phase 0; continue
-> from the roadmap.
+> SECURITY, TEMPLATES, UX, ROADMAP, and the ADRs). Phases 0–2 are done; continue
+> with Phase 3 (accounts/login) from the roadmap.
 
 ## What BlazeAudit is
 
@@ -27,11 +27,11 @@ Inspired by fire-forms.com but a focused local tool, not a cloud SaaS. A compani
 
 ## Snapshot
 
-- **Done:** Phases 0–1 (tooling + app shell) **and Phase 2 — encrypted data layer**.
-  Encrypted SQLite via `better-sqlite3-multiple-ciphers` (SQLCipher), a migration
-  runner (`user_version`), the `clients` + `app_meta` tables, client CRUD over IPC,
-  and a working Customers screen (list/add/edit/delete). DB lives encrypted at
-  `userData/data/blazeaudit.db`; verified encrypted-at-rest + wrong-key rejection.
+- **Done:** Phases 0–2. Encrypted SQLite (SQLCipher), migration runner (currently
+  **schema v2**), client CRUD over IPC, and a polished **Customers** screen
+  (list/add/edit/delete, structured address fields, validation). Dev DB/key live in
+  **`<project>/data/`** only (gitignored); packaged installs use `%APPDATA%`.
+  Verified encrypted-at-rest + wrong-key rejection.
 - **Next:** Phase 3 — accounts, local password login (Argon2id), key-X management
   (DPAPI/`safeStorage` + password wrapping), and the one-time online activation flow.
 - **Not started:** accounts/login, document model, inspections, PDF, backups,
@@ -95,24 +95,34 @@ print-to-PDF fallback). Windows-only for v1. Proprietary (all rights reserved).
 
 ## Phase 2 notes (as built)
 
-- **Engine:** `better-sqlite3-multiple-ciphers` (drop-in `better-sqlite3` with
-  SQLCipher). Native module — kept **external** in the main Vite build and loaded from
-  `node_modules` at runtime. Types aliased via `src/types/better-sqlite3-multiple-ciphers.d.ts`.
-- **Native rebuild:** Electron is **pinned to v41** because that's the newest line with a
-  published prebuilt binary for the module (Electron 42 / ABI 146 had none, and there's no
-  C++ toolchain to compile). `scripts/rebuild-native.mjs` (run via `postinstall`) fetches the
-  Electron-ABI prebuild after any `npm install`; manual: `npm run rebuild:native`.
-- **Key handling (Phase 2 bridge):** a random 256-bit key is generated on first run and
-  protected by **Windows DPAPI** (`safeStorage`), stored at `userData/data/db.key`. The DB
-  opens via `PRAGMA cipher='sqlcipher'` + raw key. Phase 3 layers password-wrapping + server
-  escrow onto this same key (it becomes "key X"). Verified: plaintext absent from the file,
-  wrong key rejected.
-- **Layout:** `src/main/db/` = `key` (DPAPI), `connection` (open/unlock + PRAGMAs),
-  `migrations` (`user_version` runner; v1 = `clients` + `app_meta`), `clients` (CRUD repo,
-  snake_case↔camelCase mapping), `index` (init/orchestrate). IPC in `src/main/ipc/clients.ts`;
-  preload exposes `window.blazeaudit.clients.*`; UI in `features/customers/CustomersScreen.tsx`.
-- **Deferred:** `templates`/`inspections` tables (added in their phases via new migrations);
-  dashboard still shows placeholder counts until Phase 5.
+- **Engine:** `better-sqlite3-multiple-ciphers` (SQLCipher). Native module kept
+  **external** in the main Vite build. Types via `src/types/better-sqlite3-multiple-ciphers.d.ts`.
+- **Native rebuild:** Electron **pinned to v41** (newest line with a published prebuild).
+  `scripts/rebuild-native.mjs` runs on `postinstall`; manual: `npm run rebuild:native`.
+- **Dev data paths (important):** during `npm run dev` / `npm run preview`, **nothing**
+  writes to the user's AppData profile. DB + key → `<project>/data/`; Electron runtime
+  files → `<project>/.electron-dev/` (both gitignored). `app.setPath('userData', …)` in
+  `src/main/index.ts`; paths in `src/main/db/paths.ts`. Startup logs the DB path:
+  `[db] ready (schema vN) → …`. **Packaged** installs only use `%APPDATA%/BlazeAudit/data/`.
+- **Key handling (Phase 2 bridge):** random 256-bit key, DPAPI-protected in `db.key`.
+  Phase 3 adds password-wrapping + server escrow ("key X"). `db.key` ≠ server escrow yet.
+- **Schema:** migration v1 = `clients` + `app_meta`; v2 adds structured address columns
+  (`street`, `unit`, `city`, `post_code`, `country`, `province`) and migrates legacy
+  `address` text into `street`.
+- **Address model:** `src/shared/address.ts` — `formatAddressForList` (no country in table),
+  `formatAddress` (full, with country), validation for post code / country / province.
+  List `Client.address` is computed; country is **editor-only**.
+- **Customers UI:** table columns Name, Contact, Phone, Email, Address (widest); truncated
+  cells show full value on hover (`TruncateCell`). Add/edit form splits address into six
+  fields with inline validation.
+- **Layout:** `src/main/db/` (`key`, `connection`, `paths`, `migrations`, `clients`, `index`);
+  IPC `src/main/ipc/clients.ts`; preload `window.blazeaudit.clients.*`;
+  UI `src/renderer/features/customers/CustomersScreen.tsx`.
+- **Local learning course:** `sandbox/learning/` (gitignored) — Phase 0–1 chapters + Phase 2
+  chapter written; PDFs regenerated. Update process in `How to Update This Course.md`.
+  `AGENTS.md` (also gitignored) points agents at the course after each phase.
+- **Deferred:** `templates`/`inspections` tables; dashboard stat tiles (Phase 5); accounts/login
+  (Phase 3).
 
 ## Immediate next step
 
@@ -126,3 +136,7 @@ flow. See [`ROADMAP.md`](ROADMAP.md), [`SECURITY.md`](SECURITY.md), and
 - Docs are **living drafts**; significant decisions are recorded as **ADRs**.
 - Commits are made only when the user asks; default branch is `main` on
   `github.com/bartekswl/BlazeAudit` (public, proprietary).
+- **Dev stays in the repo** — never write test/app data under the user's AppData during
+  development. See `AGENTS.md` (local-only).
+- Run the app: `npm run dev`. Test Customers tab for client CRUD. DB file:
+  `<project>/data/blazeaudit.db` (hidden in IDE if gitignored files are collapsed).

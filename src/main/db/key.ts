@@ -1,7 +1,7 @@
-import { app, safeStorage } from 'electron';
+import { safeStorage } from 'electron';
 import { randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import path from 'node:path';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { keyFilePath } from './paths';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Phase 2 key handling (bridge until Phase 3).
@@ -18,18 +18,6 @@ import path from 'node:path';
 // This is forward-compatible: in Phase 3 the same key becomes "key X" with
 // password-wrapping and server escrow layered on top.
 // ─────────────────────────────────────────────────────────────────────────────
-
-const KEY_FILE = 'db.key';
-
-function dataDir(): string {
-  const dir = path.join(app.getPath('userData'), 'data');
-  mkdirSync(dir, { recursive: true });
-  return dir;
-}
-
-function keyFilePath(): string {
-  return path.join(dataDir(), KEY_FILE);
-}
 
 /**
  * Returns the database key as a 64-char hex string, creating and persisting a

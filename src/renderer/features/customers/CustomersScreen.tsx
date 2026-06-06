@@ -1,11 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
 import { Pencil, Plus, Trash2, Users, X } from 'lucide-react';
+import { validateCountry, validatePostCode, validateProvince } from '../../../shared/address';
 import type { Client, ClientInput } from '../../../shared/types';
 import { cn } from '../../lib/cn';
 
 const EMPTY: ClientInput = {
   name: '',
-  address: '',
+  street: '',
+  unit: '',
+  city: '',
+  postCode: '',
+  country: '',
+  province: '',
   contactName: '',
   phone: '',
   email: '',
@@ -75,23 +81,25 @@ export function CustomersScreen() {
         </div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-white/5">
-          <table className="w-full text-left text-sm">
+          <table className="w-full table-fixed text-left text-sm">
             <thead className="sticky top-0 bg-neutral-900 text-xs uppercase tracking-wide text-neutral-500">
               <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Contact</th>
-                <th className="px-4 py-3 font-medium">Phone</th>
-                <th className="px-4 py-3 font-medium">Email</th>
+                <th className="w-[18%] px-4 py-3 font-medium">Name</th>
+                <th className="w-[14%] px-4 py-3 font-medium">Contact</th>
+                <th className="w-[12%] px-4 py-3 font-medium">Phone</th>
+                <th className="w-[18%] px-4 py-3 font-medium">Email</th>
+                <th className="w-[30%] px-4 py-3 font-medium">Address</th>
                 <th className="w-20 px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {clients.map((client) => (
                 <tr key={client.id} className="border-t border-white/5 hover:bg-white/[0.02]">
-                  <td className="px-4 py-3 font-medium text-neutral-100">{client.name}</td>
-                  <td className="px-4 py-3 text-neutral-400">{client.contactName || '—'}</td>
-                  <td className="px-4 py-3 text-neutral-400">{client.phone || '—'}</td>
-                  <td className="px-4 py-3 text-neutral-400">{client.email || '—'}</td>
+                  <TruncateCell value={client.name} className="font-medium text-neutral-100" />
+                  <TruncateCell value={client.contactName} />
+                  <TruncateCell value={client.phone} />
+                  <TruncateCell value={client.email} />
+                  <TruncateCell value={client.address} />
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
                       <button
@@ -146,7 +154,12 @@ function ClientEditor({
     initial
       ? {
           name: initial.name,
-          address: initial.address,
+          street: initial.street,
+          unit: initial.unit,
+          city: initial.city,
+          postCode: initial.postCode,
+          country: initial.country,
+          province: initial.province,
           contactName: initial.contactName,
           phone: initial.phone,
           email: initial.email,
@@ -156,18 +169,38 @@ function ClientEditor({
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ClientInput, string>>>({});
 
-  const set = (key: keyof ClientInput) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
+  const set = (key: keyof ClientInput) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setForm((f) => ({ ...f, [key]: value }));
+    setFieldErrors((errs) => {
+      const next = { ...errs };
+      delete next[key];
+      return next;
+    });
+  };
 
-  const submit = async (e: React.FormEvent) => {
+  const validateForm = (): boolean => {
+    const errs: Partial<Record<keyof ClientInput, string>> = {};
+    if (!form.name.trim()) errs.name = 'Name is required.';
+
+    const postCodeErr = validatePostCode(form.postCode ?? '');
+    if (postCodeErr) errs.postCode = postCodeErr;
+    const countryErr = validateCountry(form.country ?? '');
+    if (countryErr) errs.country = countryErr;
+    const provinceErr = validateProvince(form.province ?? '');
+    if (provinceErr) errs.province = provinceErr;
+
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) {
-      setError('Name is required.');
-      return;
-    }
-    setSaving(true);
     setError(null);
+    if (!validateForm()) return;
+    setSaving(true);
     try {
       if (initial) await window.blazeaudit.clients.update(initial.id, form);
       else await window.blazeaudit.clients.create(form);
@@ -200,12 +233,49 @@ function ClientEditor({
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
-          <Field label="Name" required>
+          <Field label="Name" required error={fieldErrors.name}>
             <input className={inputCls} value={form.name} onChange={set('name')} autoFocus />
           </Field>
-          <Field label="Address">
-            <input className={inputCls} value={form.address} onChange={set('address')} />
+
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">Address</p>
+          <Field label="Street" error={fieldErrors.street}>
+            <input className={inputCls} value={form.street} onChange={set('street')} />
           </Field>
+          <Field label="Unit / suite" error={fieldErrors.unit}>
+            <input className={inputCls} value={form.unit} onChange={set('unit')} />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="City" error={fieldErrors.city}>
+              <input className={inputCls} value={form.city} onChange={set('city')} />
+            </Field>
+            <Field label="Post code" error={fieldErrors.postCode}>
+              <input
+                className={inputCls}
+                value={form.postCode}
+                onChange={set('postCode')}
+                placeholder="A1A 1A1"
+              />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Province" error={fieldErrors.province}>
+              <input
+                className={inputCls}
+                value={form.province}
+                onChange={set('province')}
+                placeholder="ON"
+              />
+            </Field>
+            <Field label="Country" error={fieldErrors.country}>
+              <input
+                className={inputCls}
+                value={form.country}
+                onChange={set('country')}
+                placeholder="Canada"
+              />
+            </Field>
+          </div>
+
           <Field label="Contact person">
             <input className={inputCls} value={form.contactName} onChange={set('contactName')} />
           </Field>
@@ -246,14 +316,29 @@ function ClientEditor({
 const inputCls =
   'w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 outline-none placeholder:text-neutral-600 focus:border-flame-500';
 
+/** Truncated table cell; native tooltip shows the full value on hover. */
+function TruncateCell({ value, className }: { value: string; className?: string }) {
+  const trimmed = value.trim();
+  return (
+    <td
+      className={cn('truncate px-4 py-3 text-neutral-400', className)}
+      title={trimmed || undefined}
+    >
+      {trimmed || '—'}
+    </td>
+  );
+}
+
 function Field({
   label,
   required,
+  error,
   children,
 }: {
   label: string;
   required?: boolean;
-  children: React.ReactNode;
+  error?: string;
+  children: ReactNode;
 }) {
   return (
     <label className="block">
@@ -262,6 +347,7 @@ function Field({
         {required && <span className="text-flame-500"> *</span>}
       </span>
       {children}
+      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
     </label>
   );
 }

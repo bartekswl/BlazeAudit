@@ -6,6 +6,13 @@ import { registerClientsIpc } from './ipc/clients';
 import { initDatabase, closeDatabase } from './db';
 import { IpcChannels } from '../shared/ipc';
 
+// Dev/preview: never write under the real AppData profile. Keep all Electron
+// runtime files (cache, prefs, etc.) inside the repo. Packaged builds only use
+// the normal per-user location.
+if (!app.isPackaged) {
+  app.setPath('userData', path.join(process.cwd(), '.electron-dev'));
+}
+
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Set by vite-plugin-electron during `vite` dev; undefined in a packaged build.
