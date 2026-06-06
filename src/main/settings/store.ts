@@ -1,8 +1,10 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { LoginPolicy } from '../../shared/loginPolicy';
 import { DEFAULT_LOGIN_POLICY } from '../../shared/loginPolicy';
-import { readManifest } from '../auth/store';
+import { ensureAccountRecordSecret } from '../auth/recordSecret';
+import { readManifest, SettingsTamperedError } from '../auth/store';
+import { readSignedBinaryRecord, writeSignedBinaryRecord } from '../storage/binaryRecord';
+import { RecordTamperError } from '../storage/recordSeal';
 import { accountDir } from '../db/paths';
 
 export interface AccountSettings {
@@ -10,28 +12,36 @@ export interface AccountSettings {
   loginPolicy: LoginPolicy;
 }
 
-function settingsFilePath(): string {
-  return path.join(accountDir(), 'settings.json');
+function settingsBin(): string {
+  return path.join(accountDir(), 'settings.bin');
 }
 
-function writeAccountSettings(settings: AccountSettings): void {
-  writeFileSync(settingsFilePath(), JSON.stringify(settings, null, 2), { mode: 0o600 });
+function settingsJson(): string {
+  return path.join(accountDir(), 'settings.json');
 }
 
 /** Per-account preferences — always under the active account folder. */
 export function readAccountSettings(): AccountSettings {
-  const file = settingsFilePath();
-  if (existsSync(file)) {
-    return JSON.parse(readFileSync(file, 'utf8')) as AccountSettings;
+  try {
+    const existing = readSignedBinaryRecord<AccountSettings>(
+      settingsBin(),
+      settingsJson(),
+      ensureAccountRecordSecret(),
+    );
+    if (existing) return existing;
+  } catch (e) {
+    if (e instanceof RecordTamperError) {
+      throw new SettingsTamperedError();
+    }
+    throw e;
   }
 
-  // Migrate login policy from legacy auth manifest (pre-settings.json).
   const manifest = readManifest();
   const settings: AccountSettings = {
     version: 1,
     loginPolicy: manifest?.loginPolicy ?? DEFAULT_LOGIN_POLICY,
   };
-  writeAccountSettings(settings);
+  writeSignedBinaryRecord(settingsBin(), settings, ensureAccountRecordSecret());
   return settings;
 }
 
@@ -41,6 +51,6 @@ export function getLoginPolicy(): LoginPolicy {
 
 export function setLoginPolicy(policy: LoginPolicy): LoginPolicy {
   const settings = readAccountSettings();
-  writeAccountSettings({ ...settings, loginPolicy: policy });
+  writeSignedBinaryRecord(settingsBin(), { ...settings, loginPolicy: policy }, ensureAccountRecordSecret());
   return policy;
 }

@@ -2,6 +2,9 @@ import { safeStorage } from 'electron';
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { PasswordWrap } from './crypto';
+import { ensureAccountRecordSecret } from './recordSecret';
+import { readSignedBinaryRecord, writeSignedBinaryRecord } from '../storage/binaryRecord';
+import { RecordTamperError } from '../storage/recordSeal';
 import { accountDir } from '../db/paths';
 
 export interface AuthManifest {
@@ -12,11 +15,32 @@ export interface AuthManifest {
   passwordSet: boolean;
   /** sha256(keyX) prefix — ties this account folder to one key, not install-wide. */
   keyXId?: string;
+  /** Bumped on log out / password gate — must match DPAPI cache epoch. */
+  unlockEpoch?: number;
   /** Set by Log out — requires password on next app launch (ignores remember policy). */
   requirePasswordOnLaunch?: boolean;
-  /** @deprecated Migrated to accounts/<id>/settings.json */
+  /** @deprecated Migrated to accounts/<id>/settings.bin */
   loginPolicy?: import('../../shared/loginPolicy').LoginPolicy;
   lastUnlockAt?: string;
+}
+
+export interface DpapiKeyCache {
+  keyX: string;
+  epoch: number;
+}
+
+export class ManifestTamperedError extends Error {
+  constructor() {
+    super('Account manifest was modified outside BlazeAudit.');
+    this.name = 'ManifestTamperedError';
+  }
+}
+
+export class SettingsTamperedError extends Error {
+  constructor() {
+    super('Account settings were modified outside BlazeAudit.');
+    this.name = 'SettingsTamperedError';
+  }
 }
 
 const authDir = () => {
@@ -24,6 +48,11 @@ const authDir = () => {
   mkdirSync(dir, { recursive: true });
   return dir;
 };
+
+const manifestBin = () => path.join(authDir(), 'manifest.bin');
+const manifestJson = () => path.join(authDir(), 'manifest.json');
+const wrapBin = () => path.join(authDir(), 'keyx.wrap.bin');
+const wrapJson = () => path.join(authDir(), 'keyx.wrap.json');
 
 function dpapiWrite(name: string, value: string): void {
   if (!safeStorage.isEncryptionAvailable()) {
@@ -39,15 +68,44 @@ function dpapiRead(name: string): string | null {
   return safeStorage.decryptString(readFileSync(file));
 }
 
+function readSigned<T>(binPath: string, jsonPath: string): T | null {
+  try {
+    return readSignedBinaryRecord<T>(binPath, jsonPath, ensureAccountRecordSecret());
+  } catch (e) {
+    if (e instanceof RecordTamperError) throw e;
+    throw e;
+  }
+}
+
+function writeSigned(path: string, value: unknown): void {
+  writeSignedBinaryRecord(path, value, ensureAccountRecordSecret());
+}
+
+export function currentUnlockEpoch(manifest: AuthManifest): number {
+  return manifest.unlockEpoch ?? 1;
+}
+
+export function bumpUnlockEpoch(manifest: AuthManifest): AuthManifest {
+  const updated = { ...manifest, unlockEpoch: currentUnlockEpoch(manifest) + 1 };
+  writeManifest(updated);
+  return updated;
+}
+
 export function readManifest(): AuthManifest | null {
-  const file = path.join(authDir(), 'manifest.json');
-  if (!existsSync(file)) return null;
-  return JSON.parse(readFileSync(file, 'utf8')) as AuthManifest;
+  try {
+    return readSigned<AuthManifest>(manifestBin(), manifestJson());
+  } catch (e) {
+    if (e instanceof RecordTamperError) {
+      clearDpapiKeyX();
+      throw new ManifestTamperedError();
+    }
+    throw e;
+  }
 }
 
 export function writeManifest(manifest: AuthManifest): void {
-  const file = path.join(authDir(), 'manifest.json');
-  writeFileSync(file, JSON.stringify(manifest, null, 2), { mode: 0o600 });
+  ensureAccountRecordSecret();
+  writeSigned(manifestBin(), manifest);
 }
 
 export function storeActivationToken(token: string): void {
@@ -72,26 +130,55 @@ export function clearPendingKeyX(): void {
 }
 
 export function storePasswordWrap(wrap: PasswordWrap): void {
-  const file = path.join(authDir(), 'keyx.wrap.json');
-  writeFileSync(file, JSON.stringify(wrap), { mode: 0o600 });
+  writeSigned(wrapBin(), wrap);
 }
 
 export function readPasswordWrap(): PasswordWrap | null {
-  const file = path.join(authDir(), 'keyx.wrap.json');
-  if (!existsSync(file)) return null;
-  return JSON.parse(readFileSync(file, 'utf8')) as PasswordWrap;
+  try {
+    return readSigned<PasswordWrap>(wrapBin(), wrapJson());
+  } catch (e) {
+    if (e instanceof RecordTamperError) {
+      clearDpapiKeyX();
+      throw new ManifestTamperedError();
+    }
+    throw e;
+  }
 }
 
 export function isAccountActivated(): boolean {
-  return readManifest() !== null;
+  try {
+    return readManifest() !== null;
+  } catch (e) {
+    if (e instanceof ManifestTamperedError) return true;
+    throw e;
+  }
 }
 
-export function storeDpapiKeyX(keyX: string): void {
-  dpapiWrite('keyx.dpapi', keyX);
+export function storeDpapiKeyX(keyX: string, epoch: number): void {
+  const payload: DpapiKeyCache = { keyX, epoch };
+  dpapiWrite('keyx.dpapi', JSON.stringify(payload));
 }
 
-export function readDpapiKeyX(): string | null {
-  return dpapiRead('keyx.dpapi');
+export function readDpapiKeyCache(): DpapiKeyCache | null {
+  const raw = dpapiRead('keyx.dpapi');
+  if (!raw) return null;
+
+  if (/^[0-9a-f]{64}$/i.test(raw)) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as DpapiKeyCache;
+    if (!/^[0-9a-f]{64}$/i.test(parsed.keyX) || typeof parsed.epoch !== 'number') {
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+export function clearDpapiKeyX(): void {
+  const file = path.join(authDir(), 'keyx.dpapi');
+  if (existsSync(file)) unlinkSync(file);
 }
 
 export function touchLastUnlock(manifest: AuthManifest): void {

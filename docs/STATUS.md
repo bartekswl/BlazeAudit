@@ -87,15 +87,22 @@ print-to-PDF fallback). Windows-only for v1. Proprietary (all rights reserved).
   rejects a mismatched key. Every new account gets a fresh random key X.
 - **DB unlock:** `openDatabase(keyX)` only after login/set-password; `getDatabase()` throws
   when locked. Startup no longer auto-opens the DB.
-- **Settings:** per account at `accounts/<id>/settings.json` (login policy today; more prefs
-  later). Auth state stays in `accounts/<id>/auth/`.
+- **Settings:** per account at `accounts/<id>/settings.bin` (zlib + HMAC; login policy today).
+  Manifest/registry/wrap use signed `.bin` (HMAC key in DPAPI — edits outside the app are rejected).
+- **DPAPI cache:** `{ keyX, epoch }` paired with `unlockEpoch` in manifest; epoch bumps on
+  log out and “every launch” policy change. Stale DPAPI paste fails without password.
+- **Per-account isolation:** each `accounts/<opaque-id>/` has its own signed `settings.bin`,
+  `manifest.bin`, `records.mac.dpapi`, and DB — switching users on the login panel loads that
+  folder only. “Every launch” never stores DPAPI; old `keyx.dpapi` cannot skip password.
 - **IPC:** `window.blazeaudit.auth.*` — `getStatus`, `activate`, `setPassword`, `login`,
   `logOut`, `getSecuritySettings`, `setLoginPolicy`. Normal close respects login policy;
   **log out** sets `requirePasswordOnLaunch` and quits.
 - **Login policy:** Settings (and set-password step) — require password every launch,
-  week, month, year, or never. Auto-unlock uses DPAPI-stored key X + `lastUnlockAt`.
+  week, month, year, or never. Auto-unlock uses DPAPI key X only while the policy
+  allows skip; DPAPI is cleared on log out, every-launch policy, and when an interval
+  expires (JSON tamper alone cannot auto-unlock without password).
 - **Paths:** dev → `<project>/data/`; packaged → per-profile AppData. Under that:
-  `registry.json` + `accounts/<opaque-id>/` (settings, auth, DB per account).
+  `registry.bin` + `accounts/<opaque-id>/` (signed settings, auth, DB per account).
 - **Deferred:** real license server + monthly validate (Phase 8); server escrow of key X;
   backup/restore (Phase 7).
 

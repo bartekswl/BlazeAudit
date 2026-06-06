@@ -1,6 +1,8 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { accountIdFromEmail } from '../../shared/accountId';
+import { ensureProfileRecordSecret } from './profileSecret';
+import { readSignedBinaryRecord, writeSignedBinaryRecord } from '../storage/binaryRecord';
+import { RecordTamperError } from '../storage/recordSeal';
 import { dataDir } from '../db/paths';
 
 export interface AccountEntry {
@@ -15,18 +17,38 @@ interface AccountRegistry {
   lastActiveAccountId: string | null;
 }
 
-const REGISTRY_FILE = () => path.join(dataDir(), 'registry.json');
+export class RegistryTamperedError extends Error {
+  constructor() {
+    super('Account registry was modified outside BlazeAudit.');
+    this.name = 'RegistryTamperedError';
+  }
+}
+
+const registryBin = () => path.join(dataDir(), 'registry.bin');
+const registryJson = () => path.join(dataDir(), 'registry.json');
+
+function emptyRegistry(): AccountRegistry {
+  return { version: 1, accounts: [], lastActiveAccountId: null };
+}
 
 function readRegistry(): AccountRegistry {
-  const file = REGISTRY_FILE();
-  if (!existsSync(file)) {
-    return { version: 1, accounts: [], lastActiveAccountId: null };
+  try {
+    return (
+      readSignedBinaryRecord<AccountRegistry>(
+        registryBin(),
+        registryJson(),
+        ensureProfileRecordSecret(),
+      ) ?? emptyRegistry()
+    );
+  } catch (e) {
+    if (e instanceof RecordTamperError) throw new RegistryTamperedError();
+    throw e;
   }
-  return JSON.parse(readFileSync(file, 'utf8')) as AccountRegistry;
 }
 
 function writeRegistry(registry: AccountRegistry): void {
-  writeFileSync(REGISTRY_FILE(), JSON.stringify(registry, null, 2), { mode: 0o600 });
+  ensureProfileRecordSecret();
+  writeSignedBinaryRecord(registryBin(), registry, ensureProfileRecordSecret());
 }
 
 export function listAccounts(): AccountEntry[] {
@@ -40,6 +62,10 @@ export function accountExists(accountId: string): boolean {
 export function findAccountByEmail(email: string): AccountEntry | null {
   const id = accountIdFromEmail(email);
   return readRegistry().accounts.find((a) => a.id === id) ?? null;
+}
+
+export function findAccountById(accountId: string): AccountEntry | null {
+  return readRegistry().accounts.find((a) => a.id === accountId) ?? null;
 }
 
 export function registerAccount(email: string): AccountEntry {

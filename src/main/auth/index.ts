@@ -17,10 +17,13 @@ import {
   setAddingNewAccount,
 } from './context';
 import { keyXFingerprint } from './keyX';
+import { ensureProfileRecordSecret } from './profileSecret';
+import { ensureAccountRecordSecret } from './recordSecret';
 import { createInstanceId } from './instance';
 import { lockDatabaseSession, isSessionUnlocked } from './session';
 import {
   accountExists,
+  findAccountById,
   getLastActiveAccountId,
   hasAnyAccount,
   listAccounts,
@@ -28,8 +31,11 @@ import {
   setLastActiveAccountId,
 } from './registry';
 import {
+  clearDpapiKeyX,
   clearPendingKeyX,
   isAccountActivated,
+  ManifestTamperedError,
+  SettingsTamperedError,
   readActivationToken,
   readManifest,
   readPasswordWrap,
@@ -41,6 +47,7 @@ import {
 } from './store';
 import {
   completeUnlock,
+  enforcePasswordGate,
   getLoginPolicy,
   setLoginPolicy,
   shouldPromptForPassword,
@@ -95,7 +102,21 @@ export function getAuthStatus(): AuthStatus {
     if (email) return { phase: 'unlocked', email, accountId: getActiveAccountId()! };
   }
 
-  const manifest = readManifest();
+  let manifest;
+  try {
+    manifest = readManifest();
+  } catch (e) {
+    if (e instanceof ManifestTamperedError) {
+      const accountId = getActiveAccountId()!;
+      const entry = findAccountById(accountId);
+      if (entry) {
+        clearDpapiKeyX();
+        return loginStatus(entry.email);
+      }
+    }
+    throw e;
+  }
+
   if (!manifest) {
     return { phase: 'activation' };
   }
@@ -104,19 +125,25 @@ export function getAuthStatus(): AuthStatus {
     return { phase: 'set_password', email: manifest.email };
   }
 
-  if (manifest.requirePasswordOnLaunch) {
+  try {
+    const gated = enforcePasswordGate(manifest);
+
+    if (shouldPromptForPassword(gated)) {
+      return loginStatus(gated.email);
+    }
+
+    if (tryAutoUnlock()) {
+      return { phase: 'unlocked', email: manifest.email, accountId: getActiveAccountId()! };
+    }
+
     return loginStatus(manifest.email);
+  } catch (e) {
+    if (e instanceof SettingsTamperedError) {
+      clearDpapiKeyX();
+      return loginStatus(manifest.email);
+    }
+    throw e;
   }
-
-  if (tryAutoUnlock()) {
-    return { phase: 'unlocked', email: manifest.email, accountId: getActiveAccountId()! };
-  }
-
-  if (shouldPromptForPassword(manifest)) {
-    return loginStatus(manifest.email);
-  }
-
-  return loginStatus(manifest.email);
 }
 
 export async function activate(input: ActivateInput): Promise<{ email: string }> {
@@ -132,6 +159,7 @@ export async function activate(input: ActivateInput): Promise<{ email: string }>
 
   setAddingNewAccount(false);
   setActiveAccountId(accountId);
+  ensureProfileRecordSecret();
   registerAccount(email);
 
   const instanceId = createInstanceId();
@@ -143,12 +171,15 @@ export async function activate(input: ActivateInput): Promise<{ email: string }>
     appVersion: app.getVersion(),
   });
 
+  ensureAccountRecordSecret();
+
   writeManifest({
     version: 1,
     email,
     instanceId,
     activatedAt: new Date().toISOString(),
     passwordSet: false,
+    unlockEpoch: 1,
   });
   storeActivationToken(token);
   storePendingKeyX(keyX);
@@ -232,8 +263,13 @@ export function returnToLogin(): void {
 export function logOut(): void {
   const manifest = readManifest();
   if (manifest) {
-    writeManifest({ ...manifest, requirePasswordOnLaunch: true });
+    writeManifest({
+      ...manifest,
+      requirePasswordOnLaunch: true,
+      unlockEpoch: (manifest.unlockEpoch ?? 1) + 1,
+    });
   }
+  clearDpapiKeyX();
   lockDatabaseSession();
   app.quit();
 }

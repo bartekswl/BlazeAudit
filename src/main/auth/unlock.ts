@@ -4,8 +4,11 @@ import { getLoginPolicy, setLoginPolicy as persistLoginPolicy } from '../setting
 import { assertKeyXMatchesManifest, manifestWithKeyXId } from './keyX';
 import { unlockDatabaseWithKey } from './session';
 import {
+  bumpUnlockEpoch,
+  clearDpapiKeyX,
+  currentUnlockEpoch,
   readActivationToken,
-  readDpapiKeyX,
+  readDpapiKeyCache,
   readManifest,
   storeDpapiKeyX,
   touchLastUnlock,
@@ -18,26 +21,42 @@ export function shouldPromptForPassword(manifest: AuthManifest): boolean {
   return isPasswordRequired(getLoginPolicy(), manifest.lastUnlockAt);
 }
 
+/** Drop stale DPAPI cache when a password will be required (epoch bumps happen on log out / policy change only). */
+export function enforcePasswordGate(manifest: AuthManifest): AuthManifest {
+  if (!shouldPromptForPassword(manifest)) return manifest;
+  clearDpapiKeyX();
+  return manifest;
+}
+
+function shouldCacheKeyXInDpapi(): boolean {
+  return getLoginPolicy() !== 'always';
+}
+
 export function tryAutoUnlock(): boolean {
   const manifest = readManifest();
   if (!manifest?.passwordSet) return false;
-  if (manifest.requirePasswordOnLaunch) return false;
   if (shouldPromptForPassword(manifest)) return false;
 
-  const keyX = readDpapiKeyX();
+  const cache = readDpapiKeyCache();
   const token = readActivationToken();
-  if (!keyX || !token) return false;
+  if (!cache || !token) return false;
+
+  if (cache.epoch !== currentUnlockEpoch(manifest)) {
+    clearDpapiKeyX();
+    return false;
+  }
 
   try {
     const payload = verifyActivationToken(token);
     if (payload.email !== manifest.email || payload.instanceId !== manifest.instanceId) {
       return false;
     }
-    assertKeyXMatchesManifest(keyX, manifest);
-    unlockDatabaseWithKey(keyX);
-    completeUnlockTouch(manifest.keyXId ? manifest : manifestWithKeyXId(manifest, keyX));
+    assertKeyXMatchesManifest(cache.keyX, manifest);
+    unlockDatabaseWithKey(cache.keyX);
+    completeUnlockTouch(manifest.keyXId ? manifest : manifestWithKeyXId(manifest, cache.keyX));
     return true;
   } catch {
+    clearDpapiKeyX();
     return false;
   }
 }
@@ -48,8 +67,12 @@ function completeUnlockTouch(manifest: AuthManifest): void {
 
 export function completeUnlock(keyX: string, manifest: AuthManifest): void {
   assertKeyXMatchesManifest(keyX, manifest);
-  storeDpapiKeyX(keyX);
   unlockDatabaseWithKey(keyX);
+  if (shouldCacheKeyXInDpapi()) {
+    storeDpapiKeyX(keyX, currentUnlockEpoch(manifest));
+  } else {
+    clearDpapiKeyX();
+  }
   const withId = manifest.keyXId ? manifest : manifestWithKeyXId(manifest, keyX);
   completeUnlockTouch(withId);
 }
@@ -59,7 +82,12 @@ export function setLoginPolicy(policy: LoginPolicy): LoginPolicy {
   if (!manifest?.passwordSet) {
     throw new Error('Activate and set a password before changing login policy.');
   }
-  return persistLoginPolicy(policy);
+  const saved = persistLoginPolicy(policy);
+  if (policy === 'always') {
+    clearDpapiKeyX();
+    bumpUnlockEpoch(manifest);
+  }
+  return saved;
 }
 
 export { getLoginPolicy };
