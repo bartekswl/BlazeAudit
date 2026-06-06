@@ -27,6 +27,10 @@ const api = {
       ipcRenderer.invoke(IpcChannels.clientsUpdate, id, input),
     remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.clientsDelete, id),
   },
+  database: {
+    exportClientsCsv: (): Promise<{ saved: false } | { saved: true; filePath: string }> =>
+      ipcRenderer.invoke(IpcChannels.databaseExportClientsCsv),
+  },
 };
 
 contextBridge.exposeInMainWorld('blazeaudit', api);

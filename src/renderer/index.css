@@ -21,6 +21,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Pointer cursor on interactive controls (link-like affordance). */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']),
+a,
+summary,
+label[for] {
+  cursor: pointer;
+}
+
 /* Slim, neutral scrollbars to match the dark chrome. */
 *::-webkit-scrollbar {
   width: 10px;

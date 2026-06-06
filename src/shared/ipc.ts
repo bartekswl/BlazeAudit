@@ -12,6 +12,7 @@ export const IpcChannels = {
   clientsCreate: 'clients:create',
   clientsUpdate: 'clients:update',
   clientsDelete: 'clients:delete',
+  databaseExportClientsCsv: 'database:export-clients-csv',
 } as const;
 
 export type IpcChannel = (typeof IpcChannels)[keyof typeof IpcChannels];

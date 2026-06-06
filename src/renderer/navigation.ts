@@ -1,5 +1,6 @@
 import {
   Calendar,
+  Database,
   FileText,
   LayoutDashboard,
   LayoutTemplate,
@@ -14,6 +15,7 @@ export type NavId =
   | 'documents'
   | 'templates'
   | 'calendar'
+  | 'database'
   | 'settings';
 
 export interface NavItem {
@@ -30,5 +32,6 @@ export const navItems: NavItem[] = [
   { id: 'documents', label: 'Documents', icon: FileText },
   { id: 'templates', label: 'Templates', icon: LayoutTemplate },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
+  { id: 'database', label: 'Database', icon: Database },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];

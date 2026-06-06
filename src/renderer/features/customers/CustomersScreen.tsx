@@ -1,8 +1,18 @@
-import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
-import { Pencil, Plus, Trash2, Users, X } from 'lucide-react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from 'react';
+import { Pencil, Plus, Search, Trash2, Users, X } from 'lucide-react';
 import { validateCountry, validatePostCode, validateProvince } from '../../../shared/address';
 import type { Client, ClientInput } from '../../../shared/types';
 import { cn } from '../../lib/cn';
+import { CustomerDetailScreen } from './CustomerDetailScreen';
+import { filterClients } from './filterClients';
 
 const EMPTY: ClientInput = {
   name: '',
@@ -20,11 +30,38 @@ const EMPTY: ClientInput = {
 
 type EditorState = { mode: 'closed' } | { mode: 'new' } | { mode: 'edit'; client: Client };
 
-export function CustomersScreen() {
+export type CustomerDetailBreadcrumb = {
+  clientName: string;
+  onBack: () => void;
+};
+
+export function CustomersScreen({
+  onDetailChange,
+}: {
+  onDetailChange?: (detail: CustomerDetailBreadcrumb | null) => void;
+}) {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editor, setEditor] = useState<EditorState>({ mode: 'closed' });
+  const [search, setSearch] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedClientName, setSelectedClientName] = useState<string | null>(null);
+  const [detailRefreshKey, setDetailRefreshKey] = useState(0);
+
+  const goBackToList = useCallback(() => {
+    setSelectedId(null);
+    setSelectedClientName(null);
+  }, []);
+
+  useEffect(() => {
+    if (!onDetailChange) return;
+    if (selectedId && selectedClientName) {
+      onDetailChange({ clientName: selectedClientName, onBack: goBackToList });
+    } else {
+      onDetailChange(null);
+    }
+  }, [selectedId, selectedClientName, onDetailChange, goBackToList]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -42,27 +79,73 @@ export function CustomersScreen() {
     void refresh();
   }, [refresh]);
 
+  const filtered = useMemo(() => filterClients(clients, search), [clients, search]);
+
   const handleDelete = async (client: Client) => {
     if (!window.confirm(`Delete "${client.name}"? This cannot be undone.`)) return;
     await window.blazeaudit.clients.remove(client.id);
+    if (selectedId === client.id) goBackToList();
     await refresh();
   };
 
+  if (selectedId) {
+    return (
+      <div className="flex h-full min-h-0 flex-col">
+        <CustomerDetailScreen
+          key={`${selectedId}-${detailRefreshKey}`}
+          clientId={selectedId}
+          onEdit={(client) => setEditor({ mode: 'edit', client })}
+        />
+        {editor.mode !== 'closed' && (
+          <ClientEditor
+            initial={editor.mode === 'edit' ? editor.client : null}
+            onClose={() => setEditor({ mode: 'closed' })}
+            onSaved={async () => {
+              setEditor({ mode: 'closed' });
+              const updated = await window.blazeaudit.clients.list();
+              setClients(updated);
+              setError(null);
+              setLoading(false);
+              if (selectedId) {
+                const match = updated.find((c) => c.id === selectedId);
+                if (match) setSelectedClientName(match.name);
+              }
+              setDetailRefreshKey((k) => k + 1);
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-neutral-400">
-          {clients.length} {clients.length === 1 ? 'client' : 'clients'}
-        </p>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative min-w-0 flex-1 sm:max-w-md">
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-500" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name, contact, or address…"
+            className="w-full rounded-lg border border-white/10 bg-neutral-950 py-2 pr-3 pl-9 text-sm text-neutral-100 outline-none placeholder:text-neutral-600 focus:border-flame-500"
+          />
+        </div>
         <button
           type="button"
           onClick={() => setEditor({ mode: 'new' })}
-          className="inline-flex items-center gap-2 rounded-lg bg-flame-500 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-flame-600"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-flame-500 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-flame-600"
         >
           <Plus className="size-4" />
           Add client
         </button>
       </div>
+
+      <p className="mb-4 text-sm text-neutral-400">
+        {search.trim()
+          ? `${filtered.length} of ${clients.length} ${clients.length === 1 ? 'client' : 'clients'}`
+          : `${clients.length} ${clients.length === 1 ? 'client' : 'clients'}`}
+      </p>
 
       {error && (
         <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-300">
@@ -79,6 +162,13 @@ export function CustomersScreen() {
           </div>
           <p className="text-sm text-neutral-400">No clients yet. Add your first one.</p>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+          <div className="grid size-14 place-items-center rounded-2xl bg-white/5 text-neutral-500">
+            <Search className="size-7" />
+          </div>
+          <p className="text-sm text-neutral-400">No clients match your search.</p>
+        </div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-white/5">
           <table className="w-full table-fixed text-left text-sm">
@@ -93,8 +183,15 @@ export function CustomersScreen() {
               </tr>
             </thead>
             <tbody>
-              {clients.map((client) => (
-                <tr key={client.id} className="border-t border-white/5 hover:bg-white/[0.02]">
+              {filtered.map((client) => (
+                <tr
+                  key={client.id}
+                  onClick={() => {
+                    setSelectedId(client.id);
+                    setSelectedClientName(client.name);
+                  }}
+                  className="cursor-pointer border-t border-white/5 hover:bg-white/[0.04]"
+                >
                   <TruncateCell value={client.name} className="font-medium text-neutral-100" />
                   <TruncateCell value={client.contactName} />
                   <TruncateCell value={client.phone} />
@@ -105,7 +202,10 @@ export function CustomersScreen() {
                       <button
                         type="button"
                         aria-label={`Edit ${client.name}`}
-                        onClick={() => setEditor({ mode: 'edit', client })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditor({ mode: 'edit', client });
+                        }}
                         className="rounded-md p-1.5 text-neutral-400 hover:bg-white/10 hover:text-neutral-100"
                       >
                         <Pencil className="size-4" />
@@ -113,7 +213,10 @@ export function CustomersScreen() {
                       <button
                         type="button"
                         aria-label={`Delete ${client.name}`}
-                        onClick={() => void handleDelete(client)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          void handleDelete(client);
+                        }}
                         className="rounded-md p-1.5 text-neutral-400 hover:bg-red-500/20 hover:text-red-300"
                       >
                         <Trash2 className="size-4" />

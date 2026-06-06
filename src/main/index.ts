@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { registerWindowIpc } from './ipc/window';
 import { registerClientsIpc } from './ipc/clients';
+import { registerDatabaseIpc } from './ipc/database';
 import { initDatabase, closeDatabase } from './db';
 import { IpcChannels } from '../shared/ipc';
 
@@ -62,6 +63,7 @@ void app.whenReady().then(() => {
 
   registerWindowIpc();
   registerClientsIpc();
+  registerDatabaseIpc();
   createMainWindow();
 
   app.on('activate', () => {
