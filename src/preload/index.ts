@@ -1,5 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IpcChannels } from '../shared/ipc';
+import type {
+  ActivateInput,
+  AuthStatus,
+  LoginInput,
+  SecuritySettings,
+  SetPasswordInput,
+} from '../shared/auth';
+import type { LoginPolicy } from '../shared/loginPolicy';
 import type { Client, ClientInput } from '../shared/types';
 
 const api = {
@@ -26,6 +34,23 @@ const api = {
     update: (id: string, input: ClientInput): Promise<Client> =>
       ipcRenderer.invoke(IpcChannels.clientsUpdate, id, input),
     remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.clientsDelete, id),
+  },
+  auth: {
+    getStatus: (): Promise<AuthStatus> => ipcRenderer.invoke(IpcChannels.authGetStatus),
+    activate: (input: ActivateInput): Promise<{ email: string }> =>
+      ipcRenderer.invoke(IpcChannels.authActivate, input),
+    setPassword: (input: SetPasswordInput): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.authSetPassword, input),
+    login: (input: LoginInput): Promise<void> => ipcRenderer.invoke(IpcChannels.authLogin, input),
+    logOut: (): Promise<void> => ipcRenderer.invoke(IpcChannels.authLogOut),
+    selectAccount: (accountId: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.authSelectAccount, accountId),
+    beginAddAccount: (): Promise<void> => ipcRenderer.invoke(IpcChannels.authBeginAddAccount),
+    returnToLogin: (): Promise<void> => ipcRenderer.invoke(IpcChannels.authReturnToLogin),
+    getSecuritySettings: (): Promise<SecuritySettings> =>
+      ipcRenderer.invoke(IpcChannels.authGetSecuritySettings),
+    setLoginPolicy: (policy: LoginPolicy): Promise<LoginPolicy> =>
+      ipcRenderer.invoke(IpcChannels.authSetLoginPolicy, policy),
   },
   database: {
     exportClientsCsv: (): Promise<{ saved: false } | { saved: true; filePath: string }> =>

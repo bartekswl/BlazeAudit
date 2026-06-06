@@ -4,10 +4,10 @@ import { CLIENT_SPREADSHEET_COLUMNS, clientToSpreadsheetRow } from '../../shared
 import { buildCsv } from '../../shared/csv';
 import { IpcChannels } from '../../shared/ipc';
 import { clients } from '../db';
-import { dataDir } from '../db/paths';
+import { dataDir, describeDataDir } from '../db/paths';
 
 export function registerDatabaseIpc(): void {
-  ipcMain.handle(IpcChannels.databaseGetDataDir, () => dataDir());
+  ipcMain.handle(IpcChannels.databaseGetDataDir, () => describeDataDir());
 
   ipcMain.handle(IpcChannels.databaseOpenDataFolder, async () => {
     const dir = dataDir();

@@ -15,6 +15,16 @@ export const IpcChannels = {
   databaseExportClientsCsv: 'database:export-clients-csv',
   databaseGetDataDir: 'database:get-data-dir',
   databaseOpenDataFolder: 'database:open-data-folder',
+  authGetStatus: 'auth:get-status',
+  authActivate: 'auth:activate',
+  authSetPassword: 'auth:set-password',
+  authLogin: 'auth:login',
+  authLogOut: 'auth:log-out',
+  authSelectAccount: 'auth:select-account',
+  authBeginAddAccount: 'auth:begin-add-account',
+  authReturnToLogin: 'auth:return-to-login',
+  authGetSecuritySettings: 'auth:get-security-settings',
+  authSetLoginPolicy: 'auth:set-login-policy',
 } as const;
 
 export type IpcChannel = (typeof IpcChannels)[keyof typeof IpcChannels];

@@ -4,7 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { registerWindowIpc } from './ipc/window';
 import { registerClientsIpc } from './ipc/clients';
 import { registerDatabaseIpc } from './ipc/database';
-import { initDatabase, closeDatabase } from './db';
+import { registerAuthIpc } from './ipc/auth';
+import { closeDatabase } from './db';
 import { IpcChannels } from '../shared/ipc';
 
 // Dev/preview: never write under the real AppData profile. Keep all Electron
@@ -55,13 +56,8 @@ function createMainWindow(): BrowserWindow {
 }
 
 void app.whenReady().then(() => {
-  try {
-    initDatabase();
-  } catch (error) {
-    console.error('[db] failed to initialize:', error);
-  }
-
   registerWindowIpc();
+  registerAuthIpc();
   registerClientsIpc();
   registerDatabaseIpc();
   createMainWindow();

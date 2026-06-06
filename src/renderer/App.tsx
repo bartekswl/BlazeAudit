@@ -10,6 +10,7 @@ import {
 } from './features/customers/CustomersScreen';
 import { DatabaseScreen } from './features/database/DatabaseScreen';
 import { Placeholder } from './features/Placeholder';
+import { SettingsScreen } from './features/settings/SettingsScreen';
 import { navItems, type NavId } from './navigation';
 
 const screens: Record<Exclude<NavId, 'customers'>, ReactNode> = {
@@ -36,13 +37,7 @@ const screens: Record<Exclude<NavId, 'customers'>, ReactNode> = {
     />
   ),
   database: <DatabaseScreen />,
-  settings: (
-    <Placeholder
-      title="Settings"
-      description="App preferences, account, backup, and licensing."
-      icon={navItems.find((i) => i.id === 'settings')!.icon}
-    />
-  ),
+  settings: <SettingsScreen />,
 };
 
 export default function App() {
