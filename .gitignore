@@ -54,5 +54,8 @@ coverage/
 # Local design scratch — sketches, mockups, notes. NEVER committed/uploaded.
 sandbox/
 
+# Branding assets kept local only (logos, colors, mockups, source files).
+branding/
+
 # Misc
 *.tsbuildinfo
