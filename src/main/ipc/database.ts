@@ -1,11 +1,21 @@
-import { dialog, ipcMain } from 'electron';
+import { dialog, ipcMain, shell } from 'electron';
 import fs from 'node:fs';
 import { CLIENT_SPREADSHEET_COLUMNS, clientToSpreadsheetRow } from '../../shared/clientColumns';
 import { buildCsv } from '../../shared/csv';
 import { IpcChannels } from '../../shared/ipc';
 import { clients } from '../db';
+import { dataDir } from '../db/paths';
 
 export function registerDatabaseIpc(): void {
+  ipcMain.handle(IpcChannels.databaseGetDataDir, () => dataDir());
+
+  ipcMain.handle(IpcChannels.databaseOpenDataFolder, async () => {
+    const dir = dataDir();
+    const err = await shell.openPath(dir);
+    if (err) throw new Error(err);
+    return { opened: true as const, path: dir };
+  });
+
   ipcMain.handle(IpcChannels.databaseExportClientsCsv, async () => {
     const { canceled, filePath } = await dialog.showSaveDialog({
       title: 'Export customer list',

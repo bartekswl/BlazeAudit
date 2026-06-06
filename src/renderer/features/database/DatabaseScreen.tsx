@@ -1,18 +1,25 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   Database,
   Download,
   FileJson,
   FileSpreadsheet,
+  FileText,
+  FolderOpen,
   HardDriveDownload,
   Upload,
 } from 'lucide-react';
-import { CLIENT_SPREADSHEET_COLUMNS } from '../../../shared/clientColumns';
 
 export function DatabaseScreen() {
+  const [dataDir, setDataDir] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [openingFolder, setOpeningFolder] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void window.blazeaudit.database.getDataDir().then(setDataDir);
+  }, []);
 
   const exportCustomersCsv = async () => {
     setExporting(true);
@@ -27,6 +34,20 @@ export function DatabaseScreen() {
       setError(e instanceof Error ? e.message : 'Export failed.');
     } finally {
       setExporting(false);
+    }
+  };
+
+  const openDataFolder = async () => {
+    setOpeningFolder(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const result = await window.blazeaudit.database.openDataFolder();
+      setMessage(`Opened ${result.path}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not open data folder.');
+    } finally {
+      setOpeningFolder(false);
     }
   };
 
@@ -50,66 +71,61 @@ export function DatabaseScreen() {
       <Section
         icon={HardDriveDownload}
         title="Full database"
-        description="Export or restore the entire encrypted local database — clients, templates, inspections, and settings."
+        description="Export or restore the entire encrypted local database — clients, templates, inspections, and settings. On a normal install the database lives in your Windows AppData folder."
       >
+        <ActionButton
+          icon={FolderOpen}
+          label="Open data folder"
+          loadingLabel="Opening…"
+          onClick={() => void openDataFolder()}
+          loading={openingFolder}
+        />
         <ActionButton icon={Download} label="Export database" disabled hint="Coming soon" />
         <ActionButton icon={Upload} label="Import database" disabled hint="Coming soon" />
+        {dataDir && (
+          <p className="w-full text-xs text-neutral-600">
+            <span className="text-neutral-500">Data folder · </span>
+            <span className="break-all font-mono">{dataDir}</span>
+          </p>
+        )}
       </Section>
 
       <Section
         icon={FileJson}
         title="Schema & PDF portability"
-        description="Export the document JSON schema kit for external tools and PDF round-trip re-import."
+        description="Export a schema kit (JSON Schema, example, and prompt) for an external AI/LLM to turn legacy PDFs into JSON that matches our document model — you run the AI off-app, then bring the result back here. Import that AI-generated JSON, or a BlazeAudit PDF to read embedded document JSON losslessly (no OCR)."
       >
         <ActionButton icon={Download} label="Export schema kit" disabled hint="Coming soon" />
-      </Section>
-
-      <Section
-        icon={FileSpreadsheet}
-        title="Customer list"
-        description="Move clients in and out using spreadsheets. Excel (.xlsx) and CSV import will map columns to the fields below."
-      >
+        <ActionButton icon={Upload} label="Import AI-generated JSON" disabled hint="Coming soon" />
         <ActionButton
-          icon={Download}
-          label="Export to CSV"
-          onClick={() => void exportCustomersCsv()}
-          loading={exporting}
-        />
-        <ActionButton icon={Download} label="Export to Excel (.xlsx)" disabled hint="Coming soon" />
-        <ActionButton
-          icon={Upload}
-          label="Import from CSV / Excel"
+          icon={FileText}
+          label="Import from BlazeAudit PDF"
           disabled
           hint="Coming soon"
         />
       </Section>
 
-      <section className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
-        <h3 className="text-sm font-medium text-neutral-200">Customer spreadsheet columns</h3>
-        <p className="mt-1 text-xs text-neutral-500">
-          Exports and imports use these headers, matching the customer editor fields.
-        </p>
-        <div className="mt-4 overflow-x-auto rounded-lg border border-white/5">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-neutral-900/80 text-xs uppercase tracking-wide text-neutral-500">
-              <tr>
-                <th className="px-4 py-2.5 font-medium">Column</th>
-                <th className="px-4 py-2.5 font-medium">Required</th>
-              </tr>
-            </thead>
-            <tbody>
-              {CLIENT_SPREADSHEET_COLUMNS.map((col) => (
-                <tr key={col.key} className="border-t border-white/5">
-                  <td className="px-4 py-2.5 text-neutral-200">{col.header}</td>
-                  <td className="px-4 py-2.5 text-neutral-500">
-                    {'required' in col && col.required ? 'Yes' : '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <Section
+        icon={FileSpreadsheet}
+        title="Customer list"
+        description="Move clients in and out using CSV, Excel, or JSON. Import will match columns to our client fields automatically — including splitting combined values when street, post code, or similar data share one cell."
+      >
+        <ActionButton
+          icon={Download}
+          label="Export to CSV"
+          loadingLabel="Exporting…"
+          onClick={() => void exportCustomersCsv()}
+          loading={exporting}
+        />
+        <ActionButton icon={Download} label="Export to Excel (.xlsx)" disabled hint="Coming soon" />
+        <ActionButton icon={Download} label="Export to JSON" disabled hint="Coming soon" />
+        <ActionButton
+          icon={Upload}
+          label="Import from CSV / Excel / JSON"
+          disabled
+          hint="Coming soon"
+        />
+      </Section>
 
       <div className="flex items-center gap-2 text-xs text-neutral-600">
         <Database className="size-3.5" />
@@ -152,6 +168,7 @@ function ActionButton({
   onClick,
   disabled,
   loading,
+  loadingLabel,
   hint,
 }: {
   icon: typeof Download;
@@ -159,6 +176,7 @@ function ActionButton({
   onClick?: () => void;
   disabled?: boolean;
   loading?: boolean;
+  loadingLabel?: string;
   hint?: string;
 }) {
   const isDisabled = disabled || loading;
@@ -172,7 +190,7 @@ function ActionButton({
       className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-neutral-300 transition-colors hover:bg-white/5 hover:text-neutral-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-neutral-300"
     >
       <Icon className="size-4" />
-      {loading ? 'Exporting…' : label}
+      {loading ? (loadingLabel ?? 'Working…') : label}
       {hint && disabled && (
         <span className="rounded-full border border-white/10 px-1.5 py-0.5 text-[10px] text-neutral-500">
           {hint}

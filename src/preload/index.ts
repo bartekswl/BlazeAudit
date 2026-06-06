@@ -30,6 +30,9 @@ const api = {
   database: {
     exportClientsCsv: (): Promise<{ saved: false } | { saved: true; filePath: string }> =>
       ipcRenderer.invoke(IpcChannels.databaseExportClientsCsv),
+    getDataDir: (): Promise<string> => ipcRenderer.invoke(IpcChannels.databaseGetDataDir),
+    openDataFolder: (): Promise<{ opened: true; path: string }> =>
+      ipcRenderer.invoke(IpcChannels.databaseOpenDataFolder),
   },
 };
 
