@@ -136,6 +136,22 @@ local tool rather than a cloud SaaS.
 - Data is recoverable by **account**, but SubraLab cannot read inspection contents
   (data never leaves the user's machine).
 
+### 6.8 UI & navigation
+
+- **Frameless window** with a custom top **status/title bar** (minimize/maximize/
+  close), draggable, responsive.
+- **Entry flow**: if no activation is sensed, prompt for activation; then a local
+  **login page** (subtle motion, responsive); then the dashboard.
+- **Left sidebar** navigation: logo (top); **Dashboard, Customers, Documents,
+  Templates, Calendar, Settings**; user avatar + name (bottom).
+- **Documents** is the single home for all inspections (no separate "Inspections"
+  item); **Templates** holds reusable definitions.
+- **Dashboard**: a time/date hero strip; stat tiles (clients, done this year, due
+  this week, due this month); a user **reminders** notes section; body stat tiles
+  plus **recently used clients/documents**; a prominent **New Inspection** button;
+  a bottom status bar (version, copyright, SubraLab info, link).
+- Full design: [`UX.md`](UX.md).
+
 ## 7. Non-functional requirements
 
 - **Offline:** no required network calls for core features; only one-time

@@ -57,5 +57,8 @@ sandbox/
 # Branding assets kept local only (logos, colors, mockups, source files).
 branding/
 
+# Local-only agent context file (not shared/uploaded).
+AGENTS.md
+
 # Misc
 *.tsbuildinfo

@@ -77,10 +77,14 @@ minimal API** to the renderer. The renderer never accesses Node APIs directly.
 
 ### 2.3 Renderer (`src/renderer`)
 
-The React + TypeScript UI:
+The React + TypeScript UI (frameless window with a custom title/status bar and a
+left sidebar; see [`UX.md`](UX.md)):
 
-- **features/** — feature areas: `clients`, `templates`, `inspections`, `export`.
-- **components/** — shared, reusable UI components (Tailwind-styled).
+- **features/** — feature areas matching the navigation: `dashboard`, `customers`,
+  `documents` (all inspections), `templates`, `calendar`, `settings`, plus
+  `account` and `export`.
+- **components/** — shared, reusable UI components (Tailwind-styled), including the
+  window chrome (title/status bar, controls).
 - **document-model/** — block type definitions, document schema, and validation
   (see [`DATA_MODEL.md`](DATA_MODEL.md)). This is shared conceptually with the
   main process via `src/shared`.
@@ -168,9 +172,9 @@ src/
 │  ├─ ipc/      # IPC handlers
 │  └─ pdf/      # PDF generation
 ├─ preload/     # contextBridge API
-├─ renderer/    # React UI
-│  ├─ features/ # clients, templates, inspections, export, account
-│  ├─ components/
+├─ renderer/    # React UI (frameless window + sidebar; see UX.md)
+│  ├─ features/ # dashboard, customers, documents, templates, calendar, settings, account, export
+│  ├─ components/ # shared UI incl. window chrome (title/status bar)
 │  └─ document-model/
 └─ shared/      # types shared across processes (incl. license-client contract)
 ```

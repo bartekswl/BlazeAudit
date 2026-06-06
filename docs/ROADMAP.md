@@ -14,7 +14,7 @@ A phased delivery plan. Phases are sequential but boundaries are flexible.
 - Git initialization and hygiene (`.gitignore`, `.gitattributes`, `.editorconfig`).
 - Core docs (README, CONTRIBUTING, CHANGELOG); no license granted (all rights reserved).
 - Documentation set: PRD, architecture, data model, security design, template/
-  document design, ADRs, roadmap.
+  document design, UI/UX design, ADRs, roadmap.
 - Toolchain configuration: `package.json`, TypeScript, ESLint, Prettier.
 
 **Exit criteria:** repo initialized, documented, and ready for development.
@@ -23,10 +23,19 @@ A phased delivery plan. Phases are sequential but boundaries are flexible.
 
 - Install dependencies (Electron, Vite, React, TypeScript, Tailwind).
 - Boot a secure Electron window rendering a React app.
+- **Frameless window** with a custom **title/status bar** (minimize/maximize/close,
+  draggable) and the **left sidebar** navigation shell (Dashboard, Customers,
+  Documents, Templates, Calendar, Settings; avatar + name at the bottom).
 - Wire dev workflow (`npm run dev`) and a minimal production build.
 - Establish the preload/IPC security boundary.
+- See [`UX.md`](UX.md).
 
-**Exit criteria:** `npm run dev` opens a working, styled, empty BlazeAudit window.
+**Exit criteria:** `npm run dev` opens a working, styled BlazeAudit window with the
+frameless chrome and sidebar shell in place.
+
+> The **dashboard content** (time strip, stat tiles, reminders, recents, New
+> Inspection) fills in as the underlying data lands (Phases 2/5); the shell and
+> layout come first here.
 
 ## Phase 2 — Data layer (encrypted)
 
