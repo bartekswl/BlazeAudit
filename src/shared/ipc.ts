@@ -7,6 +7,11 @@ export const IpcChannels = {
   windowIsMaximized: 'window:is-maximized',
   windowMaximizeChanged: 'window:maximize-changed',
   appVersion: 'app:version',
+  clientsList: 'clients:list',
+  clientsGet: 'clients:get',
+  clientsCreate: 'clients:create',
+  clientsUpdate: 'clients:update',
+  clientsDelete: 'clients:delete',
 } as const;
 
 export type IpcChannel = (typeof IpcChannels)[keyof typeof IpcChannels];

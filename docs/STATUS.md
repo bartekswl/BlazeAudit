@@ -6,7 +6,7 @@
 | --- | --- |
 | **Status** | Living snapshot — update as the project evolves |
 | **Last updated** | 2026-06-06 |
-| **Current phase** | Phase 1 complete (app shell); next is Phase 2 (encrypted data layer) |
+| **Current phase** | Phase 2 complete (encrypted data layer + clients); next is Phase 3 (accounts/login) |
 
 ## How to use this file
 
@@ -27,15 +27,15 @@ Inspired by fire-forms.com but a focused local tool, not a cloud SaaS. A compani
 
 ## Snapshot
 
-- **Done:** Phase 0 (git, docs, tooling) **and Phase 1 — app shell**. Dependencies
-  installed; `src/` scaffolded across `main`/`preload`/`renderer`/`shared`; a secure
-  frameless Electron window boots a React + Tailwind v4 UI with custom title/status
-  bar (working min/max/close), a config-driven left sidebar, and placeholder screens.
-  `npm run dev` (Vite + Electron HMR) and `npm run build` both work.
-- **Next:** Phase 2 — encrypted data layer (SQLCipher / encryption-capable
-  `better-sqlite3`), schema + migrations, and client CRUD over IPC.
-- **Not started:** data layer, accounts/login, document model, inspections, PDF,
-  backups, license server, packaging.
+- **Done:** Phases 0–1 (tooling + app shell) **and Phase 2 — encrypted data layer**.
+  Encrypted SQLite via `better-sqlite3-multiple-ciphers` (SQLCipher), a migration
+  runner (`user_version`), the `clients` + `app_meta` tables, client CRUD over IPC,
+  and a working Customers screen (list/add/edit/delete). DB lives encrypted at
+  `userData/data/blazeaudit.db`; verified encrypted-at-rest + wrong-key rejection.
+- **Next:** Phase 3 — accounts, local password login (Argon2id), key-X management
+  (DPAPI/`safeStorage` + password wrapping), and the one-time online activation flow.
+- **Not started:** accounts/login, document model, inspections, PDF, backups,
+  license server, packaging.
 
 ## Tech stack (ADR-0001)
 
@@ -93,11 +93,33 @@ print-to-PDF fallback). Windows-only for v1. Proprietary (all rights reserved).
 - **Deferred:** a strict CSP (omitted so Vite HMR works; enforce later via session
   headers); the dashboard tiles/recents/reminders show placeholders until data lands.
 
+## Phase 2 notes (as built)
+
+- **Engine:** `better-sqlite3-multiple-ciphers` (drop-in `better-sqlite3` with
+  SQLCipher). Native module — kept **external** in the main Vite build and loaded from
+  `node_modules` at runtime. Types aliased via `src/types/better-sqlite3-multiple-ciphers.d.ts`.
+- **Native rebuild:** Electron is **pinned to v41** because that's the newest line with a
+  published prebuilt binary for the module (Electron 42 / ABI 146 had none, and there's no
+  C++ toolchain to compile). `scripts/rebuild-native.mjs` (run via `postinstall`) fetches the
+  Electron-ABI prebuild after any `npm install`; manual: `npm run rebuild:native`.
+- **Key handling (Phase 2 bridge):** a random 256-bit key is generated on first run and
+  protected by **Windows DPAPI** (`safeStorage`), stored at `userData/data/db.key`. The DB
+  opens via `PRAGMA cipher='sqlcipher'` + raw key. Phase 3 layers password-wrapping + server
+  escrow onto this same key (it becomes "key X"). Verified: plaintext absent from the file,
+  wrong key rejected.
+- **Layout:** `src/main/db/` = `key` (DPAPI), `connection` (open/unlock + PRAGMAs),
+  `migrations` (`user_version` runner; v1 = `clients` + `app_meta`), `clients` (CRUD repo,
+  snake_case↔camelCase mapping), `index` (init/orchestrate). IPC in `src/main/ipc/clients.ts`;
+  preload exposes `window.blazeaudit.clients.*`; UI in `features/customers/CustomersScreen.tsx`.
+- **Deferred:** `templates`/`inspections` tables (added in their phases via new migrations);
+  dashboard still shows placeholder counts until Phase 5.
+
 ## Immediate next step
 
-**Phase 2 — encrypted data layer.** Integrate encryption-capable SQLite, define the
-schema + migrations, and implement client CRUD over IPC with a basic client
-management UI. See [`ROADMAP.md`](ROADMAP.md) and [`DATA_MODEL.md`](DATA_MODEL.md).
+**Phase 3 — accounts, local security & login.** Local password login (Argon2id), key-X
+management (DPAPI + password wrapping) to unlock the DB, and the one-time online activation
+flow. See [`ROADMAP.md`](ROADMAP.md), [`SECURITY.md`](SECURITY.md), and
+[`adr/0002-accounts-activation-licensing.md`](adr/0002-accounts-activation-licensing.md).
 
 ## Conventions / notes
 

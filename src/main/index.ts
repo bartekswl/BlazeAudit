@@ -2,6 +2,8 @@ import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { registerWindowIpc } from './ipc/window';
+import { registerClientsIpc } from './ipc/clients';
+import { initDatabase, closeDatabase } from './db';
 import { IpcChannels } from '../shared/ipc';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -45,7 +47,14 @@ function createMainWindow(): BrowserWindow {
 }
 
 void app.whenReady().then(() => {
+  try {
+    initDatabase();
+  } catch (error) {
+    console.error('[db] failed to initialize:', error);
+  }
+
   registerWindowIpc();
+  registerClientsIpc();
   createMainWindow();
 
   app.on('activate', () => {
@@ -55,4 +64,8 @@ void app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('will-quit', () => {
+  closeDatabase();
 });

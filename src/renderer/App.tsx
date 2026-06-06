@@ -3,18 +3,13 @@ import { TitleBar } from './components/TitleBar';
 import { Sidebar } from './components/Sidebar';
 import { StatusBar } from './components/StatusBar';
 import { DashboardScreen } from './features/dashboard/DashboardScreen';
+import { CustomersScreen } from './features/customers/CustomersScreen';
 import { Placeholder } from './features/Placeholder';
 import { navItems, type NavId } from './navigation';
 
 const screens: Record<NavId, ReactNode> = {
   dashboard: <DashboardScreen />,
-  customers: (
-    <Placeholder
-      title="Customers"
-      description="Your local client and site database — add, edit, and view inspection history."
-      icon={navItems.find((i) => i.id === 'customers')!.icon}
-    />
-  ),
+  customers: <CustomersScreen />,
   documents: (
     <Placeholder
       title="Documents"

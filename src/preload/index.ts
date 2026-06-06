@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IpcChannels } from '../shared/ipc';
+import type { Client, ClientInput } from '../shared/types';
 
 const api = {
   window: {
@@ -16,6 +17,15 @@ const api = {
   },
   app: {
     getVersion: (): Promise<string> => ipcRenderer.invoke(IpcChannels.appVersion),
+  },
+  clients: {
+    list: (): Promise<Client[]> => ipcRenderer.invoke(IpcChannels.clientsList),
+    get: (id: string): Promise<Client | null> => ipcRenderer.invoke(IpcChannels.clientsGet, id),
+    create: (input: ClientInput): Promise<Client> =>
+      ipcRenderer.invoke(IpcChannels.clientsCreate, input),
+    update: (id: string, input: ClientInput): Promise<Client> =>
+      ipcRenderer.invoke(IpcChannels.clientsUpdate, id, input),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.clientsDelete, id),
   },
 };
 
