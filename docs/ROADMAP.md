@@ -13,7 +13,8 @@ A phased delivery plan. Phases are sequential but boundaries are flexible.
 
 - Git initialization and hygiene (`.gitignore`, `.gitattributes`, `.editorconfig`).
 - Core docs (README, CONTRIBUTING, CHANGELOG); no license granted (all rights reserved).
-- Documentation set: PRD, architecture, data model, ADRs, roadmap.
+- Documentation set: PRD, architecture, data model, security design, template/
+  document design, ADRs, roadmap.
 - Toolchain configuration: `package.json`, TypeScript, ESLint, Prettier.
 
 **Exit criteria:** repo initialized, documented, and ready for development.
@@ -27,39 +28,83 @@ A phased delivery plan. Phases are sequential but boundaries are flexible.
 
 **Exit criteria:** `npm run dev` opens a working, styled, empty BlazeAudit window.
 
-## Phase 2 — Data layer
+## Phase 2 — Data layer (encrypted)
 
-- Integrate SQLite (`better-sqlite3`), schema, and migrations.
+- Integrate **encrypted SQLite** (SQLCipher / encryption-capable `better-sqlite3`
+  build), schema, and migrations.
 - Implement client CRUD over IPC.
 - Basic client management UI (list, add, edit, delete).
 
-**Exit criteria:** clients can be created, edited, and persisted offline.
+**Exit criteria:** clients can be created, edited, and persisted offline in an
+encrypted database.
 
-## Phase 3 — Document model & template builder
+## Phase 3 — Accounts, local security & login
 
-- Implement the block/document model and validation.
-- Build the visual template editor: add/remove blocks, equipment tables,
-  add/remove rows and lines, reorder, toggle sections.
-- Template CRUD and storage.
+- Local **password login** (Argon2id) and **key-X** management (Windows DPAPI via
+  `safeStorage`, password wrapping) to unlock the encrypted DB.
+- **Activation flow**: enter key, one-time online activation, store signed token +
+  key X; single-use key + instance id handling.
+- See [`SECURITY.md`](SECURITY.md) and [`ADR-0002`](adr/0002-accounts-activation-licensing.md).
 
-**Exit criteria:** a user can build and save a custom template visually.
+**Exit criteria:** the app activates once online, then an offline local login
+unlocks the encrypted database.
 
-## Phase 4 — Inspections
+## Phase 4 — Document model & template builder
+
+- Implement the block/document model and validation, including the fixed
+  **document header** (title, client relation, date, inspection type).
+- Build the visual template editor: add/remove blocks, **tables** (add/remove rows
+  **and columns**), **checklists**, **write-on lines**, reorder, toggle sections.
+- Template CRUD and storage; **seed default templates** on first run.
+- **Portability**: JSON template **export/import**, the **JSON Schema export kit**
+  (`schema.json` + `example.json` + prompt), and schema-validated import.
+- See [`TEMPLATES.md`](TEMPLATES.md) and [`ADR-0003`](adr/0003-document-model-portability.md).
+
+**Exit criteria:** a user can build, save, export/import, and seed default
+templates visually.
+
+## Phase 5 — Inspections
 
 - Create inspections from templates, attached to clients.
 - Fill-in editor with autosave; draft vs. complete status.
 - Inspection history per client.
+- **Cadence + next-due date** and a **due/overdue reminders dashboard** at launch.
 
-**Exit criteria:** a full inspection can be created, edited, and saved.
+**Exit criteria:** a full inspection can be created, edited, saved, and surfaces
+when the next one is due.
 
-## Phase 5 — PDF export
+## Phase 6 — PDF export
 
 - Render an inspection's document tree to a branded PDF.
 - Tables, checklists, signatures, and metadata in output.
+- **Embed the document JSON in the PDF** for a lossless re-import round-trip.
 
-**Exit criteria:** a completed inspection exports to a clean PDF.
+**Exit criteria:** a completed inspection exports to a clean PDF, and a
+BlazeAudit-exported PDF can be re-imported losslessly.
 
-## Phase 6 — Packaging & distribution
+## Phase 7 — Backups & recovery
+
+- Produce a **single encrypted backup file**: scheduled (every few weeks),
+  on-demand, and automatically before any lockout.
+- Restore flow; recovery via key reissue on a fresh activated install.
+
+**Exit criteria:** a user can back up to one file and restore it on a fresh,
+re-activated install.
+
+## Phase 8 — License server & admin panel
+
+- Small server **co-hosted with the marketing site**: `activate` / `validate` /
+  `deactivate` with **signed** responses; escrowed key store; accounts, keys,
+  instances, and basic telemetry.
+- **Admin front end**: issue/activate keys, deactivate instances, view account data.
+- Wire the app's **monthly check + fail-open** enforcement against it.
+- **GDPR**: privacy notice, lawful basis, and data-retention policy.
+
+**Exit criteria:** SubraLab can issue/deactivate keys and see who/where; the app
+enforces the monthly check while remaining fail-open. (The license client can be
+stubbed in earlier phases.)
+
+## Phase 9 — Packaging & distribution
 
 - Configure electron-builder for a Windows installer (NSIS) + standalone build.
 - App icon and SubraLab branding.
@@ -67,11 +112,11 @@ A phased delivery plan. Phases are sequential but boundaries are flexible.
 
 **Exit criteria:** a one-click Windows installer and a portable build are produced.
 
-## Phase 7 — Marketing / showcase website
+## Phase 10 — Marketing / showcase website
 
 - Simple website: product overview, features, screenshots, contact.
 - "Usual jazz" for showcasing the product and providing contact/download info.
-- Lives in `website/`; deployable as a static site.
+- Lives in `website/`; deployable as a static site (hosts the Phase 8 server).
 
 **Exit criteria:** a polished marketing site is ready to publish.
 

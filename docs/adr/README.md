@@ -21,6 +21,8 @@ of [`0001-tech-stack.md`](0001-tech-stack.md):
 
 ## Index
 
-| ADR                                      | Title           | Status   |
-| ---------------------------------------- | --------------- | -------- |
-| [0001](0001-tech-stack.md)               | Technology stack| Accepted |
+| ADR                                      | Title                                      | Status   |
+| ---------------------------------------- | ------------------------------------------ | -------- |
+| [0001](0001-tech-stack.md)               | Technology stack                           | Accepted |
+| [0002](0002-accounts-activation-licensing.md) | Accounts, activation & local data security | Accepted |
+| [0003](0003-document-model-portability.md) | Document model & data portability          | Accepted |

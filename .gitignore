@@ -51,5 +51,8 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Local design scratch — sketches, mockups, notes. NEVER committed/uploaded.
+sandbox/
+
 # Misc
 *.tsbuildinfo

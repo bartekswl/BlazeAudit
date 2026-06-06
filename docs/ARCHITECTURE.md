@@ -55,11 +55,20 @@ Runs in Node.js and owns everything privileged:
 
 - **App lifecycle & windows** — create the main `BrowserWindow`, manage app
   events.
-- **Data layer (`src/main/db`)** — SQLite access via `better-sqlite3`, schema and
+- **Data layer (`src/main/db`)** — encrypted SQLite (SQLCipher) access, schema and
   migrations, and query functions for clients, templates, and inspections.
+- **Security (`src/main/security`)** — local credential/login handling, key-X
+  management (DPAPI via `safeStorage`, password wrapping), and DB unlock.
+- **License (`src/main/license`)** — the host-agnostic license client
+  (`activate` / `validate` / `deactivate`), signed-response verification, the
+  monthly check, and fail-open enforcement.
+- **Backup (`src/main/backup`)** — produce/restore the single encrypted backup
+  file (scheduled, on-demand, and pre-lockout).
 - **PDF generation (`src/main/pdf`)** — render an inspection document tree to PDF.
 - **IPC handlers (`src/main/ipc`)** — implement the allow-listed channels exposed
   to the renderer.
+
+These privileged concerns are detailed in [`SECURITY.md`](SECURITY.md).
 
 ### 2.2 Preload (`src/preload`)
 
@@ -119,7 +128,26 @@ Following Electron security best practices:
 - All privileged access via a minimal preload bridge over **allow-listed** IPC
   channels.
 - No remote content; the renderer loads local bundled assets only.
-- User data stays on the local machine; no network calls in core flows.
+- User data stays on the local machine; **encrypted at rest** with SQLCipher.
+- Network is used only for **one-time activation** and a **monthly licensing
+  check** — never for core data flows.
+
+### 5.1 Accounts, activation, licensing & recovery
+
+A separate concern with its own dedicated design document. In short:
+
+- Email accounts; single-use, admin-issued activation keys bound to one instance.
+- One-time online activation provisions a per-account encryption **key X**
+  (escrowed server-side); daily login is an offline local password.
+- Backups are single encrypted files; recovery reissues the key so old backups
+  open on a fresh install.
+- A monthly, **fail-open** check enables remote deactivation without ever locking
+  out a user due to server faults.
+- An external **license/admin server** (co-hosted with the marketing site) holds
+  accounts, keys, instances, escrowed keys, and telemetry — never inspection data.
+
+Full detail: [`SECURITY.md`](SECURITY.md) and
+[`adr/0002-accounts-activation-licensing.md`](adr/0002-accounts-activation-licensing.md).
 
 ## 6. Build & packaging
 
@@ -133,13 +161,20 @@ Following Electron security best practices:
 ```text
 src/
 ├─ main/        # Electron main process (Node)
-│  ├─ db/       # SQLite schema, migrations, queries
+│  ├─ db/       # encrypted SQLite (SQLCipher) schema, migrations, queries
+│  ├─ security/ # login, key-X management (DPAPI), DB unlock
+│  ├─ license/  # license client, signed-response checks, monthly check
+│  ├─ backup/   # encrypted backup file: create / restore
 │  ├─ ipc/      # IPC handlers
 │  └─ pdf/      # PDF generation
 ├─ preload/     # contextBridge API
 ├─ renderer/    # React UI
-│  ├─ features/ # clients, templates, inspections, export
+│  ├─ features/ # clients, templates, inspections, export, account
 │  ├─ components/
 │  └─ document-model/
-└─ shared/      # types shared across processes
+└─ shared/      # types shared across processes (incl. license-client contract)
 ```
+
+> The **license/admin server** is a **separate** component (co-hosted with the
+> marketing site), not part of this `src/` tree. See [`SECURITY.md`](SECURITY.md)
+> §10 and [`ROADMAP.md`](ROADMAP.md).
