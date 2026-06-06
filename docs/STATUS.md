@@ -6,7 +6,7 @@
 | --- | --- |
 | **Status** | Living snapshot — update as the project evolves |
 | **Last updated** | 2026-06-06 |
-| **Current phase** | Phase 0 complete; next is Phase 1 (app shell) |
+| **Current phase** | Phase 1 complete (app shell); next is Phase 2 (encrypted data layer) |
 
 ## How to use this file
 
@@ -27,12 +27,15 @@ Inspired by fire-forms.com but a focused local tool, not a cloud SaaS. A compani
 
 ## Snapshot
 
-- **Done:** Phase 0 — git, docs, tooling config (`package.json`, TS, ESLint,
-  Prettier), and the full design documentation set below. No app code yet.
-- **Next:** Phase 1 — app shell: Electron + Vite + React + Tailwind, frameless
-  window with custom title/status bar and the left sidebar nav shell.
-- **Not started:** dependency install (`dependencies` is still empty), `src/` is
-  empty, `dev`/`build` scripts are placeholders.
+- **Done:** Phase 0 (git, docs, tooling) **and Phase 1 — app shell**. Dependencies
+  installed; `src/` scaffolded across `main`/`preload`/`renderer`/`shared`; a secure
+  frameless Electron window boots a React + Tailwind v4 UI with custom title/status
+  bar (working min/max/close), a config-driven left sidebar, and placeholder screens.
+  `npm run dev` (Vite + Electron HMR) and `npm run build` both work.
+- **Next:** Phase 2 — encrypted data layer (SQLCipher / encryption-capable
+  `better-sqlite3`), schema + migrations, and client CRUD over IPC.
+- **Not started:** data layer, accounts/login, document model, inspections, PDF,
+  backups, license server, packaging.
 
 ## Tech stack (ADR-0001)
 
@@ -72,13 +75,29 @@ print-to-PDF fallback). Windows-only for v1. Proprietary (all rights reserved).
 | [`ROADMAP.md`](ROADMAP.md) | Phased delivery plan (Phases 0–10) |
 | [`adr/`](adr/) | Decision records: 0001 stack, 0002 accounts/security, 0003 document model |
 
+## Phase 1 notes (as built)
+
+- **Build wiring:** `vite-plugin-electron` builds `main` (ESM) and `preload`; the
+  renderer is a standard Vite React app (`index.html` → `src/renderer/main.tsx`).
+  `dev` = `vite` (auto-launches Electron + HMR); `build` = `tsc --noEmit && vite build`;
+  `preview` = `electron .` (runs the production build).
+- **Security:** `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`.
+  Because **sandboxed preload scripts cannot use ESM**, the preload is forced to a
+  CommonJS `index.cjs` via `lib.formats: ['cjs']` in `vite.config.ts` (a harmless
+  unused `index.mjs` is also emitted into the gitignored `dist-electron/`).
+- **IPC:** allow-listed channels live in `src/shared/ipc.ts`; the preload exposes a
+  typed `window.blazeaudit` bridge (window min/max/close + maximize state, app version).
+- **UI:** navigation is **config-driven** (`src/renderer/navigation.ts`) so menus are
+  a one-file edit. Neutral dark theme via Tailwind v4 (`@tailwindcss/vite`); flame
+  accent token defined in `index.css`. Branding still deferred (`branding/` local-only).
+- **Deferred:** a strict CSP (omitted so Vite HMR works; enforce later via session
+  headers); the dashboard tiles/recents/reminders show placeholders until data lands.
+
 ## Immediate next step
 
-**Phase 1 — app shell.** Recommended approach: `vite-plugin-electron` to hand-build
-the `main` / `preload` / `renderer` / `shared` structure; secure window
-(`contextIsolation`, `nodeIntegration: false`, `sandbox`); frameless chrome + sidebar
-shell; real `dev`/`build` scripts; Tailwind with a neutral theme (branding slots in
-later). Branding assets are kept **local only** (`branding/` is gitignored).
+**Phase 2 — encrypted data layer.** Integrate encryption-capable SQLite, define the
+schema + migrations, and implement client CRUD over IPC with a basic client
+management UI. See [`ROADMAP.md`](ROADMAP.md) and [`DATA_MODEL.md`](DATA_MODEL.md).
 
 ## Conventions / notes
 
