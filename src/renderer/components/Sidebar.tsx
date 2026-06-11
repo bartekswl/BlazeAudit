@@ -6,19 +6,26 @@ import { cn } from '../lib/cn';
 export function Sidebar({
   activeId,
   onSelect,
+  onOpenUserProfile,
 }: {
   activeId: NavId;
   onSelect: (id: NavId) => void;
+  onOpenUserProfile: () => void;
 }) {
   const [email, setEmail] = useState('');
+  const [businessName, setBusinessName] = useState('');
 
   useEffect(() => {
     void window.blazeaudit.auth.getStatus().then((status) => {
       if (status.phase === 'unlocked') setEmail(status.email);
     });
+    void window.blazeaudit.profile.getBusiness().then((profile) => {
+      setBusinessName(profile.businessName);
+    });
   }, []);
 
   const initial = email ? email[0]?.toUpperCase() : 'I';
+  const subtitle = businessName.trim() || 'SubraLab';
 
   return (
     <nav className="flex w-52 shrink-0 flex-col border-r border-white/5 bg-neutral-950/60">
@@ -51,8 +58,8 @@ export function Sidebar({
         <div className="flex items-center gap-2.5">
           <button
             type="button"
-            onClick={() => onSelect('settings')}
-            title="Settings"
+            onClick={onOpenUserProfile}
+            title="User profile settings"
             className={cn(
               'flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 py-1 text-left transition-colors',
               activeId === 'settings'
@@ -67,7 +74,7 @@ export function Sidebar({
               <div className="truncate text-sm font-medium text-neutral-100">
                 {email || 'Inspector'}
               </div>
-              <div className="truncate text-xs text-neutral-500">SubraLab</div>
+              <div className="truncate text-xs text-neutral-500">{subtitle}</div>
             </div>
           </button>
           <button

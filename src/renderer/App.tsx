@@ -32,7 +32,7 @@ import {
 
 import { Placeholder } from './features/Placeholder';
 
-import { SettingsScreen } from './features/settings/SettingsScreen';
+import { SettingsScreen, type SettingsScrollTarget } from './features/settings/SettingsScreen';
 
 import {
 
@@ -47,7 +47,7 @@ import { navItems, type NavId } from './navigation';
 
 
 const screens: Record<
-  Exclude<NavId, 'customers' | 'templates' | 'documents' | 'database'>,
+  Exclude<NavId, 'customers' | 'templates' | 'documents' | 'database' | 'settings'>,
   ReactNode
 > = {
 
@@ -66,8 +66,6 @@ const screens: Record<
     />
 
   ),
-
-  settings: <SettingsScreen />,
 
 };
 
@@ -98,6 +96,10 @@ export default function App() {
   );
 
   const [documentsBoot, setDocumentsBoot] = useState<DocumentsBootState | null>(null);
+
+  const [settingsBoot, setSettingsBoot] = useState<{ scrollTo?: SettingsScrollTarget } | null>(
+    null,
+  );
 
   const customerBackRef = useRef<(() => void) | null>(null);
 
@@ -142,6 +144,16 @@ export default function App() {
     setDocumentsBoot(boot);
 
     setActiveId('documents');
+
+  };
+
+
+
+  const openSettings = (boot?: { scrollTo?: SettingsScrollTarget }) => {
+
+    setSettingsBoot(boot ?? null);
+
+    setActiveId('settings');
 
   };
 
@@ -193,7 +205,11 @@ export default function App() {
 
       <div className="flex min-h-0 flex-1">
 
-        <Sidebar activeId={activeId} onSelect={setActiveId} />
+        <Sidebar
+          activeId={activeId}
+          onSelect={setActiveId}
+          onOpenUserProfile={() => openSettings({ scrollTo: 'user-profile' })}
+        />
 
 
 
@@ -364,6 +380,16 @@ export default function App() {
               <DatabaseScreen
 
                 onInspectionImported={(inspectionId) => openDocuments({ inspectionId })}
+
+              />
+
+            ) : activeId === 'settings' ? (
+
+              <SettingsScreen
+
+                scrollTo={settingsBoot?.scrollTo ?? null}
+
+                onScrollConsumed={() => setSettingsBoot(null)}
 
               />
 

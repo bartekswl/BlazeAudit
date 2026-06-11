@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react';
 import { DEFAULT_LOGIN_POLICY, type LoginPolicy } from '../../../shared/loginPolicy';
 import { LoginPolicySelect } from '../../components/LoginPolicySelect';
+import { UserProfileSection } from './UserProfileSection';
 
-export function SettingsScreen() {
+export type SettingsScrollTarget = 'user-profile';
+
+export function SettingsScreen({
+  scrollTo,
+  onScrollConsumed,
+}: {
+  scrollTo?: SettingsScrollTarget | null;
+  onScrollConsumed?: () => void;
+}) {
   const [loginPolicy, setLoginPolicy] = useState<LoginPolicy>(DEFAULT_LOGIN_POLICY);
   const [dataDir, setDataDir] = useState('');
   const [osUsername, setOsUsername] = useState('');
@@ -19,6 +28,16 @@ export function SettingsScreen() {
       setAccountId(settings.accountId);
     });
   }, []);
+
+  useEffect(() => {
+    if (scrollTo !== 'user-profile') return;
+    const target = document.getElementById('user-profile');
+    if (!target) return;
+    requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      onScrollConsumed?.();
+    });
+  }, [scrollTo, onScrollConsumed]);
 
   const savePolicy = async (policy: LoginPolicy) => {
     setLoginPolicy(policy);
@@ -39,6 +58,8 @@ export function SettingsScreen() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <UserProfileSection />
+
       <section className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
         <h3 className="text-sm font-medium text-neutral-200">Security</h3>
         <p className="mt-1 text-xs leading-relaxed text-neutral-500">
@@ -63,8 +84,8 @@ export function SettingsScreen() {
       <section className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
         <h3 className="text-sm font-medium text-neutral-200">Data location</h3>
         <p className="mt-1 text-xs leading-relaxed text-neutral-500">
-          Settings and your encrypted database are stored per account under an opaque folder id
-          (not your email). Each account loads only its own files.
+          Settings and your encrypted account database are stored per account under an opaque folder
+          id (not your email). Each account loads only its own files.
         </p>
         <dl className="mt-4 space-y-2 text-xs">
           <div>

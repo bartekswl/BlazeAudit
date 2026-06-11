@@ -43,6 +43,15 @@ export const IpcChannels = {
   inspectionsClientStats: 'inspections:client-stats',
   inspectionsExportPdf: 'inspections:export-pdf',
   inspectionsImportPdf: 'inspections:import-pdf',
+  profileGetBusiness: 'profile:get-business',
+  profileUpdateBusiness: 'profile:update-business',
+  profileGetLogo: 'profile:get-logo',
+  profilePickLogo: 'profile:pick-logo',
+  profileRemoveLogo: 'profile:remove-logo',
+  profileListInspectors: 'profile:list-inspectors',
+  profileCreateInspector: 'profile:create-inspector',
+  profileUpdateInspector: 'profile:update-inspector',
+  profileDeleteInspector: 'profile:delete-inspector',
 } as const;
 
 export type IpcChannel = (typeof IpcChannels)[keyof typeof IpcChannels];

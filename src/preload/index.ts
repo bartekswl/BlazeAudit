@@ -16,6 +16,12 @@ import type {
   InspectionInput,
   InspectionSummary,
 } from '../shared/inspection';
+import type {
+  BusinessProfile,
+  BusinessProfileInput,
+  Inspector,
+  InspectorInput,
+} from '../shared/profile';
 import type { Client, ClientInput } from '../shared/types';
 
 const api = {
@@ -114,6 +120,23 @@ const api = {
     importPdf: (): Promise<
       { imported: false } | { imported: true; inspectionId: string; filePath: string }
     > => ipcRenderer.invoke(IpcChannels.inspectionsImportPdf),
+  },
+  profile: {
+    getBusiness: (): Promise<BusinessProfile> =>
+      ipcRenderer.invoke(IpcChannels.profileGetBusiness),
+    updateBusiness: (input: BusinessProfileInput): Promise<BusinessProfile> =>
+      ipcRenderer.invoke(IpcChannels.profileUpdateBusiness, input),
+    getLogo: (): Promise<string | null> => ipcRenderer.invoke(IpcChannels.profileGetLogo),
+    pickLogo: (): Promise<BusinessProfile> => ipcRenderer.invoke(IpcChannels.profilePickLogo),
+    removeLogo: (): Promise<BusinessProfile> => ipcRenderer.invoke(IpcChannels.profileRemoveLogo),
+    listInspectors: (): Promise<Inspector[]> =>
+      ipcRenderer.invoke(IpcChannels.profileListInspectors),
+    createInspector: (input: InspectorInput): Promise<Inspector> =>
+      ipcRenderer.invoke(IpcChannels.profileCreateInspector, input),
+    updateInspector: (id: string, input: InspectorInput): Promise<Inspector> =>
+      ipcRenderer.invoke(IpcChannels.profileUpdateInspector, id, input),
+    deleteInspector: (id: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.profileDeleteInspector, id),
   },
 };
 
