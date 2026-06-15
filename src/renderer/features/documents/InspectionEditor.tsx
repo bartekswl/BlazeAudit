@@ -10,7 +10,7 @@ import { setBlockValue } from '../../../shared/document';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
 
 import { BlockFillIn } from './BlockFillIn';
-import { DocumentOutlinePanel, DocumentOutlineToggle } from './DocumentOutline';
+import { useRegisterDocumentOutline } from './DocumentOutlineContext';
 
 const AUTOSAVE_MS = 900;
 
@@ -64,8 +64,6 @@ export function InspectionEditor({
   const [pdfMessage, setPdfMessage] = useState<string | null>(null);
 
   const [error, setError] = useState<string | null>(null);
-
-  const [outlineOpen, setOutlineOpen] = useState(false);
 
   const timerRef = useRef<number | null>(null);
 
@@ -311,6 +309,10 @@ export function InspectionEditor({
 
 
 
+  useRegisterDocumentOutline(document.blocks);
+
+
+
   const toggleStatus = async () => {
 
     const next: InspectionStatus = status === 'complete' ? 'draft' : 'complete';
@@ -414,8 +416,6 @@ export function InspectionEditor({
         </div>
 
         <div className="flex shrink-0 gap-1.5">
-
-          <DocumentOutlineToggle open={outlineOpen} onToggle={() => setOutlineOpen((open) => !open)} />
 
           <button
 
@@ -641,27 +641,19 @@ export function InspectionEditor({
 
 
 
-      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
+      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
 
-        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
+        <BlockFillIn
 
-          <BlockFillIn
+          blocks={document.blocks}
 
-            blocks={document.blocks}
+          onValueChange={handleValueChange}
 
-            onValueChange={handleValueChange}
+          onPatchBlocks={handlePatchBlocks}
 
-            onPatchBlocks={handlePatchBlocks}
+          canEditStructure={status === 'draft'}
 
-            canEditStructure={status === 'draft'}
-
-          />
-
-        </div>
-
-        {outlineOpen && (
-          <DocumentOutlinePanel blocks={document.blocks} onClose={() => setOutlineOpen(false)} />
-        )}
+        />
 
       </div>
 

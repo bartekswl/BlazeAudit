@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Plus, Save } from 'lucide-react';
 import type { BlockPath, BlockType, Document, Template } from '../../../shared/document';
 import { emptyDocument, findBlockPath, insertBlock, moveBlock, removeBlock } from '../../../shared/document';
-import { DocumentOutlinePanel, DocumentOutlineToggle } from '../documents/DocumentOutline';
+import { useRegisterDocumentOutline } from '../documents/DocumentOutlineContext';
 import { BlockEditor } from './BlockEditor';
 import { BlockList, inputCls } from './BlockList';
 import { BLOCK_CATALOG } from './blockCatalog';
@@ -41,7 +41,6 @@ export function TemplateEditor({
   const [addType, setAddType] = useState<BlockType>('paragraph');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [outlineOpen, setOutlineOpen] = useState(false);
 
   const insertParentPath = useMemo(() => {
     if (!selectedPath) return [];
@@ -49,6 +48,16 @@ export function TemplateEditor({
     if (selected?.type === 'section') return selectedPath;
     return [];
   }, [document.blocks, selectedPath]);
+
+  const handleOutlineNavigate = useCallback(
+    (blockId: string) => {
+      const path = findBlockPath(document.blocks, blockId);
+      if (path) setSelectedPath(path);
+    },
+    [document.blocks],
+  );
+
+  useRegisterDocumentOutline(document.blocks, handleOutlineNavigate);
 
   const syncMeta = (nextName: string, doc: Document): Document => ({
     ...doc,
@@ -101,7 +110,6 @@ export function TemplateEditor({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <DocumentOutlineToggle open={outlineOpen} onToggle={() => setOutlineOpen((open) => !open)} />
           <button
             type="button"
             onClick={onCancel}
@@ -220,17 +228,6 @@ export function TemplateEditor({
             )}
           </div>
         </section>
-
-        {outlineOpen && (
-          <DocumentOutlinePanel
-            blocks={document.blocks}
-            onClose={() => setOutlineOpen(false)}
-            onNavigate={(blockId) => {
-              const path = findBlockPath(document.blocks, blockId);
-              if (path) setSelectedPath(path);
-            }}
-          />
-        )}
       </div>
     </div>
   );

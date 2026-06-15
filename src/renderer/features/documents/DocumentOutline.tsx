@@ -1,8 +1,13 @@
 import { useMemo } from 'react';
-import { List, X } from 'lucide-react';
+import { Menu, PanelRightClose } from 'lucide-react';
 import type { Block } from '../../../shared/document';
-import { buildDocumentOutline, scrollToDocumentBlock, type OutlineNode } from '../../../shared/document/outline';
+import {
+  buildDocumentOutline,
+  scrollToDocumentBlock,
+  type OutlineNode,
+} from '../../../shared/document/outline';
 import { cn } from '../../lib/cn';
+import { useDocumentOutlineRail } from './DocumentOutlineContext';
 
 function kindLabel(kind: OutlineNode['kind']): string {
   switch (kind) {
@@ -31,7 +36,7 @@ function OutlineTree({
   onNavigate?: (blockId: string) => void;
 }) {
   if (nodes.length === 0) {
-    return <p className="px-2 py-4 text-xs text-neutral-500">No sections or headings yet.</p>;
+    return <p className="px-2 py-4 text-xs text-[var(--ba-text-muted)]">No sections yet.</p>;
   }
 
   return (
@@ -45,15 +50,19 @@ function OutlineTree({
               onNavigate?.(node.id);
             }}
             className={cn(
-              'w-full rounded-md px-2 py-1.5 text-left transition-colors hover:bg-white/5',
-              node.kind === 'section' ? 'font-medium text-neutral-100' : 'text-neutral-300',
+              'w-full rounded-md px-2 py-1.5 text-left transition-colors hover:bg-[var(--ba-hover-bg)]',
+              node.kind === 'section'
+                ? 'font-medium text-[var(--ba-text-primary)]'
+                : 'text-[var(--ba-text-secondary)]',
             )}
             style={{ paddingLeft: 8 + node.depth * 12 }}
             title={node.label}
           >
             <span className="block truncate text-xs">{node.label}</span>
             {node.kind !== 'section' && (
-              <span className="block truncate text-[10px] text-neutral-500">{kindLabel(node.kind)}</span>
+              <span className="block truncate text-[10px] text-[var(--ba-text-muted)]">
+                {kindLabel(node.kind)}
+              </span>
             )}
           </button>
           {node.children && node.children.length > 0 && (
@@ -65,61 +74,71 @@ function OutlineTree({
   );
 }
 
-export function DocumentOutlinePanel({
+function DocumentOutlineContent({
   blocks,
-  onClose,
   onNavigate,
+  onCollapse,
 }: {
   blocks: Block[];
-  onClose: () => void;
   onNavigate?: (blockId: string) => void;
+  onCollapse: () => void;
 }) {
   const outline = useMemo(() => buildDocumentOutline(blocks), [blocks]);
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-l border-white/5 bg-neutral-950/40">
-      <div className="flex items-center justify-between border-b border-white/5 px-3 py-2">
-        <div className="flex items-center gap-2 text-xs font-semibold text-neutral-200">
-          <List className="size-3.5 text-neutral-400" />
+    <>
+      <div className="flex shrink-0 items-center justify-between border-b border-[var(--ba-chrome-border)] px-2 py-2">
+        <span className="truncate px-1 text-xs font-semibold text-[var(--ba-text-primary)]">
           Contents
-        </div>
+        </span>
         <button
           type="button"
-          onClick={onClose}
-          className="rounded-md p-1 text-neutral-500 hover:bg-white/5 hover:text-neutral-200"
-          aria-label="Close contents panel"
+          onClick={onCollapse}
+          className="rounded-md p-1 text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
+          aria-label="Collapse contents panel"
+          title="Collapse"
         >
-          <X className="size-4" />
+          <PanelRightClose className="size-4" />
         </button>
       </div>
       <nav className="min-h-0 flex-1 overflow-y-auto p-2">
         <OutlineTree nodes={outline} onNavigate={onNavigate} />
       </nav>
-    </aside>
+    </>
   );
 }
 
-export function DocumentOutlineToggle({
-  open,
-  onToggle,
-}: {
-  open: boolean;
-  onToggle: () => void;
-}) {
+/** Thin right-edge rail; visible only when a document/template editor registers blocks. */
+export function DocumentOutlineRail() {
+  const { registration, expanded, setExpanded } = useDocumentOutlineRail();
+
+  if (!registration) return null;
+
   return (
-    <button
-      type="button"
-      onClick={onToggle}
+    <aside
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs transition-colors',
-        open
-          ? 'border-flame-500/40 bg-flame-500/10 text-flame-200'
-          : 'border-white/10 text-neutral-300 hover:bg-white/5',
+        'flex h-full shrink-0 flex-col overflow-hidden border-l border-[var(--ba-chrome-border)] bg-[var(--ba-chrome-bg)] transition-[width] duration-200 ease-out',
+        expanded ? 'w-60' : 'w-8',
       )}
-      aria-expanded={open}
+      aria-label="Document contents"
     >
-      <List className="size-3.5" />
-      Contents
-    </button>
+      {!expanded ? (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="flex h-full w-full items-center justify-center text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
+          aria-label="Open contents"
+          title="Contents"
+        >
+          <Menu className="size-4 shrink-0" aria-hidden />
+        </button>
+      ) : (
+        <DocumentOutlineContent
+          blocks={registration.blocks}
+          onNavigate={registration.onNavigate}
+          onCollapse={() => setExpanded(false)}
+        />
+      )}
+    </aside>
   );
 }

@@ -42,6 +42,8 @@ import {
 
 } from './features/templates/TemplatesScreen';
 
+import { DocumentOutlineProvider } from './features/documents/DocumentOutlineContext';
+import { DocumentOutlineRail } from './features/documents/DocumentOutline';
 import { navItems, type NavId } from './navigation';
 import { cn } from './lib/cn';
 
@@ -196,6 +198,8 @@ export default function App() {
 
 
   return (
+
+    <DocumentOutlineProvider>
 
     <div className="ba-app-shell flex h-screen flex-col">
 
@@ -407,6 +411,8 @@ export default function App() {
 
         </main>
 
+        <DocumentOutlineRail />
+
       </div>
 
 
@@ -414,6 +420,8 @@ export default function App() {
       <StatusBar />
 
     </div>
+
+    </DocumentOutlineProvider>
 
   );
 
