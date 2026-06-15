@@ -4,6 +4,7 @@ import { cn } from '../../lib/cn';
 import { TitleBar } from '../../components/TitleBar';
 import { ActivationScreen } from './ActivationScreen';
 import { AuthRefreshContext } from './authContext';
+import { notifyAccountThemeSync } from '../../theme/ThemeProvider';
 import { LoginScreen } from './LoginScreen';
 import { SetPasswordScreen } from './SetPasswordScreen';
 
@@ -53,6 +54,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       const unlocked = next.phase === 'unlocked';
       setAppVisible(unlocked);
       setAuthOverlay(!unlocked);
+      if (unlocked) notifyAccountThemeSync();
     },
     [],
   );
@@ -65,6 +67,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
         setAppVisible(true);
         setAuthOverlay(false);
         setAppMotion('enter');
+        notifyAccountThemeSync();
         await delay(APP_ENTER_MS);
         setAppMotion(null);
       } else {

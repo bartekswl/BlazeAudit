@@ -1,6 +1,7 @@
 import type { LoginPolicy } from '../../shared/loginPolicy';
+import type { ColorTheme } from '../../shared/theme';
 import { isPasswordRequired } from '../../shared/loginPolicy';
-import { getLoginPolicy, setLoginPolicy as persistLoginPolicy } from '../settings/store';
+import { getLoginPolicy, setLoginPolicy as persistLoginPolicy, getColorTheme, setColorTheme as persistColorTheme } from '../settings/store';
 import { assertKeyXMatchesManifest, manifestWithKeyXId } from './keyX';
 import { unlockDatabaseWithKey } from './session';
 import {
@@ -90,4 +91,12 @@ export function setLoginPolicy(policy: LoginPolicy): LoginPolicy {
   return saved;
 }
 
-export { getLoginPolicy };
+export function setColorTheme(theme: ColorTheme): ColorTheme {
+  const manifest = readManifest();
+  if (!manifest?.passwordSet) {
+    throw new Error('Activate and set a password before changing appearance settings.');
+  }
+  return persistColorTheme(theme);
+}
+
+export { getLoginPolicy, getColorTheme };

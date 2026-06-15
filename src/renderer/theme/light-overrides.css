@@ -1,0 +1,125 @@
+/* Remap legacy Tailwind surface utilities to themed gradients & shadows. */
+html[data-theme='dark'] .bg-white\/\[0\.02\],
+html[data-theme='light'] .bg-white\/\[0\.02\] {
+  background: var(--ba-panel-bg) !important;
+  border-color: var(--ba-panel-border) !important;
+  box-shadow: var(--ba-panel-shadow) !important;
+}
+
+html[data-theme='dark'] .border-white\/5,
+html[data-theme='light'] .border-white\/5 {
+  border-color: var(--ba-panel-border) !important;
+}
+
+html[data-theme='dark'] .border-white\/10,
+html[data-theme='light'] .border-white\/10 {
+  border-color: var(--ba-input-border) !important;
+}
+
+html[data-theme='light'] .text-neutral-100 {
+  color: var(--ba-text-primary);
+}
+
+html[data-theme='light'] .text-neutral-200 {
+  color: #292524;
+}
+
+html[data-theme='light'] .text-neutral-300 {
+  color: var(--ba-text-secondary);
+}
+
+html[data-theme='light'] .text-neutral-400 {
+  color: var(--ba-text-muted);
+}
+
+html[data-theme='light'] .text-neutral-600 {
+  color: var(--ba-text-faint);
+}
+
+html[data-theme='light'] .bg-neutral-950 {
+  background: var(--ba-input-bg) !important;
+}
+
+html[data-theme='light'] .bg-neutral-950\/60 {
+  background: linear-gradient(145deg, rgb(255 241 242 / 0.85) 0%, rgb(224 242 254 / 0.8) 100%) !important;
+}
+
+html[data-theme='light'] .bg-neutral-950\/40 {
+  background: linear-gradient(145deg, rgb(237 233 254 / 0.6) 0%, rgb(224 242 254 / 0.55) 100%) !important;
+}
+
+html[data-theme='light'] .bg-neutral-900 {
+  background: var(--ba-table-head-bg) !important;
+}
+
+html[data-theme='light'] .bg-black\/60 {
+  background-color: var(--ba-overlay) !important;
+}
+
+html[data-theme='light'] .bg-black\/40 {
+  background-color: rgb(28 25 23 / 0.25) !important;
+}
+
+html[data-theme='light'] .bg-white\/5 {
+  background: var(--ba-hover-bg) !important;
+}
+
+html[data-theme='light'] .hover\:bg-white\/5:hover {
+  background: var(--ba-hover-bg) !important;
+}
+
+html[data-theme='light'] .hover\:bg-white\/\[0\.03\]:hover,
+html[data-theme='light'] .hover\:bg-white\/\[0\.04\]:hover {
+  background: var(--ba-row-hover-bg) !important;
+}
+
+html[data-theme='light'] .hover\:border-white\/10:hover {
+  border-color: var(--ba-input-border) !important;
+}
+
+html[data-theme='light'] .hover\:bg-white\/10:hover {
+  background: var(--ba-hover-bg) !important;
+}
+
+html[data-theme='light'] .hover\:text-neutral-100:hover {
+  color: var(--ba-text-primary) !important;
+}
+
+html[data-theme='light'] .placeholder\:text-neutral-600::placeholder {
+  color: var(--ba-input-placeholder);
+}
+
+html[data-theme='light'] .from-flame-500\/10 {
+  --tw-gradient-from: rgb(255 237 213 / 0.8);
+}
+
+html[data-theme='light'] .text-red-300 {
+  color: #dc2626;
+}
+
+html[data-theme='light'] .text-emerald-300 {
+  color: #059669;
+}
+
+html[data-theme='light'] select option {
+  background-color: #fdf4ff;
+  color: #44403c;
+}
+
+/* Dark mode: enrich flat legacy panels */
+html[data-theme='dark'] .hover\:bg-white\/\[0\.03\]:hover,
+html[data-theme='dark'] .hover\:bg-white\/\[0\.04\]:hover {
+  background: var(--ba-row-hover-bg) !important;
+}
+
+html[data-theme='dark'] .rounded-2xl.border.border-white\/5.bg-gradient-to-br.from-flame-500\/10 {
+  background: var(--ba-panel-hero-bg) !important;
+  border-color: var(--ba-panel-hero-border) !important;
+  box-shadow: var(--ba-panel-hero-shadow) !important;
+}
+
+html[data-theme='light'] .rounded-2xl.border.border-white\/5.bg-gradient-to-br.from-flame-500\/10 {
+  background: var(--ba-panel-hero-bg) !important;
+  border-color: var(--ba-panel-hero-border) !important;
+  box-shadow: var(--ba-panel-hero-shadow) !important;
+}

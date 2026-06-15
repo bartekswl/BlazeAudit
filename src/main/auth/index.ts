@@ -49,7 +49,9 @@ import {
   completeUnlock,
   enforcePasswordGate,
   getLoginPolicy,
+  getColorTheme,
   setLoginPolicy,
+  setColorTheme,
   shouldPromptForPassword,
   tryAutoUnlock,
 } from './unlock';
@@ -279,4 +281,4 @@ export function isActivated(): boolean {
   return getActiveAccountId() !== null && isAccountActivated();
 }
 
-export { getLoginPolicy, setLoginPolicy };
+export { getLoginPolicy, getColorTheme, setLoginPolicy, setColorTheme };

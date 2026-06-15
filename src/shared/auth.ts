@@ -1,6 +1,7 @@
 // Auth types shared across main, preload, and renderer.
 
 import type { LoginPolicy } from './loginPolicy';
+import type { ColorTheme } from './theme';
 
 export type AuthPhase = 'activation' | 'set_password' | 'login' | 'unlocked';
 
@@ -33,6 +34,7 @@ export interface LoginInput {
 
 export interface SecuritySettings {
   loginPolicy: LoginPolicy;
+  colorTheme: ColorTheme;
   dataDir: string;
   osUsername: string;
   accountId: string;

@@ -8,6 +8,8 @@ import type { TemplateSummary } from '../../../shared/document';
 import { InspectionDateField } from '../../components/InspectionDateField';
 import { inputCls } from '../templates/BlockList';
 
+const selectCls = 'ba-select';
+
 export function NewInspectionDialog({
   clients,
   templates,
@@ -95,8 +97,8 @@ export function NewInspectionDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-neutral-950 p-6 shadow-2xl">
+    <div className="ba-modal-overlay fixed inset-0 z-50 grid place-items-center p-4">
+      <div className="ba-modal w-full max-w-lg p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-neutral-100">New inspection</h2>
           <button
@@ -130,7 +132,7 @@ export function NewInspectionDialog({
             <label className="block">
               <span className="mb-1.5 block text-xs font-medium text-neutral-400">Client</span>
               <select
-                className={inputCls}
+                className={selectCls}
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
               >
@@ -144,7 +146,7 @@ export function NewInspectionDialog({
             <label className="block">
               <span className="mb-1.5 block text-xs font-medium text-neutral-400">Template</span>
               <select
-                className={inputCls}
+                className={selectCls}
                 value={templateId}
                 onChange={(e) => setTemplateId(e.target.value)}
               >
@@ -172,7 +174,7 @@ export function NewInspectionDialog({
               <label className="block">
                 <span className="mb-1.5 block text-xs font-medium text-neutral-400">Inspector</span>
                 <select
-                  className={inputCls}
+                  className={selectCls}
                   value={inspector}
                   onChange={(e) => setInspector(e.target.value)}
                 >
@@ -193,7 +195,7 @@ export function NewInspectionDialog({
             <label className="block">
               <span className="mb-1.5 block text-xs font-medium text-neutral-400">Cadence</span>
               <select
-                className={inputCls}
+                className={selectCls}
                 value={cadence}
                 onChange={(e) => setCadence(e.target.value as CadencePreset)}
               >

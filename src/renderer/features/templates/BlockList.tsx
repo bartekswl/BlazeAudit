@@ -3,8 +3,7 @@ import type { Block, BlockPath } from '../../../shared/document';
 import { cn } from '../../lib/cn';
 import { blockTypeLabel } from './blockCatalog';
 
-const inputCls =
-  'w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-flame-500';
+const inputCls = 'ba-input';
 
 function pathKey(path: BlockPath): string {
   return path.join('.');

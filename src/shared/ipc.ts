@@ -25,6 +25,7 @@ export const IpcChannels = {
   authReturnToLogin: 'auth:return-to-login',
   authGetSecuritySettings: 'auth:get-security-settings',
   authSetLoginPolicy: 'auth:set-login-policy',
+  authSetColorTheme: 'auth:set-color-theme',
   templatesList: 'templates:list',
   templatesGet: 'templates:get',
   templatesCreate: 'templates:create',

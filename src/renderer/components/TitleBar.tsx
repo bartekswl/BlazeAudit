@@ -19,8 +19,10 @@ function ControlButton({
       aria-label={label}
       onClick={onClick}
       className={cn(
-        'flex h-10 w-12 items-center justify-center text-neutral-400 transition-colors',
-        danger ? 'hover:bg-red-600 hover:text-white' : 'hover:bg-white/10 hover:text-neutral-100',
+        'flex h-10 w-12 items-center justify-center text-[var(--ba-text-muted)] transition-colors',
+        danger
+          ? 'hover:bg-red-600 hover:text-white'
+          : 'hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]',
       )}
     >
       {children}
@@ -37,10 +39,12 @@ export function TitleBar() {
   }, []);
 
   return (
-    <header className="flex h-10 shrink-0 items-center justify-between border-b border-white/5 bg-neutral-950 [-webkit-app-region:drag]">
+    <header className="ba-titlebar flex h-10 shrink-0 items-center justify-between [-webkit-app-region:drag]">
       <div className="flex items-center gap-2 px-3">
         <Flame className="size-4 text-flame-500" />
-        <span className="text-sm font-semibold tracking-wide text-neutral-100">BlazeAudit</span>
+        <span className="text-sm font-semibold tracking-wide text-[var(--ba-text-primary)]">
+          BlazeAudit
+        </span>
       </div>
 
       <div className="flex [-webkit-app-region:no-drag]">

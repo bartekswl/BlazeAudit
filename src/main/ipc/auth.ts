@@ -5,11 +5,13 @@ import {
   beginAddAccount,
   getAuthStatus,
   getLoginPolicy,
+  getColorTheme,
   logOut,
   login,
   returnToLogin,
   selectAccount,
   setLoginPolicy,
+  setColorTheme,
   setPassword,
 } from '../auth';
 import { getActiveAccountId } from '../auth/context';
@@ -17,6 +19,7 @@ import { describeDataDir } from '../db/paths';
 import { IpcChannels } from '../../shared/ipc';
 import type { ActivateInput, LoginInput, SetPasswordInput } from '../../shared/auth';
 import type { LoginPolicy } from '../../shared/loginPolicy';
+import type { ColorTheme } from '../../shared/theme';
 
 export function registerAuthIpc(): void {
   ipcMain.handle(IpcChannels.authGetStatus, () => getAuthStatus());
@@ -47,6 +50,7 @@ export function registerAuthIpc(): void {
 
   ipcMain.handle(IpcChannels.authGetSecuritySettings, () => ({
     loginPolicy: getLoginPolicy(),
+    colorTheme: getColorTheme(),
     dataDir: describeDataDir(),
     osUsername: userInfo().username,
     accountId: getActiveAccountId() ?? '',
@@ -54,5 +58,9 @@ export function registerAuthIpc(): void {
 
   ipcMain.handle(IpcChannels.authSetLoginPolicy, (_event, policy: LoginPolicy) =>
     setLoginPolicy(policy),
+  );
+
+  ipcMain.handle(IpcChannels.authSetColorTheme, (_event, theme: ColorTheme) =>
+    setColorTheme(theme),
   );
 }

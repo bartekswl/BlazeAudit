@@ -8,6 +8,7 @@ import type {
   SetPasswordInput,
 } from '../shared/auth';
 import type { LoginPolicy } from '../shared/loginPolicy';
+import type { ColorTheme } from '../shared/theme';
 import type { Template, TemplateInput, TemplateSummary } from '../shared/document';
 import type {
   CreateInspectionInput,
@@ -65,6 +66,8 @@ const api = {
       ipcRenderer.invoke(IpcChannels.authGetSecuritySettings),
     setLoginPolicy: (policy: LoginPolicy): Promise<LoginPolicy> =>
       ipcRenderer.invoke(IpcChannels.authSetLoginPolicy, policy),
+    setColorTheme: (theme: ColorTheme): Promise<ColorTheme> =>
+      ipcRenderer.invoke(IpcChannels.authSetColorTheme, theme),
   },
   database: {
     exportClientsCsv: (): Promise<{ saved: false } | { saved: true; filePath: string }> =>

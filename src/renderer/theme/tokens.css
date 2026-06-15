@@ -1,0 +1,203 @@
+/* BlazeAudit theme tokens — gradients, accents, and elevation. */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --ba-flame: #f97316;
+  --ba-flame-soft: rgb(249 115 22 / 0.14);
+  --ba-flame-glow: rgb(249 115 22 / 0.22);
+
+  --ba-app-bg: #09090b;
+  --ba-app-bg-image:
+    radial-gradient(ellipse 80% 55% at 0% -10%, rgb(249 115 22 / 0.14), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 100% 0%, rgb(56 189 248 / 0.07), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgb(234 88 12 / 0.06), transparent 55%),
+    linear-gradient(180deg, #0c0a09 0%, #09090b 45%, #0a0a0c 100%);
+
+  --ba-chrome-bg: rgb(12 10 9 / 0.92);
+  --ba-chrome-bg-image: linear-gradient(180deg, rgb(28 25 23 / 0.98) 0%, rgb(12 10 9 / 0.96) 100%);
+  --ba-chrome-border: rgb(249 115 22 / 0.12);
+  --ba-chrome-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset;
+
+  --ba-panel-bg: linear-gradient(145deg, rgb(28 25 23 / 0.92) 0%, rgb(15 14 13 / 0.88) 100%);
+  --ba-panel-border: rgb(255 255 255 / 0.08);
+  --ba-panel-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.03) inset,
+    0 4px 24px rgb(0 0 0 / 0.35),
+    0 1px 0 rgb(249 115 22 / 0.06) inset;
+
+  --ba-panel-hero-bg: linear-gradient(
+    135deg,
+    rgb(249 115 22 / 0.18) 0%,
+    rgb(234 88 12 / 0.08) 35%,
+    rgb(15 14 13 / 0.4) 100%
+  );
+  --ba-panel-hero-border: rgb(249 115 22 / 0.25);
+  --ba-panel-hero-shadow: 0 8px 32px rgb(249 115 22 / 0.12);
+
+  --ba-input-bg: rgb(9 9 11 / 0.85);
+  --ba-input-border: rgb(255 255 255 / 0.1);
+  --ba-input-text: #fafafa;
+  --ba-input-placeholder: #737373;
+  --ba-input-shadow: 0 1px 2px rgb(0 0 0 / 0.2) inset;
+
+  --ba-text-primary: #fafafa;
+  --ba-text-secondary: #e5e5e5;
+  --ba-text-muted: #a3a3a3;
+  --ba-text-faint: #737373;
+
+  --ba-hover-bg: rgb(255 255 255 / 0.06);
+  --ba-row-hover-bg: rgb(255 255 255 / 0.04);
+  --ba-table-head-bg: linear-gradient(180deg, rgb(38 38 38 / 0.95) 0%, rgb(23 23 23 / 0.95) 100%);
+
+  --ba-nav-active-bg: linear-gradient(
+    90deg,
+    rgb(249 115 22 / 0.22) 0%,
+    rgb(249 115 22 / 0.08) 100%
+  );
+  --ba-nav-active-border: rgb(249 115 22 / 0.35);
+  --ba-nav-active-text: #fdba74;
+
+  --ba-stat-flame-bg: linear-gradient(145deg, rgb(249 115 22 / 0.16) 0%, rgb(28 25 23 / 0.9) 100%);
+  --ba-stat-flame-border: rgb(249 115 22 / 0.28);
+  --ba-stat-flame-icon: #fb923c;
+  --ba-stat-emerald-bg: linear-gradient(145deg, rgb(16 185 129 / 0.14) 0%, rgb(28 25 23 / 0.9) 100%);
+  --ba-stat-emerald-border: rgb(16 185 129 / 0.28);
+  --ba-stat-emerald-icon: #34d399;
+  --ba-stat-sky-bg: linear-gradient(145deg, rgb(14 165 233 / 0.14) 0%, rgb(28 25 23 / 0.9) 100%);
+  --ba-stat-sky-border: rgb(14 165 233 / 0.28);
+  --ba-stat-sky-icon: #38bdf8;
+  --ba-stat-violet-bg: linear-gradient(145deg, rgb(139 92 246 / 0.14) 0%, rgb(28 25 23 / 0.9) 100%);
+  --ba-stat-violet-border: rgb(139 92 246 / 0.28);
+  --ba-stat-violet-icon: #a78bfa;
+
+  --ba-overlay: rgb(0 0 0 / 0.62);
+  --ba-drawer-bg: linear-gradient(180deg, rgb(28 25 23) 0%, rgb(15 14 13) 100%);
+  --ba-drawer-shadow: -12px 0 40px rgb(0 0 0 / 0.45);
+
+  --ba-modal-shadow:
+    0 24px 48px rgb(0 0 0 / 0.5),
+    0 0 0 1px rgb(255 255 255 / 0.06) inset,
+    0 0 80px rgb(249 115 22 / 0.08);
+
+  --ba-scrollbar-thumb: rgb(255 255 255 / 0.12);
+  --ba-scrollbar-thumb-hover: rgb(249 115 22 / 0.35);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --ba-flame: #ea580c;
+  --ba-flame-soft: rgb(251 146 60 / 0.16);
+  --ba-flame-glow: rgb(251 146 60 / 0.2);
+
+  --ba-app-bg: #f5f0fa;
+  --ba-app-bg-image:
+    radial-gradient(ellipse 75% 55% at 8% 0%, rgb(255 228 230 / 0.95), transparent 58%),
+    radial-gradient(ellipse 60% 50% at 92% 4%, rgb(219 234 254 / 0.92), transparent 52%),
+    radial-gradient(ellipse 55% 45% at 50% 100%, rgb(209 250 229 / 0.55), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 70% 45%, rgb(237 233 254 / 0.45), transparent 50%),
+    linear-gradient(165deg, #fdf4ff 0%, #f0f9ff 38%, #ecfdf5 72%, #fff7ed 100%);
+
+  --ba-chrome-bg: rgb(255 255 255 / 0.55);
+  --ba-chrome-bg-image: linear-gradient(
+    135deg,
+    rgb(255 241 242 / 0.92) 0%,
+    rgb(240 249 255 / 0.9) 45%,
+    rgb(236 253 245 / 0.88) 100%
+  );
+  --ba-chrome-border: rgb(196 181 253 / 0.35);
+  --ba-chrome-shadow:
+    0 1px 0 rgb(255 255 255 / 0.75) inset,
+    0 4px 18px rgb(167 139 250 / 0.08);
+
+  --ba-panel-bg: linear-gradient(
+    145deg,
+    rgb(255 241 242 / 0.88) 0%,
+    rgb(237 233 254 / 0.72) 48%,
+    rgb(224 242 254 / 0.82) 100%
+  );
+  --ba-panel-border: rgb(196 181 253 / 0.28);
+  --ba-panel-shadow:
+    0 1px 0 rgb(255 255 255 / 0.65) inset,
+    0 2px 8px rgb(167 139 250 / 0.06),
+    0 10px 28px rgb(125 211 252 / 0.1);
+
+  --ba-panel-hero-bg: linear-gradient(
+    125deg,
+    rgb(254 215 170 / 0.75) 0%,
+    rgb(251 207 232 / 0.65) 35%,
+    rgb(191 219 254 / 0.7) 70%,
+    rgb(167 243 208 / 0.55) 100%
+  );
+  --ba-panel-hero-border: rgb(251 146 60 / 0.28);
+  --ba-panel-hero-shadow:
+    0 4px 10px rgb(251 146 60 / 0.1),
+    0 18px 42px rgb(167 139 250 / 0.14);
+
+  --ba-input-bg: linear-gradient(180deg, rgb(255 251 250 / 0.95) 0%, rgb(240 249 255 / 0.9) 100%);
+  --ba-input-border: rgb(196 181 253 / 0.35);
+  --ba-input-text: #44403c;
+  --ba-input-placeholder: #a8a29e;
+  --ba-input-shadow: 0 1px 2px rgb(167 139 250 / 0.06) inset;
+
+  --ba-text-primary: #3f3f46;
+  --ba-text-secondary: #57534e;
+  --ba-text-muted: #78716c;
+  --ba-text-faint: #a8a29e;
+
+  --ba-hover-bg: linear-gradient(
+    90deg,
+    rgb(255 228 230 / 0.55) 0%,
+    rgb(224 242 254 / 0.45) 100%
+  );
+  --ba-row-hover-bg: linear-gradient(
+    90deg,
+    rgb(255 241 242 / 0.75) 0%,
+    rgb(237 233 254 / 0.55) 100%
+  );
+  --ba-table-head-bg: linear-gradient(
+    90deg,
+    rgb(255 228 230 / 0.7) 0%,
+    rgb(237 233 254 / 0.65) 50%,
+    rgb(224 242 254 / 0.7) 100%
+  );
+
+  --ba-nav-active-bg: linear-gradient(
+    90deg,
+    rgb(254 215 170 / 0.65) 0%,
+    rgb(251 207 232 / 0.45) 100%
+  );
+  --ba-nav-active-border: rgb(251 146 60 / 0.35);
+  --ba-nav-active-text: #c2410c;
+
+  --ba-stat-flame-bg: linear-gradient(145deg, rgb(255 237 213 / 0.95) 0%, rgb(254 215 170 / 0.45) 100%);
+  --ba-stat-flame-border: rgb(251 146 60 / 0.32);
+  --ba-stat-flame-icon: #ea580c;
+  --ba-stat-emerald-bg: linear-gradient(145deg, rgb(209 250 229 / 0.95) 0%, rgb(167 243 208 / 0.45) 100%);
+  --ba-stat-emerald-border: rgb(52 211 153 / 0.32);
+  --ba-stat-emerald-icon: #059669;
+  --ba-stat-sky-bg: linear-gradient(145deg, rgb(224 242 254 / 0.95) 0%, rgb(186 230 253 / 0.5) 100%);
+  --ba-stat-sky-border: rgb(56 189 248 / 0.32);
+  --ba-stat-sky-icon: #0284c7;
+  --ba-stat-violet-bg: linear-gradient(145deg, rgb(237 233 254 / 0.95) 0%, rgb(221 214 254 / 0.5) 100%);
+  --ba-stat-violet-border: rgb(167 139 250 / 0.32);
+  --ba-stat-violet-icon: #7c3aed;
+
+  --ba-overlay: rgb(88 28 135 / 0.22);
+  --ba-drawer-bg: linear-gradient(
+    180deg,
+    rgb(255 241 242 / 0.96) 0%,
+    rgb(237 233 254 / 0.92) 55%,
+    rgb(224 242 254 / 0.94) 100%
+  );
+  --ba-drawer-shadow: -12px 0 40px rgb(167 139 250 / 0.14);
+
+  --ba-modal-shadow:
+    0 24px 48px rgb(167 139 250 / 0.16),
+    0 0 0 1px rgb(255 255 255 / 0.45) inset,
+    0 0 60px rgb(125 211 252 / 0.12);
+
+  --ba-scrollbar-thumb: rgb(167 139 250 / 0.28);
+  --ba-scrollbar-thumb-hover: rgb(251 146 60 / 0.45);
+}

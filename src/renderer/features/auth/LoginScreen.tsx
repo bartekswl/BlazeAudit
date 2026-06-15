@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Plus, User } from 'lucide-react';
 import type { AccountSummary } from '../../../shared/auth';
 import { cn } from '../../lib/cn';
+import { notifyAccountThemeSync } from '../../theme/ThemeProvider';
 import { AuthError, AuthShell, AuthSubmit, authInputCls } from './AuthShell';
 
 export function LoginScreen({
@@ -42,6 +43,7 @@ export function LoginScreen({
     setPassword('');
     try {
       await window.blazeaudit.auth.selectAccount(id);
+      notifyAccountThemeSync();
       onFlowChange();
     } finally {
       setSwitchingId(null);

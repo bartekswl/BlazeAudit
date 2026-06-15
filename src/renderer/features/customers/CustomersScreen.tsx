@@ -13,6 +13,7 @@ import type { Client, ClientInput } from '../../../shared/types';
 import { cn } from '../../lib/cn';
 import { CustomerDetailScreen } from './CustomerDetailScreen';
 import { filterClients } from './filterClients';
+import { inputCls } from '../templates/BlockList';
 
 const EMPTY: ClientInput = {
   name: '',
@@ -134,7 +135,7 @@ export function CustomersScreen({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, contact, or address…"
-            className="w-full rounded-lg border border-white/10 bg-neutral-950 py-2 pr-3 pl-9 text-sm text-neutral-100 outline-none placeholder:text-neutral-600 focus:border-flame-500"
+            className="ba-search"
           />
         </div>
         <button
@@ -163,22 +164,22 @@ export function CustomersScreen({
         <p className="text-sm text-neutral-500">Loading…</p>
       ) : clients.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-          <div className="grid size-14 place-items-center rounded-2xl bg-white/5 text-neutral-500">
+          <div className="grid size-14 place-items-center rounded-2xl bg-[var(--ba-flame-soft)] text-[var(--ba-flame)] shadow-md shadow-flame-500/15">
             <Users className="size-7" />
           </div>
           <p className="text-sm text-neutral-400">No clients yet. Add your first one.</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-          <div className="grid size-14 place-items-center rounded-2xl bg-white/5 text-neutral-500">
+          <div className="grid size-14 place-items-center rounded-2xl bg-[var(--ba-flame-soft)] text-[var(--ba-flame)] shadow-md shadow-flame-500/15">
             <Search className="size-7" />
           </div>
           <p className="text-sm text-neutral-400">No clients match your search.</p>
         </div>
       ) : (
-        <div className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-white/5">
+        <div className="ba-table-wrap min-h-0 flex-1 overflow-y-auto">
           <table className="w-full table-fixed text-left text-sm">
-            <thead className="sticky top-0 bg-neutral-900 text-xs uppercase tracking-wide text-neutral-500">
+            <thead className="ba-table-head sticky top-0 text-xs uppercase tracking-wide text-[var(--ba-text-muted)]">
               <tr>
                 <th className="w-[18%] px-4 py-3 font-medium">Name</th>
                 <th className="w-[14%] px-4 py-3 font-medium">Contact</th>
@@ -196,7 +197,7 @@ export function CustomersScreen({
                     setSelectedId(client.id);
                     setSelectedClientName(client.name);
                   }}
-                  className="cursor-pointer border-t border-white/5 hover:bg-white/[0.04]"
+                  className="cursor-pointer border-t border-[var(--ba-panel-border)] hover:bg-[var(--ba-row-hover-bg)]"
                 >
                   <TruncateCell value={client.name} className="font-medium text-neutral-100" />
                   <TruncateCell value={client.contactName} />
@@ -321,14 +322,14 @@ function ClientEditor({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/40" onMouseDown={onClose}>
+    <div className="ba-modal-overlay fixed inset-0 z-50 flex justify-end" onMouseDown={onClose}>
       <form
         onMouseDown={(e) => e.stopPropagation()}
         onSubmit={submit}
-        className="flex h-full w-full max-w-md flex-col bg-neutral-900 shadow-2xl"
+        className="ba-drawer flex h-full w-full max-w-md flex-col"
       >
-        <div className="flex items-center justify-between border-b border-white/5 px-6 py-4">
-          <h2 className="text-base font-semibold text-neutral-100">
+        <div className="flex items-center justify-between border-b border-[var(--ba-panel-border)] px-6 py-4">
+          <h2 className="text-base font-semibold text-[var(--ba-text-primary)]">
             {initial ? 'Edit client' : 'New client'}
           </h2>
           <button
@@ -401,12 +402,8 @@ function ClientEditor({
           {error && <p className="text-sm text-red-400">{error}</p>}
         </div>
 
-        <div className="flex items-center justify-end gap-2 border-t border-white/5 px-6 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg px-3 py-2 text-sm text-neutral-300 hover:bg-white/5"
-          >
+        <div className="flex items-center justify-end gap-2 border-t border-[var(--ba-panel-border)] px-6 py-4">
+          <button type="button" onClick={onClose} className="ba-btn-ghost">
             Cancel
           </button>
           <button
@@ -421,9 +418,6 @@ function ClientEditor({
     </div>
   );
 }
-
-const inputCls =
-  'w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 outline-none placeholder:text-neutral-600 focus:border-flame-500';
 
 /** Truncated table cell; native tooltip shows the full value on hover. */
 function TruncateCell({ value, className }: { value: string; className?: string }) {
@@ -451,7 +445,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-xs font-medium text-neutral-400">
+      <span className="ba-field-label">
         {label}
         {required && <span className="text-flame-500"> *</span>}
       </span>

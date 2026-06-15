@@ -1,6 +1,7 @@
 import path from 'node:path';
 import type { LoginPolicy } from '../../shared/loginPolicy';
 import { DEFAULT_LOGIN_POLICY } from '../../shared/loginPolicy';
+import { DEFAULT_COLOR_THEME, type ColorTheme } from '../../shared/theme';
 import { ensureAccountRecordSecret } from '../auth/recordSecret';
 import { readManifest, SettingsTamperedError } from '../auth/store';
 import { readSignedBinaryRecord, writeSignedBinaryRecord } from '../storage/binaryRecord';
@@ -10,6 +11,7 @@ import { accountDir } from '../db/paths';
 export interface AccountSettings {
   version: 1;
   loginPolicy: LoginPolicy;
+  colorTheme?: ColorTheme;
 }
 
 function settingsBin(): string {
@@ -53,4 +55,14 @@ export function setLoginPolicy(policy: LoginPolicy): LoginPolicy {
   const settings = readAccountSettings();
   writeSignedBinaryRecord(settingsBin(), { ...settings, loginPolicy: policy }, ensureAccountRecordSecret());
   return policy;
+}
+
+export function getColorTheme(): ColorTheme {
+  return readAccountSettings().colorTheme ?? DEFAULT_COLOR_THEME;
+}
+
+export function setColorTheme(theme: ColorTheme): ColorTheme {
+  const settings = readAccountSettings();
+  writeSignedBinaryRecord(settingsBin(), { ...settings, colorTheme: theme }, ensureAccountRecordSecret());
+  return theme;
 }

@@ -43,6 +43,7 @@ import {
 } from './features/templates/TemplatesScreen';
 
 import { navItems, type NavId } from './navigation';
+import { cn } from './lib/cn';
 
 
 
@@ -72,7 +73,6 @@ const screens: Record<
 
 
 export default function App() {
-
   const [activeId, setActiveId] = useState<NavId>('dashboard');
 
   const activeItem = navItems.find((item) => item.id === activeId)!;
@@ -197,7 +197,7 @@ export default function App() {
 
   return (
 
-    <div className="flex h-screen flex-col bg-neutral-950 text-neutral-200">
+    <div className="ba-app-shell flex h-screen flex-col">
 
       <TitleBar />
 
@@ -217,15 +217,10 @@ export default function App() {
 
           <div
 
-            className={
-
-              hasSubNav
-
-                ? 'shrink-0 border-b border-white/5 px-6 py-2'
-
-                : 'shrink-0 border-b border-white/5 px-6 py-4'
-
-            }
+            className={cn(
+              'ba-main-header',
+              hasSubNav ? 'shrink-0 px-6 py-2' : 'shrink-0 px-6 py-4',
+            )}
 
           >
 
@@ -239,7 +234,7 @@ export default function App() {
 
                   onClick={() => customerBackRef.current?.()}
 
-                  className="shrink-0 font-semibold text-neutral-400 transition-colors hover:text-neutral-100"
+                  className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
 
                 >
 
@@ -247,9 +242,9 @@ export default function App() {
 
                 </button>
 
-                <ChevronRight className="size-3.5 shrink-0 text-neutral-600" aria-hidden />
+                <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
 
-                <span className="truncate font-semibold text-neutral-100">
+                <span className="truncate font-semibold text-[var(--ba-text-primary)]">
 
                   {customerBreadcrumb.clientName}
 
@@ -267,7 +262,7 @@ export default function App() {
 
                   onClick={() => templateBackRef.current?.()}
 
-                  className="shrink-0 font-semibold text-neutral-400 transition-colors hover:text-neutral-100"
+                  className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
 
                 >
 
@@ -275,9 +270,9 @@ export default function App() {
 
                 </button>
 
-                <ChevronRight className="size-3.5 shrink-0 text-neutral-600" aria-hidden />
+                <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
 
-                <span className="truncate font-semibold text-neutral-100">
+                <span className="truncate font-semibold text-[var(--ba-text-primary)]">
 
                   {templateBreadcrumb.templateName}
 
@@ -295,7 +290,7 @@ export default function App() {
 
                   onClick={() => documentBackRef.current?.()}
 
-                  className="shrink-0 font-semibold text-neutral-400 transition-colors hover:text-neutral-100"
+                  className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
 
                 >
 
@@ -303,9 +298,9 @@ export default function App() {
 
                 </button>
 
-                <ChevronRight className="size-3.5 shrink-0 text-neutral-600" aria-hidden />
+                <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
 
-                <span className="truncate font-semibold text-neutral-100">
+                <span className="truncate font-semibold text-[var(--ba-text-primary)]">
 
                   {documentBreadcrumb.documentTitle}
 
@@ -317,11 +312,10 @@ export default function App() {
 
               <h1
 
-                className={
-
-                  hasSubNav ? 'text-sm font-semibold text-neutral-100' : 'text-lg font-semibold text-neutral-100'
-
-                }
+                className={cn(
+                  'font-semibold text-[var(--ba-text-primary)]',
+                  hasSubNav ? 'text-sm' : 'text-lg',
+                )}
 
               >
 

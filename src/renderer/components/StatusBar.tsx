@@ -8,14 +8,14 @@ export function StatusBar() {
   }, []);
 
   return (
-    <footer className="flex h-7 shrink-0 items-center justify-between border-t border-white/5 bg-neutral-950 px-3 text-xs text-neutral-500">
+    <footer className="ba-statusbar flex h-7 shrink-0 items-center justify-between px-3 text-xs text-[var(--ba-text-muted)]">
       <span>BlazeAudit{version ? ` v${version}` : ''}</span>
       <span>© {new Date().getFullYear()} BlazeAudit · SubraLab</span>
       <a
         href="https://github.com/bartekswl/BlazeAudit"
         target="_blank"
         rel="noreferrer"
-        className="transition-colors hover:text-flame-400"
+        className="transition-colors hover:text-flame-500"
       >
         subralab
       </a>
