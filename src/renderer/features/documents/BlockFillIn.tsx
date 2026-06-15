@@ -1,5 +1,5 @@
 import type { Block, BlockPath } from '../../../shared/document';
-import { insertBlock, updateBlock } from '../../../shared/document';
+import { insertBlock, markChecklistsNaInTree, updateBlock } from '../../../shared/document';
 import { blockTypeLabel } from '../templates/blockCatalog';
 import { inputCls } from '../templates/BlockList';
 import { InsertSectionDivider, SectionAddBlockBar } from './DocumentStructureControls';
@@ -68,33 +68,57 @@ export function BlockFillIn({
                 )
               ) : (
                 <section className="min-w-0 rounded-xl border border-white/5 bg-white/[0.02] p-4">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    {canEditStructure ? (
-                      <input
-                        className="min-w-0 flex-1 rounded border border-white/10 bg-neutral-950 px-2 py-1 text-sm font-semibold text-neutral-100 outline-none focus:border-flame-500"
-                        value={block.label ?? ''}
-                        placeholder="Section title"
-                        onChange={(e) =>
-                          onPatchBlocks((root) =>
-                            updateBlock(root, path, { label: e.target.value }),
-                          )
-                        }
-                      />
-                    ) : (
-                      <h3 className="text-sm font-semibold text-neutral-100">
-                        {block.label || 'Section'}
-                      </h3>
-                    )}
-                    {Boolean(block.config.optional) && (
-                      <label className="flex shrink-0 items-center gap-2 text-xs text-neutral-400">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                      {canEditStructure ? (
                         <input
-                          type="checkbox"
-                          checked={included}
-                          onChange={(e) => onValueChange(path, { included: e.target.checked })}
+                          className="min-w-0 flex-1 rounded border border-white/10 bg-neutral-950 px-2 py-1 text-sm font-semibold text-neutral-100 outline-none focus:border-flame-500"
+                          value={block.label ?? ''}
+                          placeholder="Section title"
+                          onChange={(e) =>
+                            onPatchBlocks((root) =>
+                              updateBlock(root, path, { label: e.target.value }),
+                            )
+                          }
                         />
-                        Include section
-                      </label>
-                    )}
+                      ) : (
+                        <h3 className="text-sm font-semibold text-neutral-100">
+                          {block.label || 'Section'}
+                        </h3>
+                      )}
+                      {block.config.pageOrientation === 'landscape' && (
+                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+                          Landscape
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
+                      {sectionHasChecklist(block.children) && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onPatchBlocks((root) =>
+                              updateBlock(root, path, {
+                                children: markChecklistsNaInTree(block.children ?? []),
+                              }),
+                            )
+                          }
+                          className="rounded-md border border-white/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-neutral-500 transition-colors hover:border-flame-500/40 hover:text-flame-300"
+                        >
+                          Mark section N/A
+                        </button>
+                      )}
+                      {Boolean(block.config.optional) && (
+                        <label className="flex shrink-0 items-center gap-2 text-xs text-neutral-400">
+                          <input
+                            type="checkbox"
+                            checked={included}
+                            onChange={(e) => onValueChange(path, { included: e.target.checked })}
+                          />
+                          Include section
+                        </label>
+                      )}
+                    </div>
                   </div>
                   {block.children && block.children.length > 0 && (
                     <BlockFillIn
@@ -216,11 +240,25 @@ function BlockFillInItem({
     case 'checklist': {
       const items = (block.config.items as { id: string; label: string }[]) ?? [];
       const values = (block.value as ChecklistValue) ?? {};
+      const markAllNa = () => {
+        const next = { ...values };
+        for (const item of items) next[item.id] = 'na';
+        onValueChange(path, next);
+      };
       return (
         <div>
-          <p className="mb-2 text-xs font-medium text-neutral-400">
-            {block.label || 'Checklist'}
-          </p>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-medium text-neutral-400">{block.label || 'Checklist'}</p>
+            {items.length > 0 && (
+              <button
+                type="button"
+                onClick={markAllNa}
+                className="rounded-md border border-white/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-neutral-500 transition-colors hover:border-flame-500/40 hover:text-flame-300"
+              >
+                Mark all N/A
+              </button>
+            )}
+          </div>
           <ul className="space-y-2">
             {items.map((item) => (
               <li key={item.id} className="flex flex-wrap items-center gap-2 text-sm">
@@ -281,4 +319,13 @@ function BlockFillInItem({
     default:
       return null;
   }
+}
+
+function sectionHasChecklist(blocks: Block[] | undefined): boolean {
+  if (!blocks?.length) return false;
+  for (const block of blocks) {
+    if (block.type === 'checklist') return true;
+    if (block.children && sectionHasChecklist(block.children)) return true;
+  }
+  return false;
 }

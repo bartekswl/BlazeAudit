@@ -20,8 +20,8 @@ export function ColorThemeToggle({
           ) : (
             <Moon className="size-2.5 shrink-0 text-neutral-400" aria-hidden />
           )}
-          <span className="truncate text-[10px] leading-none text-[var(--ba-text-muted)]">
-            Light
+          <span className="py-0.5 text-[10px] leading-[1.35] text-[var(--ba-text-muted)]">
+            Light Mode
           </span>
         </div>
       )}

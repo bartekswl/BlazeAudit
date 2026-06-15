@@ -53,6 +53,21 @@ function getBlockAt(blocks: Block[], path: BlockPath): Block | null {
   return block ?? null;
 }
 
+/** Set every checklist item under this block tree to N/A (pass/fail/na). */
+export function markChecklistsNaInTree(blocks: Block[]): Block[] {
+  return blocks.map((block) => {
+    if (block.type === 'checklist') {
+      const items = (block.config.items as ChecklistItem[]) ?? [];
+      const value = Object.fromEntries(items.map((item) => [item.id, 'na' as const]));
+      return { ...block, value };
+    }
+    if (block.children?.length) {
+      return { ...block, children: markChecklistsNaInTree(block.children) };
+    }
+    return block;
+  });
+}
+
 export function countBlocks(blocks: Block[]): number {
   return blocks.reduce((sum, block) => {
     const childCount = block.children ? countBlocks(block.children) : 0;

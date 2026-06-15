@@ -6,11 +6,7 @@ const SEED_META_KEY = 'templates_seeded_v1';
 
 export function seedDefaultTemplates(): void {
   const db = getDatabase();
-  const row = db.prepare('SELECT value FROM app_meta WHERE key = ?').get(SEED_META_KEY) as
-    | { value: string }
-    | undefined;
-
-  if (row?.value === 'true') return;
+  let inserted = 0;
 
   const seed = db.transaction(() => {
     for (const item of DEFAULT_TEMPLATE_SEEDS) {
@@ -23,6 +19,7 @@ export function seedDefaultTemplates(): void {
         },
         { seedId: item.seedId },
       );
+      inserted += 1;
     }
 
     db.prepare(
@@ -32,5 +29,7 @@ export function seedDefaultTemplates(): void {
   });
 
   seed();
-  console.log('[templates] default templates seeded');
+  if (inserted > 0) {
+    console.log(`[templates] seeded ${inserted} default template(s)`);
+  }
 }

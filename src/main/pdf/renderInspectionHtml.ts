@@ -26,8 +26,9 @@ function renderBlocks(blocks: Block[]): string {
         if (block.config.optional && !included) return '';
         const children = block.children ? renderBlocks(block.children) : '';
         if (!children.trim()) return '';
+        const landscape = block.config.pageOrientation === 'landscape';
         return `
-          <section class="block section">
+          <section class="block section${landscape ? ' section-landscape' : ''}">
             ${block.label ? `<h3 class="section-title">${escapeHtml(block.label)}</h3>` : ''}
             ${children}
           </section>`;
@@ -185,6 +186,10 @@ export function renderInspectionHtml(
   <title>${escapeHtml(inspection.title)}</title>
   <style>
     @page { size: A4; margin: 18mm 16mm; }
+    @page landscape { size: A4 landscape; margin: 14mm 12mm; }
+    .section-landscape { page: landscape; page-break-before: always; }
+    .section-landscape .data-table { font-size: 8pt; }
+    .section-landscape .checklist-table { font-size: 8.5pt; }
     * { box-sizing: border-box; }
     body {
       font-family: "Segoe UI", system-ui, sans-serif;
