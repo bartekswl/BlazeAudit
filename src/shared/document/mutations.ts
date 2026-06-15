@@ -303,11 +303,33 @@ export function updateTableCell(
 }
 
 export function setBlockValue(blocks: Block[], path: BlockPath, value: unknown): Block[] {
-  const next = blocks.map(cloneBlock);
-  const block = getBlockAt(next, path);
-  if (!block) return blocks;
-  block.value = value === undefined ? null : structuredClone(value);
-  return next;
+  if (path.length === 0) return blocks;
+
+  const nextValue = value === undefined ? null : structuredClone(value);
+
+  function updateAt(current: Block[], depth: number): [Block[], boolean] {
+    const index = path[depth];
+    const block = current[index];
+    if (!block) return [current, false];
+
+    if (depth === path.length - 1) {
+      if (block.value === nextValue) return [current, false];
+      const next = current.slice();
+      next[index] = { ...block, value: nextValue };
+      return [next, true];
+    }
+
+    if (!block.children?.length) return [current, false];
+    const [nextChildren, changed] = updateAt(block.children, depth + 1);
+    if (!changed) return [current, false];
+
+    const next = current.slice();
+    next[index] = { ...block, children: nextChildren };
+    return [next, true];
+  }
+
+  const [next, changed] = updateAt(blocks, 0);
+  return changed ? next : blocks;
 }
 
 export function adjustLinesCount(blocks: Block[], path: BlockPath, delta: number): Block[] {

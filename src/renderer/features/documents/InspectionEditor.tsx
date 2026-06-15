@@ -10,15 +10,11 @@ import { setBlockValue } from '../../../shared/document';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
 
 import { BlockFillIn } from './BlockFillIn';
-
-
+import { DocumentOutlinePanel, DocumentOutlineToggle } from './DocumentOutline';
 
 const AUTOSAVE_MS = 900;
 
-
-
 const compactInputCls =
-
   'w-full min-w-0 rounded border border-white/10 bg-neutral-950 px-2 py-1 text-xs text-neutral-100 outline-none focus:border-flame-500';
 
 
@@ -68,6 +64,8 @@ export function InspectionEditor({
   const [pdfMessage, setPdfMessage] = useState<string | null>(null);
 
   const [error, setError] = useState<string | null>(null);
+
+  const [outlineOpen, setOutlineOpen] = useState(false);
 
   const timerRef = useRef<number | null>(null);
 
@@ -257,7 +255,7 @@ export function InspectionEditor({
 
     dirtyRef.current = true;
 
-    setSaveState('idle');
+    setSaveState((prev) => (prev === 'saved' || prev === 'error' ? 'idle' : prev));
 
     if (timerRef.current) window.clearTimeout(timerRef.current);
 
@@ -293,23 +291,23 @@ export function InspectionEditor({
 
 
 
-  const handleValueChange = (path: BlockPath, value: unknown) => {
+  const handleValueChange = useCallback((path: BlockPath, value: unknown) => {
 
     setDocument((prev) => ({ ...prev, blocks: setBlockValue(prev.blocks, path, value) }));
 
     scheduleSave();
 
-  };
+  }, [scheduleSave]);
 
 
 
-  const handlePatchBlocks = (mutator: (blocks: Block[]) => Block[]) => {
+  const handlePatchBlocks = useCallback((mutator: (blocks: Block[]) => Block[]) => {
 
     setDocument((prev) => ({ ...prev, blocks: mutator(prev.blocks) }));
 
     scheduleSave();
 
-  };
+  }, [scheduleSave]);
 
 
 
@@ -416,6 +414,8 @@ export function InspectionEditor({
         </div>
 
         <div className="flex shrink-0 gap-1.5">
+
+          <DocumentOutlineToggle open={outlineOpen} onToggle={() => setOutlineOpen((open) => !open)} />
 
           <button
 
@@ -641,19 +641,27 @@ export function InspectionEditor({
 
 
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
+      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
 
-        <BlockFillIn
+        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
 
-          blocks={document.blocks}
+          <BlockFillIn
 
-          onValueChange={handleValueChange}
+            blocks={document.blocks}
 
-          onPatchBlocks={handlePatchBlocks}
+            onValueChange={handleValueChange}
 
-          canEditStructure={status === 'draft'}
+            onPatchBlocks={handlePatchBlocks}
 
-        />
+            canEditStructure={status === 'draft'}
+
+          />
+
+        </div>
+
+        {outlineOpen && (
+          <DocumentOutlinePanel blocks={document.blocks} onClose={() => setOutlineOpen(false)} />
+        )}
 
       </div>
 

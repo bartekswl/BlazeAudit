@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import type { Block, BlockPath } from '../../../shared/document';
+import { docAnchorId } from '../../../shared/document/outline';
 import { cn } from '../../lib/cn';
 import { blockTypeLabel } from './blockCatalog';
 
@@ -56,7 +57,7 @@ export function BlockList({
         const selected = pathKey(selectedPath ?? []) === pathKey(path);
 
         return (
-          <li key={block.id}>
+          <li key={block.id} id={docAnchorId(block.id)} className="scroll-mt-4">
             <div
               className={cn(
                 'flex items-center gap-1 rounded-lg border px-2 py-1.5',

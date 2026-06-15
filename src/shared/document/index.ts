@@ -6,5 +6,12 @@ export type { BlockPath } from './mutations';
 export * from './validate';
 export { DEFAULT_TEMPLATE_SEEDS } from './defaults';
 export { inspectionSnapshotFromTemplate } from './snapshot';
+export {
+  buildDocumentOutline,
+  docAnchorId,
+  findBlockPath,
+  scrollToDocumentBlock,
+} from './outline';
+export type { OutlineNode, OutlineKind } from './outline';
 export { SCHEMA_KIT_README } from './schemaReadme';
 export { default as documentSchema } from './schema.json';

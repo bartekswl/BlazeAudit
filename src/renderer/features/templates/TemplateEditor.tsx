@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Plus, Save } from 'lucide-react';
 import type { BlockPath, BlockType, Document, Template } from '../../../shared/document';
-import { emptyDocument, insertBlock, moveBlock, removeBlock } from '../../../shared/document';
+import { emptyDocument, findBlockPath, insertBlock, moveBlock, removeBlock } from '../../../shared/document';
+import { DocumentOutlinePanel, DocumentOutlineToggle } from '../documents/DocumentOutline';
 import { BlockEditor } from './BlockEditor';
 import { BlockList, inputCls } from './BlockList';
 import { BLOCK_CATALOG } from './blockCatalog';
@@ -40,6 +41,7 @@ export function TemplateEditor({
   const [addType, setAddType] = useState<BlockType>('paragraph');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [outlineOpen, setOutlineOpen] = useState(false);
 
   const insertParentPath = useMemo(() => {
     if (!selectedPath) return [];
@@ -99,6 +101,7 @@ export function TemplateEditor({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <DocumentOutlineToggle open={outlineOpen} onToggle={() => setOutlineOpen((open) => !open)} />
           <button
             type="button"
             onClick={onCancel}
@@ -152,7 +155,7 @@ export function TemplateEditor({
         </label>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 lg:flex-row">
+      <div className="flex min-h-0 flex-1 overflow-hidden gap-3">
         <section className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-white/5 bg-white/[0.02] p-4">
           <div className="mb-3 flex flex-wrap items-end gap-2">
             <div className="min-w-0 flex-1">
@@ -202,7 +205,7 @@ export function TemplateEditor({
           </div>
         </section>
 
-        <section className="flex min-h-0 w-full shrink-0 flex-col rounded-xl border border-white/5 bg-white/[0.02] p-4 lg:w-96">
+        <section className="flex min-h-0 w-80 shrink-0 flex-col rounded-xl border border-white/5 bg-white/[0.02] p-4">
           <div className="min-h-0 flex-1 overflow-y-auto">
             {selectedPath ? (
               <BlockEditor
@@ -217,6 +220,17 @@ export function TemplateEditor({
             )}
           </div>
         </section>
+
+        {outlineOpen && (
+          <DocumentOutlinePanel
+            blocks={document.blocks}
+            onClose={() => setOutlineOpen(false)}
+            onNavigate={(blockId) => {
+              const path = findBlockPath(document.blocks, blockId);
+              if (path) setSelectedPath(path);
+            }}
+          />
+        )}
       </div>
     </div>
   );
