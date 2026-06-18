@@ -117,27 +117,43 @@ export function DocumentOutlineRail() {
   return (
     <aside
       className={cn(
-        'flex h-full shrink-0 flex-col overflow-hidden border-l border-[var(--ba-chrome-border)] bg-[var(--ba-chrome-bg)] transition-[width] duration-200 ease-out',
-        expanded ? 'w-60' : 'w-8',
+        'relative h-full shrink-0 overflow-hidden border-l border-[var(--ba-chrome-border)] bg-[var(--ba-chrome-bg)]',
+        'transition-[width] duration-[400ms] ease-in-out',
+        expanded ? 'w-60' : 'w-10',
       )}
       aria-label="Document contents"
+      aria-expanded={expanded}
     >
-      {!expanded ? (
-        <button
-          type="button"
-          onClick={() => setExpanded(true)}
-          className="flex h-full w-full items-center justify-center text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
-          aria-label="Open contents"
-          title="Contents"
-        >
-          <Menu className="size-4 shrink-0" aria-hidden />
-        </button>
-      ) : (
+      <div
+        className={cn(
+          'absolute inset-y-0 left-0 flex w-60 flex-col bg-[var(--ba-chrome-bg)]',
+          'transition-transform duration-[400ms] ease-in-out',
+          expanded ? 'translate-x-0' : 'translate-x-[calc(100%-2.5rem)]',
+        )}
+      >
         <DocumentOutlineContent
           blocks={registration.blocks}
           onNavigate={registration.onNavigate}
           onCollapse={() => setExpanded(false)}
         />
+      </div>
+
+      {!expanded && (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="group absolute inset-y-0 left-0 z-10 flex w-10 flex-col items-center justify-center gap-3 bg-[var(--ba-chrome-bg)] py-6 text-[var(--ba-text-muted)] hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
+          aria-label="Open contents"
+          title="Contents"
+        >
+          <Menu className="size-4 shrink-0" aria-hidden />
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--ba-text-muted)] group-hover:text-[var(--ba-text-primary)]"
+            style={{ writingMode: 'vertical-rl' }}
+          >
+            Contents
+          </span>
+        </button>
       )}
     </aside>
   );

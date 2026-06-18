@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LogOut } from 'lucide-react';
+import { LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { ColorThemeToggle } from './ColorThemeToggle';
 import { ConfirmDialog } from './ConfirmDialog';
 import { navItems, type NavId } from '../navigation';
@@ -17,6 +17,7 @@ export function Sidebar({
   const [email, setEmail] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [logOutOpen, setLogOutOpen] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   useEffect(() => {
     void window.blazeaudit.auth.getStatus().then((status) => {
@@ -39,8 +40,41 @@ export function Sidebar({
 
   return (
     <>
-      <nav className="ba-sidebar flex w-52 shrink-0 flex-col">
-        <ul className="flex-1 space-y-1.5 overflow-y-auto px-3 pt-5 pb-3">
+      <nav
+        className={cn(
+          'ba-sidebar flex shrink-0 flex-col overflow-hidden transition-[width] duration-[400ms] ease-in-out',
+          expanded ? 'w-52' : 'w-[3.25rem]',
+        )}
+        aria-label="Main menu"
+        aria-expanded={expanded}
+      >
+        <div
+          className={cn(
+            'flex shrink-0',
+            expanded ? 'justify-end px-2 pt-3 pb-1' : 'justify-center px-1 pt-3 pb-1',
+          )}
+        >
+          <button
+            type="button"
+            onClick={() => setExpanded((value) => !value)}
+            className="rounded-md p-1.5 text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
+            aria-label={expanded ? 'Collapse menu' : 'Expand menu'}
+            title={expanded ? 'Collapse menu' : 'Expand menu'}
+          >
+            {expanded ? (
+              <PanelLeftClose className="size-4" aria-hidden />
+            ) : (
+              <PanelLeftOpen className="size-4" aria-hidden />
+            )}
+          </button>
+        </div>
+
+        <ul
+          className={cn(
+            'flex-1 space-y-1.5 overflow-y-auto pb-3',
+            expanded ? 'px-3' : 'px-1.5',
+          )}
+        >
           {navItems.map((item) => {
             const isActive = item.id === activeId;
             const Icon = item.icon;
@@ -50,50 +84,97 @@ export function Sidebar({
                   type="button"
                   onClick={() => onSelect(item.id)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={cn('ba-nav-item', isActive && 'ba-nav-item-active')}
+                  title={expanded ? undefined : item.label}
+                  className={cn(
+                    'ba-nav-item',
+                    isActive && 'ba-nav-item-active',
+                    !expanded && 'justify-center px-0',
+                  )}
                 >
                   <Icon className="size-[18px] shrink-0" />
-                  <span className="truncate">{item.label}</span>
+                  {expanded ? (
+                    <span className="truncate">{item.label}</span>
+                  ) : (
+                    <span className="sr-only">{item.label}</span>
+                  )}
                 </button>
               </li>
             );
           })}
         </ul>
 
-        <div className="border-t border-[var(--ba-chrome-border)] px-3 py-3">
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={onOpenUserProfile}
-              title="User profile settings"
-              className={cn(
-                'flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 py-1 text-left transition-colors',
-                activeId === 'settings'
-                  ? 'text-[var(--ba-nav-active-text)]'
-                  : 'hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]',
-              )}
-            >
-              <div className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-flame-400 via-flame-500 to-red-600 text-sm font-semibold text-white shadow-md shadow-flame-500/30">
-                {initial}
+        <div
+          className={cn(
+            'border-t border-[var(--ba-chrome-border)]',
+            expanded ? 'px-3 py-3' : 'px-1.5 py-3',
+          )}
+        >
+          {expanded ? (
+            <>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={onOpenUserProfile}
+                  title="User profile settings"
+                  className={cn(
+                    'flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 py-1 text-left transition-colors',
+                    activeId === 'settings'
+                      ? 'text-[var(--ba-nav-active-text)]'
+                      : 'hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]',
+                  )}
+                >
+                  <div className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-flame-400 via-flame-500 to-red-600 text-sm font-semibold text-white shadow-md shadow-flame-500/30">
+                    {initial}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium text-[var(--ba-text-primary)]">
+                      {email || 'Inspector'}
+                    </div>
+                    <div className="truncate text-xs text-[var(--ba-text-muted)]">{subtitle}</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogOut}
+                  aria-label="Close and Log Out"
+                  title="Close and Log Out"
+                  className="rounded-md p-1.5 text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
+                >
+                  <LogOut className="size-4" />
+                </button>
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium text-[var(--ba-text-primary)]">
-                  {email || 'Inspector'}
+              <ColorThemeToggle className="mt-2 px-0.5" />
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={onOpenUserProfile}
+                title="User profile settings"
+                className={cn(
+                  'rounded-lg p-0.5 transition-colors',
+                  activeId === 'settings'
+                    ? 'text-[var(--ba-nav-active-text)]'
+                    : 'hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]',
+                )}
+              >
+                <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-flame-400 via-flame-500 to-red-600 text-sm font-semibold text-white shadow-md shadow-flame-500/30">
+                  {initial}
                 </div>
-                <div className="truncate text-xs text-[var(--ba-text-muted)]">{subtitle}</div>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={handleLogOut}
-              aria-label="Close and Log Out"
-              title="Close and Log Out"
-              className="rounded-md p-1.5 text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
-            >
-              <LogOut className="size-4" />
-            </button>
-          </div>
-          <ColorThemeToggle className="mt-2 px-0.5" />
+                <span className="sr-only">User profile settings</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleLogOut}
+                aria-label="Close and Log Out"
+                title="Close and Log Out"
+                className="rounded-md p-1.5 text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
+              >
+                <LogOut className="size-4" />
+              </button>
+              <ColorThemeToggle showLabel={false} className="justify-center" />
+            </div>
+          )}
         </div>
       </nav>
 

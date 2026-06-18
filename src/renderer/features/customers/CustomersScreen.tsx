@@ -179,7 +179,7 @@ export function CustomersScreen({
       ) : (
         <div className="ba-table-wrap min-h-0 flex-1 overflow-y-auto">
           <table className="w-full table-fixed text-left text-sm">
-            <thead className="ba-table-head sticky top-0 text-xs uppercase tracking-wide text-[var(--ba-text-muted)]">
+            <thead className="ba-table-head sticky top-0 text-xs uppercase tracking-wide text-[var(--ba-text-secondary)]">
               <tr>
                 <th className="w-[18%] px-4 py-3 font-medium">Name</th>
                 <th className="w-[14%] px-4 py-3 font-medium">Contact</th>
@@ -199,7 +199,7 @@ export function CustomersScreen({
                   }}
                   className="cursor-pointer border-t border-[var(--ba-panel-border)] hover:bg-[var(--ba-row-hover-bg)]"
                 >
-                  <TruncateCell value={client.name} className="font-medium text-neutral-100" />
+                  <TruncateCell value={client.name} className="font-medium" />
                   <TruncateCell value={client.contactName} />
                   <TruncateCell value={client.phone} />
                   <TruncateCell value={client.email} />
@@ -213,7 +213,7 @@ export function CustomersScreen({
                           e.stopPropagation();
                           setEditor({ mode: 'edit', client });
                         }}
-                        className="rounded-md p-1.5 text-neutral-400 hover:bg-white/10 hover:text-neutral-100"
+                        className="rounded-md p-1.5 text-[var(--ba-text-muted)] hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
                       >
                         <Pencil className="size-4" />
                       </button>
@@ -224,7 +224,7 @@ export function CustomersScreen({
                           e.stopPropagation();
                           void handleDelete(client);
                         }}
-                        className="rounded-md p-1.5 text-neutral-400 hover:bg-red-500/20 hover:text-red-300"
+                        className="rounded-md p-1.5 text-[var(--ba-text-muted)] hover:bg-red-500/20 hover:text-red-300"
                       >
                         <Trash2 className="size-4" />
                       </button>
@@ -422,9 +422,14 @@ function ClientEditor({
 /** Truncated table cell; native tooltip shows the full value on hover. */
 function TruncateCell({ value, className }: { value: string; className?: string }) {
   const trimmed = value.trim();
+  const isEmpty = !trimmed;
   return (
     <td
-      className={cn('truncate px-4 py-3 text-neutral-400', className)}
+      className={cn(
+        'truncate px-4 py-3',
+        isEmpty ? 'text-[var(--ba-text-faint)]' : 'text-[var(--ba-text-primary)]',
+        className,
+      )}
       title={trimmed || undefined}
     >
       {trimmed || '—'}
