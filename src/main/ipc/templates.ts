@@ -10,7 +10,7 @@ import {
   type TemplateInput,
 } from '../../shared/document';
 import { IpcChannels } from '../../shared/ipc';
-import { rebuildBundledTemplate, templates } from '../db';
+import { templates } from '../db';
 
 export function registerTemplatesIpc(): void {
   ipcMain.handle(IpcChannels.templatesList, () => templates.listTemplates());
@@ -52,7 +52,6 @@ export function registerTemplatesIpc(): void {
       template.description,
       template.document,
       app.getVersion(),
-      template.seedId,
     );
     fs.writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
     return { saved: true as const, filePath };
@@ -81,35 +80,14 @@ export function registerTemplatesIpc(): void {
     const result = parseTemplateExportPayload(parsed);
     if (!result.ok) throw new Error(result.errors.join(' '));
 
-    const input: TemplateInput = {
+    const created = templates.createTemplate({
       name: result.name ?? result.document.meta.title,
       description: result.description ?? '',
       document: result.document,
-    };
+    });
 
-    if (result.seedId) {
-      const { template, created } = templates.upsertTemplateBySeedId(result.seedId, input);
-      return {
-        imported: true as const,
-        templateId: template.id,
-        filePath: filePaths[0],
-        replaced: !created,
-      };
-    }
-
-    const created = templates.createTemplate(input);
-
-    return {
-      imported: true as const,
-      templateId: created.id,
-      filePath: filePaths[0],
-      replaced: false,
-    };
+    return { imported: true as const, templateId: created.id, filePath: filePaths[0] };
   });
-
-  ipcMain.handle(IpcChannels.templatesRebuildFromSeed, (_event, seedId: string) =>
-    rebuildBundledTemplate(seedId),
-  );
 
   ipcMain.handle(IpcChannels.templatesExportSchemaKit, async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({

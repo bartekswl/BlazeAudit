@@ -35,7 +35,6 @@ export const IpcChannels = {
   templatesExportJson: 'templates:export-json',
   templatesImportJson: 'templates:import-json',
   templatesExportSchemaKit: 'templates:export-schema-kit',
-  templatesRebuildFromSeed: 'templates:rebuild-seed',
   inspectionsList: 'inspections:list',
   inspectionsGet: 'inspections:get',
   inspectionsCreate: 'inspections:create',

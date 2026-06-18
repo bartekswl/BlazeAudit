@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, CalendarClock, CalendarDays, CheckCircle2, Plus, Users } from 'lucide-react';
+import { AlertTriangle, CalendarClock, CalendarDays, CheckCircle2, ImagePlus, Plus, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import { formatAddressForList } from '../../../shared/address';
 import type { DashboardStats } from '../../../shared/inspection';
 import type { BusinessProfile } from '../../../shared/profile';
 
@@ -54,6 +53,7 @@ export function DashboardScreen({
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [business, setBusiness] = useState<BusinessProfile | null>(null);
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
     void window.blazeaudit.inspections
@@ -63,12 +63,19 @@ export function DashboardScreen({
   }, []);
 
   useEffect(() => {
-    void window.blazeaudit.profile.getBusiness().then(setBusiness);
+    void Promise.all([
+      window.blazeaudit.profile.getBusiness(),
+      window.blazeaudit.profile.getLogo(),
+    ]).then(([profile, logo]) => {
+      setBusiness(profile);
+      setLogoDataUrl(logo);
+    });
   }, []);
 
   const businessName = business?.businessName.trim() ?? '';
-  const businessAddress = business ? formatAddressForList(business) : '';
-  const initial = businessName ? businessName[0]?.toUpperCase() : 'B';
+  const streetLine = [business?.street?.trim(), business?.unit?.trim()].filter(Boolean).join(', ');
+  const province = business?.province.trim() ?? '';
+  const locationLine = [streetLine, province].filter(Boolean).join(' · ');
 
   const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const date = now.toLocaleDateString([], {
@@ -89,17 +96,25 @@ export function DashboardScreen({
         </div>
         <div className="flex shrink-0 items-center gap-2.5 text-right">
           <div className="min-w-0 max-w-[14rem] sm:max-w-xs">
-            <div className="truncate text-sm font-medium text-[var(--ba-text-primary)]">
+            <div className="truncate text-base font-semibold text-[var(--ba-text-primary)]">
               {businessName || 'Business name not set'}
             </div>
-            {businessAddress ? (
-              <div className="truncate text-xs text-[var(--ba-text-muted)]">{businessAddress}</div>
+            {locationLine ? (
+              <div className="truncate text-xs text-[var(--ba-text-muted)]">{locationLine}</div>
             ) : (
               <div className="text-xs text-[var(--ba-text-faint)]">No address on file</div>
             )}
           </div>
-          <div className="grid size-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-flame-400 via-flame-500 to-red-600 text-sm font-semibold text-white shadow-md shadow-flame-500/30">
-            {initial}
+          <div className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg border border-[var(--ba-chrome-border)] bg-[var(--ba-chrome-bg)]">
+            {logoDataUrl ? (
+              <img
+                src={logoDataUrl}
+                alt=""
+                className="max-h-full max-w-full object-contain"
+              />
+            ) : (
+              <ImagePlus className="size-4 text-[var(--ba-text-faint)]" aria-hidden />
+            )}
           </div>
         </div>
       </section>

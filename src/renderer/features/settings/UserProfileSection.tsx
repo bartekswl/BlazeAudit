@@ -6,7 +6,7 @@ import {
   validatePostCode,
   validateProvince,
 } from '../../../shared/address';
-import type { BusinessProfileInput, Inspector } from '../../../shared/profile';
+import { BUSINESS_PROFILE_LIMITS, type BusinessProfileInput, type Inspector } from '../../../shared/profile';
 import { inputCls } from '../templates/BlockList';
 
 const emptyBusiness = (): BusinessProfileInput => ({
@@ -21,6 +21,7 @@ const emptyBusiness = (): BusinessProfileInput => ({
 
 export function UserProfileSection() {
   const [business, setBusiness] = useState<BusinessProfileInput>(emptyBusiness);
+  const [savedBusiness, setSavedBusiness] = useState<BusinessProfileInput>(emptyBusiness);
   const [inspectors, setInspectors] = useState<Inspector[]>([]);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof BusinessProfileInput, string>>>(
@@ -29,6 +30,7 @@ export function UserProfileSection() {
   const [loading, setLoading] = useState(true);
   const [savingBusiness, setSavingBusiness] = useState(false);
   const [logoBusy, setLogoBusy] = useState(false);
+  const [businessSaveNotice, setBusinessSaveNotice] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [inspectorMessage, setInspectorMessage] = useState<string | null>(null);
@@ -54,6 +56,15 @@ export function UserProfileSection() {
       country: profile.country,
       province: profile.province,
     });
+    setSavedBusiness({
+      businessName: profile.businessName,
+      street: profile.street,
+      unit: profile.unit,
+      city: profile.city,
+      postCode: profile.postCode,
+      country: profile.country,
+      province: profile.province,
+    });
     setLogoDataUrl(logo);
     setInspectors(inspectorRows);
   }, []);
@@ -68,7 +79,11 @@ export function UserProfileSection() {
     (key: keyof BusinessProfileInput) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setBusiness((prev) => ({ ...prev, [key]: e.target.value }));
       setFieldErrors((prev) => ({ ...prev, [key]: undefined }));
+      setBusinessSaveNotice(null);
     };
+
+  const businessIsDirty =
+    JSON.stringify(business) !== JSON.stringify(savedBusiness);
 
   const saveBusiness = async () => {
     const errs: Partial<Record<keyof BusinessProfileInput, string>> = {};
@@ -88,12 +103,15 @@ export function UserProfileSection() {
     }
 
     setSavingBusiness(true);
-    setMessage(null);
+    setBusinessSaveNotice(null);
     setError(null);
+    const hadChanges = businessIsDirty;
     try {
       await window.blazeaudit.profile.updateBusiness(business);
-      setMessage('Business profile saved.');
       await refresh();
+      if (hadChanges) {
+        setBusinessSaveNotice('Business profile saved.');
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save business profile.');
     } finally {
@@ -210,6 +228,7 @@ export function UserProfileSection() {
             value={business.businessName}
             onChange={setBusinessField('businessName')}
             placeholder="Your company name"
+            maxLength={BUSINESS_PROFILE_LIMITS.businessName}
           />
         </Field>
 
@@ -249,14 +268,29 @@ export function UserProfileSection() {
 
         <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">Address</p>
         <Field label="Street" error={fieldErrors.street}>
-          <input className={inputCls} value={business.street} onChange={setBusinessField('street')} />
+          <input
+            className={inputCls}
+            value={business.street}
+            onChange={setBusinessField('street')}
+            maxLength={BUSINESS_PROFILE_LIMITS.street}
+          />
         </Field>
         <Field label="Unit / suite" error={fieldErrors.unit}>
-          <input className={inputCls} value={business.unit} onChange={setBusinessField('unit')} />
+          <input
+            className={inputCls}
+            value={business.unit}
+            onChange={setBusinessField('unit')}
+            maxLength={BUSINESS_PROFILE_LIMITS.unit}
+          />
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="City" error={fieldErrors.city}>
-            <input className={inputCls} value={business.city} onChange={setBusinessField('city')} />
+            <input
+              className={inputCls}
+              value={business.city}
+              onChange={setBusinessField('city')}
+              maxLength={BUSINESS_PROFILE_LIMITS.city}
+            />
           </Field>
           <Field label="Post code" error={fieldErrors.postCode}>
             <input
@@ -274,6 +308,7 @@ export function UserProfileSection() {
               value={business.province}
               onChange={setBusinessField('province')}
               placeholder="ON"
+              maxLength={BUSINESS_PROFILE_LIMITS.province}
             />
           </Field>
           <Field label="Country" error={fieldErrors.country}>
@@ -282,6 +317,7 @@ export function UserProfileSection() {
               value={business.country}
               onChange={setBusinessField('country')}
               placeholder="Canada"
+              maxLength={BUSINESS_PROFILE_LIMITS.country}
             />
           </Field>
         </div>
@@ -294,6 +330,9 @@ export function UserProfileSection() {
         >
           {savingBusiness ? 'Saving…' : 'Save business profile'}
         </button>
+        {businessSaveNotice && (
+          <p className="text-xs text-emerald-300">{businessSaveNotice}</p>
+        )}
       </div>
 
       <div className="mt-8 border-t border-white/5 pt-6">

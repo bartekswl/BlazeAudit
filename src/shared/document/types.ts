@@ -58,7 +58,6 @@ export interface Document {
 
 export interface Template {
   id: string;
-  seedId: string | null;
   name: string;
   description: string;
   document: Document;
@@ -69,7 +68,6 @@ export interface Template {
 
 export interface TemplateSummary {
   id: string;
-  seedId: string | null;
   name: string;
   description: string;
   version: number;
@@ -90,7 +88,6 @@ export interface TemplateExportPayload {
   exportedAt: string;
   appVersion: string;
   template: {
-    seedId?: string;
     name: string;
     description: string;
     document: Document;

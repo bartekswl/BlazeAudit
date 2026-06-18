@@ -3,4 +3,4 @@ export * as clients from './clients';
 export * as templates from './templates';
 export * as inspections from './inspections';
 export * as profile from './profile';
-export { seedDefaultTemplates, rebuildBundledTemplate } from './seedTemplates';
+export { seedDefaultTemplates } from './seedTemplates';

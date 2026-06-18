@@ -156,7 +156,7 @@ export function validateDocument(input: unknown): ValidationResult {
 
 export type TemplateImportResult =
   | { ok: false; errors: string[] }
-  | { ok: true; document: Document; name: string; description: string; seedId?: string };
+  | { ok: true; document: Document; name: string; description: string };
 
 export function parseTemplateExportPayload(input: unknown): TemplateImportResult {
   if (!isRecord(input)) {
@@ -172,11 +172,7 @@ export function parseTemplateExportPayload(input: unknown): TemplateImportResult
         : docResult.document.meta.title;
     const description =
       typeof input.template.description === 'string' ? input.template.description : '';
-    const seedId =
-      typeof input.template.seedId === 'string' && input.template.seedId.trim()
-        ? input.template.seedId.trim()
-        : undefined;
-    return { ok: true, document: docResult.document, name, description, seedId };
+    return { ok: true, document: docResult.document, name, description };
   }
 
   // Bare document export (e.g. from external AI).
@@ -195,17 +191,11 @@ export function buildTemplateExportPayload(
   description: string,
   document: Document,
   appVersion: string,
-  seedId?: string | null,
 ): TemplateExportPayload {
   return {
     kind: 'blazeaudit-template',
     exportedAt: new Date().toISOString(),
     appVersion,
-    template: {
-      ...(seedId ? { seedId } : {}),
-      name,
-      description,
-      document,
-    },
+    template: { name, description, document },
   };
 }

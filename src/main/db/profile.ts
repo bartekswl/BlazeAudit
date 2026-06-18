@@ -5,6 +5,7 @@ import { dialog } from 'electron';
 import { normalizeAddressParts, validateAddressFields } from '../../shared/address';
 import {
   BUSINESS_PROFILE_ID,
+  truncateBusinessProfileInput,
   type BusinessProfile,
   type BusinessProfileInput,
   type Inspector,
@@ -70,8 +71,9 @@ function toInspector(row: InspectorRow): Inspector {
 }
 
 function normalizeBusinessInput(input: BusinessProfileInput) {
-  const businessName = input.businessName?.trim() ?? '';
-  const parts = normalizeAddressParts(input);
+  const trimmed = truncateBusinessProfileInput(input);
+  const businessName = trimmed.businessName.trim();
+  const parts = normalizeAddressParts(trimmed);
   const addressError = validateAddressFields(parts);
   if (addressError) throw new Error(addressError);
   return { businessName, ...parts };
