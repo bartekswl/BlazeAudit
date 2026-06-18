@@ -5,12 +5,18 @@ import type { AddressParts } from './address';
 /** A client/site that inspections are performed for (see DATA_MODEL.md §1). */
 export interface Client extends AddressParts {
   id: string;
+  /** Building / site name. */
   name: string;
   /** Formatted single-line address for list display. */
   address: string;
   contactName: string;
+  /** Contact person's phone number. */
   phone: string;
   email: string;
+  ownerManagerName: string;
+  ownerManagerPhone: string;
+  signalReceivingCenterName: string;
+  signalReceivingCenterPhone: string;
   notes: string;
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
@@ -28,5 +34,9 @@ export interface ClientInput {
   contactName?: string;
   phone?: string;
   email?: string;
+  ownerManagerName?: string;
+  ownerManagerPhone?: string;
+  signalReceivingCenterName?: string;
+  signalReceivingCenterPhone?: string;
   notes?: string;
 }

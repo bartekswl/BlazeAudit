@@ -91,6 +91,13 @@ export function CustomerDetailScreen({
           <DetailField label="Phone" value={client.phone} />
           <DetailField label="Email" value={client.email} />
           <DetailField label="Address" value={fullAddress} />
+          <DetailField label="Owner / manager" value={client.ownerManagerName} />
+          <DetailField label="Owner / manager phone" value={client.ownerManagerPhone} />
+          <DetailField label="Signal receiving center" value={client.signalReceivingCenterName} />
+          <DetailField
+            label="Signal receiving center phone"
+            value={client.signalReceivingCenterPhone}
+          />
         </dl>
 
         {client.notes.trim() && (

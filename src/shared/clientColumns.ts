@@ -2,16 +2,20 @@ import type { Client, ClientInput } from './types';
 
 /** Spreadsheet / import column order — matches current client fields (see ClientInput). */
 export const CLIENT_SPREADSHEET_COLUMNS = [
-  { key: 'name', header: 'Name', required: true },
+  { key: 'name', header: 'Building Name', required: true },
   { key: 'street', header: 'Street' },
   { key: 'unit', header: 'Unit' },
   { key: 'city', header: 'City' },
   { key: 'postCode', header: 'Post Code' },
   { key: 'province', header: 'Province' },
   { key: 'country', header: 'Country' },
-  { key: 'contactName', header: 'Contact' },
+  { key: 'contactName', header: 'Contact Person' },
   { key: 'phone', header: 'Phone' },
   { key: 'email', header: 'Email' },
+  { key: 'ownerManagerName', header: 'Owner / Manager' },
+  { key: 'ownerManagerPhone', header: 'Owner / Manager Phone' },
+  { key: 'signalReceivingCenterName', header: 'Signal Receiving Center' },
+  { key: 'signalReceivingCenterPhone', header: 'Signal Receiving Center Phone' },
   { key: 'notes', header: 'Notes' },
 ] as const satisfies ReadonlyArray<{
   key: keyof ClientInput;
@@ -33,6 +37,10 @@ export function clientToSpreadsheetRow(client: Client): Record<ClientSpreadsheet
     contactName: client.contactName,
     phone: client.phone,
     email: client.email,
+    ownerManagerName: client.ownerManagerName,
+    ownerManagerPhone: client.ownerManagerPhone,
+    signalReceivingCenterName: client.signalReceivingCenterName,
+    signalReceivingCenterPhone: client.signalReceivingCenterPhone,
     notes: client.notes,
   };
 }

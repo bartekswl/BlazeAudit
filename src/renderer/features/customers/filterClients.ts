@@ -6,7 +6,13 @@ export function filterClients(clients: Client[], query: string): Client[] {
   if (!q) return clients;
 
   return clients.filter((client) => {
-    const haystack = [client.name, client.contactName, client.address]
+    const haystack = [
+      client.name,
+      client.contactName,
+      client.address,
+      client.ownerManagerName,
+      client.signalReceivingCenterName,
+    ]
       .join('\n')
       .toLowerCase();
     return haystack.includes(q);

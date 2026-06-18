@@ -131,6 +131,17 @@ const migrations: Migration[] = [
       ).run(now);
     },
   },
+  {
+    version: 6,
+    up: (db) => {
+      db.exec(`
+        ALTER TABLE clients ADD COLUMN owner_manager_name TEXT NOT NULL DEFAULT '';
+        ALTER TABLE clients ADD COLUMN owner_manager_phone TEXT NOT NULL DEFAULT '';
+        ALTER TABLE clients ADD COLUMN signal_receiving_center_name TEXT NOT NULL DEFAULT '';
+        ALTER TABLE clients ADD COLUMN signal_receiving_center_phone TEXT NOT NULL DEFAULT '';
+      `);
+    },
+  },
 ];
 
 /** Applies any migrations newer than the database's current `user_version`. */

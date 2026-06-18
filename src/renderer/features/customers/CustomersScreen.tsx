@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { Pencil, Plus, Search, Trash2, Users, X } from 'lucide-react';
-import { validateCountry, validatePostCode, validateProvince } from '../../../shared/address';
+import { validateCountry, validatePhone, validatePostCode, validateProvince } from '../../../shared/address';
 import type { Client, ClientInput } from '../../../shared/types';
 import { cn } from '../../lib/cn';
 import { CustomerDetailScreen } from './CustomerDetailScreen';
@@ -26,6 +26,10 @@ const EMPTY: ClientInput = {
   contactName: '',
   phone: '',
   email: '',
+  ownerManagerName: '',
+  ownerManagerPhone: '',
+  signalReceivingCenterName: '',
+  signalReceivingCenterPhone: '',
   notes: '',
 };
 
@@ -134,7 +138,7 @@ export function CustomersScreen({
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, contact, or address…"
+            placeholder="Search by building, contact person, or address…"
             className="ba-search"
           />
         </div>
@@ -181,8 +185,8 @@ export function CustomersScreen({
           <table className="w-full table-fixed text-left text-sm">
             <thead className="ba-table-head sticky top-0 text-xs uppercase tracking-wide text-[var(--ba-text-secondary)]">
               <tr>
-                <th className="w-[18%] px-4 py-3 font-medium">Name</th>
-                <th className="w-[14%] px-4 py-3 font-medium">Contact</th>
+                <th className="w-[18%] px-4 py-3 font-medium">Building name</th>
+                <th className="w-[14%] px-4 py-3 font-medium">Contact person</th>
                 <th className="w-[12%] px-4 py-3 font-medium">Phone</th>
                 <th className="w-[18%] px-4 py-3 font-medium">Email</th>
                 <th className="w-[30%] px-4 py-3 font-medium">Address</th>
@@ -273,6 +277,10 @@ function ClientEditor({
           contactName: initial.contactName,
           phone: initial.phone,
           email: initial.email,
+          ownerManagerName: initial.ownerManagerName,
+          ownerManagerPhone: initial.ownerManagerPhone,
+          signalReceivingCenterName: initial.signalReceivingCenterName,
+          signalReceivingCenterPhone: initial.signalReceivingCenterPhone,
           notes: initial.notes,
         }
       : EMPTY,
@@ -293,7 +301,7 @@ function ClientEditor({
 
   const validateForm = (): boolean => {
     const errs: Partial<Record<keyof ClientInput, string>> = {};
-    if (!form.name.trim()) errs.name = 'Name is required.';
+    if (!form.name.trim()) errs.name = 'Building name is required.';
 
     const postCodeErr = validatePostCode(form.postCode ?? '');
     if (postCodeErr) errs.postCode = postCodeErr;
@@ -301,6 +309,13 @@ function ClientEditor({
     if (countryErr) errs.country = countryErr;
     const provinceErr = validateProvince(form.province ?? '');
     if (provinceErr) errs.province = provinceErr;
+
+    const contactPhoneErr = validatePhone(form.phone ?? '');
+    if (contactPhoneErr) errs.phone = contactPhoneErr;
+    const ownerPhoneErr = validatePhone(form.ownerManagerPhone ?? '');
+    if (ownerPhoneErr) errs.ownerManagerPhone = ownerPhoneErr;
+    const signalPhoneErr = validatePhone(form.signalReceivingCenterPhone ?? '');
+    if (signalPhoneErr) errs.signalReceivingCenterPhone = signalPhoneErr;
 
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
@@ -343,7 +358,7 @@ function ClientEditor({
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
-          <Field label="Name" required error={fieldErrors.name}>
+          <Field label="Building name" required error={fieldErrors.name}>
             <input className={inputCls} value={form.name} onChange={set('name')} autoFocus />
           </Field>
 
@@ -386,15 +401,67 @@ function ClientEditor({
             </Field>
           </div>
 
-          <Field label="Contact person">
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">Contact person</p>
+          <Field label="Name">
             <input className={inputCls} value={form.contactName} onChange={set('contactName')} />
           </Field>
-          <Field label="Phone">
-            <input className={inputCls} value={form.phone} onChange={set('phone')} />
+          <Field label="Phone" error={fieldErrors.phone}>
+            <input
+              className={inputCls}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="416-555-0100"
+              value={form.phone}
+              onChange={set('phone')}
+            />
           </Field>
           <Field label="Email">
             <input className={inputCls} type="email" value={form.email} onChange={set('email')} />
           </Field>
+
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">Owner / manager</p>
+          <Field label="Name">
+            <input
+              className={inputCls}
+              value={form.ownerManagerName}
+              onChange={set('ownerManagerName')}
+            />
+          </Field>
+          <Field label="Phone" error={fieldErrors.ownerManagerPhone}>
+            <input
+              className={inputCls}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="416-555-0100"
+              value={form.ownerManagerPhone}
+              onChange={set('ownerManagerPhone')}
+            />
+          </Field>
+
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+            Signal receiving center
+          </p>
+          <Field label="Name">
+            <input
+              className={inputCls}
+              value={form.signalReceivingCenterName}
+              onChange={set('signalReceivingCenterName')}
+            />
+          </Field>
+          <Field label="Phone" error={fieldErrors.signalReceivingCenterPhone}>
+            <input
+              className={inputCls}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="416-555-0100"
+              value={form.signalReceivingCenterPhone}
+              onChange={set('signalReceivingCenterPhone')}
+            />
+          </Field>
+
           <Field label="Notes">
             <textarea className={cn(inputCls, 'min-h-24 resize-y')} value={form.notes} onChange={set('notes')} />
           </Field>

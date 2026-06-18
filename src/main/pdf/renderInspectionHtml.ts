@@ -343,11 +343,15 @@ export function renderInspectionHtml(
   <div class="info-grid">
     <section class="info-card">
       <h2>Client</h2>
-      <div class="info-row"><span class="info-label">Name</span><span>${dash(client?.name)}</span></div>
+      <div class="info-row"><span class="info-label">Building</span><span>${dash(client?.name)}</span></div>
       <div class="info-row"><span class="info-label">Address</span><span>${dash(address)}</span></div>
-      <div class="info-row"><span class="info-label">Contact</span><span>${dash(client?.contactName)}</span></div>
-      <div class="info-row"><span class="info-label">Phone</span><span>${dash(client?.phone)}</span></div>
+      <div class="info-row"><span class="info-label">Contact person</span><span>${dash(client?.contactName)}</span></div>
+      <div class="info-row"><span class="info-label">Contact phone</span><span>${dash(client?.phone)}</span></div>
       <div class="info-row"><span class="info-label">Email</span><span>${dash(client?.email)}</span></div>
+      <div class="info-row"><span class="info-label">Owner / manager</span><span>${dash(client?.ownerManagerName)}</span></div>
+      <div class="info-row"><span class="info-label">Owner / manager phone</span><span>${dash(client?.ownerManagerPhone)}</span></div>
+      <div class="info-row"><span class="info-label">Signal receiving center</span><span>${dash(client?.signalReceivingCenterName)}</span></div>
+      <div class="info-row"><span class="info-label">Signal receiving center phone</span><span>${dash(client?.signalReceivingCenterPhone)}</span></div>
     </section>
     <section class="info-card">
       <h2>Inspection</h2>

@@ -50,6 +50,20 @@ export function validateProvince(value: string): string | null {
   return 'Province should be letters (e.g. ON or Ontario).';
 }
 
+/** Optional phone — digits plus common formatting characters; 10–15 digits when stripped. */
+export function validatePhone(value: string): string | null {
+  const v = value.trim();
+  if (!v) return null;
+  if (!/^[+]?[\d\s().-]+$/.test(v)) {
+    return 'Phone may only include digits, spaces, and ()-.';
+  }
+  const digits = v.replace(/\D/g, '');
+  if (digits.length < 10 || digits.length > 15) {
+    return 'Phone should be 10–15 digits (e.g. 416-555-0100).';
+  }
+  return null;
+}
+
 export function validateAddressFields(parts: AddressParts): string | null {
   return (
     validatePostCode(parts.postCode) ??

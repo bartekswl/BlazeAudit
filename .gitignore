@@ -63,3 +63,6 @@ AGENTS.md
 
 # Misc
 *.tsbuildinfo
+
+# Local reference PDFs (not part of the app)
+CANULC-S536.pdf
