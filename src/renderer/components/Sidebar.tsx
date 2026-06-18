@@ -29,7 +29,7 @@ export function Sidebar({
   }, []);
 
   const initial = email ? email[0]?.toUpperCase() : 'I';
-  const subtitle = businessName.trim() || 'SubraLab';
+  const subtitle = businessName.trim() || 'Business name not set';
 
   const handleLogOut = () => setLogOutOpen(true);
 
@@ -130,7 +130,16 @@ export function Sidebar({
                     <div className="truncate text-sm font-medium text-[var(--ba-text-primary)]">
                       {email || 'Inspector'}
                     </div>
-                    <div className="truncate text-xs text-[var(--ba-text-muted)]">{subtitle}</div>
+                    <div
+                      className={cn(
+                        'truncate text-xs',
+                        businessName.trim()
+                          ? 'text-[var(--ba-text-muted)]'
+                          : 'text-[var(--ba-text-faint)]',
+                      )}
+                    >
+                      {subtitle}
+                    </div>
                   </div>
                 </button>
                 <button

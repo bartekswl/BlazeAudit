@@ -5,12 +5,14 @@ import {
   LayoutTemplate,
   Pencil,
   Plus,
+  RotateCcw,
   Search,
   Trash2,
   Upload,
 } from 'lucide-react';
 import type { Template, TemplateSummary } from '../../../shared/document';
 import { cn } from '../../lib/cn';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { TemplateEditor } from './TemplateEditor';
 
 export type TemplateDetailBreadcrumb = {
@@ -30,6 +32,7 @@ export function TemplatesScreen({
   const [message, setMessage] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | 'new' | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
+  const [resetTarget, setResetTarget] = useState<TemplateSummary | null>(null);
 
   const goBackToList = useCallback(() => {
     setEditingId(null);
@@ -86,7 +89,11 @@ export function TemplatesScreen({
     try {
       const result = await window.blazeaudit.templates.importJson();
       if (result.imported) {
-        setMessage(`Imported template from ${result.filePath}`);
+        setMessage(
+          result.replaced
+            ? `Replaced existing template from ${result.filePath}`
+            : `Imported template from ${result.filePath}`,
+        );
         await refresh();
         setEditingId(result.templateId);
       }
@@ -189,6 +196,13 @@ export function TemplatesScreen({
                   onClick={() => setEditingId(template.id)}
                   icon={Pencil}
                 />
+                {template.seedId && (
+                  <IconButton
+                    label="Reset to bundled version"
+                    onClick={() => setResetTarget(template)}
+                    icon={RotateCcw}
+                  />
+                )}
                 <IconButton
                   label="Duplicate"
                   onClick={async () => {
@@ -221,6 +235,37 @@ export function TemplatesScreen({
             </li>
           ))}
         </ul>
+      )}
+
+      {resetTarget?.seedId && (
+        <ConfirmDialog
+          title="Reset to bundled version?"
+          icon={RotateCcw}
+          confirmLabel="Reset template"
+          onCancel={() => setResetTarget(null)}
+          onConfirm={() => {
+            const target = resetTarget;
+            setResetTarget(null);
+            void (async () => {
+              setError(null);
+              try {
+                const rebuilt = await window.blazeaudit.templates.rebuildFromSeed(target.seedId!);
+                setMessage(`Reset "${target.name}" to the latest bundled version.`);
+                await refresh();
+                setEditingId(rebuilt.id);
+                setEditingTemplate(rebuilt);
+              } catch (e) {
+                setError(e instanceof Error ? e.message : 'Failed to reset template.');
+              }
+            })();
+          }}
+        >
+          <p>
+            This replaces the entire template definition with the bundled version shipped with
+            BlazeAudit.
+          </p>
+          <p>Your local edits to this template will be lost. Existing inspections are not changed.</p>
+        </ConfirmDialog>
       )}
     </div>
   );

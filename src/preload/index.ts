@@ -78,7 +78,8 @@ const api = {
     exportSchemaKit: (): Promise<{ saved: false } | { saved: true; directory: string }> =>
       ipcRenderer.invoke(IpcChannels.templatesExportSchemaKit),
     importTemplateJson: (): Promise<
-      { imported: false } | { imported: true; templateId: string; filePath: string }
+      | { imported: false }
+      | { imported: true; templateId: string; filePath: string; replaced: boolean }
     > => ipcRenderer.invoke(IpcChannels.templatesImportJson),
   },
   templates: {
@@ -94,10 +95,13 @@ const api = {
     exportJson: (id: string): Promise<{ saved: false } | { saved: true; filePath: string }> =>
       ipcRenderer.invoke(IpcChannels.templatesExportJson, id),
     importJson: (): Promise<
-      { imported: false } | { imported: true; templateId: string; filePath: string }
+      | { imported: false }
+      | { imported: true; templateId: string; filePath: string; replaced: boolean }
     > => ipcRenderer.invoke(IpcChannels.templatesImportJson),
     exportSchemaKit: (): Promise<{ saved: false } | { saved: true; directory: string }> =>
       ipcRenderer.invoke(IpcChannels.templatesExportSchemaKit),
+    rebuildFromSeed: (seedId: string): Promise<Template> =>
+      ipcRenderer.invoke(IpcChannels.templatesRebuildFromSeed, seedId),
   },
   inspections: {
     list: (options?: { clientId?: string }): Promise<InspectionSummary[]> =>

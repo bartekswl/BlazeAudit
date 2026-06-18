@@ -11,6 +11,7 @@ import { getDatabase } from './connection';
 
 interface TemplateRow {
   id: string;
+  seed_id: string | null;
   name: string;
   description: string;
   document: string;
@@ -34,6 +35,7 @@ function parseDocument(json: string): Document {
 function toTemplate(row: TemplateRow): Template {
   return {
     id: row.id,
+    seedId: row.seed_id,
     name: row.name,
     description: row.description,
     document: parseDocument(row.document),
@@ -47,6 +49,7 @@ function toSummary(row: TemplateRow): TemplateSummary {
   const document = parseDocument(row.document);
   return {
     id: row.id,
+    seedId: row.seed_id,
     name: row.name,
     description: row.description,
     version: row.version,
@@ -123,6 +126,17 @@ export function createTemplate(input: TemplateInput, options?: { seedId?: string
     });
 
   return getTemplate(id)!;
+}
+
+export function upsertTemplateBySeedId(
+  seedId: string,
+  input: TemplateInput,
+): { template: Template; created: boolean } {
+  const existing = getTemplateBySeedId(seedId);
+  if (existing) {
+    return { template: updateTemplate(existing.id, input), created: false };
+  }
+  return { template: createTemplate(input, { seedId }), created: true };
 }
 
 export function updateTemplate(id: string, input: TemplateInput): Template {

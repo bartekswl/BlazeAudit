@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { AlertTriangle, CalendarClock, CalendarDays, CheckCircle2, Plus, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { formatAddressForList } from '../../../shared/address';
 import type { DashboardStats } from '../../../shared/inspection';
+import type { BusinessProfile } from '../../../shared/profile';
 
 function useNow(): Date {
   const [now, setNow] = useState(() => new Date());
@@ -51,6 +53,7 @@ export function DashboardScreen({
   const now = useNow();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [business, setBusiness] = useState<BusinessProfile | null>(null);
 
   useEffect(() => {
     void window.blazeaudit.inspections
@@ -59,7 +62,15 @@ export function DashboardScreen({
       .finally(() => setLoading(false));
   }, []);
 
-  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  useEffect(() => {
+    void window.blazeaudit.profile.getBusiness().then(setBusiness);
+  }, []);
+
+  const businessName = business?.businessName.trim() ?? '';
+  const businessAddress = business ? formatAddressForList(business) : '';
+  const initial = businessName ? businessName[0]?.toUpperCase() : 'B';
+
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const date = now.toLocaleDateString([], {
     weekday: 'long',
     year: 'numeric',
@@ -68,12 +79,29 @@ export function DashboardScreen({
   });
 
   return (
-    <div className="space-y-6">
-      <section className="ba-panel-hero p-6">
-        <div className="text-4xl font-semibold tabular-nums tracking-tight text-[var(--ba-text-primary)]">
-          {time}
+    <div className="space-y-4">
+      <section className="ba-panel-hero flex items-center justify-between gap-4 px-4 py-3">
+        <div className="min-w-0">
+          <div className="text-2xl font-semibold tabular-nums tracking-tight text-[var(--ba-text-primary)]">
+            {time}
+          </div>
+          <div className="text-xs text-[var(--ba-text-muted)]">{date}</div>
         </div>
-        <div className="mt-1 text-sm text-[var(--ba-text-muted)]">{date}</div>
+        <div className="flex shrink-0 items-center gap-2.5 text-right">
+          <div className="min-w-0 max-w-[14rem] sm:max-w-xs">
+            <div className="truncate text-sm font-medium text-[var(--ba-text-primary)]">
+              {businessName || 'Business name not set'}
+            </div>
+            {businessAddress ? (
+              <div className="truncate text-xs text-[var(--ba-text-muted)]">{businessAddress}</div>
+            ) : (
+              <div className="text-xs text-[var(--ba-text-faint)]">No address on file</div>
+            )}
+          </div>
+          <div className="grid size-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-flame-400 via-flame-500 to-red-600 text-sm font-semibold text-white shadow-md shadow-flame-500/30">
+            {initial}
+          </div>
+        </div>
       </section>
 
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">

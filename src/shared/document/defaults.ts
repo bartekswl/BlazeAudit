@@ -4,6 +4,8 @@ import { ulc536Document } from './ulc536-template';
 
 export interface DefaultTemplateSeed {
   seedId: string;
+  /** Bump to auto-rebuild this bundled template on app unlock when revision is newer. */
+  seedRevision?: number;
   name: string;
   description: string;
   document: Document;
@@ -133,24 +135,28 @@ function walkthroughDocument(): Document {
 export const DEFAULT_TEMPLATE_SEEDS: DefaultTemplateSeed[] = [
   {
     seedId: 'default-sprinkler-annual',
+    seedRevision: 1,
     name: 'Annual Sprinkler System Inspection',
     description: 'Sprinkler system overview, checklist, head table, and sign-off.',
     document: sprinklerDocument(),
   },
   {
     seedId: 'default-extinguisher-survey',
+    seedRevision: 1,
     name: 'Fire Extinguisher Survey',
     description: 'Extinguisher inventory table with mounting and access checks.',
     document: extinguisherDocument(),
   },
   {
     seedId: 'default-fire-walkthrough',
+    seedRevision: 1,
     name: 'General Fire Safety Walkthrough',
     description: 'Flexible walkthrough with optional sections for egress and housekeeping.',
     document: walkthroughDocument(),
   },
   {
     seedId: 'default-ulc-s536-fire-alarm',
+    seedRevision: 1,
     name: 'CAN/ULC-S536 Fire Alarm Annual Test & Inspection',
     description:
       'CAN/ULC-S536:2019 (2024) annual fire alarm test and inspection record with documentation, control unit tests, and field device sheets.',
