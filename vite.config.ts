@@ -27,8 +27,9 @@ export default defineConfig({
       },
       {
         entry: 'src/preload/index.ts',
-        onstart({ reload }) {
-          reload();
+        onstart({ startup, reload }) {
+          if ('electronApp' in process && process.electronApp) reload();
+          else void startup();
         },
         vite: {
           build: {

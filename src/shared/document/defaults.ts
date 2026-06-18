@@ -1,6 +1,5 @@
 import { createBlock, emptyDocument } from './factory';
 import type { Document } from './types';
-import { ulc536Document } from './ulc536-template';
 
 export interface DefaultTemplateSeed {
   seedId: string;
@@ -148,12 +147,5 @@ export const DEFAULT_TEMPLATE_SEEDS: DefaultTemplateSeed[] = [
     name: 'General Fire Safety Walkthrough',
     description: 'Flexible walkthrough with optional sections for egress and housekeeping.',
     document: walkthroughDocument(),
-  },
-  {
-    seedId: 'default-ulc-s536-fire-alarm',
-    name: 'CAN/ULC-S536 Fire Alarm Annual Test & Inspection',
-    description:
-      'CAN/ULC-S536:2019 (2024) annual fire alarm test and inspection record with documentation, control unit tests, and field device sheets.',
-    document: ulc536Document(),
   },
 ];

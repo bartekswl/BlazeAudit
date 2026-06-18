@@ -48,12 +48,21 @@ function toSummary(row: TemplateRow): TemplateSummary {
   const document = parseDocument(row.document);
   return {
     id: row.id,
+    seedId: row.seed_id,
     name: row.name,
     description: row.description,
     version: row.version,
     updatedAt: row.updated_at,
     blockCount: countBlocks(document.blocks),
   };
+}
+
+export function assertCustomTemplate(id: string): void {
+  const row = getDatabase()
+    .prepare('SELECT seed_id FROM templates WHERE id = ?')
+    .get(id) as { seed_id: string | null } | undefined;
+  if (!row) throw new Error(`Template not found: ${id}`);
+  if (row.seed_id) throw new Error('Built-in templates cannot be modified.');
 }
 
 function normalize(input: TemplateInput) {
@@ -126,7 +135,59 @@ export function createTemplate(input: TemplateInput, options?: { seedId?: string
   return getTemplate(id)!;
 }
 
+export function syncBundledTemplateFromSeed(seedId: string, input: TemplateInput): Template {
+  const existing = getTemplateBySeedId(seedId);
+  if (!existing) throw new Error(`Bundled template not found for seed: ${seedId}`);
+
+  const fields = normalize(input);
+  const now = new Date().toISOString();
+
+  getDatabase()
+    .prepare(
+      `UPDATE templates
+         SET name = @name, description = @description, document = @document,
+             version = @version, updated_at = @updatedAt
+       WHERE seed_id = @seedId`,
+    )
+    .run({
+      seedId,
+      name: fields.name,
+      description: fields.description,
+      document: JSON.stringify(fields.document),
+      version: existing.version + 1,
+      updatedAt: now,
+    });
+
+  return getTemplateBySeedId(seedId)!;
+}
+
+export function deleteBundledTemplatesExcept(keepSeedIds: string[]): void {
+  const db = getDatabase();
+
+  const rows =
+    keepSeedIds.length === 0
+      ? (db.prepare('SELECT id FROM templates WHERE seed_id IS NOT NULL').all() as { id: string }[])
+      : (db
+          .prepare(
+            `SELECT id FROM templates WHERE seed_id IS NOT NULL AND seed_id NOT IN (${keepSeedIds.map(() => '?').join(', ')})`,
+          )
+          .all(...keepSeedIds) as { id: string }[]);
+
+  if (rows.length === 0) return;
+
+  const ids = rows.map((row) => row.id);
+  const placeholders = ids.map(() => '?').join(', ');
+
+  // Inspections keep their document snapshot; drop the template link so retired
+  // bundled seeds can be removed without violating the FK constraint.
+  db.prepare(`UPDATE inspections SET template_id = NULL WHERE template_id IN (${placeholders})`).run(
+    ...ids,
+  );
+  db.prepare(`DELETE FROM templates WHERE id IN (${placeholders})`).run(...ids);
+}
+
 export function updateTemplate(id: string, input: TemplateInput): Template {
+  assertCustomTemplate(id);
   const fields = normalize(input);
   const now = new Date().toISOString();
   const existing = getTemplate(id);
@@ -153,11 +214,13 @@ export function updateTemplate(id: string, input: TemplateInput): Template {
 }
 
 export function deleteTemplate(id: string): void {
+  assertCustomTemplate(id);
   const result = getDatabase().prepare('DELETE FROM templates WHERE id = ?').run(id);
   if (result.changes === 0) throw new Error(`Template not found: ${id}`);
 }
 
 export function duplicateTemplate(id: string): Template {
+  assertCustomTemplate(id);
   const source = getTemplate(id);
   if (!source) throw new Error(`Template not found: ${id}`);
   return createTemplate({

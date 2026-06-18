@@ -48,6 +48,8 @@ export function TableFillIn({
 
   onPatchBlocks,
 
+  readOnly = false,
+
 }: {
 
   block: Block;
@@ -55,6 +57,8 @@ export function TableFillIn({
   path: BlockPath;
 
   onPatchBlocks: (mutator: (blocks: Block[]) => Block[]) => void;
+
+  readOnly?: boolean;
 
 }) {
 
@@ -67,6 +71,53 @@ export function TableFillIn({
   const rowHeights = tableValue.rowHeights;
 
   const layoutLocked = Boolean(block.config.layoutLocked);
+
+  if (readOnly) {
+    return (
+      <div className="min-w-0 overflow-x-auto">
+        <p className="mb-2 text-xs font-medium text-neutral-400">{block.label || 'Table'}</p>
+        <table className="w-max min-w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              {columns.map((col) => (
+                <th
+                  key={col.key}
+                  className="border border-white/10 bg-white/[0.03] px-2 py-1.5 text-left text-xs font-medium text-neutral-300"
+                >
+                  {col.title}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="border border-white/10 px-3 py-4 text-center text-xs text-neutral-500"
+                >
+                  No rows in this table.
+                </td>
+              </tr>
+            ) : (
+              rows.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {columns.map((col) => (
+                    <td
+                      key={col.key}
+                      className="border border-white/10 px-2 py-1.5 text-xs text-neutral-400"
+                    >
+                      {row[col.key] ?? '—'}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
 
 

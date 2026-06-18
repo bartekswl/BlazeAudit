@@ -50,7 +50,15 @@ import { cn } from './lib/cn';
 
 
 const screens: Record<
-  Exclude<NavId, 'customers' | 'templates' | 'documents' | 'database' | 'settings'>,
+  Exclude<
+    NavId,
+    | 'customers'
+    | 'builtinTemplates'
+    | 'customTemplates'
+    | 'documents'
+    | 'database'
+    | 'settings'
+  >,
   ReactNode
 > = {
 
@@ -121,19 +129,19 @@ export default function App() {
 
     }
 
-    if (activeId !== 'templates') {
-
-      setTemplateBreadcrumb(null);
-
-      templateBackRef.current = null;
-
-    }
-
     if (activeId !== 'documents') {
 
       setDocumentBreadcrumb(null);
 
       documentBackRef.current = null;
+
+    }
+
+    if (activeId !== 'customTemplates' && activeId !== 'builtinTemplates') {
+
+      setTemplateBreadcrumb(null);
+
+      templateBackRef.current = null;
 
     }
 
@@ -192,8 +200,10 @@ export default function App() {
 
 
   const hasSubNav =
-
-    activeId === 'customers' || activeId === 'templates' || activeId === 'documents';
+    activeId === 'customers' ||
+    activeId === 'builtinTemplates' ||
+    activeId === 'customTemplates' ||
+    activeId === 'documents';
 
 
 
@@ -256,7 +266,8 @@ export default function App() {
 
               </nav>
 
-            ) : activeId === 'templates' && templateBreadcrumb ? (
+            ) : (activeId === 'builtinTemplates' || activeId === 'customTemplates') &&
+              templateBreadcrumb ? (
 
               <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-sm">
 
@@ -270,7 +281,7 @@ export default function App() {
 
                 >
 
-                  Templates
+                  {activeId === 'builtinTemplates' ? 'Built-in Templates' : 'Custom Templates'}
 
                 </button>
 
@@ -357,10 +368,6 @@ export default function App() {
 
               />
 
-            ) : activeId === 'templates' ? (
-
-              <TemplatesScreen onDetailChange={handleTemplateDetailChange} />
-
             ) : activeId === 'documents' ? (
 
               <DocumentsScreen
@@ -371,6 +378,20 @@ export default function App() {
 
                 onDetailChange={handleDocumentDetailChange}
 
+              />
+
+            ) : activeId === 'builtinTemplates' ? (
+
+              <TemplatesScreen
+                variant="built-in"
+                onDetailChange={handleTemplateDetailChange}
+              />
+
+            ) : activeId === 'customTemplates' ? (
+
+              <TemplatesScreen
+                variant="custom"
+                onDetailChange={handleTemplateDetailChange}
               />
 
             ) : activeId === 'database' ? (

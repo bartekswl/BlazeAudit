@@ -27,6 +27,7 @@ function LazyTextInput({
   className,
   placeholder,
   type = 'text',
+  readOnly = false,
 }: {
   value: string;
   onCommit: (value: string) => void;
@@ -34,6 +35,7 @@ function LazyTextInput({
   className?: string;
   placeholder?: string;
   type?: string;
+  readOnly?: boolean;
 }) {
   const [local, setLocal] = useState(value);
   const onCommitRef = useRef(onCommit);
@@ -56,6 +58,23 @@ function LazyTextInput({
   const handleBlur = () => {
     if (local !== value) onCommitRef.current(local);
   };
+
+  if (readOnly) {
+    if (multiline) {
+      return (
+        <div
+          className={`${className ?? ''} min-h-[2.5rem] whitespace-pre-wrap text-sm text-neutral-500`}
+        >
+          {value || placeholder || '—'}
+        </div>
+      );
+    }
+    return (
+      <div className={`${className ?? ''} text-sm text-neutral-500`}>
+        {value || placeholder || '—'}
+      </div>
+    );
+  }
 
   if (multiline) {
     return (
@@ -84,9 +103,11 @@ function LazyTextInput({
 function LazyLinesInput({
   values,
   onCommit,
+  readOnly = false,
 }: {
   values: string[];
   onCommit: (values: string[]) => void;
+  readOnly?: boolean;
 }) {
   const [local, setLocal] = useState(values);
   const onCommitRef = useRef(onCommit);
@@ -103,6 +124,21 @@ function LazyLinesInput({
     const id = window.setTimeout(() => onCommitRef.current(local), COMMIT_MS);
     return () => window.clearTimeout(id);
   }, [local, values]);
+
+  if (readOnly) {
+    return (
+      <div className="space-y-2">
+        {values.map((line, index) => (
+          <div
+            key={index}
+            className="border-b border-white/10 py-2 text-sm text-neutral-500"
+          >
+            {line || `Line ${index + 1}`}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -134,12 +170,14 @@ export function BlockFillIn({
   onValueChange,
   onPatchBlocks,
   canEditStructure = false,
+  readOnly = false,
 }: {
   blocks: Block[];
   pathPrefix?: BlockPath;
   onValueChange: (path: BlockPath, value: unknown) => void;
   onPatchBlocks: (mutator: (blocks: Block[]) => Block[]) => void;
   canEditStructure?: boolean;
+  readOnly?: boolean;
 }) {
   const isRoot = pathPrefix.length === 0;
 
@@ -159,6 +197,7 @@ export function BlockFillIn({
               onValueChange={onValueChange}
               onPatchBlocks={onPatchBlocks}
               canEditStructure={canEditStructure}
+              readOnly={readOnly}
             />
           );
         }
@@ -173,6 +212,7 @@ export function BlockFillIn({
             onValueChange={onValueChange}
             onPatchBlocks={onPatchBlocks}
             canEditStructure={canEditStructure}
+            readOnly={readOnly}
           />
         );
       })}
@@ -194,6 +234,7 @@ const BlockFillInSection = memo(function BlockFillInSection({
   onValueChange,
   onPatchBlocks,
   canEditStructure,
+  readOnly,
 }: {
   block: Block;
   path: BlockPath;
@@ -202,9 +243,10 @@ const BlockFillInSection = memo(function BlockFillInSection({
   onValueChange: (path: BlockPath, value: unknown) => void;
   onPatchBlocks: (mutator: (blocks: Block[]) => Block[]) => void;
   canEditStructure: boolean;
+  readOnly: boolean;
 }) {
   const included = (block.value as { included?: boolean } | null)?.included ?? true;
-  const isHiddenOptional = Boolean(block.config.optional) && !included;
+  const isHiddenOptional = Boolean(block.config.optional) && !included && !readOnly;
 
   return (
     <div className="min-w-0 space-y-4">
@@ -257,34 +299,41 @@ const BlockFillInSection = memo(function BlockFillInSection({
                   Landscape
                 </span>
               )}
-            </div>
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
-              {sectionHasChecklist(block.children) && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    onPatchBlocks((root) =>
-                      updateBlock(root, path, {
-                        children: markChecklistsNaInTree(block.children ?? []),
-                      }),
-                    )
-                  }
-                  className="rounded-md border border-white/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-neutral-500 transition-colors hover:border-flame-500/40 hover:text-flame-300"
-                >
-                  Mark section N/A
-                </button>
-              )}
-              {Boolean(block.config.optional) && (
-                <label className="flex shrink-0 items-center gap-2 text-xs text-neutral-400">
-                  <input
-                    type="checkbox"
-                    checked={included}
-                    onChange={(e) => onValueChange(path, { included: e.target.checked })}
-                  />
-                  Include section
-                </label>
+              {readOnly && Boolean(block.config.optional) && (
+                <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+                  Optional
+                </span>
               )}
             </div>
+            {!readOnly && (
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                {sectionHasChecklist(block.children) && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onPatchBlocks((root) =>
+                        updateBlock(root, path, {
+                          children: markChecklistsNaInTree(block.children ?? []),
+                        }),
+                      )
+                    }
+                    className="rounded-md border border-white/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-neutral-500 transition-colors hover:border-flame-500/40 hover:text-flame-300"
+                  >
+                    Mark section N/A
+                  </button>
+                )}
+                {Boolean(block.config.optional) && (
+                  <label className="flex shrink-0 items-center gap-2 text-xs text-neutral-400">
+                    <input
+                      type="checkbox"
+                      checked={included}
+                      onChange={(e) => onValueChange(path, { included: e.target.checked })}
+                    />
+                    Include section
+                  </label>
+                )}
+              </div>
+            )}
           </div>
           {block.children && block.children.length > 0 && (
             <BlockFillIn
@@ -293,6 +342,7 @@ const BlockFillInSection = memo(function BlockFillInSection({
               onValueChange={onValueChange}
               onPatchBlocks={onPatchBlocks}
               canEditStructure={canEditStructure}
+              readOnly={readOnly}
             />
           )}
           {canEditStructure && (
@@ -312,6 +362,7 @@ const BlockFillInRow = memo(function BlockFillInRow({
   onValueChange,
   onPatchBlocks,
   canEditStructure,
+  readOnly,
 }: {
   block: Block;
   path: BlockPath;
@@ -320,6 +371,7 @@ const BlockFillInRow = memo(function BlockFillInRow({
   onValueChange: (path: BlockPath, value: unknown) => void;
   onPatchBlocks: (mutator: (blocks: Block[]) => Block[]) => void;
   canEditStructure: boolean;
+  readOnly: boolean;
 }) {
   return (
     <div className="min-w-0 space-y-4">
@@ -337,6 +389,7 @@ const BlockFillInRow = memo(function BlockFillInRow({
           path={path}
           onValueChange={onValueChange}
           onPatchBlocks={onPatchBlocks}
+          readOnly={readOnly}
         />
       </div>
     </div>
@@ -348,11 +401,13 @@ const BlockFillInItem = memo(function BlockFillInItem({
   path,
   onValueChange,
   onPatchBlocks,
+  readOnly,
 }: {
   block: Block;
   path: BlockPath;
   onValueChange: (path: BlockPath, value: unknown) => void;
   onPatchBlocks: (mutator: (blocks: Block[]) => Block[]) => void;
+  readOnly: boolean;
 }) {
   switch (block.type) {
     case 'heading': {
@@ -377,6 +432,7 @@ const BlockFillInItem = memo(function BlockFillInItem({
             value={(block.value as string) ?? ''}
             placeholder={(block.config.placeholder as string) ?? ''}
             onCommit={(next) => onValueChange(path, next)}
+            readOnly={readOnly}
           />
         </label>
       );
@@ -391,6 +447,7 @@ const BlockFillInItem = memo(function BlockFillInItem({
           <LazyLinesInput
             values={lineValues}
             onCommit={(next) => onValueChange(path, next)}
+            readOnly={readOnly}
           />
         </div>
       );
@@ -407,7 +464,7 @@ const BlockFillInItem = memo(function BlockFillInItem({
         <div>
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-medium text-neutral-400">{block.label || 'Checklist'}</p>
-            {items.length > 0 && (
+            {!readOnly && items.length > 0 && (
               <button
                 type="button"
                 onClick={markAllNa}
@@ -421,20 +478,33 @@ const BlockFillInItem = memo(function BlockFillInItem({
             {items.map((item) => (
               <li key={item.id} className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="min-w-0 flex-1 text-neutral-200">{item.label}</span>
-                {(['pass', 'fail', 'na'] as const).map((choice) => (
-                  <button
-                    key={choice}
-                    type="button"
-                    onClick={() => onValueChange(path, { ...values, [item.id]: choice })}
-                    className={`rounded-md border px-2 py-1 text-xs uppercase ${
-                      values[item.id] === choice
-                        ? 'border-flame-500/50 bg-flame-500/15 text-flame-300'
-                        : 'border-white/10 text-neutral-500 hover:text-neutral-300'
-                    }`}
-                  >
-                    {choice}
-                  </button>
-                ))}
+                {readOnly ? (
+                  <div className="flex gap-2">
+                    {(['pass', 'fail', 'na'] as const).map((choice) => (
+                      <span
+                        key={choice}
+                        className="rounded-md border border-white/10 px-2 py-1 text-xs uppercase text-neutral-600"
+                      >
+                        {choice}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  (['pass', 'fail', 'na'] as const).map((choice) => (
+                    <button
+                      key={choice}
+                      type="button"
+                      onClick={() => onValueChange(path, { ...values, [item.id]: choice })}
+                      className={`rounded-md border px-2 py-1 text-xs uppercase ${
+                        values[item.id] === choice
+                          ? 'border-flame-500/50 bg-flame-500/15 text-flame-300'
+                          : 'border-white/10 text-neutral-500 hover:text-neutral-300'
+                      }`}
+                    >
+                      {choice}
+                    </button>
+                  ))
+                )}
               </li>
             ))}
           </ul>
@@ -442,7 +512,14 @@ const BlockFillInItem = memo(function BlockFillInItem({
       );
     }
     case 'table':
-      return <TableFillIn block={block} path={path} onPatchBlocks={onPatchBlocks} />;
+      return (
+        <TableFillIn
+          block={block}
+          path={path}
+          onPatchBlocks={onPatchBlocks}
+          readOnly={readOnly}
+        />
+      );
     case 'signature': {
       const value = (block.value as { name?: string; date?: string | null }) ?? {};
       return (
@@ -453,12 +530,14 @@ const BlockFillInItem = memo(function BlockFillInItem({
             placeholder="Inspector name"
             value={value.name ?? ''}
             onCommit={(name) => onValueChange(path, { ...value, name })}
+            readOnly={readOnly}
           />
           <LazyTextInput
             className={inputCls}
             type="date"
             value={value.date ?? ''}
             onCommit={(date) => onValueChange(path, { ...value, date: date || null })}
+            readOnly={readOnly}
           />
           <p className="text-xs text-neutral-600">
             Handwritten signature capture is planned for a later update.

@@ -34,6 +34,7 @@ export function registerTemplatesIpc(): void {
   ipcMain.handle(IpcChannels.templatesExportJson, async (_event, id: string) => {
     const template = templates.getTemplate(id);
     if (!template) throw new Error(`Template not found: ${id}`);
+    templates.assertCustomTemplate(id);
 
     const safeName = template.name.replace(/[^\w\-]+/g, '-').replace(/-+/g, '-');
     const { canceled, filePath } = await dialog.showSaveDialog({

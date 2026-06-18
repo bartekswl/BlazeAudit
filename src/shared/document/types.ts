@@ -68,6 +68,8 @@ export interface Template {
 
 export interface TemplateSummary {
   id: string;
+  /** Set when the row was seeded from a bundled app template. */
+  seedId: string | null;
   name: string;
   description: string;
   version: number;

@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   LayoutTemplate,
   Settings,
+  SquarePen,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -13,7 +14,8 @@ export type NavId =
   | 'dashboard'
   | 'customers'
   | 'documents'
-  | 'templates'
+  | 'builtinTemplates'
+  | 'customTemplates'
   | 'calendar'
   | 'database'
   | 'settings';
@@ -30,7 +32,8 @@ export const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'customers', label: 'Customers', icon: Users },
   { id: 'documents', label: 'Documents', icon: FileText },
-  { id: 'templates', label: 'Templates', icon: LayoutTemplate },
+  { id: 'builtinTemplates', label: 'Built-in Templates', icon: LayoutTemplate },
+  { id: 'customTemplates', label: 'Custom Templates', icon: SquarePen },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
   { id: 'database', label: 'Database', icon: Database },
   { id: 'settings', label: 'Settings', icon: Settings },
