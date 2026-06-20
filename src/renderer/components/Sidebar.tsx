@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { ColorThemeToggle } from './ColorThemeToggle';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -14,8 +14,10 @@ export function Sidebar({
   onSelect: (id: NavId) => void;
   onOpenUserProfile: () => void;
 }) {
+  const prevActiveId = useRef(activeId);
   const [email, setEmail] = useState('');
   const [businessName, setBusinessName] = useState('');
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [logOutOpen, setLogOutOpen] = useState(false);
   const [expanded, setExpanded] = useState(true);
 
@@ -26,7 +28,18 @@ export function Sidebar({
     void window.blazeaudit.profile.getBusiness().then((profile) => {
       setBusinessName(profile.businessName);
     });
+    void window.blazeaudit.profile.getLogo().then(setLogoDataUrl);
   }, []);
+
+  useEffect(() => {
+    if (prevActiveId.current === 'settings' && activeId !== 'settings') {
+      void window.blazeaudit.profile.getBusiness().then((profile) => {
+        setBusinessName(profile.businessName);
+      });
+      void window.blazeaudit.profile.getLogo().then(setLogoDataUrl);
+    }
+    prevActiveId.current = activeId;
+  }, [activeId]);
 
   const initial = email ? email[0]?.toUpperCase() : 'I';
   const subtitle = businessName.trim() || 'Business name not set';
@@ -123,9 +136,7 @@ export function Sidebar({
                       : 'hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]',
                   )}
                 >
-                  <div className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-flame-400 via-flame-500 to-red-600 text-sm font-semibold text-white shadow-md shadow-flame-500/30">
-                    {initial}
-                  </div>
+                  <UserAvatar logoDataUrl={logoDataUrl} initial={initial} />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium text-[var(--ba-text-primary)]">
                       {email || 'Inspector'}
@@ -167,9 +178,7 @@ export function Sidebar({
                     : 'hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]',
                 )}
               >
-                <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-flame-400 via-flame-500 to-red-600 text-sm font-semibold text-white shadow-md shadow-flame-500/30">
-                  {initial}
-                </div>
+                <UserAvatar logoDataUrl={logoDataUrl} initial={initial} />
                 <span className="sr-only">User profile settings</span>
               </button>
               <button
@@ -200,5 +209,21 @@ export function Sidebar({
         </ConfirmDialog>
       )}
     </>
+  );
+}
+
+function UserAvatar({ logoDataUrl, initial }: { logoDataUrl: string | null; initial: string }) {
+  if (logoDataUrl) {
+    return (
+      <div className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--ba-chrome-border)] bg-white p-0.5">
+        <img src={logoDataUrl} alt="" className="size-full scale-[1.35] rounded-full object-contain" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-flame-400 via-flame-500 to-red-600 text-sm font-semibold text-white shadow-md shadow-flame-500/30">
+      {initial}
+    </div>
   );
 }

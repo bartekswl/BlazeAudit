@@ -205,6 +205,14 @@ export function updateClient(id: string, input: ClientInput): Client {
 }
 
 export function deleteClient(id: string): void {
-  const result = getDatabase().prepare('DELETE FROM clients WHERE id = ?').run(id);
+  const db = getDatabase();
+  const linked = db
+    .prepare('SELECT COUNT(*) AS n FROM inspections WHERE client_id = ?')
+    .get(id) as { n: number };
+  if (linked.n > 0) {
+    throw new Error('This customer still has documents. Delete them first.');
+  }
+
+  const result = db.prepare('DELETE FROM clients WHERE id = ?').run(id);
   if (result.changes === 0) throw new Error(`Client not found: ${id}`);
 }

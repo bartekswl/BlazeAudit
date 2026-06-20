@@ -5,6 +5,7 @@ import type { Inspection, InspectionSummary } from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
 import type { TemplateSummary } from '../../../shared/document';
 import { cn } from '../../lib/cn';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { InspectionEditor } from './InspectionEditor';
 import { NewInspectionDialog } from './NewInspectionDialog';
 
@@ -39,6 +40,7 @@ export function DocumentsScreen({
   const [newClientId, setNewClientId] = useState<string | undefined>();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingInspection, setEditingInspection] = useState<Inspection | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<InspectionSummary | null>(null);
 
   const goBackToList = useCallback(() => {
     setEditingId(null);
@@ -119,6 +121,13 @@ export function DocumentsScreen({
     setShowNew(false);
     setEditingId(created.id);
     setEditingInspection(created);
+    await refresh();
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    await window.blazeaudit.inspections.remove(pendingDelete.id);
+    setPendingDelete(null);
     await refresh();
   };
 
@@ -223,12 +232,8 @@ export function DocumentsScreen({
               </span>
               <button
                 type="button"
-                aria-label="Delete"
-                onClick={async () => {
-                  if (!window.confirm(`Delete "${row.title}"? This cannot be undone.`)) return;
-                  await window.blazeaudit.inspections.remove(row.id);
-                  await refresh();
-                }}
+                aria-label={`Delete ${row.title}`}
+                onClick={() => setPendingDelete(row)}
                 className="rounded-lg border border-white/10 p-2 text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
               >
                 <Trash2 className="size-4" />
@@ -246,6 +251,22 @@ export function DocumentsScreen({
           onClose={() => setShowNew(false)}
           onCreate={createInspection}
         />
+      )}
+
+      {pendingDelete && (
+        <ConfirmDialog
+          title="Delete document?"
+          icon={Trash2}
+          confirmLabel="Delete"
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={() => void confirmDelete()}
+        >
+          <p>
+            <span className="font-medium text-[var(--ba-text-primary)]">{pendingDelete.title}</span>{' '}
+            will be permanently deleted.
+          </p>
+          <p>This cannot be undone.</p>
+        </ConfirmDialog>
       )}
     </div>
   );

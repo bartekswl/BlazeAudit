@@ -105,15 +105,15 @@ export function DashboardScreen({
               <div className="text-xs text-[var(--ba-text-faint)]">No address on file</div>
             )}
           </div>
-          <div className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg border border-[var(--ba-chrome-border)] bg-[var(--ba-chrome-bg)]">
+          <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border-2 border-[var(--ba-chrome-border)] bg-white p-1.5">
             {logoDataUrl ? (
               <img
                 src={logoDataUrl}
                 alt=""
-                className="max-h-full max-w-full object-contain"
+                className="size-full scale-[1.35] object-contain"
               />
             ) : (
-              <ImagePlus className="size-4 text-[var(--ba-text-faint)]" aria-hidden />
+              <ImagePlus className="size-5 text-[var(--ba-text-faint)]" aria-hidden />
             )}
           </div>
         </div>

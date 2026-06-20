@@ -6,6 +6,7 @@ export function ConfirmDialog({
   icon: Icon,
   confirmLabel,
   cancelLabel = 'Cancel',
+  showCancel = true,
   onCancel,
   onConfirm,
   children,
@@ -14,6 +15,7 @@ export function ConfirmDialog({
   icon?: LucideIcon;
   confirmLabel: string;
   cancelLabel?: string;
+  showCancel?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
   children: ReactNode;
@@ -63,9 +65,11 @@ export function ConfirmDialog({
         </div>
 
         <div className="mt-6 flex justify-end gap-2 border-t border-[var(--ba-panel-border)] pt-4">
-          <button type="button" onClick={onCancel} className="ba-btn-ghost">
-            {cancelLabel}
-          </button>
+          {showCancel && (
+            <button type="button" onClick={onCancel} className="ba-btn-ghost">
+              {cancelLabel}
+            </button>
+          )}
           <button type="button" onClick={onConfirm} className="ba-btn-primary">
             {confirmLabel}
           </button>

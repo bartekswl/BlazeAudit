@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import type { Template, TemplateSummary } from '../../../shared/document';
 import { cn } from '../../lib/cn';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { BuiltinTemplateViewer } from './BuiltinTemplateViewer';
 import { TemplateEditor } from './TemplateEditor';
 
@@ -42,6 +43,7 @@ export function TemplatesScreen({
   const [viewingTemplate, setViewingTemplate] = useState<Template | null>(null);
   const [editingId, setEditingId] = useState<string | 'new' | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<TemplateSummary | null>(null);
 
   const goBackToList = useCallback(() => {
     setViewingId(null);
@@ -133,6 +135,13 @@ export function TemplatesScreen({
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Import failed.');
     }
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    await window.blazeaudit.templates.remove(pendingDelete.id);
+    setPendingDelete(null);
+    await refresh();
   };
 
   if (isCustom && editingId) {
@@ -265,13 +274,7 @@ export function TemplatesScreen({
                     <IconButton
                       label="Delete"
                       danger
-                      onClick={async () => {
-                        if (!window.confirm(`Delete "${template.name}"? This cannot be undone.`)) {
-                          return;
-                        }
-                        await window.blazeaudit.templates.remove(template.id);
-                        await refresh();
-                      }}
+                      onClick={() => setPendingDelete(template)}
                       icon={Trash2}
                     />
                   </div>
@@ -294,6 +297,22 @@ export function TemplatesScreen({
             </li>
           ))}
         </ul>
+      )}
+
+      {pendingDelete && (
+        <ConfirmDialog
+          title="Delete template?"
+          icon={Trash2}
+          confirmLabel="Delete"
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={() => void confirmDelete()}
+        >
+          <p>
+            <span className="font-medium text-[var(--ba-text-primary)]">{pendingDelete.name}</span>{' '}
+            will be permanently deleted.
+          </p>
+          <p>This cannot be undone.</p>
+        </ConfirmDialog>
       )}
     </div>
   );

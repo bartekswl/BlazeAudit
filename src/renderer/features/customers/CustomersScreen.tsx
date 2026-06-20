@@ -7,10 +7,11 @@ import {
   type FormEvent,
   type ReactNode,
 } from 'react';
-import { Pencil, Plus, Search, Trash2, Users, X } from 'lucide-react';
+import { FileText, Pencil, Plus, Search, Trash2, Users, X } from 'lucide-react';
 import { validateCountry, validatePhone, validatePostCode, validateProvince } from '../../../shared/address';
 import type { Client, ClientInput } from '../../../shared/types';
 import { cn } from '../../lib/cn';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { CustomerDetailScreen } from './CustomerDetailScreen';
 import { filterClients } from './filterClients';
 import { inputCls } from '../templates/BlockList';
@@ -57,6 +58,11 @@ export function CustomersScreen({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedClientName, setSelectedClientName] = useState<string | null>(null);
   const [detailRefreshKey, setDetailRefreshKey] = useState(0);
+  const [pendingDelete, setPendingDelete] = useState<Client | null>(null);
+  const [blockedDelete, setBlockedDelete] = useState<{
+    client: Client;
+    documentCount: number;
+  } | null>(null);
 
   const goBackToList = useCallback(() => {
     setSelectedId(null);
@@ -90,12 +96,66 @@ export function CustomersScreen({
 
   const filtered = useMemo(() => filterClients(clients, search), [clients, search]);
 
-  const handleDelete = async (client: Client) => {
-    if (!window.confirm(`Delete "${client.name}"? This cannot be undone.`)) return;
-    await window.blazeaudit.clients.remove(client.id);
-    if (selectedId === client.id) goBackToList();
-    await refresh();
+  const requestDelete = async (client: Client) => {
+    setError(null);
+    try {
+      const stats = await window.blazeaudit.inspections.getClientStats(client.id);
+      if (stats.documentCount > 0) {
+        setBlockedDelete({ client, documentCount: stats.documentCount });
+        return;
+      }
+      setPendingDelete(client);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to check customer documents.');
+    }
   };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    try {
+      await window.blazeaudit.clients.remove(pendingDelete.id);
+      if (selectedId === pendingDelete.id) goBackToList();
+      setPendingDelete(null);
+      await refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to delete customer.');
+      setPendingDelete(null);
+    }
+  };
+
+  const deleteConfirmDialog = pendingDelete ? (
+    <ConfirmDialog
+      title="Delete customer?"
+      icon={Trash2}
+      confirmLabel="Delete"
+      onCancel={() => setPendingDelete(null)}
+      onConfirm={() => void confirmDelete()}
+    >
+      <p>
+        <span className="font-medium text-[var(--ba-text-primary)]">{pendingDelete.name}</span>{' '}
+        will be permanently deleted.
+      </p>
+      <p>This cannot be undone.</p>
+    </ConfirmDialog>
+  ) : null;
+
+  const blockedDeleteDialog = blockedDelete ? (
+    <ConfirmDialog
+      title="Cannot delete customer"
+      icon={FileText}
+      confirmLabel="OK"
+      showCancel={false}
+      onCancel={() => setBlockedDelete(null)}
+      onConfirm={() => setBlockedDelete(null)}
+    >
+      <p>
+        <span className="font-medium text-[var(--ba-text-primary)]">{blockedDelete.client.name}</span>{' '}
+        has {blockedDelete.documentCount}{' '}
+        {blockedDelete.documentCount === 1 ? 'document' : 'documents'}.
+      </p>
+      <p>Delete those documents first, then you can remove this customer.</p>
+    </ConfirmDialog>
+  ) : null;
 
   if (selectedId) {
     return (
@@ -226,7 +286,7 @@ export function CustomersScreen({
                         aria-label={`Delete ${client.name}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          void handleDelete(client);
+                          void requestDelete(client);
                         }}
                         className="rounded-md p-1.5 text-[var(--ba-text-muted)] hover:bg-red-500/20 hover:text-red-300"
                       >
@@ -251,6 +311,9 @@ export function CustomersScreen({
           }}
         />
       )}
+
+      {deleteConfirmDialog}
+      {blockedDeleteDialog}
     </div>
   );
 }
