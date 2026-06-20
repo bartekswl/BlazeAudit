@@ -9,7 +9,14 @@ import type {
 } from '../shared/auth';
 import type { LoginPolicy } from '../shared/loginPolicy';
 import type { ColorTheme } from '../shared/theme';
-import type { Template, TemplateInput, TemplateSummary } from '../shared/document';
+import type {
+  BuiltinTemplateSummary,
+  CustomTemplateSummary,
+  Template,
+  TemplateInput,
+  TemplatePickerItem,
+  TemplateRef,
+} from '../shared/document';
 import type {
   CreateInspectionInput,
   DashboardStats,
@@ -75,27 +82,40 @@ const api = {
     getDataDir: (): Promise<string> => ipcRenderer.invoke(IpcChannels.databaseGetDataDir),
     openDataFolder: (): Promise<{ opened: true; path: string }> =>
       ipcRenderer.invoke(IpcChannels.databaseOpenDataFolder),
-    exportSchemaKit: (): Promise<{ saved: false } | { saved: true; directory: string }> =>
-      ipcRenderer.invoke(IpcChannels.templatesExportSchemaKit),
     importTemplateJson: (): Promise<
       { imported: false } | { imported: true; templateId: string; filePath: string }
-    > => ipcRenderer.invoke(IpcChannels.templatesImportJson),
+    > => ipcRenderer.invoke(IpcChannels.customTemplatesImportJson),
   },
   templates: {
-    list: (): Promise<TemplateSummary[]> => ipcRenderer.invoke(IpcChannels.templatesList),
-    get: (id: string): Promise<Template | null> => ipcRenderer.invoke(IpcChannels.templatesGet, id),
-    create: (input: TemplateInput): Promise<Template> =>
-      ipcRenderer.invoke(IpcChannels.templatesCreate, input),
-    update: (id: string, input: TemplateInput): Promise<Template> =>
-      ipcRenderer.invoke(IpcChannels.templatesUpdate, id, input),
-    remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.templatesDelete, id),
-    duplicate: (id: string): Promise<Template> =>
-      ipcRenderer.invoke(IpcChannels.templatesDuplicate, id),
-    exportJson: (id: string): Promise<{ saved: false } | { saved: true; filePath: string }> =>
-      ipcRenderer.invoke(IpcChannels.templatesExportJson, id),
-    importJson: (): Promise<
-      { imported: false } | { imported: true; templateId: string; filePath: string }
-    > => ipcRenderer.invoke(IpcChannels.templatesImportJson),
+    builtin: {
+      list: (): Promise<BuiltinTemplateSummary[]> =>
+        ipcRenderer.invoke(IpcChannels.builtinTemplatesList),
+      get: (id: string): Promise<Template | null> =>
+        ipcRenderer.invoke(IpcChannels.builtinTemplatesGet, id),
+    },
+    custom: {
+      list: (): Promise<CustomTemplateSummary[]> =>
+        ipcRenderer.invoke(IpcChannels.customTemplatesList),
+      get: (id: string): Promise<Template | null> =>
+        ipcRenderer.invoke(IpcChannels.customTemplatesGet, id),
+      create: (input: TemplateInput): Promise<Template> =>
+        ipcRenderer.invoke(IpcChannels.customTemplatesCreate, input),
+      update: (id: string, input: TemplateInput): Promise<Template> =>
+        ipcRenderer.invoke(IpcChannels.customTemplatesUpdate, id, input),
+      remove: (id: string): Promise<void> =>
+        ipcRenderer.invoke(IpcChannels.customTemplatesDelete, id),
+      duplicate: (id: string): Promise<Template> =>
+        ipcRenderer.invoke(IpcChannels.customTemplatesDuplicate, id),
+      exportJson: (id: string): Promise<{ saved: false } | { saved: true; filePath: string }> =>
+        ipcRenderer.invoke(IpcChannels.customTemplatesExportJson, id),
+      importJson: (): Promise<
+        { imported: false } | { imported: true; templateId: string; filePath: string }
+      > => ipcRenderer.invoke(IpcChannels.customTemplatesImportJson),
+    },
+    listForPicker: (): Promise<TemplatePickerItem[]> =>
+      ipcRenderer.invoke(IpcChannels.templatesListForPicker),
+    resolve: (ref: TemplateRef): Promise<Template | null> =>
+      ipcRenderer.invoke(IpcChannels.templatesResolve, ref),
     exportSchemaKit: (): Promise<{ saved: false } | { saved: true; directory: string }> =>
       ipcRenderer.invoke(IpcChannels.templatesExportSchemaKit),
   },

@@ -3,7 +3,7 @@ import { FileText, Plus, Search, Trash2 } from 'lucide-react';
 import { cadenceLabel, isOverdue } from '../../../shared/cadence';
 import type { Inspection, InspectionSummary } from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
-import type { TemplateSummary } from '../../../shared/document';
+import type { TemplatePickerItem } from '../../../shared/document';
 import { cn } from '../../lib/cn';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { InspectionEditor } from './InspectionEditor';
@@ -31,7 +31,7 @@ export function DocumentsScreen({
 }) {
   const [inspections, setInspections] = useState<InspectionSummary[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
-  const [templates, setTemplates] = useState<TemplateSummary[]>([]);
+  const [templates, setTemplates] = useState<TemplatePickerItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -62,7 +62,7 @@ export function DocumentsScreen({
       const [inspectionRows, clientRows, templateRows] = await Promise.all([
         window.blazeaudit.inspections.list(),
         window.blazeaudit.clients.list(),
-        window.blazeaudit.templates.list(),
+        window.blazeaudit.templates.listForPicker(),
       ]);
       setInspections(inspectionRows);
       setClients(clientRows);
@@ -111,6 +111,7 @@ export function DocumentsScreen({
 
   const createInspection = async (input: {
     clientId: string;
+    templateKind: 'builtin' | 'custom';
     templateId: string;
     title: string;
     inspector: string;

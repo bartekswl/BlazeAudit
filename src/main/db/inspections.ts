@@ -15,12 +15,14 @@ import type {
   InspectionInput,
   InspectionSummary,
 } from '../../shared/inspection';
+import type { TemplateKind } from '../../shared/document';
 import { getDatabase } from './connection';
-import * as templates from './templates';
+import * as templateRegistry from './templateRegistry';
 
 interface InspectionRow {
   id: string;
   client_id: string;
+  template_kind: string | null;
   template_id: string | null;
   title: string;
   status: string;
@@ -51,10 +53,15 @@ function parseInspectionDocument(json: string, requireClient = true): Document {
 }
 
 function toInspection(row: InspectionRow): Inspection {
+  const templateKind =
+    row.template_kind === 'builtin' || row.template_kind === 'custom'
+      ? row.template_kind
+      : null;
   return {
     id: row.id,
     clientId: row.client_id,
     clientName: row.client_name ?? '',
+    templateKind,
     templateId: row.template_id,
     templateName: row.template_name ?? null,
     title: row.title,
@@ -91,10 +98,12 @@ const summarySelect = `
 `;
 
 const detailSelect = `
-  SELECT i.*, c.name AS client_name, t.name AS template_name
+  SELECT i.*, c.name AS client_name,
+         COALESCE(bt.name, ct.name) AS template_name
     FROM inspections i
     JOIN clients c ON c.id = i.client_id
-    LEFT JOIN templates t ON t.id = i.template_id
+    LEFT JOIN builtin_templates bt ON i.template_kind = 'builtin' AND bt.id = i.template_id
+    LEFT JOIN custom_templates ct ON i.template_kind = 'custom' AND ct.id = i.template_id
 `;
 
 function normalizeInput(input: InspectionInput) {
@@ -152,8 +161,8 @@ export function getInspection(id: string): Inspection | null {
 }
 
 export function createInspectionFromTemplate(input: CreateInspectionInput): Inspection {
-  const template = templates.getTemplate(input.templateId);
-  if (!template) throw new Error(`Template not found: ${input.templateId}`);
+  const template = templateRegistry.getTemplate(input.templateId, input.templateKind);
+  if (!template) throw new Error(`Template not found: ${input.templateKind}:${input.templateId}`);
 
   const client = getDatabase()
     .prepare('SELECT id, name FROM clients WHERE id = ?')
@@ -175,16 +184,17 @@ export function createInspectionFromTemplate(input: CreateInspectionInput): Insp
   getDatabase()
     .prepare(
       `INSERT INTO inspections (
-         id, client_id, template_id, title, status, inspector, document,
+         id, client_id, template_kind, template_id, title, status, inspector, document,
          inspected_at, cadence, next_due_at, created_at, updated_at
        ) VALUES (
-         @id, @clientId, @templateId, @title, 'draft', @inspector, @document,
+         @id, @clientId, @templateKind, @templateId, @title, 'draft', @inspector, @document,
          @inspectedAt, @cadence, NULL, @createdAt, @updatedAt
        )`,
     )
     .run({
       id,
       clientId: input.clientId,
+      templateKind: input.templateKind,
       templateId: input.templateId,
       title,
       inspector: input.inspector?.trim() ?? '',
@@ -225,19 +235,23 @@ export function createInspectionFromPdfExport(payload: PdfInspectionExport): Ins
   const now = new Date().toISOString();
   const id = randomUUID();
 
+  const templateKind: TemplateKind | null =
+    src.templateKind === 'builtin' || src.templateKind === 'custom' ? src.templateKind : null;
+
   getDatabase()
     .prepare(
       `INSERT INTO inspections (
-         id, client_id, template_id, title, status, inspector, document,
+         id, client_id, template_kind, template_id, title, status, inspector, document,
          inspected_at, cadence, next_due_at, created_at, updated_at
        ) VALUES (
-         @id, @clientId, @templateId, @title, @status, @inspector, @document,
+         @id, @clientId, @templateKind, @templateId, @title, @status, @inspector, @document,
          @inspectedAt, @cadence, @nextDueAt, @createdAt, @updatedAt
        )`,
     )
     .run({
       id,
       clientId: src.clientId,
+      templateKind,
       templateId: src.templateId,
       title,
       status,

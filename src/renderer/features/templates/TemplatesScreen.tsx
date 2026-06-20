@@ -9,7 +9,11 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react';
-import type { Template, TemplateSummary } from '../../../shared/document';
+import type {
+  BuiltinTemplateSummary,
+  CustomTemplateSummary,
+  Template,
+} from '../../../shared/document';
 import { cn } from '../../lib/cn';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { BuiltinTemplateViewer } from './BuiltinTemplateViewer';
@@ -22,9 +26,7 @@ export type TemplateDetailBreadcrumb = {
 
 export type TemplatesScreenVariant = 'built-in' | 'custom';
 
-function isBundledTemplate(template: TemplateSummary): boolean {
-  return template.seedId !== null;
-}
+type TemplateSummary = BuiltinTemplateSummary | CustomTemplateSummary;
 
 export function TemplatesScreen({
   variant,
@@ -43,7 +45,7 @@ export function TemplatesScreen({
   const [viewingTemplate, setViewingTemplate] = useState<Template | null>(null);
   const [editingId, setEditingId] = useState<string | 'new' | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<TemplateSummary | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<CustomTemplateSummary | null>(null);
 
   const goBackToList = useCallback(() => {
     setViewingId(null);
@@ -82,14 +84,18 @@ export function TemplatesScreen({
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      setTemplates(await window.blazeaudit.templates.list());
+      setTemplates(
+        isCustom
+          ? await window.blazeaudit.templates.custom.list()
+          : await window.blazeaudit.templates.builtin.list(),
+      );
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load templates.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isCustom]);
 
   useEffect(() => {
     void refresh();
@@ -98,35 +104,32 @@ export function TemplatesScreen({
   useEffect(() => {
     if (isCustom) {
       if (!editingId || editingId === 'new') return;
-      void window.blazeaudit.templates.get(editingId).then((template) => {
+      void window.blazeaudit.templates.custom.get(editingId).then((template) => {
         if (template) setEditingTemplate(template);
       });
       return;
     }
     if (!viewingId) return;
-    void window.blazeaudit.templates.get(viewingId).then((template) => {
+    void window.blazeaudit.templates.builtin.get(viewingId).then((template) => {
       if (template) setViewingTemplate(template);
     });
   }, [isCustom, editingId, viewingId]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const scoped = templates.filter((t) =>
-      isCustom ? !isBundledTemplate(t) : isBundledTemplate(t),
-    );
-    if (!q) return scoped;
-    return scoped.filter(
+    if (!q) return templates;
+    return templates.filter(
       (t) =>
         t.name.toLowerCase().includes(q) ||
         t.description.toLowerCase().includes(q),
     );
-  }, [templates, search, isCustom]);
+  }, [templates, search]);
 
   const importJson = async () => {
     setMessage(null);
     setError(null);
     try {
-      const result = await window.blazeaudit.templates.importJson();
+      const result = await window.blazeaudit.templates.custom.importJson();
       if (result.imported) {
         setMessage(`Imported template from ${result.filePath}`);
         await refresh();
@@ -139,7 +142,7 @@ export function TemplatesScreen({
 
   const confirmDelete = async () => {
     if (!pendingDelete) return;
-    await window.blazeaudit.templates.remove(pendingDelete.id);
+    await window.blazeaudit.templates.custom.remove(pendingDelete.id);
     setPendingDelete(null);
     await refresh();
   };
@@ -258,7 +261,7 @@ export function TemplatesScreen({
                     <IconButton
                       label="Duplicate"
                       onClick={async () => {
-                        await window.blazeaudit.templates.duplicate(template.id);
+                        await window.blazeaudit.templates.custom.duplicate(template.id);
                         await refresh();
                       }}
                       icon={Copy}
@@ -266,7 +269,9 @@ export function TemplatesScreen({
                     <IconButton
                       label="Export JSON"
                       onClick={async () => {
-                        const result = await window.blazeaudit.templates.exportJson(template.id);
+                        const result = await window.blazeaudit.templates.custom.exportJson(
+                          template.id,
+                        );
                         if (result.saved) setMessage(`Exported to ${result.filePath}`);
                       }}
                       icon={Download}
@@ -274,7 +279,7 @@ export function TemplatesScreen({
                     <IconButton
                       label="Delete"
                       danger
-                      onClick={() => setPendingDelete(template)}
+                      onClick={() => setPendingDelete(template as CustomTemplateSummary)}
                       icon={Trash2}
                     />
                   </div>

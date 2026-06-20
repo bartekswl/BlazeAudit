@@ -66,10 +66,17 @@ export interface Template {
   updatedAt: string;
 }
 
-export interface TemplateSummary {
+export type TemplateKind = 'builtin' | 'custom';
+
+/** Pointer to a row in either template table — use for cross-type resolution. */
+export interface TemplateRef {
+  kind: TemplateKind;
   id: string;
-  /** Set when the row was seeded from a bundled app template. */
-  seedId: string | null;
+}
+
+export interface BuiltinTemplateSummary {
+  id: string;
+  seedId: string;
   name: string;
   description: string;
   version: number;
@@ -77,7 +84,29 @@ export interface TemplateSummary {
   blockCount: number;
 }
 
-/** Fields supplied when creating or updating a template. */
+export interface CustomTemplateSummary {
+  id: string;
+  name: string;
+  description: string;
+  version: number;
+  updatedAt: string;
+  blockCount: number;
+}
+
+/** Built-in + custom templates merged for inspection creation pickers. */
+export interface TemplatePickerItem {
+  kind: TemplateKind;
+  id: string;
+  name: string;
+  description: string;
+  version: number;
+  blockCount: number;
+}
+
+/** @deprecated Prefer BuiltinTemplateSummary or CustomTemplateSummary. */
+export type TemplateSummary = BuiltinTemplateSummary | CustomTemplateSummary;
+
+/** Fields supplied when creating or updating a custom template. */
 export interface TemplateInput {
   name: string;
   description?: string;

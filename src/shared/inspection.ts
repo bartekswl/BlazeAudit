@@ -1,7 +1,7 @@
 // Inspection domain types (see DATA_MODEL.md §1 inspections).
 
 import type { Cadence } from './cadence';
-import type { Document } from './document';
+import type { Document, TemplateKind } from './document';
 
 export type InspectionStatus = 'draft' | 'complete';
 
@@ -9,6 +9,7 @@ export interface Inspection {
   id: string;
   clientId: string;
   clientName: string;
+  templateKind: TemplateKind | null;
   templateId: string | null;
   templateName: string | null;
   title: string;
@@ -37,6 +38,7 @@ export interface InspectionSummary {
 
 export interface CreateInspectionInput {
   clientId: string;
+  templateKind: TemplateKind;
   templateId: string;
   title?: string;
   inspector?: string;

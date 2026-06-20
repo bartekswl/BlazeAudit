@@ -1,6 +1,6 @@
 import { DEFAULT_TEMPLATE_SEEDS } from '../../shared/document';
 import { getDatabase } from './connection';
-import * as templates from './templates';
+import * as builtin from './builtinTemplates';
 
 const SEED_META_KEY = 'templates_seeded_v1';
 
@@ -19,23 +19,19 @@ export function seedDefaultTemplates(): void {
         description: item.description,
         document: structuredClone(item.document),
       };
-      const existing = templates.getTemplateBySeedId(item.seedId);
+      const existing = builtin.getBuiltinTemplateBySeedId(item.seedId);
       if (existing) {
-        templates.syncBundledTemplateFromSeed(item.seedId, input);
+        builtin.syncBuiltinTemplateFromSeed(item.seedId, input);
         synced += 1;
         continue;
       }
-      templates.createTemplate(input, { seedId: item.seedId });
+      builtin.createBuiltinTemplate(input, item.seedId);
       inserted += 1;
     }
 
-    const before = db.prepare('SELECT COUNT(*) AS n FROM templates WHERE seed_id IS NOT NULL').get() as {
-      n: number;
-    };
-    templates.deleteBundledTemplatesExcept(activeSeedIds);
-    const after = db.prepare('SELECT COUNT(*) AS n FROM templates WHERE seed_id IS NOT NULL').get() as {
-      n: number;
-    };
+    const before = db.prepare('SELECT COUNT(*) AS n FROM builtin_templates').get() as { n: number };
+    builtin.deleteBuiltinTemplatesExcept(activeSeedIds);
+    const after = db.prepare('SELECT COUNT(*) AS n FROM builtin_templates').get() as { n: number };
     removed = before.n - after.n;
 
     db.prepare(
@@ -47,7 +43,7 @@ export function seedDefaultTemplates(): void {
   seed();
   if (inserted > 0 || synced > 0 || removed > 0) {
     console.log(
-      `[templates] seeded ${inserted} new, synced ${synced} bundled, removed ${removed} retired bundled template(s)`,
+      `[templates] seeded ${inserted} new, synced ${synced} built-in, removed ${removed} retired built-in template(s)`,
     );
   }
 }

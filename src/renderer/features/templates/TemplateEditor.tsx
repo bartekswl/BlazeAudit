@@ -91,8 +91,8 @@ export function TemplateEditor({
         document: syncMeta(name.trim(), document),
       };
       const saved = templateId
-        ? await window.blazeaudit.templates.update(templateId, payload)
-        : await window.blazeaudit.templates.create(payload);
+        ? await window.blazeaudit.templates.custom.update(templateId, payload)
+        : await window.blazeaudit.templates.custom.create(payload);
       onSaved(saved);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Save failed.');

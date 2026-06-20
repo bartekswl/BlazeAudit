@@ -142,6 +142,117 @@ const migrations: Migration[] = [
       `);
     },
   },
+  {
+    version: 7,
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE builtin_templates (
+          id          TEXT PRIMARY KEY,
+          seed_id     TEXT NOT NULL UNIQUE,
+          name        TEXT NOT NULL,
+          description TEXT NOT NULL DEFAULT '',
+          document    TEXT NOT NULL,
+          version     INTEGER NOT NULL DEFAULT 1,
+          created_at  TEXT NOT NULL,
+          updated_at  TEXT NOT NULL
+        );
+
+        CREATE INDEX idx_builtin_templates_name ON builtin_templates (name);
+
+        CREATE TABLE custom_templates (
+          id          TEXT PRIMARY KEY,
+          name        TEXT NOT NULL,
+          description TEXT NOT NULL DEFAULT '',
+          document    TEXT NOT NULL,
+          version     INTEGER NOT NULL DEFAULT 1,
+          created_at  TEXT NOT NULL,
+          updated_at  TEXT NOT NULL
+        );
+
+        CREATE INDEX idx_custom_templates_name ON custom_templates (name);
+      `);
+
+      db.exec(`
+        INSERT INTO builtin_templates (id, seed_id, name, description, document, version, created_at, updated_at)
+        SELECT id, seed_id, name, description, document, version, created_at, updated_at
+          FROM templates
+         WHERE seed_id IS NOT NULL;
+
+        INSERT INTO custom_templates (id, name, description, document, version, created_at, updated_at)
+        SELECT id, name, description, document, version, created_at, updated_at
+          FROM templates
+         WHERE seed_id IS NULL;
+      `);
+
+      db.exec(`
+        CREATE TABLE inspections_new (
+          id            TEXT PRIMARY KEY,
+          client_id     TEXT NOT NULL REFERENCES clients(id),
+          template_kind TEXT,
+          template_id   TEXT,
+          title         TEXT NOT NULL,
+          status        TEXT NOT NULL DEFAULT 'draft',
+          inspector     TEXT NOT NULL DEFAULT '',
+          document      TEXT NOT NULL,
+          inspected_at  TEXT,
+          cadence       TEXT NOT NULL DEFAULT 'annual',
+          next_due_at   TEXT,
+          created_at    TEXT NOT NULL,
+          updated_at    TEXT NOT NULL
+        );
+
+        INSERT INTO inspections_new (
+          id, client_id, template_kind, template_id, title, status, inspector,
+          document, inspected_at, cadence, next_due_at, created_at, updated_at
+        )
+        SELECT
+          i.id,
+          i.client_id,
+          CASE
+            WHEN i.template_id IS NOT NULL
+              AND EXISTS (SELECT 1 FROM builtin_templates b WHERE b.id = i.template_id)
+              THEN 'builtin'
+            WHEN i.template_id IS NOT NULL
+              AND EXISTS (SELECT 1 FROM custom_templates c WHERE c.id = i.template_id)
+              THEN 'custom'
+            ELSE NULL
+          END,
+          i.template_id,
+          i.title,
+          i.status,
+          i.inspector,
+          i.document,
+          i.inspected_at,
+          i.cadence,
+          i.next_due_at,
+          i.created_at,
+          i.updated_at
+        FROM inspections i;
+
+        DROP TABLE inspections;
+        ALTER TABLE inspections_new RENAME TO inspections;
+
+        CREATE INDEX idx_inspections_client ON inspections (client_id);
+        CREATE INDEX idx_inspections_status ON inspections (status);
+        CREATE INDEX idx_inspections_next_due ON inspections (next_due_at);
+        CREATE INDEX idx_inspections_updated ON inspections (updated_at);
+
+        DROP TABLE templates;
+      `);
+    },
+  },
+  {
+    version: 8,
+    up: (db) => {
+      db.exec(`
+        UPDATE inspections
+           SET template_kind = NULL, template_id = NULL
+         WHERE template_kind = 'builtin';
+
+        DELETE FROM builtin_templates;
+      `);
+    },
+  },
 ];
 
 /** Applies any migrations newer than the database's current `user_version`. */

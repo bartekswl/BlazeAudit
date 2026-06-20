@@ -3,38 +3,55 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   buildTemplateExportPayload,
-  DEFAULT_TEMPLATE_SEEDS,
+  createBlock,
   documentSchema,
+  emptyDocument,
   parseTemplateExportPayload,
   SCHEMA_KIT_README,
   type TemplateInput,
+  type TemplateRef,
 } from '../../shared/document';
 import { IpcChannels } from '../../shared/ipc';
-import { templates } from '../db';
+import { builtinTemplates, customTemplates, templateRegistry } from '../db';
 
 export function registerTemplatesIpc(): void {
-  ipcMain.handle(IpcChannels.templatesList, () => templates.listTemplates());
+  ipcMain.handle(IpcChannels.builtinTemplatesList, () => builtinTemplates.listBuiltinTemplates());
 
-  ipcMain.handle(IpcChannels.templatesGet, (_event, id: string) => templates.getTemplate(id));
-
-  ipcMain.handle(IpcChannels.templatesCreate, (_event, input: TemplateInput) =>
-    templates.createTemplate(input),
+  ipcMain.handle(IpcChannels.builtinTemplatesGet, (_event, id: string) =>
+    builtinTemplates.getBuiltinTemplate(id),
   );
 
-  ipcMain.handle(IpcChannels.templatesUpdate, (_event, id: string, input: TemplateInput) =>
-    templates.updateTemplate(id, input),
+  ipcMain.handle(IpcChannels.customTemplatesList, () => customTemplates.listCustomTemplates());
+
+  ipcMain.handle(IpcChannels.customTemplatesGet, (_event, id: string) =>
+    customTemplates.getCustomTemplate(id),
   );
 
-  ipcMain.handle(IpcChannels.templatesDelete, (_event, id: string) => templates.deleteTemplate(id));
-
-  ipcMain.handle(IpcChannels.templatesDuplicate, (_event, id: string) =>
-    templates.duplicateTemplate(id),
+  ipcMain.handle(IpcChannels.customTemplatesCreate, (_event, input: TemplateInput) =>
+    customTemplates.createCustomTemplate(input),
   );
 
-  ipcMain.handle(IpcChannels.templatesExportJson, async (_event, id: string) => {
-    const template = templates.getTemplate(id);
+  ipcMain.handle(IpcChannels.customTemplatesUpdate, (_event, id: string, input: TemplateInput) =>
+    customTemplates.updateCustomTemplate(id, input),
+  );
+
+  ipcMain.handle(IpcChannels.customTemplatesDelete, (_event, id: string) =>
+    customTemplates.deleteCustomTemplate(id),
+  );
+
+  ipcMain.handle(IpcChannels.customTemplatesDuplicate, (_event, id: string) =>
+    customTemplates.duplicateCustomTemplate(id),
+  );
+
+  ipcMain.handle(IpcChannels.templatesListForPicker, () => templateRegistry.listTemplatesForPicker());
+
+  ipcMain.handle(IpcChannels.templatesResolve, (_event, ref: TemplateRef) =>
+    templateRegistry.resolveTemplate(ref),
+  );
+
+  ipcMain.handle(IpcChannels.customTemplatesExportJson, async (_event, id: string) => {
+    const template = customTemplates.getCustomTemplate(id);
     if (!template) throw new Error(`Template not found: ${id}`);
-    templates.assertCustomTemplate(id);
 
     const safeName = template.name.replace(/[^\w\-]+/g, '-').replace(/-+/g, '-');
     const { canceled, filePath } = await dialog.showSaveDialog({
@@ -58,7 +75,7 @@ export function registerTemplatesIpc(): void {
     return { saved: true as const, filePath };
   });
 
-  ipcMain.handle(IpcChannels.templatesImportJson, async () => {
+  ipcMain.handle(IpcChannels.customTemplatesImportJson, async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       title: 'Import template JSON',
       properties: ['openFile'],
@@ -81,7 +98,7 @@ export function registerTemplatesIpc(): void {
     const result = parseTemplateExportPayload(parsed);
     if (!result.ok) throw new Error(result.errors.join(' '));
 
-    const created = templates.createTemplate({
+    const created = customTemplates.createCustomTemplate({
       name: result.name ?? result.document.meta.title,
       description: result.description ?? '',
       document: result.document,
@@ -99,7 +116,13 @@ export function registerTemplatesIpc(): void {
     if (canceled || filePaths.length === 0) return { saved: false as const };
 
     const dir = filePaths[0];
-    const example = DEFAULT_TEMPLATE_SEEDS[0].document;
+    const example = emptyDocument({ title: 'Example inspection', inspectionType: 'Example' });
+    example.blocks = [
+      createBlock('heading', { config: { level: 1, text: 'Overview' } }),
+      createBlock('paragraph', {
+        config: { text: 'Replace with your inspection content.' },
+      }),
+    ];
 
     fs.writeFileSync(path.join(dir, 'schema.json'), `${JSON.stringify(documentSchema, null, 2)}\n`, 'utf8');
     fs.writeFileSync(path.join(dir, 'example.json'), `${JSON.stringify(example, null, 2)}\n`, 'utf8');

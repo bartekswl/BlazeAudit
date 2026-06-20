@@ -1,14 +1,27 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { X } from 'lucide-react';
 import { CADENCE_PRESETS, type CadencePreset } from '../../../shared/cadence';
 import { todayLocalIsoDate, validateInspectionDate } from '../../../shared/dates';
+import type { TemplateKind, TemplatePickerItem } from '../../../shared/document';
 import type { Inspector } from '../../../shared/profile';
 import type { Client } from '../../../shared/types';
-import type { TemplateSummary } from '../../../shared/document';
 import { InspectionDateField } from '../../components/InspectionDateField';
 import { inputCls } from '../templates/BlockList';
 
 const selectCls = 'ba-select';
+
+function templatePickerKey(kind: TemplateKind, id: string): string {
+  return `${kind}:${id}`;
+}
+
+function parseTemplatePickerKey(key: string): { kind: TemplateKind; id: string } | null {
+  const sep = key.indexOf(':');
+  if (sep <= 0) return null;
+  const kind = key.slice(0, sep);
+  if (kind !== 'builtin' && kind !== 'custom') return null;
+  const id = key.slice(sep + 1);
+  return id ? { kind, id } : null;
+}
 
 export function NewInspectionDialog({
   clients,
@@ -18,11 +31,12 @@ export function NewInspectionDialog({
   onCreate,
 }: {
   clients: Client[];
-  templates: TemplateSummary[];
+  templates: TemplatePickerItem[];
   initialClientId?: string;
   onClose: () => void;
   onCreate: (input: {
     clientId: string;
+    templateKind: TemplateKind;
     templateId: string;
     title: string;
     inspector: string;
@@ -31,7 +45,9 @@ export function NewInspectionDialog({
   }) => Promise<void>;
 }) {
   const [clientId, setClientId] = useState(initialClientId ?? clients[0]?.id ?? '');
-  const [templateId, setTemplateId] = useState(templates[0]?.id ?? '');
+  const [templateKey, setTemplateKey] = useState(
+    templates[0] ? templatePickerKey(templates[0].kind, templates[0].id) : '',
+  );
   const [title, setTitle] = useState('');
   const [inspector, setInspector] = useState('');
   const [inspectors, setInspectors] = useState<Inspector[]>([]);
@@ -46,6 +62,20 @@ export function NewInspectionDialog({
   }, [initialClientId]);
 
   useEffect(() => {
+    if (templates.length === 0) {
+      setTemplateKey('');
+      return;
+    }
+    const current = parseTemplatePickerKey(templateKey);
+    const stillValid =
+      current &&
+      templates.some((t) => t.kind === current.kind && t.id === current.id);
+    if (!stillValid) {
+      setTemplateKey(templatePickerKey(templates[0].kind, templates[0].id));
+    }
+  }, [templates, templateKey]);
+
+  useEffect(() => {
     setInspectorsLoading(true);
     void window.blazeaudit.profile
       .listInspectors()
@@ -56,14 +86,26 @@ export function NewInspectionDialog({
       .finally(() => setInspectorsLoading(false));
   }, []);
 
-  const selectedTemplate = templates.find((t) => t.id === templateId);
+  const selectedTemplateRef = useMemo(
+    () => parseTemplatePickerKey(templateKey),
+    [templateKey],
+  );
+  const selectedTemplate = useMemo(
+    () =>
+      selectedTemplateRef
+        ? templates.find(
+            (t) => t.kind === selectedTemplateRef.kind && t.id === selectedTemplateRef.id,
+          )
+        : undefined,
+    [templates, selectedTemplateRef],
+  );
   const selectedClient = clients.find((c) => c.id === clientId);
   const canCreate =
     clients.length > 0 && templates.length > 0 && !inspectorsLoading && inspectors.length > 0;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!clientId || !templateId) {
+    if (!clientId || !selectedTemplateRef) {
       setError('Choose a client and template.');
       return;
     }
@@ -84,7 +126,8 @@ export function NewInspectionDialog({
         `${selectedTemplate?.name ?? 'Inspection'} — ${selectedClient?.name ?? 'Client'}`;
       await onCreate({
         clientId,
-        templateId,
+        templateKind: selectedTemplateRef.kind,
+        templateId: selectedTemplateRef.id,
         title: autoTitle,
         inspector,
         inspectedAt,
@@ -116,7 +159,7 @@ export function NewInspectionDialog({
           <p className="text-sm text-neutral-400">
             {clients.length === 0
               ? 'Add a client first under Customers.'
-              : 'Add or seed a template first under Templates.'}
+              : 'Add a custom template under Templates first.'}
           </p>
         ) : inspectors.length === 0 ? (
           <p className="text-sm text-neutral-400">
@@ -147,14 +190,18 @@ export function NewInspectionDialog({
               <span className="mb-1.5 block text-xs font-medium text-neutral-400">Template</span>
               <select
                 className={selectCls}
-                value={templateId}
-                onChange={(e) => setTemplateId(e.target.value)}
+                value={templateKey}
+                onChange={(e) => setTemplateKey(e.target.value)}
               >
-                {templates.map((template) => (
-                  <option key={template.id} value={template.id}>
-                    {template.name}
-                  </option>
-                ))}
+                {templates.map((template) => {
+                  const key = templatePickerKey(template.kind, template.id);
+                  const kindLabel = template.kind === 'builtin' ? 'Built-in' : 'Custom';
+                  return (
+                    <option key={key} value={key}>
+                      {template.name} ({kindLabel})
+                    </option>
+                  );
+                })}
               </select>
             </label>
             <label className="block">

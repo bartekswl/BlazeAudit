@@ -49,7 +49,7 @@ export function DatabaseScreen({
     setMessage(null);
     setError(null);
     try {
-      const result = await window.blazeaudit.database.exportSchemaKit();
+      const result = await window.blazeaudit.templates.exportSchemaKit();
       if (result.saved) {
         setMessage(`Schema kit exported to ${result.directory}`);
       }
