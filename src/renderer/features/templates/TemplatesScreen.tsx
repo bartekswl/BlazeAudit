@@ -14,6 +14,7 @@ import type {
   CustomTemplateSummary,
   Template,
 } from '../../../shared/document';
+import type { BuiltinTemplate } from '../../../shared/form';
 import { cn } from '../../lib/cn';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { BuiltinTemplateViewer } from './BuiltinTemplateViewer';
@@ -42,7 +43,7 @@ export function TemplatesScreen({
   const [search, setSearch] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [viewingId, setViewingId] = useState<string | null>(null);
-  const [viewingTemplate, setViewingTemplate] = useState<Template | null>(null);
+  const [viewingTemplate, setViewingTemplate] = useState<BuiltinTemplate | null>(null);
   const [editingId, setEditingId] = useState<string | 'new' | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [pendingDelete, setPendingDelete] = useState<CustomTemplateSummary | null>(null);
@@ -111,7 +112,7 @@ export function TemplatesScreen({
     }
     if (!viewingId) return;
     void window.blazeaudit.templates.builtin.get(viewingId).then((template) => {
-      if (template) setViewingTemplate(template);
+      setViewingTemplate(template);
     });
   }, [isCustom, editingId, viewingId]);
 
@@ -293,7 +294,13 @@ export function TemplatesScreen({
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-neutral-100">{template.name}</p>
                     <p className="truncate text-xs text-neutral-500">
-                      {template.description || 'No description'} · {template.blockCount} block
+                      {'code' in template && template.code ? `${template.code} · ` : ''}
+                      {template.description || 'No description'}
+                      {'pageCount' in template && template.pageCount
+                        ? ` · ${template.pageCount} page${template.pageCount === 1 ? '' : 's'}`
+                        : ''}
+                      {' · '}
+                      {template.blockCount} element
                       {template.blockCount === 1 ? '' : 's'} · v{template.version}
                     </p>
                   </div>

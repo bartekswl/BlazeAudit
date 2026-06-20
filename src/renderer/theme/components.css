@@ -300,3 +300,174 @@
   color: var(--ba-flame);
   box-shadow: 0 4px 16px var(--ba-flame-glow);
 }
+
+/* Built-in form page sheet — themed in app; PDF export stays white */
+.form-page-viewport-scroll {
+  padding-bottom: 2.75rem;
+}
+
+.form-page-viewport-pad {
+  padding: 0.5rem 1.25rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .form-page-viewport-pad {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.form-page-sheet {
+  width: 100%;
+  aspect-ratio: 8.5 / 11;
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid var(--ba-panel-border);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.04),
+    0 8px 28px rgb(0 0 0 / 0.12);
+  --ba-form-page-footer-border: #e5e5e5;
+  --ba-form-page-footer-count: #171717;
+  --ba-form-page-footer-disclaimer: #737373;
+}
+
+[data-theme='light'] .form-page-sheet {
+  background: #ffffff;
+  color: #171717;
+  --ba-text-primary: #171717;
+  --ba-text-secondary: #262626;
+  --ba-text-muted: #525252;
+  --ba-input-bg: #ffffff;
+  --ba-input-border: #d4d4d4;
+  --ba-input-text: #171717;
+  --ba-input-placeholder: #a3a3a3;
+  --ba-input-shadow: 0 1px 2px rgb(0 0 0 / 0.04) inset;
+  --ba-panel-border: #e5e5e5;
+  --ba-table-head-bg: linear-gradient(180deg, #f5f5f5 0%, #ebebeb 100%);
+}
+
+[data-theme='dark'] .form-page-sheet {
+  background: var(--ba-panel-bg);
+  color: var(--ba-text-primary);
+  box-shadow: var(--ba-panel-shadow);
+  --ba-form-page-footer-border: rgb(255 255 255 / 0.1);
+  --ba-form-page-footer-count: var(--ba-text-primary);
+  --ba-form-page-footer-disclaimer: var(--ba-text-muted);
+}
+
+.form-page-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.125rem;
+  flex-shrink: 0;
+}
+
+.form-page-header-line {
+  line-height: 1.25;
+}
+
+.form-page-body {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0.5rem 1rem 0;
+}
+
+.form-page-content {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.form-page-section {
+  flex-shrink: 0;
+}
+
+.form-element-frame {
+  border-radius: 0.5rem;
+  border: 1px solid var(--ba-panel-border);
+  background: rgb(255 255 255 / 0.02);
+  padding: 0.625rem;
+}
+
+[data-theme='light'] .form-element-frame {
+  background: rgb(0 0 0 / 0.02);
+}
+
+.form-page-footer {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  border-top: 1px solid var(--ba-form-page-footer-border);
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.form-page-footer-count {
+  padding: 0.25rem 0 0;
+  text-align: right;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ba-form-page-footer-count);
+}
+
+.form-page-footer-disclaimer {
+  padding: 0.125rem 0 0.5rem;
+  text-align: center;
+  font-size: 0.625rem;
+  line-height: 1.4;
+  color: var(--ba-form-page-footer-disclaimer);
+}
+
+/* App-only floater — not part of the printable page */
+.form-page-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--ba-panel-border);
+  background: var(--ba-chrome-bg-image);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--ba-text-secondary);
+  box-shadow:
+    0 4px 16px rgb(0 0 0 / 0.2),
+    0 0 0 1px rgb(255 255 255 / 0.04) inset;
+  backdrop-filter: blur(10px);
+}
+
+.form-page-indicator-label {
+  min-width: 5.5rem;
+  text-align: center;
+  color: var(--ba-text-primary);
+}
+
+.form-page-indicator-nav {
+  display: grid;
+  place-items: center;
+  border-radius: 0.25rem;
+  padding: 0.125rem;
+  color: var(--ba-text-muted);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.form-page-indicator-nav:hover:not(:disabled) {
+  background: var(--ba-hover-bg);
+  color: var(--ba-text-primary);
+}
+
+.form-page-indicator-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

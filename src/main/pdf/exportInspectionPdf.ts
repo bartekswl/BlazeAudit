@@ -3,9 +3,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { buildPdfInspectionExport } from '../../shared/pdf';
-import { clients, inspections } from '../db';
+import { inspections, resolveDocumentContext } from '../db';
 import { appendExportPayloadToPdf } from './embed';
-import { renderInspectionHtml } from './renderInspectionHtml';
+import { renderInspectionHtmlForExport } from './renderInspectionHtmlForExport';
 
 export async function exportInspectionPdf(
   inspectionId: string,
@@ -13,9 +13,9 @@ export async function exportInspectionPdf(
   const inspection = inspections.getInspection(inspectionId);
   if (!inspection) throw new Error(`Inspection not found: ${inspectionId}`);
 
-  const client = clients.getClient(inspection.clientId);
+  const context = resolveDocumentContext(inspection);
   const exportPayload = buildPdfInspectionExport(inspection, app.getVersion());
-  const html = renderInspectionHtml(inspection, client, exportPayload);
+  const html = renderInspectionHtmlForExport(inspection, context.client, context, exportPayload);
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'blazeaudit-pdf-'));
   const htmlPath = path.join(tmpDir, 'report.html');
@@ -23,8 +23,8 @@ export async function exportInspectionPdf(
 
   const win = new BrowserWindow({
     show: false,
-    width: 794,
-    height: 1123,
+    width: 816,
+    height: 1056,
     webPreferences: {
       sandbox: true,
       contextIsolation: true,
@@ -38,7 +38,7 @@ export async function exportInspectionPdf(
 
     const pdf = await win.webContents.printToPDF({
       printBackground: true,
-      pageSize: 'A4',
+      pageSize: 'Letter',
       margins: { marginType: 'default' },
     });
 

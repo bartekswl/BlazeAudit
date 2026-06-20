@@ -9,9 +9,11 @@ import type {
 } from '../shared/auth';
 import type { LoginPolicy } from '../shared/loginPolicy';
 import type { ColorTheme } from '../shared/theme';
+import type { BuiltinTemplate } from '../shared/form';
 import type {
   BuiltinTemplateSummary,
   CustomTemplateSummary,
+  DocumentContext,
   Template,
   TemplateInput,
   TemplatePickerItem,
@@ -90,7 +92,7 @@ const api = {
     builtin: {
       list: (): Promise<BuiltinTemplateSummary[]> =>
         ipcRenderer.invoke(IpcChannels.builtinTemplatesList),
-      get: (id: string): Promise<Template | null> =>
+      get: (id: string): Promise<BuiltinTemplate | null> =>
         ipcRenderer.invoke(IpcChannels.builtinTemplatesGet, id),
     },
     custom: {
@@ -143,6 +145,8 @@ const api = {
     importPdf: (): Promise<
       { imported: false } | { imported: true; inspectionId: string; filePath: string }
     > => ipcRenderer.invoke(IpcChannels.inspectionsImportPdf),
+    resolveContext: (id: string): Promise<DocumentContext> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsResolveContext, id),
   },
   profile: {
     getBusiness: (): Promise<BusinessProfile> =>

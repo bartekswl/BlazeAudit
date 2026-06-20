@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Menu, PanelRightClose } from 'lucide-react';
 import type { Block } from '../../../shared/document';
+import type { FormOutlineSection } from '../../../shared/form/outline';
 import {
   buildDocumentOutline,
   scrollToDocumentBlock,
@@ -74,16 +75,57 @@ function OutlineTree({
   );
 }
 
-function DocumentOutlineContent({
-  blocks,
+function FormOutlineList({
+  sections,
   onNavigate,
+}: {
+  sections: FormOutlineSection[];
+  onNavigate?: (sectionId: string, pageIndex: number) => void;
+}) {
+  if (sections.length === 0) {
+    return <p className="px-2 py-4 text-xs text-[var(--ba-text-muted)]">No sections yet.</p>;
+  }
+
+  return (
+    <ul className="space-y-0.5">
+      {sections.map((section) => (
+        <li key={section.id}>
+          <button
+            type="button"
+            onClick={() => onNavigate?.(section.id, section.pageIndex)}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-[var(--ba-hover-bg)]"
+            title={section.label}
+          >
+            <span className="min-w-0 flex-1 truncate text-xs font-medium text-[var(--ba-text-primary)]">
+              {section.label}
+            </span>
+            <span className="shrink-0 text-[10px] text-[var(--ba-text-muted)]">
+              {section.pageLabel}
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function DocumentOutlineContent({
+  title,
+  blocks,
+  formSections,
+  onNavigate,
+  onFormNavigate,
   onCollapse,
 }: {
-  blocks: Block[];
+  title?: string;
+  blocks?: Block[];
+  formSections?: FormOutlineSection[];
   onNavigate?: (blockId: string) => void;
+  onFormNavigate?: (sectionId: string, pageIndex: number) => void;
   onCollapse: () => void;
 }) {
-  const outline = useMemo(() => buildDocumentOutline(blocks), [blocks]);
+  const outline = useMemo(() => buildDocumentOutline(blocks ?? []), [blocks]);
+  const isForm = (formSections?.length ?? 0) > 0;
 
   return (
     <>
@@ -102,7 +144,19 @@ function DocumentOutlineContent({
         </button>
       </div>
       <nav className="min-h-0 flex-1 overflow-y-auto p-2">
-        <OutlineTree nodes={outline} onNavigate={onNavigate} />
+        {title ? (
+          <p
+            className="mb-2 truncate px-2 text-xs font-semibold text-[var(--ba-text-primary)]"
+            title={title}
+          >
+            {title}
+          </p>
+        ) : null}
+        {isForm ? (
+          <FormOutlineList sections={formSections ?? []} onNavigate={onFormNavigate} />
+        ) : (
+          <OutlineTree nodes={outline} onNavigate={onNavigate} />
+        )}
       </nav>
     </>
   );
@@ -113,6 +167,10 @@ export function DocumentOutlineRail() {
   const { registration, expanded, setExpanded } = useDocumentOutlineRail();
 
   if (!registration) return null;
+
+  const hasForm = (registration.formSections?.length ?? 0) > 0;
+  const hasBlocks = (registration.blocks?.length ?? 0) > 0;
+  if (!hasForm && !hasBlocks) return null;
 
   return (
     <aside
@@ -132,8 +190,11 @@ export function DocumentOutlineRail() {
         )}
       >
         <DocumentOutlineContent
+          title={registration.title}
           blocks={registration.blocks}
+          formSections={registration.formSections}
           onNavigate={registration.onNavigate}
+          onFormNavigate={registration.onFormNavigate}
           onCollapse={() => setExpanded(false)}
         />
       </div>

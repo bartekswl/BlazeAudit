@@ -17,15 +17,16 @@ export function seedDefaultTemplates(): void {
       const input = {
         name: item.name,
         description: item.description,
-        document: structuredClone(item.document),
+        form: structuredClone(item.form),
       };
+      const meta = { code: item.code, title: item.title };
       const existing = builtin.getBuiltinTemplateBySeedId(item.seedId);
       if (existing) {
-        builtin.syncBuiltinTemplateFromSeed(item.seedId, input);
+        builtin.syncBuiltinTemplateFromSeed(item.seedId, input, meta);
         synced += 1;
         continue;
       }
-      builtin.createBuiltinTemplate(input, item.seedId);
+      builtin.createBuiltinTemplate(input, item.seedId, meta);
       inserted += 1;
     }
 

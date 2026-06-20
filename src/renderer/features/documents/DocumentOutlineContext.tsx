@@ -8,10 +8,14 @@ import {
   type ReactNode,
 } from 'react';
 import type { Block } from '../../../shared/document';
+import type { FormOutlineSection } from '../../../shared/form/outline';
 
 export type DocumentOutlineRegistration = {
-  blocks: Block[];
+  title?: string;
+  blocks?: Block[];
+  formSections?: FormOutlineSection[];
   onNavigate?: (blockId: string) => void;
+  onFormNavigate?: (sectionId: string, pageIndex: number) => void;
 };
 
 type DocumentOutlineContextValue = {
@@ -66,6 +70,28 @@ export function useRegisterDocumentOutline(
 
     return () => setRegistration(null);
   }, [blocks, setRegistration]);
+}
+
+/** Register form sections while a built-in form viewer or inspection editor is open. */
+export function useRegisterFormOutline(
+  title: string,
+  formSections: FormOutlineSection[],
+  onFormNavigate?: (sectionId: string, pageIndex: number) => void,
+) {
+  const { setRegistration } = useDocumentOutlineContext();
+  const onFormNavigateRef = useRef(onFormNavigate);
+  onFormNavigateRef.current = onFormNavigate;
+
+  useEffect(() => {
+    setRegistration({
+      title,
+      formSections,
+      onFormNavigate: (sectionId, pageIndex) =>
+        onFormNavigateRef.current?.(sectionId, pageIndex),
+    });
+
+    return () => setRegistration(null);
+  }, [title, formSections, setRegistration]);
 }
 
 export function useDocumentOutlineRail() {

@@ -48,6 +48,7 @@ export const IpcChannels = {
   inspectionsClientStats: 'inspections:client-stats',
   inspectionsExportPdf: 'inspections:export-pdf',
   inspectionsImportPdf: 'inspections:import-pdf',
+  inspectionsResolveContext: 'inspections:resolve-context',
   profileGetBusiness: 'profile:get-business',
   profileUpdateBusiness: 'profile:update-business',
   profileGetLogo: 'profile:get-logo',

@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { IpcChannels } from '../../shared/ipc';
 import type { CreateInspectionInput, InspectionInput } from '../../shared/inspection';
-import { inspections } from '../db';
+import { inspections, resolveDocumentContext } from '../db';
 import { exportInspectionPdf } from '../pdf/exportInspectionPdf';
 import { importInspectionPdf } from '../pdf/importInspectionPdf';
 
@@ -35,4 +35,10 @@ export function registerInspectionsIpc(): void {
   );
 
   ipcMain.handle(IpcChannels.inspectionsImportPdf, () => importInspectionPdf());
+
+  ipcMain.handle(IpcChannels.inspectionsResolveContext, (_event, id: string) => {
+    const inspection = inspections.getInspection(id);
+    if (!inspection) throw new Error(`Inspection not found: ${id}`);
+    return resolveDocumentContext(inspection);
+  });
 }

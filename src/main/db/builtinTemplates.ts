@@ -1,30 +1,73 @@
 import { randomUUID } from 'node:crypto';
-import type { BuiltinTemplateSummary, Template, TemplateInput } from '../../shared/document';
-import { countBlocks } from '../../shared/document';
+import type { BuiltinTemplateMeta, BuiltinTemplateSummary } from '../../shared/document';
+import {
+  countFormElements,
+  countFormPages,
+  parseStoredFormDefinition,
+  type BuiltinTemplate,
+  type FormDefinition,
+} from '../../shared/form';
 import { getDatabase } from './connection';
-import { normalizeTemplateInput, parseStoredDocument, toTemplate } from './templateShared';
 
 interface BuiltinTemplateRow {
   id: string;
   seed_id: string;
   name: string;
   description: string;
+  code: string;
+  title: string;
   document: string;
   version: number;
   created_at: string;
   updated_at: string;
 }
 
-function toSummary(row: BuiltinTemplateRow): BuiltinTemplateSummary {
-  const document = parseStoredDocument(row.document);
+export interface BuiltinTemplateInput {
+  name: string;
+  description?: string;
+  form: FormDefinition;
+}
+
+function toBuiltinTemplate(row: BuiltinTemplateRow): BuiltinTemplate {
+  const form = parseStoredFormDefinition(row.document);
   return {
     id: row.id,
     seedId: row.seed_id,
     name: row.name,
     description: row.description,
+    code: row.code,
+    title: row.title,
+    form,
+    version: row.version,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function toSummary(row: BuiltinTemplateRow): BuiltinTemplateSummary {
+  const form = parseStoredFormDefinition(row.document);
+  return {
+    id: row.id,
+    seedId: row.seed_id,
+    name: row.name,
+    description: row.description,
+    code: row.code,
+    title: row.title,
     version: row.version,
     updatedAt: row.updated_at,
-    blockCount: countBlocks(document.blocks),
+    blockCount: countFormElements(form),
+    pageCount: countFormPages(form),
+  };
+}
+
+function normalizeBuiltinInput(input: BuiltinTemplateInput) {
+  const name = input.name?.trim();
+  if (!name) throw new Error('Template name is required.');
+  const form = structuredClone(input.form);
+  return {
+    name,
+    description: input.description?.trim() ?? '',
+    form,
   };
 }
 
@@ -35,31 +78,60 @@ export function listBuiltinTemplates(): BuiltinTemplateSummary[] {
   return rows.map(toSummary);
 }
 
-export function getBuiltinTemplate(id: string): Template | null {
+export function getBuiltinTemplate(id: string): BuiltinTemplate | null {
   const row = getDatabase().prepare('SELECT * FROM builtin_templates WHERE id = ?').get(id) as
     | BuiltinTemplateRow
     | undefined;
-  return row ? toTemplate(row) : null;
+  return row ? toBuiltinTemplate(row) : null;
 }
 
-export function getBuiltinTemplateBySeedId(seedId: string): Template | null {
+export function getBuiltinTemplateBySeedId(seedId: string): BuiltinTemplate | null {
   const row = getDatabase()
     .prepare('SELECT * FROM builtin_templates WHERE seed_id = ?')
     .get(seedId) as BuiltinTemplateRow | undefined;
-  return row ? toTemplate(row) : null;
+  return row ? toBuiltinTemplate(row) : null;
 }
 
-export function createBuiltinTemplate(input: TemplateInput, seedId: string): Template {
-  const fields = normalizeTemplateInput(input);
+export function getBuiltinSeedId(templateId: string): string | null {
+  const row = getDatabase()
+    .prepare('SELECT seed_id FROM builtin_templates WHERE id = ?')
+    .get(templateId) as { seed_id: string } | undefined;
+  return row?.seed_id ?? null;
+}
+
+export function getBuiltinTemplateMeta(
+  templateId: string,
+): (BuiltinTemplateMeta & { seedId: string; name: string; description: string }) | null {
+  const row = getDatabase()
+    .prepare('SELECT seed_id, name, description, code, title FROM builtin_templates WHERE id = ?')
+    .get(templateId) as
+    | Pick<BuiltinTemplateRow, 'seed_id' | 'name' | 'description' | 'code' | 'title'>
+    | undefined;
+  if (!row) return null;
+  return {
+    seedId: row.seed_id,
+    name: row.name,
+    description: row.description,
+    code: row.code,
+    title: row.title,
+  };
+}
+
+export function createBuiltinTemplate(
+  input: BuiltinTemplateInput,
+  seedId: string,
+  meta: BuiltinTemplateMeta,
+): BuiltinTemplate {
+  const fields = normalizeBuiltinInput(input);
   const now = new Date().toISOString();
   const id = randomUUID();
 
   getDatabase()
     .prepare(
       `INSERT INTO builtin_templates (
-         id, seed_id, name, description, document, version, created_at, updated_at
+         id, seed_id, name, description, code, title, document, version, created_at, updated_at
        ) VALUES (
-         @id, @seedId, @name, @description, @document, 1, @createdAt, @updatedAt
+         @id, @seedId, @name, @description, @code, @title, @document, 1, @createdAt, @updatedAt
        )`,
     )
     .run({
@@ -67,7 +139,9 @@ export function createBuiltinTemplate(input: TemplateInput, seedId: string): Tem
       seedId,
       name: fields.name,
       description: fields.description,
-      document: JSON.stringify(fields.document),
+      code: meta.code,
+      title: meta.title,
+      document: JSON.stringify(fields.form),
       createdAt: now,
       updatedAt: now,
     });
@@ -75,25 +149,31 @@ export function createBuiltinTemplate(input: TemplateInput, seedId: string): Tem
   return getBuiltinTemplate(id)!;
 }
 
-export function syncBuiltinTemplateFromSeed(seedId: string, input: TemplateInput): Template {
+export function syncBuiltinTemplateFromSeed(
+  seedId: string,
+  input: BuiltinTemplateInput,
+  meta: BuiltinTemplateMeta,
+): BuiltinTemplate {
   const existing = getBuiltinTemplateBySeedId(seedId);
   if (!existing) throw new Error(`Built-in template not found for seed: ${seedId}`);
 
-  const fields = normalizeTemplateInput(input);
+  const fields = normalizeBuiltinInput(input);
   const now = new Date().toISOString();
 
   getDatabase()
     .prepare(
       `UPDATE builtin_templates
-         SET name = @name, description = @description, document = @document,
-             version = @version, updated_at = @updatedAt
+         SET name = @name, description = @description, code = @code, title = @title,
+             document = @document, version = @version, updated_at = @updatedAt
        WHERE seed_id = @seedId`,
     )
     .run({
       seedId,
       name: fields.name,
       description: fields.description,
-      document: JSON.stringify(fields.document),
+      code: meta.code,
+      title: meta.title,
+      document: JSON.stringify(fields.form),
       version: existing.version + 1,
       updatedAt: now,
     });

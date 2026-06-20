@@ -1,6 +1,7 @@
 import { formatAddress } from '../../shared/address';
 import { cadenceLabel } from '../../shared/cadence';
-import type { Block } from '../../shared/document';
+import type { Block, Document } from '../../shared/document';
+import { isFormInspectionDocument } from '../../shared/form';
 import type { PdfInspectionExport } from '../../shared/pdf';
 import type { Inspection } from '../../shared/inspection';
 import type { Client } from '../../shared/types';
@@ -176,6 +177,10 @@ export function renderInspectionHtml(
   client: Client | null,
   exportPayload: PdfInspectionExport,
 ): string {
+  if (isFormInspectionDocument(inspection.document)) {
+    throw new Error('renderInspectionHtml does not support form inspections.');
+  }
+  const document: Document = inspection.document;
   const address = client ? formatAddress(client) : '';
   const embedJson = JSON.stringify(exportPayload).replace(/</g, '\\u003c');
 
@@ -355,7 +360,7 @@ export function renderInspectionHtml(
     </section>
     <section class="info-card">
       <h2>Inspection</h2>
-      <div class="info-row"><span class="info-label">Type</span><span>${dash(inspection.document.meta.inspectionType)}</span></div>
+      <div class="info-row"><span class="info-label">Type</span><span>${dash(document.meta.inspectionType)}</span></div>
       <div class="info-row"><span class="info-label">Inspector</span><span>${dash(inspection.inspector)}</span></div>
       <div class="info-row"><span class="info-label">Date</span><span>${dash(inspection.inspectedAt)}</span></div>
       <div class="info-row"><span class="info-label">Status</span><span>${inspection.status === 'complete' ? 'Complete' : 'Draft'}</span></div>
@@ -369,7 +374,7 @@ export function renderInspectionHtml(
   </div>
 
   <main class="body">
-    ${renderBlocks(inspection.document.blocks)}
+    ${renderBlocks(document.blocks)}
   </main>
 
   <footer class="footer">

@@ -79,9 +79,12 @@ export interface BuiltinTemplateSummary {
   seedId: string;
   name: string;
   description: string;
+  code: string;
+  title: string;
   version: number;
   updatedAt: string;
   blockCount: number;
+  pageCount: number;
 }
 
 export interface CustomTemplateSummary {

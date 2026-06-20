@@ -253,6 +253,15 @@ const migrations: Migration[] = [
       `);
     },
   },
+  {
+    version: 9,
+    up: (db) => {
+      db.exec(`
+        ALTER TABLE builtin_templates ADD COLUMN code TEXT NOT NULL DEFAULT '';
+        ALTER TABLE builtin_templates ADD COLUMN title TEXT NOT NULL DEFAULT '';
+      `);
+    },
+  },
 ];
 
 /** Applies any migrations newer than the database's current `user_version`. */

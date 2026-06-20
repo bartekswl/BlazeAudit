@@ -4,6 +4,7 @@ export * from './factory';
 export * from './mutations';
 export type { BlockPath } from './mutations';
 export * from './validate';
+export * from './context';
 export { DEFAULT_TEMPLATE_SEEDS } from './defaults';
 export { inspectionSnapshotFromTemplate } from './snapshot';
 export {

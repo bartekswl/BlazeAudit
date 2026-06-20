@@ -8,8 +8,10 @@ import type { Block, BlockPath, Document } from '../../../shared/document';
 import { setBlockValue } from '../../../shared/document';
 
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
+import { isFormInspectionDocument, isBlockDocument } from '../../../shared/form';
 
 import { BlockFillIn } from './BlockFillIn';
+import { FormInspectionEditor } from './FormInspectionEditor';
 import { useRegisterDocumentOutline } from './DocumentOutlineContext';
 
 const AUTOSAVE_MS = 900;
@@ -20,23 +22,51 @@ const compactInputCls =
 
 
 export function InspectionEditor({
-
   inspection,
-
   onSaved,
-
   onBack,
-
 }: {
-
   inspection: Inspection;
-
   onSaved: (inspection: Inspection) => void;
-
   onBack: () => void;
-
 }) {
+  if (isFormInspectionDocument(inspection.document)) {
+    return (
+      <FormInspectionEditor inspection={inspection} onSaved={onSaved} onBack={onBack} />
+    );
+  }
+  return (
+    <BlockInspectionEditor inspection={inspection} onSaved={onSaved} onBack={onBack} />
+  );
+}
 
+function BlockInspectionEditor(props: {
+  inspection: Inspection;
+  onSaved: (inspection: Inspection) => void;
+  onBack: () => void;
+}) {
+  if (!isBlockDocument(props.inspection.document)) {
+    return <p className="text-sm text-red-300">Invalid block inspection document.</p>;
+  }
+  return (
+    <BlockInspectionEditorInner
+      {...props}
+      blockDocument={props.inspection.document}
+    />
+  );
+}
+
+function BlockInspectionEditorInner({
+  inspection,
+  blockDocument,
+  onSaved,
+  onBack,
+}: {
+  inspection: Inspection;
+  blockDocument: Document;
+  onSaved: (inspection: Inspection) => void;
+  onBack: () => void;
+}) {
   const [title, setTitle] = useState(inspection.title);
 
   const [status, setStatus] = useState<InspectionStatus>(inspection.status);
@@ -55,7 +85,7 @@ export function InspectionEditor({
 
   );
 
-  const [document, setDocument] = useState<Document>(inspection.document);
+  const [document, setDocument] = useState<Document>(blockDocument);
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
@@ -107,9 +137,9 @@ export function InspectionEditor({
 
     );
 
-    setDocument(inspection.document);
+    setDocument(blockDocument);
 
-  }, [inspection.id, inspection.updatedAt, inspection.document, inspection.title, inspection.status, inspection.inspector, inspection.inspectedAt, inspection.cadence]);
+  }, [inspection.id, inspection.updatedAt, blockDocument, inspection.title, inspection.status, inspection.inspector, inspection.inspectedAt, inspection.cadence]);
 
 
 

@@ -5,7 +5,15 @@ import {
   isOverdue,
   type Cadence,
 } from '../../shared/cadence';
-import { inspectionSnapshotFromTemplate, validateDocument, type Document } from '../../shared/document';
+import { inspectionSnapshotFromTemplate, validateDocument } from '../../shared/document';
+import {
+  createFormInspectionDocument,
+  isFormInspectionDocument,
+  validateFormInspectionDocument,
+  type FormInspectionDocument,
+} from '../../shared/form';
+import type { InspectionDocument } from '../../shared/form/guards';
+import type { Document } from '../../shared/document';
 import type { PdfInspectionExport } from '../../shared/pdf';
 import type {
   CreateInspectionInput,
@@ -16,6 +24,7 @@ import type {
   InspectionSummary,
 } from '../../shared/inspection';
 import type { TemplateKind } from '../../shared/document';
+import * as builtinTemplates from './builtinTemplates';
 import { getDatabase } from './connection';
 import * as templateRegistry from './templateRegistry';
 
@@ -37,12 +46,20 @@ interface InspectionRow {
   template_name?: string;
 }
 
-function parseInspectionDocument(json: string, requireClient = true): Document {
+function parseInspectionDocument(json: string, requireClient = true): InspectionDocument {
   let parsed: unknown;
   try {
     parsed = JSON.parse(json);
   } catch {
     throw new Error('Inspection document is not valid JSON.');
+  }
+  if (isFormInspectionDocument(parsed)) {
+    const result = validateFormInspectionDocument(parsed);
+    if (!result.ok) throw new Error(result.errors.join(' '));
+    if (requireClient && !result.document.clientId) {
+      throw new Error('Inspection document must reference a client.');
+    }
+    return result.document;
   }
   const result = validateDocument(parsed);
   if (!result.ok) throw new Error(result.errors.join(' '));
@@ -106,24 +123,47 @@ const detailSelect = `
     LEFT JOIN custom_templates ct ON i.template_kind = 'custom' AND ct.id = i.template_id
 `;
 
-function normalizeInput(input: InspectionInput) {
+function normalizeInput(input: InspectionInput, existingClientId?: string) {
   const title = input.title?.trim();
   if (!title) throw new Error('Inspection title is required.');
-
-  const result = validateDocument(input.document);
-  if (!result.ok) throw new Error(result.errors.join(' '));
-  if (!result.document.meta.clientId) throw new Error('Inspection must be linked to a client.');
 
   const inspectedAt = input.inspectedAt?.trim() || null;
   const cadence = (input.cadence?.trim() || 'annual') as Cadence;
   const nextDueAt =
     input.status === 'complete' ? computeNextDueAt(inspectedAt, cadence) : null;
 
-  const document = {
+  if (isFormInspectionDocument(input.document)) {
+    const result = validateFormInspectionDocument(input.document);
+    if (!result.ok) throw new Error(result.errors.join(' '));
+    const clientId = existingClientId ?? result.document.clientId;
+    if (!clientId) throw new Error('Inspection must be linked to a client.');
+    const document: FormInspectionDocument = {
+      ...result.document,
+      clientId,
+    };
+    return {
+      title,
+      status: input.status,
+      inspector: input.inspector?.trim() ?? '',
+      document,
+      inspectedAt,
+      cadence,
+      nextDueAt,
+    };
+  }
+
+  const result = validateDocument(input.document);
+  if (!result.ok) throw new Error(result.errors.join(' '));
+  if (!result.document.meta.clientId && !existingClientId) {
+    throw new Error('Inspection must be linked to a client.');
+  }
+
+  const document: Document = {
     ...result.document,
     meta: {
       ...result.document.meta,
       title,
+      clientId: existingClientId ?? result.document.meta.clientId,
       inspectionDate: inspectedAt,
     },
   };
@@ -161,23 +201,34 @@ export function getInspection(id: string): Inspection | null {
 }
 
 export function createInspectionFromTemplate(input: CreateInspectionInput): Inspection {
-  const template = templateRegistry.getTemplate(input.templateId, input.templateKind);
-  if (!template) throw new Error(`Template not found: ${input.templateKind}:${input.templateId}`);
-
   const client = getDatabase()
     .prepare('SELECT id, name FROM clients WHERE id = ?')
     .get(input.clientId) as { id: string; name: string } | undefined;
   if (!client) throw new Error(`Client not found: ${input.clientId}`);
 
   const inspectedAt = input.inspectedAt ?? new Date().toISOString().slice(0, 10);
-  const title = input.title?.trim() || `${template.name} — ${client.name}`;
   const cadence = (input.cadence ?? 'annual') as Cadence;
-  const document = inspectionSnapshotFromTemplate(template.document, {
-    clientId: input.clientId,
-    title,
-    inspectionDate: inspectedAt,
-  });
 
+  let document: InspectionDocument;
+  let defaultTitle: string;
+
+  if (input.templateKind === 'builtin') {
+    const builtin = builtinTemplates.getBuiltinTemplate(input.templateId);
+    if (!builtin) throw new Error(`Template not found: builtin:${input.templateId}`);
+    document = createFormInspectionDocument(builtin.form, input.clientId);
+    defaultTitle = `${builtin.name} — ${client.name}`;
+  } else {
+    const template = templateRegistry.getTemplate(input.templateId, input.templateKind);
+    if (!template) throw new Error(`Template not found: ${input.templateKind}:${input.templateId}`);
+    document = inspectionSnapshotFromTemplate(template.document, {
+      clientId: input.clientId,
+      title: input.title?.trim() || `${template.name} — ${client.name}`,
+      inspectionDate: inspectedAt,
+    });
+    defaultTitle = `${template.name} — ${client.name}`;
+  }
+
+  const title = input.title?.trim() || defaultTitle;
   const now = new Date().toISOString();
   const id = randomUUID();
 
@@ -271,9 +322,7 @@ export function updateInspection(id: string, input: InspectionInput): Inspection
   const existing = getInspection(id);
   if (!existing) throw new Error(`Inspection not found: ${id}`);
 
-  const fields = normalizeInput(input);
-  // Client is chosen at creation and cannot be changed on an existing inspection.
-  fields.document.meta.clientId = existing.clientId;
+  const fields = normalizeInput(input, existing.clientId);
   const now = new Date().toISOString();
 
   const result = getDatabase()

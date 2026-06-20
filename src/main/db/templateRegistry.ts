@@ -1,12 +1,12 @@
 import type { Template, TemplateKind, TemplatePickerItem, TemplateRef } from '../../shared/document';
+import { emptyDocument } from '../../shared/document';
 import * as builtin from './builtinTemplates';
 import * as custom from './customTemplates';
 
-/** Resolve a template from either table — extension point for cross-type flows. */
+/** Resolve a custom block template from ref — built-ins use getBuiltinTemplate directly. */
 export function resolveTemplate(ref: TemplateRef): Template | null {
-  return ref.kind === 'builtin'
-    ? builtin.getBuiltinTemplate(ref.id)
-    : custom.getCustomTemplate(ref.id);
+  if (ref.kind === 'builtin') return null;
+  return custom.getCustomTemplate(ref.id);
 }
 
 /** Copy a built-in template into custom_templates (future UI hook). */
@@ -16,12 +16,12 @@ export function duplicateBuiltinToCustom(builtinId: string): Template | null {
   return custom.createCustomTemplate({
     name: `${source.name} (copy)`,
     description: source.description,
-    document: structuredClone(source.document),
+    document: emptyDocument({ title: source.name }),
   });
 }
 
 export function getTemplate(id: string, kind: TemplateKind): Template | null {
-  return resolveTemplate({ kind, id });
+  return kind === 'builtin' ? null : custom.getCustomTemplate(id);
 }
 
 export function listTemplatesForPicker(): TemplatePickerItem[] {
