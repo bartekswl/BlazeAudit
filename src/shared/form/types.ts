@@ -62,7 +62,16 @@ export type FormElement =
   | {
       kind: 'affirmation';
       id: string;
+    }
+  | {
+      kind: 'deficiencies';
+      id: string;
     };
+
+export type FormPageOrientation = 'portrait' | 'landscape';
+
+/** Page 2+ header: Code – Name line and building meta table. Page 1 uses template regions. */
+export type FormPageHeaderKind = 'templateRegions' | 'codeNameMeta';
 
 export interface FormSection {
   id: string;
@@ -78,6 +87,10 @@ export interface FormSection {
 export interface FormPage {
   id: string;
   label?: string;
+  /** Default portrait (A4 210×297 mm). Landscape pages use 297×210 mm. */
+  orientation?: FormPageOrientation;
+  /** When set to `codeNameMeta`, renders standard Code–Name + building table header. Otherwise uses `regions`. */
+  header?: FormPageHeaderKind;
   regions: FormRegion[];
   sections: FormSection[];
 }
@@ -143,3 +156,9 @@ export type YesNoSummaryValue = Record<string, YesNoSummaryItemValue>;
 
 export type { UlcSection1Value } from './ulcSection1';
 export type { AffirmationValue } from './affirmation';
+export type {
+  DeficienciesValue,
+  DeficiencyControlRow,
+  DeficiencyDeviceRow,
+  DeficiencyRepairFields,
+} from './deficiencies';

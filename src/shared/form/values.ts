@@ -8,6 +8,7 @@ import type {
 } from './types';
 import { walkFormElements } from './layout';
 import { emptyAffirmationValue } from './affirmation';
+import { emptyDeficienciesValue } from './deficiencies';
 import { emptyUlcSection1Value, normalizeUlcSection1Value } from './ulcSection1';
 import { emptyYesNoSummaryValue } from './yesNoSummary';
 
@@ -48,6 +49,8 @@ export function initialValueForElement(element: FormElement): unknown {
       return emptyYesNoSummaryValue(element.items);
     case 'affirmation':
       return emptyAffirmationValue();
+    case 'deficiencies':
+      return emptyDeficienciesValue();
     default: {
       const _exhaustive: never = element;
       return _exhaustive;

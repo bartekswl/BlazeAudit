@@ -7,6 +7,7 @@ import type {
 } from '../../../shared/form';
 import { cn } from '../../lib/cn';
 import { FormAffirmationView } from './FormAffirmationView';
+import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormUlcSection1View } from './FormUlcSection1View';
 import { FormYesNoSummaryView } from './FormYesNoSummaryView';
 
@@ -36,7 +37,8 @@ export function FormElementView({
   const flushFrame =
     element.kind === 'ulcSection1' ||
     element.kind === 'yesNoSummary' ||
-    element.kind === 'affirmation';
+    element.kind === 'affirmation' ||
+    element.kind === 'deficiencies';
 
   return (
     <div
@@ -289,6 +291,14 @@ function FormElementBody({
           value={value}
           context={context}
           totalPages={totalPages}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'deficiencies':
+      return (
+        <FormDeficienciesView
+          value={value}
           readOnly={readOnly}
           onChange={onChange}
         />

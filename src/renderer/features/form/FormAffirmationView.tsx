@@ -120,7 +120,7 @@ function TechnicianBlock({
 
   return (
     <div className="aff-tech">
-      <div className="aff-fields">
+      <div className="aff-tech-grid">
         <div className="aff-cell aff-cell--name">
           {readOnly ? (
             <span className="aff-cell-value">{displayName || '\u00a0'}</span>
@@ -159,8 +159,6 @@ function TechnicianBlock({
           readOnly={readOnly}
           onChange={(next) => setField('signature', next)}
         />
-      </div>
-      <div className="aff-labels">
         {labels.map((label) => (
           <div className="aff-label" key={label}>
             {label}

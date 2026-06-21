@@ -4,6 +4,7 @@ import {
   formSectionHeading,
   pageBodyPercent,
   resolveFormBinding,
+  resolveFormPageMetaHeader,
   type ChecklistElementValue,
   type FormDefinition,
   type FormElement,
@@ -131,6 +132,11 @@ function renderElementHtml(
         }),
         true,
       );
+    case 'deficiencies':
+      return framed(
+        '<p class="form-pdf-value">Deficiencies table — open document and export PDF for full layout.</p>',
+        true,
+      );
     default:
       return '';
   }
@@ -146,6 +152,31 @@ function renderPageHtml(
   const bodyPercent = pageBodyPercent(page);
   const totalPages = form.pages.length;
 
+  const meta = resolveFormPageMetaHeader(context);
+
+  const metaHeaderHtml =
+    page.header === 'codeNameMeta'
+      ? `<div class="form-page-header form-page-header--meta">
+          <div class="form-page-meta-code">${headerValue(meta.codeName)}</div>
+          <table class="form-page-meta-table">
+            <tbody>
+              <tr>
+                <td class="form-page-meta-label">Building Name:</td>
+                <td class="form-page-meta-value">${headerValue(meta.buildingName)}</td>
+                <td class="form-page-meta-label">Date:</td>
+                <td class="form-page-meta-value">${headerValue(meta.date)}</td>
+              </tr>
+              <tr>
+                <td class="form-page-meta-label">Address:</td>
+                <td class="form-page-meta-value">${headerValue(meta.address)}</td>
+                <td class="form-page-meta-label">City:</td>
+                <td class="form-page-meta-value">${headerValue(meta.city)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>`
+      : '';
+
   const headerInner = page.regions
     .map((region) => {
       if (region.content.kind === 'spacer') {
@@ -160,7 +191,11 @@ function renderPageHtml(
     .join('');
 
   const headerHtml =
-    page.regions.length > 0 ? `<div class="form-page-header">${headerInner}</div>` : '';
+    page.header === 'codeNameMeta'
+      ? metaHeaderHtml
+      : page.regions.length > 0
+        ? `<div class="form-page-header">${headerInner}</div>`
+        : '';
 
   const sections = page.sections
     .map((section) => {
@@ -189,8 +224,10 @@ function renderPageHtml(
     })
     .join('');
 
+  const orientationCls = page.orientation === 'landscape' ? ' form-page-sheet--landscape' : '';
+
   return `
-    <section class="form-page form-page-sheet">
+    <section class="form-page form-page-sheet${orientationCls}">
       <div class="form-page-body" style="height:${bodyPercent}%">
         ${headerHtml}
         <div class="form-page-content">${sections}</div>

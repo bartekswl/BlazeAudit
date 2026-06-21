@@ -10,6 +10,7 @@ import {
   type FormPage,
 } from '../../../shared/form';
 import { cn } from '../../lib/cn';
+import { FormPageMetaHeader } from './FormPageMetaHeader';
 import { FormElementView } from './FormElementView';
 
 export function FormPageCanvas({
@@ -21,6 +22,7 @@ export function FormPageCanvas({
   values,
   readOnly,
   onValueChange,
+  fixedPageLayout = false,
 }: {
   form: FormDefinition;
   page: FormPage;
@@ -30,45 +32,62 @@ export function FormPageCanvas({
   values?: Record<string, unknown>;
   readOnly?: boolean;
   onValueChange?: (elementId: string, value: unknown) => void;
+  /** True for PDF export — A4 percent heights. False for screen — sheet hugs content. */
+  fixedPageLayout?: boolean;
 }) {
   const bodyPercent = pageBodyPercent(page);
   const totalPages = form.pages.length;
+  const isLandscape = page.orientation === 'landscape';
+  const useMetaHeader = page.header === 'codeNameMeta';
 
   return (
-    <div className="form-page-sheet">
-      <div className="form-page-body" style={{ minHeight: `${bodyPercent}%` }}>
-        {page.regions.length > 0 && (
-          <div className="form-page-header">
-            {page.regions.map((region) => {
-              if (region.content.kind === 'spacer') {
+    <div
+      className={cn(
+        'form-page-sheet',
+        isLandscape && 'form-page-sheet--landscape',
+        fixedPageLayout && 'form-page-sheet--fixed',
+      )}
+    >
+      <div
+        className="form-page-body"
+        style={fixedPageLayout ? { minHeight: `${bodyPercent}%` } : undefined}
+      >
+        {useMetaHeader ? (
+          <FormPageMetaHeader context={context} template={template} />
+        ) : (
+          page.regions.length > 0 && (
+            <div className="form-page-header">
+              {page.regions.map((region) => {
+                if (region.content.kind === 'spacer') {
+                  return (
+                    <div
+                      key={region.id}
+                      className="shrink-0"
+                      style={{ height: `${region.heightPercent}%` }}
+                    />
+                  );
+                }
+                const text = resolveFormBinding(region.content.binding, context ?? null, template);
                 return (
                   <div
                     key={region.id}
-                    className="shrink-0"
-                    style={{ height: `${region.heightPercent}%` }}
-                  />
+                    className={cn(
+                      'form-page-header-line font-semibold text-[var(--ba-text-primary)]',
+                      region.content.align === 'center' && 'text-center',
+                      region.content.align === 'right' && 'text-right',
+                    )}
+                  >
+                    {text || (
+                      <span className="text-[var(--ba-text-muted)]">{region.content.binding}</span>
+                    )}
+                  </div>
                 );
-              }
-              const text = resolveFormBinding(region.content.binding, context ?? null, template);
-              return (
-                <div
-                  key={region.id}
-                  className={cn(
-                    'form-page-header-line font-semibold text-[var(--ba-text-primary)]',
-                    region.content.align === 'center' && 'text-center',
-                    region.content.align === 'right' && 'text-right',
-                  )}
-                >
-                  {text || (
-                    <span className="text-[var(--ba-text-muted)]">{region.content.binding}</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+              })}
+            </div>
+          )
         )}
 
-        <div className="form-page-content">
+        <div className={cn('form-page-content', isLandscape && 'form-page-content--landscape')}>
           {page.sections.map((section) => {
             const heading = formSectionHeading(section);
             const isUlcSection =
@@ -82,7 +101,7 @@ export function FormPageCanvas({
                 isUlcSection && 'flex flex-col',
               )}
               style={
-                section.heightPercent
+                fixedPageLayout && section.heightPercent
                   ? isUlcSection
                     ? { minHeight: `${section.heightPercent}%` }
                     : { minHeight: `${section.heightPercent}%` }
@@ -122,7 +141,7 @@ export function FormPageCanvas({
 
       <footer
         className="form-page-footer"
-        style={{ height: `${FORM_FOOTER_HEIGHT_PERCENT}%` }}
+        style={fixedPageLayout ? { height: `${FORM_FOOTER_HEIGHT_PERCENT}%` } : undefined}
       >
         <div className="form-page-footer-count">
           Page {pageIndex + 1} of {totalPages}

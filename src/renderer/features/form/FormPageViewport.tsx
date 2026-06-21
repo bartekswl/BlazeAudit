@@ -3,12 +3,12 @@ import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { useDocumentOutlineRail } from '../documents/DocumentOutlineContext';
 
 const SCALE_EPSILON = 0.001;
-const USER_ZOOM_MIN = 0.75;
-const USER_ZOOM_MAX = 1.5;
-const USER_ZOOM_STEP = 0.1;
+const ZOOM_PERCENT_MIN = 75;
+const ZOOM_PERCENT_MAX = 150;
+const ZOOM_PERCENT_STEP = 5;
 
-function clampUserZoom(value: number): number {
-  return Math.min(USER_ZOOM_MAX, Math.max(USER_ZOOM_MIN, Math.round(value * 100) / 100));
+function clampZoomPercent(value: number): number {
+  return Math.min(ZOOM_PERCENT_MAX, Math.max(ZOOM_PERCENT_MIN, value));
 }
 
 export function FormPageViewport({
@@ -33,19 +33,21 @@ export function FormPageViewport({
   const hostRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const referenceWidthRef = useRef(0);
-  const [userZoom, setUserZoom] = useState(1);
+  const [zoomPercent, setZoomPercent] = useState(100);
   const [innerStyle, setInnerStyle] = useState<CSSProperties>({ width: '100%' });
 
+  const userZoom = zoomPercent / 100;
+
   const zoomIn = useCallback(() => {
-    setUserZoom((prev) => clampUserZoom(prev + USER_ZOOM_STEP));
+    setZoomPercent((prev) => clampZoomPercent(prev + ZOOM_PERCENT_STEP));
   }, []);
 
   const zoomOut = useCallback(() => {
-    setUserZoom((prev) => clampUserZoom(prev - USER_ZOOM_STEP));
+    setZoomPercent((prev) => clampZoomPercent(prev - ZOOM_PERCENT_STEP));
   }, []);
 
   const resetZoom = useCallback(() => {
-    setUserZoom(1);
+    setZoomPercent(100);
   }, []);
 
   const updateScale = useCallback(() => {
@@ -71,6 +73,10 @@ export function FormPageViewport({
         : { width: reference, zoom: effectiveZoom },
     );
   }, [contentsExpanded, userZoom]);
+
+  useEffect(() => {
+    setZoomPercent(100);
+  }, [pageIndex]);
 
   useEffect(() => {
     if (!contentsExpanded && hostRef.current) {
@@ -112,9 +118,9 @@ export function FormPageViewport({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [showZoomControls, zoomIn, zoomOut, resetZoom]);
 
-  const zoomLabel = `${Math.round(userZoom * 100)}%`;
-  const atMinZoom = userZoom <= USER_ZOOM_MIN + SCALE_EPSILON;
-  const atMaxZoom = userZoom >= USER_ZOOM_MAX - SCALE_EPSILON;
+  const zoomLabel = `${zoomPercent}%`;
+  const atMinZoom = zoomPercent <= ZOOM_PERCENT_MIN;
+  const atMaxZoom = zoomPercent >= ZOOM_PERCENT_MAX;
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col">

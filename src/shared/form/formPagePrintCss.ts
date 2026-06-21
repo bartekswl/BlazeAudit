@@ -1,7 +1,7 @@
 /** Print/PDF stylesheet — mirrors `components.css` form-page + ulc-s1 rules (light theme). */
 export const FORM_PAGE_PRINT_CSS = `
   html { font-size: 16px; }
-  @page { size: letter; margin: 0; }
+  @page { size: A4; margin: 0; }
   * { box-sizing: border-box; }
   body {
     font-family: "Segoe UI", Arial, sans-serif;

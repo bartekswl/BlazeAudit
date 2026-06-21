@@ -58,6 +58,25 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-2',
+        label: 'Page 2',
+        orientation: 'landscape',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-deficiencies',
+            heading: '20.2 DEFICIENCIES',
+            elements: [
+              {
+                kind: 'deficiencies',
+                id: 'deficiencies-table',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

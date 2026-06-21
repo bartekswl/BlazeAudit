@@ -34,21 +34,20 @@ function formatAffirmationDate(iso: string | null | undefined): string {
 function technicianFieldsHtml(
   tech: AffirmationTechnicianValue,
   inspectors: AffirmationInspectorOption[],
+  labels: readonly string[],
 ): string {
   const name = resolveAffirmationTechnicianName(tech, inspectors);
   const identification = resolveAffirmationTechnicianIdentification(tech, inspectors);
-  return `<div class="aff-fields">
+  const labelCells = labels
+    .map((label) => `<div class="aff-label">${escapeHtml(label)}</div>`)
+    .join('');
+  return `<div class="aff-tech-grid">
     <div class="aff-cell aff-cell--name">${fieldValue(name)}</div>
     <div class="aff-cell aff-cell--identification">${fieldValue(identification)}</div>
     <div class="aff-cell aff-cell--date">${formatAffirmationDate(tech.date)}</div>
     <div class="aff-cell aff-cell--sig">${fieldValue(tech.signature)}</div>
+    ${labelCells}
   </div>`;
-}
-
-function labelsHtml(labels: readonly string[]): string {
-  return `<div class="aff-labels">${labels
-    .map((label) => `<div class="aff-label">${escapeHtml(label)}</div>`)
-    .join('')}</div>`;
 }
 
 function technicianBlockHtml(
@@ -58,7 +57,7 @@ function technicianBlockHtml(
   inspectors: AffirmationInspectorOption[],
 ): string {
   const tech = value[technician];
-  return `<div class="aff-tech">${technicianFieldsHtml(tech, inspectors)}${labelsHtml(labels)}</div>`;
+  return `<div class="aff-tech">${technicianFieldsHtml(tech, inspectors, labels)}</div>`;
 }
 
 /** Read-only Affirmation block — same structure/classes as FormAffirmationView. */

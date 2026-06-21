@@ -35,6 +35,7 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `ulcSection1` — composite inspection header panel (`.ulc-s1-*`)
 - `yesNoSummary` — Yes / No / Summary checklist table (`.yns-*`)
 - `affirmation` — Affirmation paragraph + technician signature grid (`.aff-*`)
+- `deficiencies` — Split inspection/repair deficiencies table (`.def-*`)
 
 ---
 
@@ -44,18 +45,31 @@ All composite elements on a letter page share the same “form panel” language
 
 | Token | Value | Notes |
 |-------|-------|-------|
-| Panel border | `1px solid rgb(148 163 184 / 0.45)` | CSS var: `--ulc-line` / `--yns-line` / `--aff-line` |
+| Inner cell line | `1px solid rgb(148 163 184 / 0.45)` | CSS var: `--ulc-line` / `--yns-line` / `--aff-line` / `--def-line` |
+| **Outer panel frame** | **`2px solid #000000`** | CSS var: `--form-panel-frame` on `.form-page-sheet` — applies to **all** composite panels |
 | Panel radius | `0.625rem` | Rounded outer frame |
-| Panel shadow | **none** on `.form-page-sheet` | Avoid gray/blue bands between stacked panels |
+| Panel shadow | **none** on `.form-page-sheet` panels | Avoid gray/blue bands between stacked panels |
 | Label header bg | `linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%)` | Text `#334155` — not black |
 | Body text | `var(--ba-text-primary)` | Never hardcode `#171717` without dark pair |
 | Page top → code | `padding-top: 1.75rem` on `.form-page-body` | Space above template code line |
 | Section gap | `1.5rem` on `.form-page-content` | **Even** gap between all stacked panels |
 | Section title → panel | `margin-bottom: 0.75rem` on `.form-page-section-title` | e.g. “20.1 …” heading → ULC panel |
 | ULC section height | **`minHeight`** % | Never `maxHeight` — prevents PDF overlap |
-| PDF outer frame | `2pt solid #334155` | Print-only override on panel wrap |
+| PDF outer frame | **`3pt solid #000000`** | Print-only — same black frame on every composite panel |
 | PDF inner lines | `0.5px solid #64748b` | Print-only; fixes Chromium dropped borders |
 | Row dividers | Single thin line | No thick gray separator bands between rows |
+
+### Outer frame (all composite panels)
+
+Every built-in form panel on `.form-page-sheet` shares one thick **black** outer edge. Inner grid lines stay thin slate.
+
+| Surface | Selector | Outer border |
+|---------|----------|--------------|
+| Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `2px solid #000000` |
+| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance` | via `border: var(--form-panel-frame)` |
+| PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `3pt solid #000000 !important` on the same selectors |
+
+Do **not** use the thin `--*-line` variable for the outer panel perimeter — that is for inner cells only.
 
 ### Affirmation block (`.aff-*`) — defaults
 
@@ -63,6 +77,7 @@ When building or editing the **affirmation** element, apply these without being 
 
 | Area | Rule |
 |------|------|
+| Outer frame | **`--form-panel-frame`** — same black edge as all form panels (see above) |
 | Gray body (long text) | **Center text vertically and horizontally** — `.aff-body { display: flex; align-items: center; justify-content: center; text-align: center; }` |
 | Body padding | Comfortable padding above/below paragraph (`~0.625rem` vertical) |
 | Technician field rows | **2× standard cell height** (`--aff-field-row-height: 3.5rem`) for white input rows only; label bars stay compact |
@@ -72,6 +87,37 @@ When building or editing the **affirmation** element, apply these without being 
 | Inspector names | Dropdown from Settings → Inspectors; ID auto-filled from license/certificate number (read-only) |
 | Dates | Default to inspection date; editable via `InspectionDateField` |
 | Signature cells | **No** company-name placeholder overlay |
+
+### Deficiencies block (`.def-*`) — defaults
+
+When building or editing the **deficiencies** element (page 2, landscape), apply these without being asked again:
+
+| Area | Rule |
+|------|------|
+| Outer frame | **`--form-panel-frame`** on `.def-grid` and `.def-compliance` |
+| Panel frame | **`border-radius: 0.625rem`** + `overflow: hidden` on `.def-grid` — same rounded panel language as `.yns-table-wrap` / `.aff-panel` |
+| Compliance footer | Same **`0.625rem`** radius on `.def-compliance` (blue box) |
+| Layout | **Single CSS grid** (`.def-grid`) — left/right cells share one row so header rows stay level across the split |
+| Right-side headers | **Two** repair column-header rows — one above device rows, one above control rows (never an empty peach placeholder) |
+| Banner rows | **`min-height: 2rem`** — green (inspect) + peach (repair) instruction text |
+| Column header rows | **`min-height: 1.75rem`** — multi-line labels must not clip |
+| Item # column | **`7%`** (`--def-col-item`) |
+| ULC 536 column | **`18%`** (`--def-col-ulc`) — narrower; extra width to Deficiency |
+| Section divider | **`2px solid #171717`** between device block and control block (`.def-section-divider`) |
+| Compliance text → fields | **Tight gap** — `margin-bottom: 0.125rem` on `.def-compliance-text` |
+| Date fields | Same label + control structure as Printed Name / Signature; date boxes **`1.625rem × 1.25rem`**, aligned with signature input row |
+
+### ULC 20.1 panel (`.ulc-s1-*`) — defaults
+
+| Area | Rule |
+|------|------|
+| Outer frame | **`--form-panel-frame`** — black edge; inner cells use `--ulc-line` only |
+
+### Yes / No / Summary table (`.yns-*`) — defaults
+
+| Area | Rule |
+|------|------|
+| Outer frame | **`--form-panel-frame`** — black edge; inner cells use `--yns-line` only |
 
 ### Dark theme (required)
 
@@ -101,9 +147,12 @@ Template viewer and document editor both respect `data-theme` on `<html>`. PDF e
 }
 .form-page-sheet .ulc-s1-panel,
 .form-page-sheet .yns-table-wrap,
-.form-page-sheet .aff-panel {
+.form-page-sheet .aff-panel,
+.form-page-sheet .def-grid,
+.form-page-sheet .def-compliance {
   box-shadow: none;
   outline: none;
+  border: var(--form-panel-frame);
 }
 ```
 
@@ -224,5 +273,7 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
+| 2026-06-21 | Shared **`--form-panel-frame`** black outer edge on all composite panels (page 1 + 20.2); screen `2px`, PDF `3pt`. |
+| 2026-06-21 | Deficiencies element (`.def-*`): rounded grid panel, dual repair header rows, column widths, compliance footer alignment. |
 | 2026-06-21 | Affirmation element (`.aff-*`): centered gray body text, inspector dropdowns, page spacing tokens, technician row heights. |
 | 2026-06-21 | Initial blueprint from ULC 20.1 + Yes/No/Summary table work (three-surface PDF architecture, panel styling, spacing, dark theme, full-cell clicks). |

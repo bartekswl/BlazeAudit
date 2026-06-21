@@ -3,7 +3,7 @@ import { FORM_PRINT_APP_CSS } from '../../shared/form/formPrintAppCss.generated'
 /** Page shell + print tweaks — layout/CSS comes from bundled components.css extract. */
 const PDF_PRINT_OVERRIDES = `
   html { font-size: 16px; }
-  @page { size: letter; margin: 0; }
+  @page { size: A4; margin: 0; }
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -12,15 +12,23 @@ const PDF_PRINT_OVERRIDES = `
     color: #171717;
   }
   .form-page.form-page-sheet {
-    width: 8.5in;
-    height: 11in;
-    min-height: 11in;
-    max-height: 11in;
+    width: 210mm;
+    height: 297mm;
+    min-height: 297mm;
+    max-height: 297mm;
     aspect-ratio: unset;
     page-break-after: always;
     border: none;
     box-shadow: none;
     border-radius: 0;
+  }
+  @page a4-landscape { size: A4 landscape; margin: 0; }
+  .form-page.form-page-sheet--landscape {
+    width: 297mm;
+    height: 210mm;
+    min-height: 210mm;
+    max-height: 210mm;
+    page: a4-landscape;
   }
   .form-page.form-page-sheet:last-child { page-break-after: auto; }
   .form-page-header-line.text-center { text-align: center; }

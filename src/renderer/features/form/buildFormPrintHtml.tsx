@@ -10,7 +10,7 @@ import { FormPageCanvas } from './FormPageCanvas';
  * from the bundled app stylesheet so the PDF can never drift from the document.
  */
 const PRINT_OVERRIDES = `
-  @page { size: letter; margin: 0; }
+  @page { size: A4; margin: 0; }
   html { font-size: 16px; }
   html, body {
     margin: 0;
@@ -22,10 +22,10 @@ const PRINT_OVERRIDES = `
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .form-print-root { display: block; }
   .form-print-root .form-page-sheet {
-    width: 8.5in;
-    height: 11in;
-    min-height: 11in;
-    max-height: 11in;
+    width: 210mm;
+    height: 297mm;
+    min-height: 297mm;
+    max-height: 297mm;
     aspect-ratio: auto;
     border: none;
     border-radius: 0;
@@ -42,7 +42,6 @@ const PRINT_OVERRIDES = `
   /* ULC print hardening: force uniform, visible grid lines in Chromium PDF. */
   .form-print-root .ulc-s1-panel {
     --ulc-line: 0.5px solid #64748b !important;
-    border: 2pt solid #334155 !important;
     box-shadow: none !important;
   }
   .form-print-root .ulc-s1-company { flex: 0 0 42% !important; }
@@ -200,7 +199,6 @@ const PRINT_OVERRIDES = `
   /* Yes/No/Summary table — match ULC panel frame + thin row lines in PDF. */
   .form-print-root .yns-table-wrap {
     --yns-line: 0.5px solid #64748b !important;
-    border: 2pt solid #334155 !important;
     border-radius: 0.625rem !important;
     box-shadow: none !important;
     margin-top: 0 !important;
@@ -227,7 +225,6 @@ const PRINT_OVERRIDES = `
   /* Affirmation block — match panel frame + thin grid lines in PDF. */
   .form-print-root .aff-panel {
     --aff-line: 0.5px solid #64748b !important;
-    border: 2pt solid #334155 !important;
     border-radius: 0.625rem !important;
     box-shadow: none !important;
     margin-top: 0 !important;
@@ -251,7 +248,8 @@ const PRINT_OVERRIDES = `
     justify-content: center !important;
     text-align: center !important;
   }
-  .form-print-root .aff-fields .aff-cell {
+  .form-print-root .aff-fields .aff-cell,
+  .form-print-root .aff-tech-grid > .aff-cell {
     min-height: 3.5rem !important;
   }
   .form-print-root .aff-cell,
@@ -260,8 +258,205 @@ const PRINT_OVERRIDES = `
   .form-print-root .aff-label {
     border-color: #64748b !important;
   }
+  .form-print-root .aff-tech-grid > .aff-cell:not(:nth-child(4n + 1)),
+  .form-print-root .aff-tech-grid > .aff-label:not(:nth-child(4n + 1)) {
+    border-left: 0.5px solid #64748b !important;
+  }
+  .form-print-root .aff-tech-grid > .aff-cell:nth-child(-n + 4) {
+    border-bottom: 0.5px solid #64748b !important;
+  }
   .form-print-root .aff-tech:not(:last-child) {
     border-bottom: 0.5px solid #64748b !important;
+  }
+
+  @page a4-landscape { size: A4 landscape; margin: 0; }
+
+  .form-print-root .form-page-sheet--landscape {
+    width: 297mm;
+    height: 210mm;
+    min-height: 210mm;
+    max-height: 210mm;
+    page: a4-landscape;
+  }
+
+  .form-print-root .form-page-sheet--landscape .form-page-body {
+    padding: 0.625rem 0.5rem 0 !important;
+  }
+
+  /* Fixed A4 layout — stretch content toward page bottom (PDF export only). */
+  .form-print-root .form-page-sheet--fixed {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--fixed .form-page-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--fixed .form-page-content {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    gap: 0.5rem !important;
+  }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.ulc-s1-panel),
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.yns-table-wrap) {
+    flex: 1 1 0 !important;
+    flex-shrink: 1 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.aff-panel) {
+    flex: 0 0 auto !important;
+  }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.ulc-s1-panel) > div,
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.yns-table-wrap) > div {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.aff-panel) > div {
+    flex: 0 0 auto !important;
+  }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.aff-panel) .form-element-frame--flush {
+    flex: 0 0 auto !important;
+  }
+  .form-print-root .form-page-sheet--fixed .form-element-frame--flush {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--fixed .ulc-s1-panel {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--fixed .ulc-s1-service {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+  .form-print-root .form-page-sheet--fixed .ulc-s1-system-row {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+  }
+  .form-print-root .form-page-sheet--fixed .yns-table-wrap {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--fixed .yns-table {
+    height: 100% !important;
+  }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .yns-row {
+    height: calc(100% / 7) !important;
+  }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .yns-td {
+    vertical-align: middle !important;
+  }
+  .form-print-root .form-page-sheet--fixed .aff-panel {
+    flex: 0 0 auto !important;
+  }
+  .form-print-root .form-page-sheet--fixed .aff-body {
+    flex: 0 0 auto !important;
+  }
+  .form-print-root .form-page-sheet--fixed.form-page-sheet--landscape .form-page-section {
+    flex: 1 1 auto !important;
+    flex-shrink: 1 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--fixed.form-page-sheet--landscape .form-page-section > div {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--fixed .def-panel {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+  .form-print-root .form-page-sheet--fixed .def-grid {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    grid-template-rows:
+      auto
+      auto
+      repeat(6, minmax(1.375rem, 1fr))
+      auto
+      repeat(5, minmax(1.375rem, 1fr)) !important;
+  }
+  .form-print-root .form-page-sheet--fixed .def-data-strip {
+    min-height: 100% !important;
+    height: 100% !important;
+  }
+  .form-print-root .form-page-sheet--fixed .def-cell {
+    min-height: 100% !important;
+  }
+  .form-print-root .form-page-sheet--fixed .def-cell-input,
+  .form-print-root .form-page-sheet--fixed .def-cell-value {
+    min-height: 100% !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .form-print-root .ulc-s1-panel,
+  .form-print-root .yns-table-wrap,
+  .form-print-root .aff-panel,
+  .form-print-root .def-grid,
+  .form-print-root .def-compliance {
+    border: 3pt solid #000000 !important;
+  }
+
+  .form-print-root .def-grid {
+    border-radius: 0.625rem !important;
+    overflow: hidden !important;
+  }
+
+  .form-print-root .def-compliance {
+    background: #cfe2f3 !important;
+    border-radius: 0.625rem !important;
+  }
+
+  .form-print-root .def-head-cell,
+  .form-print-root .def-cell,
+  .form-print-root .def-meta td {
+    border-color: #64748b !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .form-print-root .def-grid-left {
+    border-right: 2pt solid #334155 !important;
+  }
+
+  .form-print-root .def-banner--inspect {
+    background: #d9ead3 !important;
+  }
+
+  .form-print-root .def-banner--repair {
+    background: #fce5cd !important;
+  }
+
+  .form-print-root .def-red-bar {
+    background: #cc0000 !important;
+  }
+
+  .form-print-root .form-page-meta-table td {
+    background: #ffffff !important;
+    border-color: #64748b !important;
+  }
+
+  .form-print-root .def-head-strip--device-left .def-head-cell,
+  .form-print-root .def-head-strip--repair .def-head-cell {
+    background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%) !important;
+    color: #334155 !important;
   }
 `;
 
@@ -333,6 +528,7 @@ export async function buildFormPrintHtml({
           context={context}
           values={values}
           readOnly
+          fixedPageLayout
         />,
       ),
     )
