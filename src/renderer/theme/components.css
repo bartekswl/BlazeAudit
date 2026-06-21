@@ -368,6 +368,8 @@
 
 .form-page-header-line {
   line-height: 1.25;
+  font-size: calc(0.875rem + 1pt);
+  font-weight: 600;
 }
 
 .form-page-body {
@@ -375,7 +377,7 @@
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  padding: 0.5rem 1rem 0;
+  padding: 0.75rem 1rem 0;
 }
 
 .form-page-content {
@@ -385,7 +387,15 @@
   flex-direction: column;
   gap: 0.75rem;
   overflow: hidden;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-page-section-title {
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: calc(0.875rem + 2pt);
+  font-weight: 700;
+  color: var(--ba-text-primary);
 }
 
 .form-page-section {

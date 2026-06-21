@@ -12,6 +12,8 @@ import { validateCountry, validatePhone, validatePostCode, validateProvince } fr
 import type { Client, ClientInput } from '../../../shared/types';
 import { cn } from '../../lib/cn';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { ListPagination } from '../../components/ListPagination';
+import { paginateItems } from '../../lib/pagination';
 import { CustomerDetailScreen } from './CustomerDetailScreen';
 import { filterClients } from './filterClients';
 import { inputCls } from '../templates/BlockList';
@@ -55,6 +57,7 @@ export function CustomersScreen({
   const [error, setError] = useState<string | null>(null);
   const [editor, setEditor] = useState<EditorState>({ mode: 'closed' });
   const [search, setSearch] = useState('');
+  const [listPage, setListPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedClientName, setSelectedClientName] = useState<string | null>(null);
   const [detailRefreshKey, setDetailRefreshKey] = useState(0);
@@ -95,6 +98,15 @@ export function CustomersScreen({
   }, [refresh]);
 
   const filtered = useMemo(() => filterClients(clients, search), [clients, search]);
+
+  useEffect(() => {
+    setListPage(1);
+  }, [search]);
+
+  const paged = useMemo(
+    () => paginateItems(filtered, listPage),
+    [filtered, listPage],
+  );
 
   const requestDelete = async (client: Client) => {
     setError(null);
@@ -241,20 +253,21 @@ export function CustomersScreen({
           <p className="text-sm text-neutral-400">No clients match your search.</p>
         </div>
       ) : (
-        <div className="ba-table-wrap min-h-0 flex-1 overflow-y-auto">
-          <table className="w-full table-fixed text-left text-sm">
-            <thead className="ba-table-head sticky top-0 text-xs uppercase tracking-wide text-[var(--ba-text-secondary)]">
-              <tr>
-                <th className="w-[18%] px-4 py-3 font-medium">Building name</th>
-                <th className="w-[14%] px-4 py-3 font-medium">Contact person</th>
-                <th className="w-[12%] px-4 py-3 font-medium">Phone</th>
-                <th className="w-[18%] px-4 py-3 font-medium">Email</th>
-                <th className="w-[30%] px-4 py-3 font-medium">Address</th>
-                <th className="w-20 px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((client) => (
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="ba-table-wrap min-h-0 flex-1 overflow-y-auto">
+            <table className="w-full table-fixed text-left text-sm">
+              <thead className="ba-table-head sticky top-0 text-xs uppercase tracking-wide text-[var(--ba-text-secondary)]">
+                <tr>
+                  <th className="w-[18%] px-4 py-3 font-medium">Building name</th>
+                  <th className="w-[14%] px-4 py-3 font-medium">Contact person</th>
+                  <th className="w-[12%] px-4 py-3 font-medium">Phone</th>
+                  <th className="w-[18%] px-4 py-3 font-medium">Email</th>
+                  <th className="w-[30%] px-4 py-3 font-medium">Address</th>
+                  <th className="w-20 px-4 py-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {paged.items.map((client) => (
                 <tr
                   key={client.id}
                   onClick={() => {
@@ -298,6 +311,15 @@ export function CustomersScreen({
               ))}
             </tbody>
           </table>
+          </div>
+          <ListPagination
+            page={paged.page}
+            totalPages={paged.totalPages}
+            totalItems={paged.totalItems}
+            startIndex={paged.startIndex}
+            endIndex={paged.endIndex}
+            onPageChange={setListPage}
+          />
         </div>
       )}
 

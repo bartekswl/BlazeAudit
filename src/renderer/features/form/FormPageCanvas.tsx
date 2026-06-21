@@ -53,7 +53,7 @@ export function FormPageCanvas({
                 <div
                   key={region.id}
                   className={cn(
-                    'form-page-header-line text-sm font-semibold text-[var(--ba-text-primary)]',
+                    'form-page-header-line font-semibold text-[var(--ba-text-primary)]',
                     region.content.align === 'center' && 'text-center',
                     region.content.align === 'right' && 'text-right',
                   )}
@@ -79,7 +79,7 @@ export function FormPageCanvas({
                   : undefined
               }
             >
-              <h3 className="mb-2 text-center text-sm font-bold text-[var(--ba-text-primary)]">
+              <h3 className="form-page-section-title">
                 {section.number}
                 {section.title ? `. ${section.title}` : ''}
               </h3>

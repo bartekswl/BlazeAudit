@@ -6,6 +6,8 @@ import type { Client } from '../../../shared/types';
 import type { TemplatePickerItem } from '../../../shared/document';
 import { cn } from '../../lib/cn';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { ListPagination } from '../../components/ListPagination';
+import { paginateItems } from '../../lib/pagination';
 import { InspectionEditor } from './InspectionEditor';
 import { NewInspectionDialog } from './NewInspectionDialog';
 
@@ -36,6 +38,7 @@ export function DocumentsScreen({
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'complete'>('all');
+  const [listPage, setListPage] = useState(1);
   const [showNew, setShowNew] = useState(false);
   const [newClientId, setNewClientId] = useState<string | undefined>();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -108,6 +111,15 @@ export function DocumentsScreen({
       );
     });
   }, [inspections, search, statusFilter]);
+
+  useEffect(() => {
+    setListPage(1);
+  }, [search, statusFilter]);
+
+  const paged = useMemo(
+    () => paginateItems(filtered, listPage),
+    [filtered, listPage],
+  );
 
   const createInspection = async (input: {
     clientId: string;
@@ -199,8 +211,9 @@ export function DocumentsScreen({
           </p>
         </div>
       ) : (
-        <ul className="space-y-2">
-          {filtered.map((row) => (
+        <div className="space-y-3">
+          <ul className="space-y-2">
+            {paged.items.map((row) => (
             <li
               key={row.id}
               className="flex flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3"
@@ -240,8 +253,17 @@ export function DocumentsScreen({
                 <Trash2 className="size-4" />
               </button>
             </li>
-          ))}
-        </ul>
+            ))}
+          </ul>
+          <ListPagination
+            page={paged.page}
+            totalPages={paged.totalPages}
+            totalItems={paged.totalItems}
+            startIndex={paged.startIndex}
+            endIndex={paged.endIndex}
+            onPageChange={setListPage}
+          />
+        </div>
       )}
 
       {showNew && (

@@ -23,22 +23,34 @@ export function resolveDocumentContext(inspection: Inspection): DocumentContext 
 
   let template: DocumentContext['template'] = null;
   if (inspection.templateKind && inspection.templateId) {
-    const row = templateRegistry.getTemplate(inspection.templateId, inspection.templateKind);
-    if (row) {
-      const builtinMeta =
-        inspection.templateKind === 'builtin'
-          ? builtinTemplates.getBuiltinTemplateMeta(inspection.templateId)
-          : null;
-      template = {
-        kind: inspection.templateKind,
-        name: row.name,
-        description: row.description,
-        code: builtinMeta?.code ?? '',
-        title: builtinMeta?.title ?? '',
-        inspectionType: isFormInspectionDocument(inspection.document)
-          ? inspection.document.form.pages[0]?.label ?? row.name
-          : inspection.document.meta.inspectionType,
-      };
+    if (inspection.templateKind === 'builtin') {
+      const builtin = builtinTemplates.getBuiltinTemplateMeta(inspection.templateId);
+      if (builtin) {
+        template = {
+          kind: 'builtin',
+          name: builtin.name,
+          description: builtin.description,
+          code: builtin.code,
+          title: builtin.title,
+          inspectionType: isFormInspectionDocument(inspection.document)
+            ? inspection.document.form.pages[0]?.label ?? builtin.name
+            : '',
+        };
+      }
+    } else {
+      const row = templateRegistry.getTemplate(inspection.templateId, inspection.templateKind);
+      if (row) {
+        template = {
+          kind: inspection.templateKind,
+          name: row.name,
+          description: row.description,
+          code: '',
+          title: '',
+          inspectionType: isFormInspectionDocument(inspection.document)
+            ? inspection.document.form.pages[0]?.label ?? row.name
+            : inspection.document.meta.inspectionType,
+        };
+      }
     }
   }
 

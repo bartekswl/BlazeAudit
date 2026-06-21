@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FileText, Pencil, Plus } from 'lucide-react';
 import { formatAddress } from '../../../shared/address';
 import { cadenceLabel, isOverdue } from '../../../shared/cadence';
 import type { InspectionSummary } from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
 import { cn } from '../../lib/cn';
+import { ListPagination } from '../../components/ListPagination';
+import { paginateItems } from '../../lib/pagination';
 
 export function CustomerDetailScreen({
   clientId,
@@ -26,6 +28,7 @@ export function CustomerDetailScreen({
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [listPage, setListPage] = useState(1);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,6 +53,15 @@ export function CustomerDetailScreen({
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    setListPage(1);
+  }, [clientId]);
+
+  const pagedInspections = useMemo(
+    () => paginateItems(inspections, listPage),
+    [inspections, listPage],
+  );
 
   if (loading) {
     return <p className="text-sm text-neutral-500">Loading…</p>;
@@ -140,8 +152,9 @@ export function CustomerDetailScreen({
             </button>
           </div>
         ) : (
-          <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
-            {inspections.map((row) => (
+          <>
+            <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+              {pagedInspections.items.map((row) => (
               <li key={row.id}>
                 <button
                   type="button"
@@ -176,8 +189,18 @@ export function CustomerDetailScreen({
                   </span>
                 </button>
               </li>
-            ))}
-          </ul>
+              ))}
+            </ul>
+            <ListPagination
+              page={pagedInspections.page}
+              totalPages={pagedInspections.totalPages}
+              totalItems={pagedInspections.totalItems}
+              startIndex={pagedInspections.startIndex}
+              endIndex={pagedInspections.endIndex}
+              onPageChange={setListPage}
+              className="shrink-0"
+            />
+          </>
         )}
       </section>
     </div>

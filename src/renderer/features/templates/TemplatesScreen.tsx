@@ -29,6 +29,14 @@ export type TemplatesScreenVariant = 'built-in' | 'custom';
 
 type TemplateSummary = BuiltinTemplateSummary | CustomTemplateSummary;
 
+function builtinTemplateSubtitle(template: BuiltinTemplateSummary): string {
+  const parts: string[] = [];
+  if (template.code) parts.push(template.code);
+  if (template.title) parts.push(template.title);
+  parts.push(`${template.pageCount} page${template.pageCount === 1 ? '' : 's'}`);
+  return parts.join(' · ');
+}
+
 export function TemplatesScreen({
   variant,
   onDetailChange,
@@ -292,16 +300,11 @@ export function TemplatesScreen({
                   className="flex w-full flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-left transition-colors hover:border-white/10 hover:bg-white/[0.04]"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-neutral-100">{template.name}</p>
-                    <p className="truncate text-xs text-neutral-500">
-                      {'code' in template && template.code ? `${template.code} · ` : ''}
-                      {template.description || 'No description'}
-                      {'pageCount' in template && template.pageCount
-                        ? ` · ${template.pageCount} page${template.pageCount === 1 ? '' : 's'}`
-                        : ''}
-                      {' · '}
-                      {template.blockCount} element
-                      {template.blockCount === 1 ? '' : 's'} · v{template.version}
+                    <p className="truncate text-base font-semibold text-[var(--ba-text-primary)]">
+                      {template.name}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-[var(--ba-text-muted)]">
+                      {builtinTemplateSubtitle(template as BuiltinTemplateSummary)}
                     </p>
                   </div>
                 </button>
