@@ -416,6 +416,59 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   }
 }
 
+/* Template preview — all pages in one vertical scroll. */
+.form-page-viewport--continuous .form-page-viewport-scroll {
+  overflow-x: hidden;
+}
+
+.form-page-viewport--continuous .form-page-viewport-pad {
+  padding: 0.5rem 0.375rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .form-page-viewport--continuous .form-page-viewport-pad {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+.form-page-viewport--continuous .form-page-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.form-page-viewport--continuous .form-page-sheet {
+  flex-shrink: 0;
+}
+
+/* Portrait — narrower than window, more side margin than landscape. */
+.form-page-viewport--continuous .form-page-sheet:not(.form-page-sheet--landscape) {
+  width: 86%;
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
+/* Landscape — full width of viewport (minimal outer pad), height hugs content. */
+.form-page-viewport--continuous .form-page-sheet--landscape {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  aspect-ratio: auto !important;
+  height: auto !important;
+}
+
+.form-page-viewport--continuous .form-page-sheet--landscape .form-page-body {
+  flex: 0 1 auto;
+  padding: 0.625rem 0.5rem 0;
+}
+
+.form-page-viewport--continuous .form-page-sheet--landscape .def-panel {
+  flex: 0 1 auto;
+}
+
 .form-page-sheet {
   width: 100%;
   aspect-ratio: 210 / 297;

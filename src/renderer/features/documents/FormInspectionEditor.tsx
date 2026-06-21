@@ -55,7 +55,6 @@ function FormInspectionEditorInner({
     syncFormDocumentInspectionDate(formDocInitial, inspection.inspectedAt ?? null),
   );
   const [context, setContext] = useState<DocumentContext | null>(null);
-  const [pageIndex, setPageIndex] = useState(0);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [exportingPdf, setExportingPdf] = useState(false);
   const [pdfMessage, setPdfMessage] = useState<string | null>(null);
@@ -67,12 +66,11 @@ function FormInspectionEditorInner({
     void window.blazeaudit.inspections.resolveContext(inspection.id).then(setContext);
   }, [inspection.id]);
 
-  const page = formDoc.form.pages[pageIndex];
+  const pageCount = formDoc.form.pages.length;
   const formSections = useMemo(() => buildFormOutline(formDoc.form), [formDoc.form]);
   const outlineTitle = context?.template?.title || title;
 
-  const handleOutlineNavigate = useCallback((sectionId: string, targetPageIndex: number) => {
-    setPageIndex(targetPageIndex);
+  const handleOutlineNavigate = useCallback((sectionId: string, _targetPageIndex: number) => {
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => scrollToFormSection(sectionId));
     });
@@ -156,7 +154,7 @@ function FormInspectionEditorInner({
   const saveLabel =
     saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved' : 'Save';
 
-  if (!page) {
+  if (pageCount === 0) {
     return <p className="text-sm text-neutral-500">This form has no pages.</p>;
   }
 
@@ -247,49 +245,30 @@ function FormInspectionEditorInner({
         </div>
       </div>
 
-      {formDoc.form.pages.length > 1 && (
-        <div className="flex shrink-0 flex-wrap gap-1">
-          {formDoc.form.pages.map((p, index) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setPageIndex(index)}
-              className={
-                index === pageIndex
-                  ? 'rounded-lg bg-flame-500 px-3 py-1.5 text-xs font-semibold text-white'
-                  : 'rounded-lg border border-[var(--ba-panel-border)] px-3 py-1.5 text-xs text-[var(--ba-text-muted)] hover:bg-[var(--ba-hover-bg)]'
-              }
-            >
-              {p.label ?? `Page ${index + 1}`}
-            </button>
-          ))}
-        </div>
-      )}
-
       <div className="flex min-h-0 flex-1 flex-col">
-        <FormPageViewport
-          pageIndex={pageIndex}
-          totalPages={formDoc.form.pages.length}
-          onPageChange={formDoc.form.pages.length > 1 ? setPageIndex : undefined}
-          showZoomControls
-        >
-          <FormPageCanvas
-            form={formDoc.form}
-            page={page}
-            pageIndex={pageIndex}
-            template={
-              context?.template
-                ? {
-                    code: context.template.code,
-                    title: context.template.title,
-                    name: context.template.name,
-                  }
-                : undefined
-            }
-            context={context}
-            values={formDoc.values}
-            onValueChange={onValueChange}
-          />
+        <FormPageViewport pageIndex={0} totalPages={pageCount} continuous showZoomControls>
+          <div className="form-page-stack">
+            {formDoc.form.pages.map((p, index) => (
+              <FormPageCanvas
+                key={p.id}
+                form={formDoc.form}
+                page={p}
+                pageIndex={index}
+                template={
+                  context?.template
+                    ? {
+                        code: context.template.code,
+                        title: context.template.title,
+                        name: context.template.name,
+                      }
+                    : undefined
+                }
+                context={context}
+                values={formDoc.values}
+                onValueChange={onValueChange}
+              />
+            ))}
+          </div>
         </FormPageViewport>
       </div>
     </div>

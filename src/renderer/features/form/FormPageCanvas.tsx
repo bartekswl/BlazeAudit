@@ -42,6 +42,7 @@ export function FormPageCanvas({
 
   return (
     <div
+      data-form-page-index={pageIndex}
       className={cn(
         'form-page-sheet',
         isLandscape && 'form-page-sheet--landscape',

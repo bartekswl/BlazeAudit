@@ -16,27 +16,33 @@ export function FormPageViewport({
   totalPages,
   onPageChange,
   showZoomControls = false,
+  /** Template preview — all pages stacked in one scroll; no page pager. */
+  continuous = false,
   children,
 }: {
   pageIndex: number;
   totalPages: number;
   onPageChange?: (pageIndex: number) => void;
-  /** Manual zoom in/out — document editor only. */
+  /** Manual zoom in/out — document editor and template preview. */
   showZoomControls?: boolean;
+  continuous?: boolean;
   children: ReactNode;
 }) {
   const canPrev = pageIndex > 0;
   const canNext = pageIndex < totalPages - 1;
-  const multiPage = totalPages > 1 && onPageChange;
+  const multiPage = !continuous && totalPages > 1 && onPageChange;
   const { expanded: contentsExpanded } = useDocumentOutlineRail();
 
+  const scrollRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const referenceWidthRef = useRef(0);
   const [zoomPercent, setZoomPercent] = useState(100);
+  const [visiblePageIndex, setVisiblePageIndex] = useState(0);
   const [innerStyle, setInnerStyle] = useState<CSSProperties>({ width: '100%' });
 
   const userZoom = zoomPercent / 100;
+  const displayPageIndex = continuous ? visiblePageIndex : pageIndex;
 
   const zoomIn = useCallback(() => {
     setZoomPercent((prev) => clampZoomPercent(prev + ZOOM_PERCENT_STEP));
@@ -75,8 +81,8 @@ export function FormPageViewport({
   }, [contentsExpanded, userZoom]);
 
   useEffect(() => {
-    setZoomPercent(100);
-  }, [pageIndex]);
+    if (!continuous) setZoomPercent(100);
+  }, [continuous, pageIndex]);
 
   useEffect(() => {
     if (!contentsExpanded && hostRef.current) {
@@ -95,7 +101,7 @@ export function FormPageViewport({
     ro.observe(inner);
     updateScale();
     return () => ro.disconnect();
-  }, [updateScale, pageIndex]);
+  }, [updateScale, continuous, pageIndex, children]);
 
   useEffect(() => {
     if (!showZoomControls) return;
@@ -118,13 +124,59 @@ export function FormPageViewport({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [showZoomControls, zoomIn, zoomOut, resetZoom]);
 
+  useEffect(() => {
+    if (!continuous) return;
+    const root = scrollRef.current;
+    if (!root) return;
+
+    const sheets = root.querySelectorAll<HTMLElement>('[data-form-page-index]');
+    if (!sheets.length) return;
+
+    const ratios = new Map<number, number>();
+
+    const pickVisible = () => {
+      let best = 0;
+      let bestRatio = -1;
+      ratios.forEach((ratio, idx) => {
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          best = idx;
+        }
+      });
+      if (bestRatio > 0) setVisiblePageIndex(best);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const idx = Number((entry.target as HTMLElement).dataset.formPageIndex);
+          if (!Number.isNaN(idx)) ratios.set(idx, entry.intersectionRatio);
+        }
+        pickVisible();
+      },
+      { root, threshold: [0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1] },
+    );
+
+    sheets.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [continuous, children]);
+
   const zoomLabel = `${zoomPercent}%`;
   const atMinZoom = zoomPercent <= ZOOM_PERCENT_MIN;
   const atMaxZoom = zoomPercent >= ZOOM_PERCENT_MAX;
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col">
-      <div className="form-page-viewport-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
+    <div
+      className={
+        continuous
+          ? 'form-page-viewport--continuous relative flex min-h-0 flex-1 flex-col'
+          : 'relative flex min-h-0 flex-1 flex-col'
+      }
+    >
+      <div
+        ref={scrollRef}
+        className="form-page-viewport-scroll min-h-0 flex-1 overflow-y-auto"
+      >
         <div className="form-page-viewport-pad">
           <div ref={hostRef} className="form-page-scale-host">
             <div ref={innerRef} className="form-page-scale-inner" style={innerStyle}>
@@ -169,37 +221,39 @@ export function FormPageViewport({
           </div>
         ) : null}
 
-        <div
-          className="form-page-indicator pointer-events-auto"
-          role="status"
-          aria-label={`Page ${pageIndex + 1} of ${totalPages}`}
-        >
-          {multiPage ? (
-            <button
-              type="button"
-              disabled={!canPrev}
-              onClick={() => onPageChange(pageIndex - 1)}
-              className="form-page-indicator-nav"
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="size-3.5" />
-            </button>
-          ) : null}
-          <span className="form-page-indicator-label">
-            Page {pageIndex + 1} of {totalPages}
-          </span>
-          {multiPage ? (
-            <button
-              type="button"
-              disabled={!canNext}
-              onClick={() => onPageChange(pageIndex + 1)}
-              className="form-page-indicator-nav"
-              aria-label="Next page"
-            >
-              <ChevronRight className="size-3.5" />
-            </button>
-          ) : null}
-        </div>
+        {totalPages > 0 ? (
+          <div
+            className="form-page-indicator pointer-events-auto"
+            role="status"
+            aria-label={`Page ${displayPageIndex + 1} of ${totalPages}`}
+          >
+            {multiPage ? (
+              <button
+                type="button"
+                disabled={!canPrev}
+                onClick={() => onPageChange!(pageIndex - 1)}
+                className="form-page-indicator-nav"
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="size-3.5" />
+              </button>
+            ) : null}
+            <span className="form-page-indicator-label">
+              Page {displayPageIndex + 1} of {totalPages}
+            </span>
+            {multiPage ? (
+              <button
+                type="button"
+                disabled={!canNext}
+                onClick={() => onPageChange!(pageIndex + 1)}
+                className="form-page-indicator-nav"
+                aria-label="Next page"
+              >
+                <ChevronRight className="size-3.5" />
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </div>
   );
