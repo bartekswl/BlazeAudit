@@ -46,7 +46,7 @@ All composite elements on a letter page share the same “form panel” language
 | Token | Value | Notes |
 |-------|-------|-------|
 | Inner cell line | `1px solid rgb(148 163 184 / 0.45)` | CSS var: `--ulc-line` / `--yns-line` / `--aff-line` / `--def-line` |
-| **Outer panel frame** | **`2px solid #000000`** | CSS var: `--form-panel-frame` on `.form-page-sheet` — applies to **all** composite panels |
+| **Outer panel frame** | **`1.5px solid #000000`** | CSS var: `--form-panel-frame` on `.form-page-sheet` — applies to **all** composite panels |
 | Panel radius | `0.625rem` | Rounded outer frame |
 | Panel shadow | **none** on `.form-page-sheet` panels | Avoid gray/blue bands between stacked panels |
 | Label header bg | `linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%)` | Text `#334155` — not black |
@@ -55,7 +55,7 @@ All composite elements on a letter page share the same “form panel” language
 | Section gap | `1.5rem` on `.form-page-content` | **Even** gap between all stacked panels |
 | Section title → panel | `margin-bottom: 0.75rem` on `.form-page-section-title` | e.g. “20.1 …” heading → ULC panel |
 | ULC section height | **`minHeight`** % | Never `maxHeight` — prevents PDF overlap |
-| PDF outer frame | **`3pt solid #000000`** | Print-only — same black frame on every composite panel |
+| PDF outer frame | **`2pt solid #000000`** | Print-only — same black frame on every composite panel |
 | PDF inner lines | `0.5px solid #64748b` | Print-only; fixes Chromium dropped borders |
 | Row dividers | Single thin line | No thick gray separator bands between rows |
 
@@ -65,11 +65,15 @@ Every built-in form panel on `.form-page-sheet` shares one thick **black** outer
 
 | Surface | Selector | Outer border |
 |---------|----------|--------------|
-| Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `2px solid #000000` |
+| Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `1.5px solid #000000` |
 | Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance` | via `border: var(--form-panel-frame)` |
-| PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `3pt solid #000000 !important` on the same selectors |
+| PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `2pt solid #000000 !important` on the same selectors |
 
 Do **not** use the thin `--*-line` variable for the outer panel perimeter — that is for inner cells only.
+
+Inner grid lines use **single-edge borders** only (`border-right` + `border-bottom` per cell, never full `border` on adjacent cells) so shared edges do not stack to double thickness. Exceptions: deficiencies **inspect/repair split** (`.def-grid-left` `2px`) and **device/control divider** (`.def-section-divider` `2px` top).
+
+**ULC PDF corners:** use **`box-shadow: inset 0 0 0 2pt #000`** instead of `border` on `.ulc-s1-panel` — Chromium print breaks rounded bottom corners with `border` + `overflow: hidden`.
 
 ### Affirmation block (`.aff-*`) — defaults
 
@@ -273,7 +277,7 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
-| 2026-06-21 | Shared **`--form-panel-frame`** black outer edge on all composite panels (page 1 + 20.2); screen `2px`, PDF `3pt`. |
+| 2026-06-21 | Shared **`--form-panel-frame`** black outer edge on all composite panels (page 1 + 20.2); screen `1.5px`, PDF `2pt`. |
 | 2026-06-21 | Deficiencies element (`.def-*`): rounded grid panel, dual repair header rows, column widths, compliance footer alignment. |
 | 2026-06-21 | Affirmation element (`.aff-*`): centered gray body text, inspector dropdowns, page spacing tokens, technician row heights. |
 | 2026-06-21 | Initial blueprint from ULC 20.1 + Yes/No/Summary table work (three-surface PDF architecture, panel styling, spacing, dark theme, full-cell clicks). |

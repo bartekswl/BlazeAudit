@@ -39,10 +39,18 @@ const PRINT_OVERRIDES = `
     page-break-after: auto;
   }
 
-  /* ULC print hardening: force uniform, visible grid lines in Chromium PDF. */
+  /*
+   * ULC PDF — full box on every grid cell (print only). Layout containers get no
+   * partial edges; each cell carries its own complete border. Flex rules below
+   * prevent clip/column bugs.
+   */
   .form-print-root .ulc-s1-panel {
-    --ulc-line: 0.5px solid #64748b !important;
+    --ulc-line: 1px solid #64748b !important;
     box-shadow: none !important;
+    max-height: none !important;
+    height: auto !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   .form-print-root .ulc-s1-company { flex: 0 0 42% !important; }
   .form-print-root .ulc-s1-bottom-row {
@@ -52,134 +60,41 @@ const PRINT_OVERRIDES = `
     grid-template-columns: 42% minmax(0, 1fr) !important;
   }
 
-  .form-print-root .ulc-s1-top,
-  .form-print-root .ulc-s1-service-row,
-  .form-print-root .ulc-s1-system-block,
-  .form-print-root .ulc-s1-bottom-row,
-  .form-print-root .ulc-s1-system-row,
-  .form-print-root .ulc-s1-circuits .ulc-s1-cell,
-  .form-print-root .ulc-s1-phone-fax .ulc-s1-cell,
-  .form-print-root .ulc-s1-city-postal > .ulc-s1-cell {
-    border-bottom: 0.5px solid #64748b !important;
-  }
-
-  .form-print-root .ulc-s1-company,
-  .form-print-root .ulc-s1-system-types,
-  .form-print-root .ulc-s1-service-row--header .ulc-s1-cell,
-  .form-print-root .ulc-s1-system-row .ulc-s1-check,
-  .form-print-root .ulc-s1-circuits .ulc-s1-label,
-  .form-print-root .ulc-s1-bottom-row .ulc-s1-cell,
-  .form-print-root .ulc-s1-city-postal,
-  .form-print-root .ulc-s1-city-postal > .ulc-s1-cell {
-    border-right: 0.5px solid #64748b !important;
-  }
-
-  .form-print-root .ulc-s1-service-row:last-child,
-  .form-print-root .ulc-s1-bottom-row:last-child,
-  .form-print-root .ulc-s1-circuits .ulc-s1-cell:last-child,
-  .form-print-root .ulc-s1-phone-fax .ulc-s1-cell:last-child,
-  .form-print-root .ulc-s1-system-row:last-child {
-    border-bottom: 0 !important;
-  }
-  .form-print-root .ulc-s1-service-row--header .ulc-s1-cell:last-child,
-  .form-print-root .ulc-s1-system-row .ulc-s1-check:last-child,
-  .form-print-root .ulc-s1-city-postal > .ulc-s1-cell:last-child {
-    border-right: 0 !important;
-  }
-
-  /*
-   * Final PDF grid layer.
-   *
-   * Chromium can still omit borders when only the parent flex/grid item owns a
-   * divider. For export, every visible "table cell" paints its own inset grid
-   * line. This makes the ULC block behave like a real bordered table in PDF:
-   * no missing row/cell dividers, stable column widths, and consistent color.
-   */
-  .form-print-root .ulc-s1-cell,
-  .form-print-root .ulc-s1-label,
-  .form-print-root .ulc-s1-value,
-  .form-print-root .ulc-s1-check,
-  .form-print-root .ulc-s1-circuits-title,
-  .form-print-root .ulc-s1-city-postal,
-  .form-print-root .ulc-s1-phone-fax,
-  .form-print-root .ulc-s1-system-types,
-  .form-print-root .ulc-s1-circuits {
-    outline: 0.5px solid #64748b !important;
-    outline-offset: -0.5px !important;
-    box-shadow: none !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  .form-print-root .ulc-s1-label,
-  .form-print-root .ulc-s1-value,
-  .form-print-root .ulc-s1-check,
-  .form-print-root .ulc-s1-circuits-title {
-    position: relative;
-    z-index: 1;
-  }
-
-  .form-print-root .ulc-s1-input,
-  .form-print-root .ulc-s1-date-field {
-    outline: 0.5px solid #64748b !important;
-    outline-offset: -0.5px !important;
-    box-shadow: none !important;
-  }
-
-  /* PDF tweak: stage row — no boxes around Single Stage / Two Stage / Other ticks. */
-  .form-print-root .ulc-s1-service-row--stage .ulc-s1-check,
-  .form-print-root .ulc-s1-service-row--stage .ulc-s1-value--inline,
-  .form-print-root .ulc-s1-service-row--stage .ulc-s1-value {
-    outline: none !important;
-    box-shadow: none !important;
+  /* Strip partial borders from row/column wrappers — cells own the lines. */
+  .form-print-root .ulc-s1-panel .ulc-s1-top,
+  .form-print-root .ulc-s1-panel .ulc-s1-service,
+  .form-print-root .ulc-s1-panel .ulc-s1-service-row,
+  .form-print-root .ulc-s1-panel .ulc-s1-system-block,
+  .form-print-root .ulc-s1-panel .ulc-s1-system-types,
+  .form-print-root .ulc-s1-panel .ulc-s1-circuits,
+  .form-print-root .ulc-s1-panel .ulc-s1-system-row,
+  .form-print-root .ulc-s1-panel .ulc-s1-bottom,
+  .form-print-root .ulc-s1-panel .ulc-s1-bottom-row,
+  .form-print-root .ulc-s1-panel .ulc-s1-phone-fax,
+  .form-print-root .ulc-s1-panel .ulc-s1-city-postal {
     border: none !important;
   }
 
-  /* PDF tweak: system-type rows — vertical dividers only; thinner line between rows. */
-  .form-print-root .ulc-s1-system-row .ulc-s1-check {
-    outline: none !important;
-    box-shadow: none !important;
-    border-top: none !important;
-    border-bottom: none !important;
-    border-left: none !important;
-  }
-  .form-print-root .ulc-s1-system-row:first-child {
-    border-bottom: 0.25px solid #64748b !important;
+  /* Every cell in the ULC table — company block, data fields, stage checks,
+     system-type checks, circuits header/rows, phone/fax stacks, city/postal pair. */
+  .form-print-root .ulc-s1-panel .ulc-s1-company,
+  .form-print-root .ulc-s1-panel .ulc-s1-cell,
+  .form-print-root .ulc-s1-panel .ulc-s1-system-row .ulc-s1-check,
+  .form-print-root .ulc-s1-panel .ulc-s1-circuits-title {
+    border: 1px solid #64748b !important;
+    box-sizing: border-box !important;
   }
 
-  /* PDF tweak: Phone/Fax column — thinner divider from column on the left. */
-  .form-print-root .ulc-s1-bottom-row--3col > :nth-child(2) {
-    border-right: none !important;
-  }
-  .form-print-root .ulc-s1-bottom-row .ulc-s1-phone-fax {
-    outline: none !important;
-    box-shadow: none !important;
-    border-left: 0.25px solid #64748b !important;
-    border-top: none !important;
-    border-bottom: none !important;
-    border-right: none !important;
+  /* Label/value divider inside each data cell. */
+  .form-print-root .ulc-s1-panel .ulc-s1-cell > .ulc-s1-label,
+  .form-print-root .ulc-s1-panel .ulc-s1-phone-fax .ulc-s1-cell > .ulc-s1-label {
+    border-bottom: 1px solid #64748b !important;
   }
 
-  /* PDF tweak: City/Postal — thinner bottom edge under value content. */
-  .form-print-root .ulc-s1-city-postal {
-    outline: none !important;
-    box-shadow: none !important;
+  /* Circuits row: label | value split inside the cell. */
+  .form-print-root .ulc-s1-panel .ulc-s1-circuits .ulc-s1-cell > .ulc-s1-label {
+    border-right: 1px solid #64748b !important;
     border-bottom: none !important;
-  }
-  .form-print-root .ulc-s1-city-postal > .ulc-s1-cell {
-    outline: none !important;
-    box-shadow: none !important;
-    border-bottom: none !important;
-  }
-  .form-print-root .ulc-s1-city-postal > .ulc-s1-cell .ulc-s1-label {
-    outline: none !important;
-    box-shadow: none !important;
-    border-bottom: 0.25px solid #64748b !important;
-  }
-  .form-print-root .ulc-s1-city-postal > .ulc-s1-cell .ulc-s1-value {
-    outline: none !important;
-    box-shadow: none !important;
-    border-bottom: 0.25px solid #64748b !important;
   }
 
   .form-print-root .form-page-content {
@@ -252,11 +167,13 @@ const PRINT_OVERRIDES = `
   .form-print-root .aff-tech-grid > .aff-cell {
     min-height: 3.5rem !important;
   }
-  .form-print-root .aff-cell,
   .form-print-root .aff-title,
-  .form-print-root .aff-body,
-  .form-print-root .aff-label {
-    border-color: #64748b !important;
+  .form-print-root .aff-body {
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .aff-tech-grid > .aff-cell,
+  .form-print-root .aff-tech-grid > .aff-label {
+    border: none !important;
   }
   .form-print-root .aff-tech-grid > .aff-cell:not(:nth-child(4n + 1)),
   .form-print-root .aff-tech-grid > .aff-label:not(:nth-child(4n + 1)) {
@@ -265,8 +182,14 @@ const PRINT_OVERRIDES = `
   .form-print-root .aff-tech-grid > .aff-cell:nth-child(-n + 4) {
     border-bottom: 0.5px solid #64748b !important;
   }
-  .form-print-root .aff-tech:not(:last-child) {
+  .form-print-root .aff-tech-grid > .aff-label {
     border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .aff-tech:last-child .aff-tech-grid > .aff-label {
+    border-bottom: none !important;
+  }
+  .form-print-root .aff-tech:not(:last-child) {
+    border-bottom: none !important;
   }
 
   @page a4-landscape { size: A4 landscape; margin: 0; }
@@ -299,7 +222,6 @@ const PRINT_OVERRIDES = `
     min-height: 0 !important;
     gap: 0.5rem !important;
   }
-  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.ulc-s1-panel),
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.yns-table-wrap) {
     flex: 1 1 0 !important;
     flex-shrink: 1 !important;
@@ -307,18 +229,30 @@ const PRINT_OVERRIDES = `
     display: flex !important;
     flex-direction: column !important;
   }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.ulc-s1-panel) {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    min-height: auto !important;
+  }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.aff-panel) {
     flex: 0 0 auto !important;
   }
-  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.ulc-s1-panel) > div,
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.yns-table-wrap) > div {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
   }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.ulc-s1-panel) > div {
+    flex: 0 0 auto !important;
+    min-height: auto !important;
+  }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.aff-panel) > div {
     flex: 0 0 auto !important;
+  }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.ulc-s1-panel) .form-element-frame--flush {
+    flex: 0 0 auto !important;
+    min-height: auto !important;
   }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.aff-panel) .form-element-frame--flush {
     flex: 0 0 auto !important;
@@ -330,18 +264,45 @@ const PRINT_OVERRIDES = `
     flex-direction: column !important;
   }
   .form-print-root .form-page-sheet--fixed .ulc-s1-panel {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
     display: flex !important;
     flex-direction: column !important;
   }
+  .form-print-root .form-page-sheet--fixed .ulc-s1-top {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+  }
+  .form-print-root .form-page-sheet--fixed .ulc-s1-company {
+    flex: 0 0 42% !important;
+  }
   .form-print-root .form-page-sheet--fixed .ulc-s1-service {
     flex: 1 1 auto !important;
-    min-height: 0 !important;
+    min-width: 0 !important;
+    min-height: auto !important;
+  }
+  .form-print-root .form-page-sheet--fixed .ulc-s1-system-block {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+  }
+  .form-print-root .form-page-sheet--fixed .ulc-s1-system-types {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+  .form-print-root .form-page-sheet--fixed .ulc-s1-circuits {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
   }
   .form-print-root .form-page-sheet--fixed .ulc-s1-system-row {
     flex: 1 1 0 !important;
     min-height: 0 !important;
+  }
+  .form-print-root .form-page-sheet--fixed .ulc-s1-bottom {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
   }
   .form-print-root .form-page-sheet--fixed .yns-table-wrap {
     flex: 1 1 auto !important;
@@ -411,7 +372,12 @@ const PRINT_OVERRIDES = `
   .form-print-root .aff-panel,
   .form-print-root .def-grid,
   .form-print-root .def-compliance {
-    border: 3pt solid #000000 !important;
+    border: 2pt solid #000000 !important;
+    border-radius: 0.625rem !important;
+  }
+
+  .form-print-root .ulc-s1-panel {
+    overflow: hidden !important;
   }
 
   .form-print-root .def-grid {
@@ -425,7 +391,27 @@ const PRINT_OVERRIDES = `
   }
 
   .form-print-root .def-head-cell,
-  .form-print-root .def-cell,
+  .form-print-root .def-cell {
+    border: none !important;
+    border-right: 0.5px solid #64748b !important;
+    border-bottom: 0.5px solid #64748b !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .form-print-root .def-head-strip--device-left .def-head-cell:last-child,
+  .form-print-root .def-head-strip--control-left .def-head-cell:last-child,
+  .form-print-root .def-head-strip--repair .def-head-cell:last-child,
+  .form-print-root .def-data-strip--device-left .def-cell:last-child,
+  .form-print-root .def-data-strip--control-left .def-cell:last-child,
+  .form-print-root .def-data-strip--repair .def-cell:last-child {
+    border-right: none !important;
+  }
+  .form-print-root .def-grid > .def-data-strip:nth-last-child(-n + 2) .def-cell {
+    border-bottom: none !important;
+  }
+  .form-print-root .def-section-divider {
+    border-top: 2px solid #171717 !important;
+  }
   .form-print-root .def-meta td {
     border-color: #64748b !important;
     -webkit-print-color-adjust: exact !important;
@@ -433,7 +419,7 @@ const PRINT_OVERRIDES = `
   }
 
   .form-print-root .def-grid-left {
-    border-right: 2pt solid #334155 !important;
+    border-right: 2px solid #171717 !important;
   }
 
   .form-print-root .def-banner--inspect {

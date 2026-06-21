@@ -428,7 +428,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   box-shadow:
     0 0 0 1px rgb(0 0 0 / 0.04),
     0 8px 28px rgb(0 0 0 / 0.12);
-  --form-panel-frame: 2px solid #000000;
+  --form-panel-frame: 1.5px solid #000000;
   --ba-form-page-footer-border: #e5e5e5;
   --ba-form-page-footer-count: #171717;
   --ba-form-page-footer-disclaimer: #737373;
@@ -1474,7 +1474,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .aff-tech:not(:last-child) {
-  border-bottom: var(--aff-line);
+  border-bottom: none;
 }
 
 .aff-page-count-value {
@@ -1504,6 +1504,14 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 .aff-tech-grid > .aff-cell:nth-child(-n + 4) {
   border-bottom: var(--aff-line);
+}
+
+.aff-tech-grid > .aff-label {
+  border-bottom: var(--aff-line);
+}
+
+.aff-tech:last-child .aff-tech-grid > .aff-label {
+  border-bottom: none;
 }
 
 .aff-tech-grid > .aff-cell {
@@ -1799,6 +1807,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   line-height: 1.2;
   font-weight: 700;
   text-align: center;
+  border-bottom: var(--def-line);
 }
 
 .def-banner--inspect {
@@ -1837,13 +1846,25 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   align-items: center;
   justify-content: center;
   padding: 0.125rem 0.1875rem;
-  border: var(--def-line);
+  border: none;
+  border-right: var(--def-line);
+  border-bottom: var(--def-line);
   font-size: 0.5rem;
   line-height: 1.15;
   font-weight: 600;
   text-align: center;
   background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%);
   color: #334155;
+}
+
+.def-head-strip--device-left .def-head-cell:last-child,
+.def-head-strip--control-left .def-head-cell:last-child,
+.def-head-strip--repair .def-head-cell:last-child {
+  border-right: none;
+}
+
+.def-section-divider.def-head-strip {
+  border-top: 2px solid #171717;
 }
 
 .def-head-strip--control-left .def-head-cell {
@@ -1864,8 +1885,20 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   display: flex;
   min-width: 0;
   align-items: stretch;
-  border: var(--def-line);
+  border: none;
+  border-right: var(--def-line);
+  border-bottom: var(--def-line);
   background: #fff;
+}
+
+.def-data-strip--device-left .def-cell:last-child,
+.def-data-strip--control-left .def-cell:last-child,
+.def-data-strip--repair .def-cell:last-child {
+  border-right: none;
+}
+
+.def-grid > .def-data-strip:nth-last-child(-n + 2) .def-cell {
+  border-bottom: none;
 }
 
 .def-cell--item {
