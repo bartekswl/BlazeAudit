@@ -13,7 +13,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "sync:form-print-css": "node scripts/sync-form-print-css.mjs",
+    "build": "node scripts/sync-form-print-css.mjs && tsc --noEmit && vite build",
     "preview": "electron .",
     "lint": "eslint .",
     "format": "prettier --write .",

@@ -179,7 +179,7 @@ export function TemplatesScreen({
     if (!viewingTemplate) {
       return <p className="text-sm text-neutral-500">Loading template…</p>;
     }
-    return <BuiltinTemplateViewer template={viewingTemplate} onBack={goBackToList} />;
+    return <BuiltinTemplateViewer template={viewingTemplate} />;
   }
 
   return (

@@ -57,3 +57,15 @@ export function compareIsoDates(a: string, b: string): number {
 export function isoDateInRange(iso: string, min: string, max: string): boolean {
   return compareIsoDates(iso, min) >= 0 && compareIsoDates(iso, max) <= 0;
 }
+
+/** Coerce inspection or binding text to YYYY-MM-DD when possible. */
+export function normalizeIsoDateInput(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  const head = trimmed.slice(0, 10);
+  if (parseIsoDateLocal(head)) return head;
+  const date = new Date(trimmed);
+  if (!Number.isNaN(date.getTime())) return formatIsoDateLocal(date);
+  return trimmed;
+}

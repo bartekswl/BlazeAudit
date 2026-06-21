@@ -6,10 +6,8 @@ import { FormPageViewport } from './FormPageViewport';
 
 export function BuiltinFormViewer({
   template,
-  onBack,
 }: {
   template: BuiltinTemplate;
-  onBack: () => void;
 }) {
   const [pageIndex, setPageIndex] = useState(0);
   const page = template.form.pages[pageIndex];
@@ -17,7 +15,9 @@ export function BuiltinFormViewer({
 
   const handleOutlineNavigate = useCallback((sectionId: string, targetPageIndex: number) => {
     setPageIndex(targetPageIndex);
-    window.requestAnimationFrame(() => scrollToFormSection(sectionId));
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => scrollToFormSection(sectionId));
+    });
   }, []);
 
   useRegisterFormOutline(template.title || template.name, formSections, handleOutlineNavigate);
@@ -28,25 +28,16 @@ export function BuiltinFormViewer({
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs text-[var(--ba-text-muted)]">
-            Built-in form · v{template.version} · {template.form.pages.length} page
-            {template.form.pages.length === 1 ? '' : 's'}
+      <div className="shrink-0">
+        <p className="text-xs text-[var(--ba-text-muted)]">
+          Built-in form · v{template.version} · {template.form.pages.length} page
+          {template.form.pages.length === 1 ? '' : 's'}
+        </p>
+        {template.description ? (
+          <p className="mt-0.5 truncate text-sm text-[var(--ba-text-secondary)]">
+            {template.description}
           </p>
-          {template.description ? (
-            <p className="mt-0.5 truncate text-sm text-[var(--ba-text-secondary)]">
-              {template.description}
-            </p>
-          ) : null}
-        </div>
-        <button
-          type="button"
-          onClick={onBack}
-          className="rounded-lg border border-[var(--ba-panel-border)] px-3 py-2 text-sm text-[var(--ba-text-secondary)] hover:bg-[var(--ba-hover-bg)]"
-        >
-          Back
-        </button>
+        ) : null}
       </div>
 
       {template.form.pages.length > 1 && (

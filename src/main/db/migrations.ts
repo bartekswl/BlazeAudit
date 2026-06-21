@@ -262,6 +262,15 @@ const migrations: Migration[] = [
       `);
     },
   },
+  {
+    version: 10,
+    up: (db) => {
+      db.exec(`
+        ALTER TABLE business_profile ADD COLUMN phone TEXT NOT NULL DEFAULT '';
+        ALTER TABLE business_profile ADD COLUMN email TEXT NOT NULL DEFAULT '';
+      `);
+    },
+  },
 ];
 
 /** Applies any migrations newer than the database's current `user_version`. */

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { TitleBar } from './components/TitleBar';
 
@@ -79,6 +79,11 @@ const screens: Record<
   ),
 
 };
+
+
+
+const headerBackBtnCls =
+  'inline-flex shrink-0 items-center gap-1 rounded-md border border-flame-500/30 bg-flame-500/10 px-2 py-1 text-xs text-flame-300 transition-colors hover:bg-flame-500/20';
 
 
 
@@ -240,7 +245,7 @@ export default function App() {
 
             {activeId === 'customers' && customerBreadcrumb ? (
 
-              <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-sm">
+              <div className="flex min-w-0 items-center gap-2">
 
                 <button
 
@@ -248,28 +253,48 @@ export default function App() {
 
                   onClick={() => customerBackRef.current?.()}
 
-                  className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
+                  className={headerBackBtnCls}
 
                 >
 
-                  Customers
+                  <ChevronLeft className="size-3.5" aria-hidden />
+
+                  Back
 
                 </button>
 
-                <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
+                <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-sm">
 
-                <span className="truncate font-semibold text-[var(--ba-text-primary)]">
+                  <button
 
-                  {customerBreadcrumb.clientName}
+                    type="button"
 
-                </span>
+                    onClick={() => customerBackRef.current?.()}
 
-              </nav>
+                    className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
+
+                  >
+
+                    Customers
+
+                  </button>
+
+                  <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
+
+                  <span className="truncate font-semibold text-[var(--ba-text-primary)]">
+
+                    {customerBreadcrumb.clientName}
+
+                  </span>
+
+                </nav>
+
+              </div>
 
             ) : (activeId === 'builtinTemplates' || activeId === 'customTemplates') &&
               templateBreadcrumb ? (
 
-              <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-sm">
+              <div className="flex min-w-0 items-center gap-2">
 
                 <button
 
@@ -277,27 +302,47 @@ export default function App() {
 
                   onClick={() => templateBackRef.current?.()}
 
-                  className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
+                  className={headerBackBtnCls}
 
                 >
 
-                  {activeId === 'builtinTemplates' ? 'Built-in Templates' : 'Custom Templates'}
+                  <ChevronLeft className="size-3.5" aria-hidden />
+
+                  Back
 
                 </button>
 
-                <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
+                <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-sm">
 
-                <span className="truncate font-semibold text-[var(--ba-text-primary)]">
+                  <button
 
-                  {templateBreadcrumb.templateName}
+                    type="button"
 
-                </span>
+                    onClick={() => templateBackRef.current?.()}
 
-              </nav>
+                    className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
+
+                  >
+
+                    {activeId === 'builtinTemplates' ? 'Built-in Templates' : 'Custom Templates'}
+
+                  </button>
+
+                  <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
+
+                  <span className="truncate font-semibold text-[var(--ba-text-primary)]">
+
+                    {templateBreadcrumb.templateName}
+
+                  </span>
+
+                </nav>
+
+              </div>
 
             ) : activeId === 'documents' && documentBreadcrumb ? (
 
-              <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-sm">
+              <div className="flex min-w-0 items-center gap-2">
 
                 <button
 
@@ -305,23 +350,43 @@ export default function App() {
 
                   onClick={() => documentBackRef.current?.()}
 
-                  className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
+                  className={headerBackBtnCls}
 
                 >
 
-                  Documents
+                  <ChevronLeft className="size-3.5" aria-hidden />
+
+                  Back
 
                 </button>
 
-                <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
+                <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-sm">
 
-                <span className="truncate font-semibold text-[var(--ba-text-primary)]">
+                  <button
 
-                  {documentBreadcrumb.documentTitle}
+                    type="button"
 
-                </span>
+                    onClick={() => documentBackRef.current?.()}
 
-              </nav>
+                    className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
+
+                  >
+
+                    Documents
+
+                  </button>
+
+                  <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
+
+                  <span className="truncate font-semibold text-[var(--ba-text-primary)]">
+
+                    {documentBreadcrumb.documentTitle}
+
+                  </span>
+
+                </nav>
+
+              </div>
 
             ) : (
 

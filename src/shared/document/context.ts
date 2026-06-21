@@ -106,6 +106,8 @@ export type BindingPath =
   | 'inspection.nextDueAt'
   // Business profile
   | 'business.businessName'
+  | 'business.phone'
+  | 'business.email'
   | 'business.addressFormatted'
   | 'business.addressLine1'
   | 'business.addressLocality'
@@ -158,6 +160,8 @@ export const BINDING_PATH_LABELS: Record<BindingPath, string> = {
   'inspection.cadence': 'Cadence',
   'inspection.nextDueAt': 'Next due date',
   'business.businessName': 'Company name',
+  'business.phone': 'Company phone',
+  'business.email': 'Company email',
   'business.addressFormatted': 'Company address (full)',
   'business.addressLine1': 'Company street line',
   'business.addressLocality': 'Company city / province / post code',

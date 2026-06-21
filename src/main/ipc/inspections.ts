@@ -30,8 +30,8 @@ export function registerInspectionsIpc(): void {
     inspections.getClientInspectionStats(clientId),
   );
 
-  ipcMain.handle(IpcChannels.inspectionsExportPdf, (_event, id: string) =>
-    exportInspectionPdf(id),
+  ipcMain.handle(IpcChannels.inspectionsExportPdf, (_event, id: string, html?: string) =>
+    exportInspectionPdf(id, html),
   );
 
   ipcMain.handle(IpcChannels.inspectionsImportPdf, () => importInspectionPdf());

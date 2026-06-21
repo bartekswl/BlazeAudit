@@ -5,6 +5,8 @@ export const BUSINESS_PROFILE_ID = 'default';
 /** Max lengths for business profile fields (UI + persistence). */
 export const BUSINESS_PROFILE_LIMITS = {
   businessName: 25,
+  phone: 20,
+  email: 80,
   street: 30,
   unit: 8,
   city: 15,
@@ -14,16 +16,21 @@ export const BUSINESS_PROFILE_LIMITS = {
 
 export interface BusinessProfile extends AddressParts {
   businessName: string;
+  phone: string;
+  email: string;
   hasLogo: boolean;
   updatedAt: string;
 }
 
-export type BusinessProfileInput = Pick<BusinessProfile, 'businessName'> & AddressParts;
+export type BusinessProfileInput = Pick<BusinessProfile, 'businessName' | 'phone' | 'email'> &
+  AddressParts;
 
 export function truncateBusinessProfileInput(input: BusinessProfileInput): BusinessProfileInput {
   const L = BUSINESS_PROFILE_LIMITS;
   return {
     businessName: input.businessName.slice(0, L.businessName),
+    phone: input.phone.slice(0, L.phone),
+    email: input.email.slice(0, L.email),
     street: input.street.slice(0, L.street),
     unit: input.unit.slice(0, L.unit),
     city: input.city.slice(0, L.city),

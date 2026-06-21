@@ -3,6 +3,8 @@ import { ImagePlus, Plus, Trash2 } from 'lucide-react';
 import {
   validateAddressFields,
   validateCountry,
+  validateEmail,
+  validatePhone,
   validatePostCode,
   validateProvince,
 } from '../../../shared/address';
@@ -11,6 +13,8 @@ import { inputCls } from '../templates/BlockList';
 
 const emptyBusiness = (): BusinessProfileInput => ({
   businessName: '',
+  phone: '',
+  email: '',
   street: '',
   unit: '',
   city: '',
@@ -49,6 +53,8 @@ export function UserProfileSection() {
     ]);
     setBusiness({
       businessName: profile.businessName,
+      phone: profile.phone,
+      email: profile.email,
       street: profile.street,
       unit: profile.unit,
       city: profile.city,
@@ -58,6 +64,8 @@ export function UserProfileSection() {
     });
     setSavedBusiness({
       businessName: profile.businessName,
+      phone: profile.phone,
+      email: profile.email,
       street: profile.street,
       unit: profile.unit,
       city: profile.city,
@@ -93,6 +101,10 @@ export function UserProfileSection() {
     if (countryErr) errs.country = countryErr;
     const provinceErr = validateProvince(business.province);
     if (provinceErr) errs.province = provinceErr;
+    const phoneErr = validatePhone(business.phone);
+    if (phoneErr) errs.phone = phoneErr;
+    const emailErr = validateEmail(business.email);
+    if (emailErr) errs.email = emailErr;
     const addressErr = validateAddressFields(business);
     if (addressErr && !errs.postCode && !errs.country && !errs.province) {
       errs.street = addressErr;
@@ -231,6 +243,29 @@ export function UserProfileSection() {
             maxLength={BUSINESS_PROFILE_LIMITS.businessName}
           />
         </Field>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Phone" error={fieldErrors.phone}>
+            <input
+              className={inputCls}
+              type="tel"
+              value={business.phone}
+              onChange={setBusinessField('phone')}
+              placeholder="416-555-0100"
+              maxLength={BUSINESS_PROFILE_LIMITS.phone}
+            />
+          </Field>
+          <Field label="Email" error={fieldErrors.email}>
+            <input
+              className={inputCls}
+              type="email"
+              value={business.email}
+              onChange={setBusinessField('email')}
+              placeholder="contact@company.com"
+              maxLength={BUSINESS_PROFILE_LIMITS.email}
+            />
+          </Field>
+        </div>
 
         <div>
           <p className="mb-2 text-xs font-medium text-neutral-400">Company logo</p>

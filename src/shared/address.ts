@@ -50,6 +50,17 @@ export function validateProvince(value: string): string | null {
   return 'Province should be letters (e.g. ON or Ontario).';
 }
 
+/** Optional email — basic format check when non-empty. */
+export function validateEmail(value: string): string | null {
+  const v = value.trim();
+  if (!v) return null;
+  if (v.length > 254) return 'Email is too long.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+    return 'Enter a valid email address.';
+  }
+  return null;
+}
+
 /** Optional phone — digits plus common formatting characters; 10–15 digits when stripped. */
 export function validatePhone(value: string): string | null {
   const v = value.trim();

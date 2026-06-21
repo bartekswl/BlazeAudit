@@ -140,8 +140,11 @@ const api = {
       lastDocumentDate: string | null;
       nextInspectionDue: string | null;
     }> => ipcRenderer.invoke(IpcChannels.inspectionsClientStats, clientId),
-    exportPdf: (id: string): Promise<{ saved: false } | { saved: true; filePath: string }> =>
-      ipcRenderer.invoke(IpcChannels.inspectionsExportPdf, id),
+    exportPdf: (
+      id: string,
+      html?: string,
+    ): Promise<{ saved: false } | { saved: true; filePath: string }> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsExportPdf, id, html),
     importPdf: (): Promise<
       { imported: false } | { imported: true; inspectionId: string; filePath: string }
     > => ipcRenderer.invoke(IpcChannels.inspectionsImportPdf),

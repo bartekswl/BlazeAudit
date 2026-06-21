@@ -1,3 +1,4 @@
+import type { DocumentContext } from '../../../shared/document';
 import type {
   ChecklistElementValue,
   FormElement,
@@ -5,6 +6,9 @@ import type {
   TableElementValue,
 } from '../../../shared/form';
 import { cn } from '../../lib/cn';
+import { FormAffirmationView } from './FormAffirmationView';
+import { FormUlcSection1View } from './FormUlcSection1View';
+import { FormYesNoSummaryView } from './FormYesNoSummaryView';
 
 const inputCls = 'ba-input !px-2 !py-1.5 !text-xs';
 
@@ -17,21 +21,37 @@ export function FormElementView({
   value,
   readOnly,
   bindingText,
+  context,
+  totalPages,
   onChange,
 }: {
   element: FormElement;
   value: unknown;
   readOnly?: boolean;
   bindingText?: string;
+  context?: DocumentContext | null;
+  totalPages?: number;
   onChange?: (value: unknown) => void;
 }) {
+  const flushFrame =
+    element.kind === 'ulcSection1' ||
+    element.kind === 'yesNoSummary' ||
+    element.kind === 'affirmation';
+
   return (
-    <div className="form-element-frame">
+    <div
+      className={cn(
+        'form-element-frame',
+        flushFrame && 'form-element-frame--flush flex min-h-0 flex-1 flex-col',
+      )}
+    >
       <FormElementBody
         element={element}
         value={value}
         readOnly={readOnly}
         bindingText={bindingText}
+        context={context ?? null}
+        totalPages={totalPages ?? 1}
         onChange={onChange}
       />
     </div>
@@ -43,12 +63,16 @@ function FormElementBody({
   value,
   readOnly,
   bindingText,
+  context,
+  totalPages,
   onChange,
 }: {
   element: FormElement;
   value: unknown;
   readOnly?: boolean;
   bindingText?: string;
+  context: DocumentContext | null;
+  totalPages: number;
   onChange?: (value: unknown) => void;
 }) {
   switch (element.kind) {
@@ -241,6 +265,34 @@ function FormElementBody({
         </div>
       );
     }
+    case 'ulcSection1':
+      return (
+        <FormUlcSection1View
+          value={value}
+          context={context}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'yesNoSummary':
+      return (
+        <FormYesNoSummaryView
+          items={element.items}
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'affirmation':
+      return (
+        <FormAffirmationView
+          value={value}
+          context={context}
+          totalPages={totalPages}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
     default:
       return null;
   }

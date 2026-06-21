@@ -51,3 +51,11 @@ export function walkFormElements(
     }
   }
 }
+
+export function formSectionHeading(section: FormSection): string | null {
+  const heading = section.heading?.trim();
+  if (heading) return heading;
+  const title = section.title?.trim();
+  if (title) return `${section.number ?? ''}. ${title}`.replace(/^\.\s*/, '');
+  return null;
+}

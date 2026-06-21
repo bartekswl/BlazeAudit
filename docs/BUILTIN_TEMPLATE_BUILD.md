@@ -72,6 +72,7 @@ Form **definition** is snapshotted at inspection create (`FormInspectionDocument
 
 | What | Where |
 |------|--------|
+| **Form element blueprint (read first for new elements)** | **`docs/FORM_ELEMENT_BLUEPRINT.md`** |
 | Form types + validation | `src/shared/form/types.ts`, `validate.ts`, `layout.ts` |
 | Form seeds | `src/shared/form/seeds/<seed-id>.ts` |
 | Seed registry | `src/shared/document/defaults.ts` → `DEFAULT_TEMPLATE_SEEDS` |
@@ -81,9 +82,11 @@ Form **definition** is snapshotted at inspection create (`FormInspectionDocument
 | Sync on unlock | `src/main/db/seedTemplates.ts` |
 | Built-in viewer UI | `src/renderer/features/form/BuiltinFormViewer.tsx`, `FormPageCanvas.tsx` |
 | Inspection fill-in (form) | `src/renderer/features/documents/FormInspectionEditor.tsx` |
-| PDF export (form) | `src/main/pdf/renderFormHtml.ts` |
+| **PDF export (primary — matches UI)** | `src/renderer/features/form/buildFormPrintHtml.ts` → `exportInspectionPdf.ts` |
+| PDF export (fallback HTML) | `src/main/pdf/renderFormHtml.ts` |
 | PDF export (legacy blocks) | `src/main/pdf/renderInspectionHtml.ts` |
 | PDF router | `src/main/pdf/renderInspectionHtmlForExport.ts` |
+| Composite elements | `ulcSection1`, `yesNoSummary` — see blueprint |
 
 ---
 
@@ -133,12 +136,16 @@ Run the app and unlock the DB. `seedDefaultTemplates()` inserts or updates the r
 
 ### 5. Add new element types (only when needed)
 
+**Read `docs/FORM_ELEMENT_BLUEPRINT.md` first** — it has the full checklist, design tokens, and anti-patterns.
+
 If a page needs a shape the renderer does not support yet:
 
 1. Extend `FormElement` in `src/shared/form/types.ts`.
-2. Add validation in `validate.ts`.
-3. Render in `FormElementView.tsx` (UI) and `renderFormHtml.ts` (PDF).
-4. Add empty value factory in `values.ts` if the element is fillable.
+2. Add validation in `validate.ts` (if needed).
+3. React view in `FormElementView.tsx` + shared module + `components.css` (with dark theme).
+4. Optional fallback HTML in `renderFormHtml.ts`.
+5. Add empty value factory in `values.ts` if the element is fillable.
+6. Verify **template · document · PDF** before moving on.
 
 ### 6. Update this doc
 
@@ -178,10 +185,11 @@ Region example (page 1 header):
 | DB: built-in stores `FormDefinition` | ✅ | `builtinTemplates.ts` |
 | `resolveDocumentContext()` | ✅ | `src/main/db/resolveDocumentContext.ts` |
 | Page shell UI | ✅ | `FormPageCanvas`, `BuiltinFormViewer` |
-| Form PDF renderer | ✅ | `renderFormHtml.ts` |
+| Form PDF renderer | ✅ | `buildFormPrintHtml.ts` (primary); `renderFormHtml.ts` (fallback) |
 | Inspection snapshot + fill-in | ✅ | `FormInspectionEditor` |
-| Prototype seed | ✅ | `form-prototype` |
-| Real production form (e.g. ULC) | ⬜ | Page-by-page with owner |
+| Element blueprint doc | ✅ | `docs/FORM_ELEMENT_BLUEPRINT.md` |
+| Prototype seed | ✅ | `form-prototype` — ULC 20.1 + Summary table |
+| Real production form (e.g. ULC) | 🔄 | Page-by-page with owner |
 | Custom templates on form model | ⬜ | Future |
 
 ---
@@ -197,6 +205,7 @@ Region example (page 1 header):
 | 2026-06-06 | ULC 536 20.1 block attempt removed — replaced by page-first form model. |
 | 2026-06-06 | Page → Section → Element; % layout; auto footer (disclaimer + page X of Y). |
 | 2026-06-06 | Authoring via TypeScript seeds, not in-app designer (v1). |
+| 2026-06-21 | Three-surface form elements: one React view + `components.css`; PDF via `buildFormPrintHtml`. See `FORM_ELEMENT_BLUEPRINT.md`. |
 
 ---
 
@@ -206,11 +215,11 @@ Region example (page 1 header):
 
 - **Code:** PROTOTYPE-001
 - **Title:** Built-in form prototype — page shell
-- **Added:** 2026-06-06
-- **Pages:** 1 — 5% `template.code`, 5% `template.title`, section 1 demo checklist + table
-- **Bindings used:** `template.code`, `template.title`
-- **PDF notes:** Letter size; footer ~5% height; body regions use flex % matching UI
-- **Reuse notes:** Start every new form from this seed; strip demo section when building real page 1
+- **Added:** 2026-06-06 · **Updated:** 2026-06-21
+- **Pages:** 1 — 5% `template.code`, 5% `template.title`, section 20.1 ULC header (`ulcSection1`), Summary Yes/No table (`yesNoSummary`)
+- **Bindings used:** `template.code`, `template.title`; business/client via ULC bindings
+- **PDF notes:** Primary export via `buildFormPrintHtml` (SSR + live CSS); panel outer frame 2pt in print overrides; section gap 0.375rem
+- **Reuse notes:** Follow `docs/FORM_ELEMENT_BLUEPRINT.md` for every new composite element
 
 ### Template section template (copy when adding)
 

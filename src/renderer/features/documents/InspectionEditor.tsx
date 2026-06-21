@@ -60,7 +60,6 @@ function BlockInspectionEditorInner({
   inspection,
   blockDocument,
   onSaved,
-  onBack,
 }: {
   inspection: Inspection;
   blockDocument: Document;
@@ -446,20 +445,6 @@ function BlockInspectionEditorInner({
         </div>
 
         <div className="flex shrink-0 gap-1.5">
-
-          <button
-
-            type="button"
-
-            onClick={onBack}
-
-            className="rounded-md border border-white/10 px-2.5 py-1 text-xs text-neutral-300 hover:bg-white/5"
-
-          >
-
-            Back
-
-          </button>
 
           <button
 

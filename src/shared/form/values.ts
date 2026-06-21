@@ -7,6 +7,9 @@ import type {
   TableElementValue,
 } from './types';
 import { walkFormElements } from './layout';
+import { emptyAffirmationValue } from './affirmation';
+import { emptyUlcSection1Value, normalizeUlcSection1Value } from './ulcSection1';
+import { emptyYesNoSummaryValue } from './yesNoSummary';
 
 function emptyTableValue(element: Extract<FormElement, { kind: 'table' }>): TableElementValue {
   const rowCount = Math.max(1, element.minRows ?? element.rowLabels?.length ?? 1);
@@ -39,6 +42,12 @@ export function initialValueForElement(element: FormElement): unknown {
       return '';
     case 'signature':
       return emptySignatureValue();
+    case 'ulcSection1':
+      return emptyUlcSection1Value();
+    case 'yesNoSummary':
+      return emptyYesNoSummaryValue(element.items);
+    case 'affirmation':
+      return emptyAffirmationValue();
     default: {
       const _exhaustive: never = element;
       return _exhaustive;
@@ -78,4 +87,25 @@ export function setElementValue(
   value: unknown,
 ): Record<string, unknown> {
   return { ...values, [elementId]: value };
+}
+
+/** Push inspection date into ULC Date of Service (and any other date-bound fields). */
+export function syncFormDocumentInspectionDate(
+  document: FormInspectionDocument,
+  inspectedAt: string | null,
+): FormInspectionDocument {
+  if (!inspectedAt) return document;
+
+  let nextValues = document.values;
+  walkFormElements(document.form, (element) => {
+    if (element.kind !== 'ulcSection1') return;
+    const current = normalizeUlcSection1Value(nextValues[element.id]);
+    nextValues = setElementValue(nextValues, element.id, {
+      ...current,
+      dateOfService: inspectedAt,
+    });
+  });
+
+  if (nextValues === document.values) return document;
+  return { ...document, values: nextValues };
 }

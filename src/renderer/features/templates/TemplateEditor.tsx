@@ -25,7 +25,7 @@ export function TemplateEditor({
   templateId,
   initial,
   onSaved,
-  onCancel,
+  onCancel: _onCancel,
 }: {
   templateId: string | null;
   initial?: Template;
@@ -110,13 +110,6 @@ export function TemplateEditor({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-lg border border-white/10 px-3 py-2 text-sm text-neutral-300 hover:bg-white/5"
-          >
-            Back
-          </button>
           <button
             type="button"
             disabled={saving}

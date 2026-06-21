@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { dialog } from 'electron';
-import { normalizeAddressParts, validateAddressFields } from '../../shared/address';
+import { normalizeAddressParts, validateAddressFields, validateEmail, validatePhone } from '../../shared/address';
 import {
   BUSINESS_PROFILE_ID,
   truncateBusinessProfileInput,
@@ -17,6 +17,8 @@ import { getDatabase } from './connection';
 interface BusinessProfileRow {
   id: string;
   business_name: string;
+  phone: string;
+  email: string;
   logo_path: string;
   street: string;
   unit: string;
@@ -48,6 +50,8 @@ function toBusinessProfile(row: BusinessProfileRow): BusinessProfile {
   const logoPath = row.logo_path?.trim() ?? '';
   return {
     businessName: row.business_name ?? '',
+    phone: row.phone ?? '',
+    email: row.email ?? '',
     street: row.street ?? '',
     unit: row.unit ?? '',
     city: row.city ?? '',
@@ -73,10 +77,16 @@ function toInspector(row: InspectorRow): Inspector {
 function normalizeBusinessInput(input: BusinessProfileInput) {
   const trimmed = truncateBusinessProfileInput(input);
   const businessName = trimmed.businessName.trim();
+  const phone = trimmed.phone.trim();
+  const email = trimmed.email.trim();
   const parts = normalizeAddressParts(trimmed);
   const addressError = validateAddressFields(parts);
   if (addressError) throw new Error(addressError);
-  return { businessName, ...parts };
+  const phoneError = validatePhone(phone);
+  if (phoneError) throw new Error(phoneError);
+  const emailError = validateEmail(email);
+  if (emailError) throw new Error(emailError);
+  return { businessName, phone, email, ...parts };
 }
 
 function getProfileRow(): BusinessProfileRow {
@@ -99,6 +109,8 @@ export function updateBusinessProfile(input: BusinessProfileInput): BusinessProf
   db.prepare(
     `UPDATE business_profile
         SET business_name = @businessName,
+            phone = @phone,
+            email = @email,
             street = @street,
             unit = @unit,
             city = @city,
@@ -110,6 +122,8 @@ export function updateBusinessProfile(input: BusinessProfileInput): BusinessProf
   ).run({
     id: BUSINESS_PROFILE_ID,
     businessName: normalized.businessName,
+    phone: normalized.phone,
+    email: normalized.email,
     street: normalized.street,
     unit: normalized.unit,
     city: normalized.city,

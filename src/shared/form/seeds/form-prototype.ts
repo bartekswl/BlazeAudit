@@ -1,4 +1,5 @@
 import type { FormDefinition } from '../types';
+import { FORM_PROTOTYPE_SUMMARY_ITEMS } from '../yesNoSummary';
 
 export const FORM_PROTOTYPE_SEED_ID = 'form-prototype';
 
@@ -25,30 +26,33 @@ export function formPrototypeDefinition(): FormDefinition {
         ],
         sections: [
           {
-            id: 'section-demo',
-            number: 1,
-            title: 'Demo section',
-            heightPercent: 35,
+            id: 'section-1',
+            number: 20,
+            heading: '20.1 Fire Alarm System Annual Test and Inspection Report',
+            heightPercent: 30,
             elements: [
               {
-                kind: 'checklist',
-                id: 'demo-checklist',
-                label: 'Sample checklist',
-                columns: 'yesNo',
-                items: [
-                  { id: 'item-1', label: 'System is operational' },
-                  { id: 'item-2', label: 'Documentation on site' },
-                ],
+                kind: 'ulcSection1',
+                id: 'ulc-section-1',
               },
+            ],
+          },
+          {
+            id: 'section-summary',
+            elements: [
               {
-                kind: 'table',
-                id: 'demo-table',
-                label: 'Sample table',
-                columns: [
-                  { key: 'location', title: 'Location', widthPercent: 40 },
-                  { key: 'notes', title: 'Notes', widthPercent: 60 },
-                ],
-                minRows: 2,
+                kind: 'yesNoSummary',
+                id: 'annual-summary',
+                items: FORM_PROTOTYPE_SUMMARY_ITEMS,
+              },
+            ],
+          },
+          {
+            id: 'section-affirmation',
+            elements: [
+              {
+                kind: 'affirmation',
+                id: 'affirmation-block',
               },
             ],
           },

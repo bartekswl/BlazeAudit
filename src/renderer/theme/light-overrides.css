@@ -97,6 +97,10 @@ html[data-theme='light'] .text-red-300 {
   color: #dc2626;
 }
 
+html[data-theme='light'] .text-emerald-200 {
+  color: #047857;
+}
+
 html[data-theme='light'] .text-emerald-300 {
   color: #059669;
 }

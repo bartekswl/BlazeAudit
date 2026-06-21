@@ -125,12 +125,13 @@ export function DocumentsScreen({
     clientId: string;
     templateKind: 'builtin' | 'custom';
     templateId: string;
-    title: string;
-    inspector: string;
     inspectedAt: string;
-    cadence: 'monthly' | 'quarterly' | 'annual' | 'none';
   }) => {
-    const created = await window.blazeaudit.inspections.create(input);
+    const created = await window.blazeaudit.inspections.create({
+      ...input,
+      inspector: '',
+      cadence: 'annual',
+    });
     setShowNew(false);
     setEditingId(created.id);
     setEditingInspection(created);

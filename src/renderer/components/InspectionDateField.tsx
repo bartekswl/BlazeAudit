@@ -43,10 +43,14 @@ export function InspectionDateField({
   value,
   onChange,
   disabled,
+  compact,
+  className,
 }: {
   value: string;
   onChange: (iso: string) => void;
   disabled?: boolean;
+  compact?: boolean;
+  className?: string;
 }) {
   const { min, max } = inspectionDateBounds();
   const [open, setOpen] = useState(false);
@@ -103,16 +107,25 @@ export function InspectionDateField({
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
           inputCls,
-          'flex w-full items-center justify-between gap-2 text-left',
-          disabled && 'opacity-50',
+          'flex w-full cursor-pointer items-center justify-between gap-2 text-left',
+          compact && 'min-h-0 rounded-none border-0 bg-transparent px-2 py-1 text-xs shadow-none',
+          disabled && 'cursor-not-allowed opacity-50',
+          className,
         )}
       >
-        <span>{formatInspectionDateLabel(value || todayLocalIsoDate())}</span>
-        <Calendar className="size-4 shrink-0 text-neutral-500" />
+        <span className={compact ? 'truncate text-[var(--ba-text-primary)]' : undefined}>
+          {value ? formatInspectionDateLabel(value) : 'Select date'}
+        </span>
+        <Calendar className={cn('shrink-0 text-neutral-500', compact ? 'size-3' : 'size-4')} />
       </button>
 
       {open && (
-        <div className="absolute top-full z-50 mt-2 w-72 rounded-xl border border-white/10 bg-neutral-950 p-3 shadow-2xl">
+        <div
+          className={cn(
+            'absolute top-full z-50 mt-2 rounded-xl border border-white/10 bg-neutral-950 p-3 shadow-2xl',
+            compact ? 'w-64' : 'w-72',
+          )}
+        >
           <div className="mb-3 flex items-center justify-between gap-2">
             <button
               type="button"

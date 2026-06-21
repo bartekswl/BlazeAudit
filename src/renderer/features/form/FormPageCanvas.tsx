@@ -2,6 +2,7 @@ import type { DocumentContext } from '../../../shared/document';
 import {
   FORM_FOOTER_HEIGHT_PERCENT,
   formSectionAnchorId,
+  formSectionHeading,
   pageBodyPercent,
   resolveFormBinding,
   type BuiltinTemplate,
@@ -35,7 +36,7 @@ export function FormPageCanvas({
 
   return (
     <div className="form-page-sheet">
-      <div className="form-page-body" style={{ height: `${bodyPercent}%` }}>
+      <div className="form-page-body" style={{ minHeight: `${bodyPercent}%` }}>
         {page.regions.length > 0 && (
           <div className="form-page-header">
             {page.regions.map((region) => {
@@ -68,28 +69,38 @@ export function FormPageCanvas({
         )}
 
         <div className="form-page-content">
-          {page.sections.map((section) => (
+          {page.sections.map((section) => {
+            const heading = formSectionHeading(section);
+            const isUlcSection =
+              section.elements.length === 1 && section.elements[0]?.kind === 'ulcSection1';
+            return (
             <section
               key={section.id}
               id={formSectionAnchorId(section.id)}
-              className="form-page-section scroll-mt-3"
+              className={cn(
+                'form-page-section scroll-mt-3',
+                isUlcSection && 'flex flex-col',
+              )}
               style={
                 section.heightPercent
-                  ? { minHeight: `${section.heightPercent}%` }
+                  ? isUlcSection
+                    ? { minHeight: `${section.heightPercent}%` }
+                    : { minHeight: `${section.heightPercent}%` }
                   : undefined
               }
             >
-              <h3 className="form-page-section-title">
-                {section.number}
-                {section.title ? `. ${section.title}` : ''}
-              </h3>
-              <div className="space-y-3">
+              {heading && (
+                <h3 className="form-page-section-title">{heading}</h3>
+              )}
+              <div className={cn(isUlcSection ? 'flex flex-col' : 'space-y-3')}>
                 {section.elements.map((element) => (
                   <FormElementView
                     key={element.id}
                     element={element}
                     value={values?.[element.id]}
                     readOnly={readOnly}
+                    context={context ?? null}
+                    totalPages={totalPages}
                     bindingText={
                       element.kind === 'text' && element.binding
                         ? resolveFormBinding(element.binding, context ?? null, template)
@@ -104,7 +115,8 @@ export function FormPageCanvas({
                 ))}
               </div>
             </section>
-          ))}
+            );
+          })}
         </div>
       </div>
 

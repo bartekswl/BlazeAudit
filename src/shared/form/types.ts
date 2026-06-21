@@ -49,12 +49,28 @@ export type FormElement =
       id: string;
       label?: string;
       role?: string;
+    }
+  | {
+      kind: 'ulcSection1';
+      id: string;
+    }
+  | {
+      kind: 'yesNoSummary';
+      id: string;
+      items: YesNoSummaryItem[];
+    }
+  | {
+      kind: 'affirmation';
+      id: string;
     };
 
 export interface FormSection {
   id: string;
-  number: number;
+  /** Section number for numbered headings; omit when the Contents outline uses a plain label. */
+  number?: number;
   title?: string;
+  /** Full section heading when set (e.g. "20.1 Fire Alarm System…"). Overrides number + title display. */
+  heading?: string;
   heightPercent?: number;
   elements: FormElement[];
 }
@@ -108,3 +124,22 @@ export interface SignatureElementValue {
   name: string;
   date: string | null;
 }
+
+export interface YesNoSummaryItem {
+  id: string;
+  text: string;
+  /** Inline underline field after `text`. */
+  fillIn?: boolean;
+  /** Copy after the fill-in field (same summary cell). */
+  textAfterFill?: string;
+}
+
+export interface YesNoSummaryItemValue {
+  choice: 'yes' | 'no' | null;
+  fillIn?: string;
+}
+
+export type YesNoSummaryValue = Record<string, YesNoSummaryItemValue>;
+
+export type { UlcSection1Value } from './ulcSection1';
+export type { AffirmationValue } from './affirmation';

@@ -1,0 +1,228 @@
+# Form element blueprint — template · document · PDF
+
+**Point the agent here** whenever we add or change a built-in form page element (ULC-style panels, summary tables, similar composite blocks).
+
+Goal: **one look, one layout, three surfaces** — built-in template viewer, inspection document editor, and PDF export must always match.
+
+---
+
+## Golden rule
+
+> **One React component + one CSS source.**  
+> Template (read-only), document (editable), and PDF (read-only SSR) all render through `FormPageCanvas` → `FormElementView` → your view component.
+
+| Surface | How it renders |
+|---------|----------------|
+| **Template** | `BuiltinFormViewer` → `FormPageCanvas` (`readOnly`) |
+| **Document** | `FormInspectionEditor` → `FormPageCanvas` (editable) |
+| **PDF export** | `buildFormPrintHtml()` → `renderToStaticMarkup(<FormPageCanvas readOnly />)` + live CSS + tiny print overrides |
+
+Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fallback** path in `renderFormHtml.ts` (used when prebuilt HTML is not passed). The primary export path is renderer-built HTML.
+
+---
+
+## When to add a dedicated element type
+
+| Use a **dedicated** `FormElement` kind | Use a **generic** element |
+|----------------------------------------|---------------------------|
+| Custom grid / panel layout (ULC 20.1 header) | Single bound text line |
+| Styled multi-column table (Yes / No / Summary) | Simple checklist (Pass/Fail) |
+| Domain-specific bindings + normalization | Generic table with columns |
+| Non-trivial PDF border/print behaviour | Signature block |
+
+**Reference implementations:**
+
+- `ulcSection1` — composite inspection header panel (`.ulc-s1-*`)
+- `yesNoSummary` — Yes / No / Summary checklist table (`.yns-*`)
+- `affirmation` — Affirmation paragraph + technician signature grid (`.aff-*`)
+
+---
+
+## Visual design system (form page)
+
+All composite elements on a letter page share the same “form panel” language:
+
+| Token | Value | Notes |
+|-------|-------|-------|
+| Panel border | `1px solid rgb(148 163 184 / 0.45)` | CSS var: `--ulc-line` / `--yns-line` / `--aff-line` |
+| Panel radius | `0.625rem` | Rounded outer frame |
+| Panel shadow | **none** on `.form-page-sheet` | Avoid gray/blue bands between stacked panels |
+| Label header bg | `linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%)` | Text `#334155` — not black |
+| Body text | `var(--ba-text-primary)` | Never hardcode `#171717` without dark pair |
+| Page top → code | `padding-top: 1.75rem` on `.form-page-body` | Space above template code line |
+| Section gap | `1.5rem` on `.form-page-content` | **Even** gap between all stacked panels |
+| Section title → panel | `margin-bottom: 0.75rem` on `.form-page-section-title` | e.g. “20.1 …” heading → ULC panel |
+| ULC section height | **`minHeight`** % | Never `maxHeight` — prevents PDF overlap |
+| PDF outer frame | `2pt solid #334155` | Print-only override on panel wrap |
+| PDF inner lines | `0.5px solid #64748b` | Print-only; fixes Chromium dropped borders |
+| Row dividers | Single thin line | No thick gray separator bands between rows |
+
+### Affirmation block (`.aff-*`) — defaults
+
+When building or editing the **affirmation** element, apply these without being asked again:
+
+| Area | Rule |
+|------|------|
+| Gray body (long text) | **Center text vertically and horizontally** — `.aff-body { display: flex; align-items: center; justify-content: center; text-align: center; }` |
+| Body padding | Comfortable padding above/below paragraph (`~0.625rem` vertical) |
+| Technician field rows | **2× standard cell height** (`--aff-field-row-height: 3.5rem`) for white input rows only; label bars stay compact |
+| Column widths | Technician **narrow**, ID **medium-narrow**, Date **wide**, Signature flexible — tune via grid `fr` / `minmax` on `.aff-fields` / `.aff-labels` |
+| Field cell alignment | ID + Date values **centered** vertically and horizontally in their cells; inspector select / name has **left padding** (`~0.875rem`); first-column label bars match |
+| Page count in text | Inline with normal single spaces — **not** a wide fill-in box |
+| Inspector names | Dropdown from Settings → Inspectors; ID auto-filled from license/certificate number (read-only) |
+| Dates | Default to inspection date; editable via `InspectionDateField` |
+| Signature cells | **No** company-name placeholder overlay |
+
+### Dark theme (required)
+
+Every new composite element **must** include a `[data-theme='dark']` block in `components.css` for:
+
+- panel background and `--*-line` border color  
+- label/header gradients and text  
+- cell tint backgrounds (Yes green / No red columns, etc.)  
+- fill-in underlines and input text  
+
+Template viewer and document editor both respect `data-theme` on `<html>`. PDF export forces `data-theme="light"`.
+
+### Spacing between stacked panels
+
+```css
+.form-page-body {
+  padding: 1.75rem 1.25rem 0; /* top → template code */
+}
+.form-page-content {
+  gap: 1.5rem; /* even spacing between ULC, Summary, Affirmation, … */
+}
+.form-page-section-title {
+  margin-bottom: 0.75rem; /* “20.1 …” → first panel */
+}
+.form-page-content > .form-page-section + .form-page-section {
+  padding-top: 0;
+}
+.form-page-sheet .ulc-s1-panel,
+.form-page-sheet .yns-table-wrap,
+.form-page-sheet .aff-panel {
+  box-shadow: none;
+  outline: none;
+}
+```
+
+Do not add a **section heading** above a table that already has its own column headers (e.g. don’t show “Summary” above a Yes/No/Summary table).
+
+When changing page spacing, update **both** `components.css` and `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` so PDF stays in sync. **PDF export uses half the on-screen section gap** (`0.75rem` print vs `1.5rem` screen) to fit the letter page.
+
+### Viewport scaling (template + document editor)
+
+The form page uses **dynamic reference width**: at scale `1` the sheet fills the column (same size as before). When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom` (layout-aware in Electron — no overlap with the rail). The page stays **centered** in the remaining column. The viewport sheet **hugs content height** (no forced letter aspect-ratio empty area below). PDF export is unaffected.
+
+---
+
+## Implementation checklist (copy per element)
+
+Use this list every time. Check off in the PR / session notes.
+
+### 1. Schema & values
+
+- [ ] Extend `FormElement` union in `src/shared/form/types.ts`
+- [ ] Add value type(s) + item config types if needed
+- [ ] `src/shared/form/<name>.ts` — `empty*`, `normalize*`, setters, optional seed item constants
+- [ ] `initialValueForElement()` in `src/shared/form/values.ts`
+- [ ] Export from `src/shared/form/index.ts`
+
+### 2. React view (single source of truth)
+
+- [ ] `src/renderer/features/form/Form<Name>View.tsx`
+- [ ] Support `readOnly` (template + PDF) and editable mode (document)
+- [ ] Wire in `FormElementView.tsx` (`case` + `flushFrame` if full-bleed panel)
+- [ ] **Editable UX:** make whole click targets (e.g. full Yes/No cell = `<label>` + `cursor: pointer`)
+
+### 3. CSS (structure + theme)
+
+- [ ] Add prefixed rules to `src/renderer/theme/components.css` (e.g. `.yns-*`, `.ulc-s1-*`)
+- [ ] Scope print-color-adjust on `.form-page-sheet .your-panel *` if colors must survive PDF
+- [ ] Add **`[data-theme='dark']`** overrides for every hardcoded light color
+- [ ] No `box-shadow` on panels inside `.form-page-sheet`
+
+### 4. PDF
+
+- [ ] Primary path: **no change needed** if view + CSS are correct — `buildFormPrintHtml` picks up live CSS
+- [ ] Add **minimal** rules to `PRINT_OVERRIDES` in `src/renderer/features/form/buildFormPrintHtml.tsx` only for:
+  - Letter page sizing (already global)
+  - Chromium border dropout (solid lines, `print-color-adjust: exact`)
+  - Section stacking / gap if PDF still overlaps
+  - Bold outer frame (`2pt`) if panel border prints too light
+- [ ] Optional fallback: `src/shared/form/<name>Html.ts` + case in `src/main/pdf/renderFormHtml.ts`
+
+### 5. Seed & sync
+
+- [ ] Add element to seed in `src/shared/form/seeds/<seed-id>.ts`
+- [ ] Keep page % budget ≤ 95% body (+ 5% footer)
+- [ ] Unlock app to sync built-in template row
+- [ ] Verify **all three surfaces** after each change
+
+### 6. Verify (mandatory)
+
+- [ ] Built-in template viewer — layout, dark theme, read-only values/bindings  
+- [ ] New/open inspection — fill-in works, autosave, full-cell clicks  
+- [ ] Export PDF — same spacing, borders, colors; no overlap between sections  
+- [ ] Toggle dark theme in Settings — no broken backgrounds or invisible text  
+
+---
+
+## File map (current)
+
+| Layer | Path |
+|-------|------|
+| Types | `src/shared/form/types.ts` |
+| Values | `src/shared/form/values.ts` |
+| ULC logic | `src/shared/form/ulcSection1.ts`, `ulcSection1Html.ts` |
+| Summary logic | `src/shared/form/yesNoSummary.ts`, `yesNoSummaryHtml.ts` |
+| Affirmation logic | `src/shared/form/affirmation.ts`, `affirmationHtml.ts` |
+| React views | `src/renderer/features/form/FormUlcSection1View.tsx`, `FormYesNoSummaryView.tsx`, `FormAffirmationView.tsx` |
+| Element router | `src/renderer/features/form/FormElementView.tsx` |
+| Page shell | `src/renderer/features/form/FormPageCanvas.tsx` |
+| Template viewer | `src/renderer/features/form/BuiltinFormViewer.tsx` |
+| Document editor | `src/renderer/features/documents/FormInspectionEditor.tsx` |
+| Styles | `src/renderer/theme/components.css` |
+| PDF (primary) | `src/renderer/features/form/buildFormPrintHtml.ts` |
+| PDF (export IPC) | `src/main/pdf/exportInspectionPdf.ts` |
+| PDF (fallback HTML) | `src/main/pdf/renderFormHtml.ts` |
+| Seeds | `src/shared/form/seeds/*.ts`, registry in `src/shared/document/defaults.ts` |
+
+---
+
+## Anti-patterns (learned the hard way)
+
+| Don’t | Do instead |
+|-------|------------|
+| Maintain separate PDF HTML/CSS copied from React | SSR `FormPageCanvas` + live `components.css` |
+| Use `maxHeight` on ULC-only sections | Use `minHeight` so content pushes the next section down |
+| Stack `box-shadow` on adjacent panels | `box-shadow: none` on `.form-page-sheet` panels |
+| Add section `heading` duplicating table headers | Let the table header row speak for itself |
+| Thick gray `<tr>` separator bands | `.row:not(:last-child) td { border-bottom: var(--line) }` |
+| Stack `border` + `outline` + `inset box-shadow` on same edge in PDF | One owner per edge; print overrides only where Chromium drops lines |
+| Hardcode light colors without dark pair | Always add `[data-theme='dark']` rules |
+| Tiny radio/checkbox hit target only | Full-cell `<label class="…-check-cell">` in editable mode |
+
+---
+
+## Agent prompt (paste at start of session)
+
+```
+Read docs/FORM_ELEMENT_BLUEPRINT.md and docs/BUILTIN_TEMPLATE_BUILD.md.
+
+We are adding/changing a built-in form element. Follow the blueprint:
+- One React view for template, document, and PDF (via buildFormPrintHtml).
+- CSS in components.css with dark theme.
+- Match existing panel style (rounded frame, slate borders, no shadow between panels).
+- Verify template viewer, document editor, and PDF export all match.
+```
+
+---
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-06-21 | Affirmation element (`.aff-*`): centered gray body text, inspector dropdowns, page spacing tokens, technician row heights. |
+| 2026-06-21 | Initial blueprint from ULC 20.1 + Yes/No/Summary table work (three-surface PDF architecture, panel styling, spacing, dark theme, full-cell clicks). |
