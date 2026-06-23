@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { DocumentContext } from '../../../shared/document';
 import type { BuiltinTemplate, FormDefinition } from '../../../shared/form';
 import { FormPageCanvas } from './FormPageCanvas';
+import { measureLinedNotesPdfRowHeights } from './measureLinedNotesPdfRowHeights';
 
 /**
  * Print-only CSS appended after the app's live stylesheet. The goal is to keep
@@ -135,6 +136,150 @@ const PRINT_OVERRIDES = `
   .form-print-root .yns-th--summary {
     background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%) !important;
     color: #334155 !important;
+  }
+
+  /* Lined notes — Recommendations + Testing Notes */
+  .form-print-root .ln-panel {
+    --ln-line: 0.5px solid #64748b !important;
+    border-radius: 0.625rem !important;
+    box-shadow: none !important;
+    margin-top: 0 !important;
+    overflow: hidden !important;
+  }
+  .form-print-root .form-page-section:has(.ln-panel) .form-element-frame--flush {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  .form-print-root .ln-panel--green .ln-head-bar {
+    background: #1b6b2f !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .form-print-root .ln-panel--blue .ln-head-bar {
+    background: #1e3a8a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .form-print-root .ln-head-bar {
+    border-bottom: 0.5px solid #64748b !important;
+    min-height: 0.625rem !important;
+    flex-shrink: 0 !important;
+  }
+  .form-print-root .ln-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+  .form-print-root .ln-body-stack {
+    position: relative !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    width: 100% !important;
+  }
+  .form-print-root .ln-body-stack--fill {
+    max-height: none !important;
+    align-self: stretch !important;
+  }
+  .form-print-root .ln-rows {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
+  .form-print-root .ln-body-stack--fill .ln-rows {
+    bottom: 0 !important;
+    height: 100% !important;
+  }
+  .form-print-root .ln-row {
+    flex: 0 0 1.375rem !important;
+    height: 1.375rem !important;
+    border-bottom: 0.5px solid #64748b !important;
+    box-sizing: border-box !important;
+  }
+  .form-print-root .ln-body-stack--fill .ln-row {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  .form-print-root .ln-body {
+    position: relative !important;
+    z-index: 1 !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    background: transparent !important;
+    overflow: hidden !important;
+  }
+  .form-print-root .ln-body-stack:not(.ln-body-stack--measured) .ln-body {
+    line-height: 1.375rem !important;
+  }
+  .form-print-root .ln-body-stack--measured .ln-rows {
+    bottom: auto !important;
+    height: auto !important;
+  }
+  .form-print-root .ln-body-stack--measured .ln-row {
+    flex: 0 0 var(--ln-row-height) !important;
+    height: var(--ln-row-height) !important;
+    min-height: 0 !important;
+    border-bottom: 0.5px solid #64748b !important;
+    box-sizing: border-box !important;
+  }
+  .form-print-root .ln-body-stack--measured .ln-body {
+    line-height: var(--ln-row-height) !important;
+  }
+  .form-print-root .form-page-content--lined-notes {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    gap: 0.5rem !important;
+  }
+  .form-print-root .form-page-sheet--lined-notes.form-page-sheet--fixed {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--lined-notes.form-page-sheet--fixed .form-page-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  .form-print-root .form-page-sheet--lined-notes.form-page-sheet--fixed .form-page-section:has(.ln-panel--green) {
+    flex: 10 1 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--lined-notes.form-page-sheet--fixed .form-page-section:has(.ln-panel--blue) {
+    flex: 18 1 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--lined-notes.form-page-sheet--fixed .form-page-section:has(.ln-panel) > div {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--lined-notes.form-page-sheet--fixed .form-page-section:has(.ln-panel) .form-element-frame--flush {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
   }
 
   /* Affirmation block — match panel frame + thin grid lines in PDF. */
@@ -371,7 +516,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .yns-table-wrap,
   .form-print-root .aff-panel,
   .form-print-root .def-grid,
-  .form-print-root .def-compliance {
+  .form-print-root .def-compliance,
+  .form-print-root .ln-panel {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }
@@ -489,6 +635,8 @@ export interface FormPrintInput {
   context: DocumentContext | null;
   template?: Pick<BuiltinTemplate, 'code' | 'title' | 'name'>;
   title: string;
+  linedNotesVisibleLines?: Record<string, number>;
+  linedNotesRowHeights?: Record<string, number>;
 }
 
 /**
@@ -502,7 +650,20 @@ export async function buildFormPrintHtml({
   context,
   template,
   title,
+  linedNotesVisibleLines,
+  linedNotesRowHeights: linedNotesRowHeightsInput,
 }: FormPrintInput): Promise<string> {
+  const linedNotesRowHeights =
+    linedNotesRowHeightsInput ??
+    (await measureLinedNotesPdfRowHeights({
+      form,
+      values,
+      context,
+      template,
+      linedNotesVisibleLines,
+      printCss: PRINT_OVERRIDES,
+    }));
+
   const pagesMarkup = form.pages
     .map((page, index) =>
       renderToStaticMarkup(
@@ -515,6 +676,8 @@ export async function buildFormPrintHtml({
           values={values}
           readOnly
           fixedPageLayout
+          linedNotesVisibleLines={linedNotesVisibleLines}
+          linedNotesRowHeights={linedNotesRowHeights}
         />,
       ),
     )

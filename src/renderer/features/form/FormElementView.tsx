@@ -8,6 +8,7 @@ import type {
 import { cn } from '../../lib/cn';
 import { FormAffirmationView } from './FormAffirmationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
+import { FormLinedNotesView } from './FormLinedNotesView';
 import { FormUlcSection1View } from './FormUlcSection1View';
 import { FormYesNoSummaryView } from './FormYesNoSummaryView';
 
@@ -24,6 +25,8 @@ export function FormElementView({
   bindingText,
   context,
   totalPages,
+  linedNotesVisibleLines,
+  linedNotesRowHeights,
   onChange,
 }: {
   element: FormElement;
@@ -32,13 +35,17 @@ export function FormElementView({
   bindingText?: string;
   context?: DocumentContext | null;
   totalPages?: number;
+  linedNotesVisibleLines?: Record<string, number>;
+  linedNotesRowHeights?: Record<string, number>;
   onChange?: (value: unknown) => void;
 }) {
   const flushFrame =
     element.kind === 'ulcSection1' ||
     element.kind === 'yesNoSummary' ||
     element.kind === 'affirmation' ||
-    element.kind === 'deficiencies';
+    element.kind === 'deficiencies' ||
+    element.kind === 'recommendations' ||
+    element.kind === 'testingNotes';
 
   return (
     <div
@@ -54,6 +61,8 @@ export function FormElementView({
         bindingText={bindingText}
         context={context ?? null}
         totalPages={totalPages ?? 1}
+        linedNotesVisibleLines={linedNotesVisibleLines}
+        linedNotesRowHeights={linedNotesRowHeights}
         onChange={onChange}
       />
     </div>
@@ -67,6 +76,8 @@ function FormElementBody({
   bindingText,
   context,
   totalPages,
+  linedNotesVisibleLines,
+  linedNotesRowHeights,
   onChange,
 }: {
   element: FormElement;
@@ -75,6 +86,8 @@ function FormElementBody({
   bindingText?: string;
   context: DocumentContext | null;
   totalPages: number;
+  linedNotesVisibleLines?: Record<string, number>;
+  linedNotesRowHeights?: Record<string, number>;
   onChange?: (value: unknown) => void;
 }) {
   switch (element.kind) {
@@ -300,6 +313,30 @@ function FormElementBody({
         <FormDeficienciesView
           value={value}
           readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'recommendations':
+      return (
+        <FormLinedNotesView
+          elementId={element.id}
+          variant="green"
+          value={value}
+          readOnly={readOnly}
+          visibleLineCount={linedNotesVisibleLines?.[element.id]}
+          pdfRowHeightPx={linedNotesRowHeights?.[element.id]}
+          onChange={onChange}
+        />
+      );
+    case 'testingNotes':
+      return (
+        <FormLinedNotesView
+          elementId={element.id}
+          variant="blue"
+          value={value}
+          readOnly={readOnly}
+          visibleLineCount={linedNotesVisibleLines?.[element.id]}
+          pdfRowHeightPx={linedNotesRowHeights?.[element.id]}
           onChange={onChange}
         />
       );

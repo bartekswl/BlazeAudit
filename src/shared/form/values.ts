@@ -9,6 +9,7 @@ import type {
 import { walkFormElements } from './layout';
 import { emptyAffirmationValue } from './affirmation';
 import { emptyDeficienciesValue } from './deficiencies';
+import { emptyLinedNotesValue } from './linedNotes';
 import { emptyUlcSection1Value, normalizeUlcSection1Value } from './ulcSection1';
 import { emptyYesNoSummaryValue } from './yesNoSummary';
 
@@ -51,6 +52,9 @@ export function initialValueForElement(element: FormElement): unknown {
       return emptyAffirmationValue();
     case 'deficiencies':
       return emptyDeficienciesValue();
+    case 'recommendations':
+    case 'testingNotes':
+      return emptyLinedNotesValue();
     default: {
       const _exhaustive: never = element;
       return _exhaustive;

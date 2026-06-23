@@ -36,6 +36,8 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `yesNoSummary` — Yes / No / Summary checklist table (`.yns-*`)
 - `affirmation` — Affirmation paragraph + technician signature grid (`.aff-*`)
 - `deficiencies` — Split inspection/repair deficiencies table (`.def-*`)
+- `recommendations` — 20.3 lined table with green header bar (`.ln-panel--green`)
+- `testingNotes` — Technician's testing notes with blue header bar (`.ln-panel--blue`)
 
 ---
 
@@ -45,7 +47,7 @@ All composite elements on a letter page share the same “form panel” language
 
 | Token | Value | Notes |
 |-------|-------|-------|
-| Inner cell line | `1px solid rgb(148 163 184 / 0.45)` | CSS var: `--ulc-line` / `--yns-line` / `--aff-line` / `--def-line` |
+| Inner cell line | `1px solid rgb(148 163 184 / 0.45)` | CSS var: `--ulc-line` / `--yns-line` / `--aff-line` / `--def-line` / `--ln-line` |
 | **Outer panel frame** | **`1.5px solid #000000`** | CSS var: `--form-panel-frame` on `.form-page-sheet` — applies to **all** composite panels |
 | Panel radius | `0.625rem` | Rounded outer frame |
 | Panel shadow | **none** on `.form-page-sheet` panels | Avoid gray/blue bands between stacked panels |
@@ -66,7 +68,7 @@ Every built-in form panel on `.form-page-sheet` shares one thick **black** outer
 | Surface | Selector | Outer border |
 |---------|----------|--------------|
 | Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `1.5px solid #000000` |
-| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance` | via `border: var(--form-panel-frame)` |
+| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel` | via `border: var(--form-panel-frame)` |
 | PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `2pt solid #000000 !important` on the same selectors |
 
 Do **not** use the thin `--*-line` variable for the outer panel perimeter — that is for inner cells only.
@@ -110,6 +112,22 @@ When building or editing the **deficiencies** element (page 2, landscape), apply
 | Section divider | **`2px solid #171717`** between device block and control block (`.def-section-divider`) |
 | Compliance text → fields | **Tight gap** — `margin-bottom: 0.125rem` on `.def-compliance-text` |
 | Date fields | Same label + control structure as Printed Name / Signature; date boxes **`1.625rem × 1.25rem`**, aligned with signature input row |
+
+### Lined notes tables (`.ln-*`) — defaults
+
+Page 3 portrait — **20.3 Recommendations** (`recommendations`) and **Technician's Testing Notes** (`testingNotes`).
+
+| Area | Rule |
+|------|------|
+| Outer frame | **`--form-panel-frame`** on `.ln-panel` |
+| Panel frame | **`border-radius: 0.625rem`** + `overflow: hidden`; **`display: flex`** column, **`flex: 1`** on page 3 |
+| Header bar | Solid strip only — **green** `#1b6b2f` (recommendations), **blue** `#1e3a8a` (testing notes); `min-height: 0.625rem` |
+| Body | **Single** `.ln-body` text; **`.ln-row`** divs with `border-bottom` (PDF-safe); editor clamps to **visible row count** (no scroll past last line) |
+| Page tile | **Always A4 portrait** (`aspect-ratio: 210/297`) in template + document viewport — same visual size as other portrait pages; **never** content-hug height |
+| Panel split | Recommendations **10** : Testing notes **18** flex-grow — fills body between `codeNameMeta` header and page footer |
+| Section titles | In `.form-page-section-title` above each panel — not inside the colored bar |
+| Page header | **`codeNameMeta`** — same Code–Name + building table as page 2 |
+| Value shape | `string` (legacy `string[]` rows joined with `\n` on read) |
 
 ### ULC 20.1 panel (`.ulc-s1-*`) — defaults
 
@@ -166,7 +184,7 @@ When changing page spacing, update **both** `components.css` and `PRINT_OVERRIDE
 
 ### Viewport scaling (template + document editor)
 
-The form page uses **dynamic reference width**: at scale `1` the sheet fills the column (same size as before). When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom` (layout-aware in Electron — no overlap with the rail). The page stays **centered** in the remaining column. The viewport sheet **hugs content height** (no forced letter aspect-ratio empty area below). PDF export is unaffected.
+The form page uses **dynamic reference width**: at scale `1` the sheet fills the column. When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom`. **Page 1** portrait sheets hug content height; **page 3** (`form-page-sheet--lined-notes`) and **page 2** landscape always keep fixed **A4** aspect ratio. PDF export is unaffected.
 
 ---
 
@@ -277,7 +295,7 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
-| 2026-06-21 | Shared **`--form-panel-frame`** black outer edge on all composite panels (page 1 + 20.2); screen `1.5px`, PDF `2pt`. |
+| 2026-06-21 | Page 3 A4-locked tile (`form-page-sheet--lined-notes`); panels flex-fill body 10:18. |
 | 2026-06-21 | Deficiencies element (`.def-*`): rounded grid panel, dual repair header rows, column widths, compliance footer alignment. |
 | 2026-06-21 | Affirmation element (`.aff-*`): centered gray body text, inspector dropdowns, page spacing tokens, technician row heights. |
 | 2026-06-21 | Initial blueprint from ULC 20.1 + Yes/No/Summary table work (three-surface PDF architecture, panel styling, spacing, dark theme, full-cell clicks). |

@@ -77,6 +77,34 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-3',
+        label: 'Page 3',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-recommendations',
+            heading: '20.3 Recommendations',
+            elements: [
+              {
+                kind: 'recommendations',
+                id: 'recommendations-table',
+              },
+            ],
+          },
+          {
+            id: 'section-testing-notes',
+            heading: "Technician's Testing Notes",
+            elements: [
+              {
+                kind: 'testingNotes',
+                id: 'testing-notes-table',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

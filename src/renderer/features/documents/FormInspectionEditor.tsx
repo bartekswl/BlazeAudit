@@ -15,6 +15,7 @@ import { useRegisterFormOutline } from './DocumentOutlineContext';
 import { FormPageCanvas } from '../form/FormPageCanvas';
 import { FormPageViewport } from '../form/FormPageViewport';
 import { buildFormPrintHtml } from '../form/buildFormPrintHtml';
+import { collectLinedNotesVisibleLines } from '../form/collectLinedNotesVisibleLines';
 
 const AUTOSAVE_MS = 900;
 const compactInputCls = 'ba-input ba-input--compact';
@@ -129,6 +130,7 @@ function FormInspectionEditorInner({
     setPdfMessage(null);
     try {
       if (dirtyRef.current) await save();
+      const linedNotesVisibleLines = collectLinedNotesVisibleLines();
       const printHtml = await buildFormPrintHtml({
         form: formDoc.form,
         values: formDoc.values,
@@ -141,6 +143,7 @@ function FormInspectionEditorInner({
             }
           : undefined,
         title,
+        linedNotesVisibleLines,
       });
       const result = await window.blazeaudit.inspections.exportPdf(inspection.id, printHtml);
       if (result.saved) setPdfMessage(`Exported to ${result.filePath}`);

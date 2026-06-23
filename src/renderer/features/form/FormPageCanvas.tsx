@@ -23,6 +23,8 @@ export function FormPageCanvas({
   readOnly,
   onValueChange,
   fixedPageLayout = false,
+  linedNotesVisibleLines,
+  linedNotesRowHeights,
 }: {
   form: FormDefinition;
   page: FormPage;
@@ -34,11 +36,20 @@ export function FormPageCanvas({
   onValueChange?: (elementId: string, value: unknown) => void;
   /** True for PDF export — A4 percent heights. False for screen — sheet hugs content. */
   fixedPageLayout?: boolean;
+  /** Visible ruled-line counts from the document editor — keeps PDF rows aligned with screen. */
+  linedNotesVisibleLines?: Record<string, number>;
+  /** PDF — pixel height per ruled row (measured from fixed A4 layout). */
+  linedNotesRowHeights?: Record<string, number>;
 }) {
   const bodyPercent = pageBodyPercent(page);
   const totalPages = form.pages.length;
   const isLandscape = page.orientation === 'landscape';
   const useMetaHeader = page.header === 'codeNameMeta';
+  const hasLinedNotes = page.sections.some((section) =>
+    section.elements.some(
+      (element) => element.kind === 'recommendations' || element.kind === 'testingNotes',
+    ),
+  );
 
   return (
     <div
@@ -46,6 +57,7 @@ export function FormPageCanvas({
       className={cn(
         'form-page-sheet',
         isLandscape && 'form-page-sheet--landscape',
+        hasLinedNotes && 'form-page-sheet--lined-notes',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -88,11 +100,20 @@ export function FormPageCanvas({
           )
         )}
 
-        <div className={cn('form-page-content', isLandscape && 'form-page-content--landscape')}>
+        <div
+          className={cn(
+            'form-page-content',
+            isLandscape && 'form-page-content--landscape',
+            hasLinedNotes && 'form-page-content--lined-notes',
+          )}
+        >
           {page.sections.map((section) => {
             const heading = formSectionHeading(section);
             const isUlcSection =
               section.elements.length === 1 && section.elements[0]?.kind === 'ulcSection1';
+            const isLinedNotesSection = section.elements.some(
+              (element) => element.kind === 'recommendations' || element.kind === 'testingNotes',
+            );
             return (
             <section
               key={section.id}
@@ -100,6 +121,7 @@ export function FormPageCanvas({
               className={cn(
                 'form-page-section scroll-mt-3',
                 isUlcSection && 'flex flex-col',
+                isLinedNotesSection && 'flex min-h-0 flex-col',
               )}
               style={
                 fixedPageLayout && section.heightPercent
@@ -112,7 +134,12 @@ export function FormPageCanvas({
               {heading && (
                 <h3 className="form-page-section-title">{heading}</h3>
               )}
-              <div className={cn(isUlcSection ? 'flex flex-col' : 'space-y-3')}>
+              <div
+                className={cn(
+                  (isUlcSection || isLinedNotesSection) && 'flex flex-1 flex-col',
+                  !isUlcSection && !isLinedNotesSection && 'space-y-3',
+                )}
+              >
                 {section.elements.map((element) => (
                   <FormElementView
                     key={element.id}
@@ -131,6 +158,8 @@ export function FormPageCanvas({
                         ? (next) => onValueChange(element.id, next)
                         : undefined
                     }
+                    linedNotesVisibleLines={linedNotesVisibleLines}
+                    linedNotesRowHeights={linedNotesRowHeights}
                   />
                 ))}
               </div>

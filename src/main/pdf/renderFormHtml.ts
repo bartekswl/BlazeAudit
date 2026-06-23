@@ -16,6 +16,7 @@ import {
 import { loadFormPrintCss } from './loadFormPrintCss';
 import type { PdfInspectionExport } from '../../shared/pdf';
 import { renderAffirmationHtml } from '../../shared/form/affirmationHtml';
+import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
 import { renderYesNoSummaryHtml } from '../../shared/form/yesNoSummaryHtml';
 
@@ -137,6 +138,10 @@ function renderElementHtml(
         '<p class="form-pdf-value">Deficiencies table — open document and export PDF for full layout.</p>',
         true,
       );
+    case 'recommendations':
+      return framed(renderRecommendationsHtml(value), true);
+    case 'testingNotes':
+      return framed(renderTestingNotesHtml(value), true);
     default:
       return '';
   }

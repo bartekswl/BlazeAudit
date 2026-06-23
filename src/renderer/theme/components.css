@@ -379,7 +379,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   max-width: 100%;
 }
 
-/* Viewport: portrait pages hug content; landscape keeps A4 proportions. */
+/* Viewport: portrait pages hug content; landscape + page 3 keep fixed A4 proportions. */
 .form-page-scale-inner .form-page-sheet {
   width: 100%;
   max-width: none;
@@ -393,11 +393,30 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   aspect-ratio: 297 / 210 !important;
 }
 
+.form-page-scale-inner .form-page-sheet--lined-notes:not(.form-page-sheet--landscape) {
+  aspect-ratio: 210 / 297 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
 .form-page-scale-inner .form-page-body {
   overflow: visible;
   flex: 0 1 auto;
   min-height: 0 !important;
   height: auto !important;
+}
+
+.form-page-scale-inner .form-page-sheet--lined-notes .form-page-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.form-page-scale-inner .form-page-sheet--lined-notes .form-page-content--lined-notes {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
 }
 
 .form-page-scale-inner .form-page-footer {
@@ -458,6 +477,11 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   margin-inline: 0;
   aspect-ratio: auto !important;
   height: auto !important;
+}
+
+/* Page 3 — always full A4 portrait tile (same visual weight as page 1). */
+.form-page-viewport--continuous .form-page-sheet--lined-notes:not(.form-page-sheet--landscape) {
+  aspect-ratio: 210 / 297 !important;
 }
 
 .form-page-viewport--continuous .form-page-sheet--landscape .form-page-body {
@@ -1292,7 +1316,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-sheet .yns-table-wrap,
 .form-page-sheet .aff-panel,
 .form-page-sheet .def-grid,
-.form-page-sheet .def-compliance {
+.form-page-sheet .def-compliance,
+.form-page-sheet .ln-panel {
   border: var(--form-panel-frame);
   box-shadow: none;
   outline: none;
@@ -1485,6 +1510,214 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 [data-theme='dark'] .form-page-sheet .yns-fill-value,
 [data-theme='dark'] .form-page-sheet .yns-fill-input {
   color: var(--ba-text-primary);
+}
+
+/* Lined notes tables — 20.3 Recommendations (green) + Technician's Testing Notes (blue) */
+.ln-panel {
+  --ln-line: 1px solid rgb(148 163 184 / 0.45);
+  --ln-line-height: 1.375rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  margin-top: 0;
+  border-radius: 0.625rem;
+  background: var(--ba-input-bg, #ffffff);
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  color: var(--ba-text-primary);
+}
+
+.ln-head-bar {
+  flex-shrink: 0;
+  min-height: 0.625rem;
+  border-bottom: var(--ln-line);
+}
+
+.ln-panel--green .ln-head-bar {
+  background: #1b6b2f;
+}
+
+.ln-panel--blue .ln-head-bar {
+  background: #1e3a8a;
+}
+
+.ln-body-stack {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ln-rows {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ln-row {
+  flex: 0 0 var(--ln-line-height);
+  height: var(--ln-line-height);
+  border-bottom: var(--ln-line);
+  box-sizing: border-box;
+}
+
+/* PDF export — stretch N ruled rows to fill the panel body (same count as document). */
+.ln-body-stack--fill {
+  height: 100%;
+}
+
+.ln-body-stack--fill .ln-rows {
+  inset: 0;
+  bottom: 0;
+  height: 100%;
+}
+
+.ln-body-stack--fill .ln-row {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 0;
+}
+
+.ln-body-stack--measured .ln-rows {
+  bottom: auto;
+  height: auto;
+}
+
+.ln-body-stack--measured .ln-row {
+  flex: 0 0 var(--ln-row-height);
+  height: var(--ln-row-height);
+}
+
+.ln-body-stack--measured .ln-body {
+  line-height: var(--ln-row-height);
+}
+
+.ln-body {
+  --ln-line-height: 1.375rem;
+  position: relative;
+  z-index: 1;
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 0.25rem;
+  border: none;
+  resize: none;
+  overflow: auto;
+  font: inherit;
+  line-height: var(--ln-line-height);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: inherit;
+  background: transparent;
+}
+
+.ln-body--input {
+  overflow: hidden;
+  background-image: none;
+}
+
+.ln-body--input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgb(37 99 235 / 0.35);
+  background-color: rgb(239 246 255 / 0.35);
+}
+
+/* Page 3 — A4 portrait tile; panels split remaining body 10:18. */
+.form-page-sheet--lined-notes {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-page-sheet--lined-notes .form-page-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.form-page-content--lined-notes {
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 0.75rem;
+}
+
+.form-page-sheet--lined-notes .form-page-section:has(.ln-panel) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.form-page-sheet--lined-notes .form-page-section:has(.ln-panel--green) {
+  flex-grow: 10;
+}
+
+.form-page-sheet--lined-notes .form-page-section:has(.ln-panel--blue) {
+  flex-grow: 18;
+}
+
+.form-page-sheet--lined-notes .form-page-section:has(.ln-panel) .form-page-section-title {
+  flex-shrink: 0;
+}
+
+.form-page-sheet--lined-notes .form-page-section:has(.ln-panel) > div,
+.form-page-sheet--lined-notes .form-page-section:has(.ln-panel) .form-element-frame--flush {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.form-page-sheet--lined-notes .form-page-section:has(.ln-panel) .ln-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.form-page-sheet--lined-notes .form-page-section:has(.ln-panel) .ln-body-stack {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.form-page-sheet--lined-notes .form-page-section:has(.ln-panel) .ln-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.form-page-sheet .ln-panel,
+.form-page-sheet .ln-body {
+  color: #171717;
+}
+
+[data-theme='dark'] .ln-panel {
+  --ln-line: 1px solid rgb(148 163 184 / 0.22);
+  background: rgb(15 23 42 / 0.35);
+}
+
+[data-theme='dark'] .form-page-sheet .ln-body {
+  color: var(--ba-text-primary);
+}
+
+[data-theme='dark'] .ln-body--input:focus {
+  background-color: rgb(30 41 59 / 0.55);
+}
+
+.form-page-section:has(.ln-panel) .form-element-frame--flush {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 /* Affirmation block (ULC annual report) */

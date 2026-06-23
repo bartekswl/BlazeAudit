@@ -66,6 +66,14 @@ export type FormElement =
   | {
       kind: 'deficiencies';
       id: string;
+    }
+  | {
+      kind: 'recommendations';
+      id: string;
+    }
+  | {
+      kind: 'testingNotes';
+      id: string;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';
@@ -156,6 +164,7 @@ export type YesNoSummaryValue = Record<string, YesNoSummaryItemValue>;
 
 export type { UlcSection1Value } from './ulcSection1';
 export type { AffirmationValue } from './affirmation';
+export type { LinedNotesValue } from './linedNotes';
 export type {
   DeficienciesValue,
   DeficiencyControlRow,
