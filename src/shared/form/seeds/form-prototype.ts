@@ -105,6 +105,24 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-4',
+        label: 'Page 4',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-attendance-log',
+            heading: '20.4 Technician Attendance Log',
+            elements: [
+              {
+                kind: 'attendanceLog',
+                id: 'attendance-log-table',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

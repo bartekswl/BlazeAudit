@@ -23,6 +23,7 @@ function outlineEntryForSection(section: FormSection): { label: string; depth: n
   if (only?.kind === 'affirmation') return { label: 'Affirmation', depth: 1 };
   if (only?.kind === 'recommendations') return { label: 'Recommendations', depth: 1 };
   if (only?.kind === 'testingNotes') return { label: 'Testing Notes', depth: 1 };
+  if (only?.kind === 'attendanceLog') return { label: 'Attendance Log', depth: 1 };
 
   const title = section.title?.trim();
   if (title) return { label: title, depth: 0 };

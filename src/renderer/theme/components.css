@@ -399,6 +399,12 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   flex-direction: column !important;
 }
 
+.form-page-scale-inner .form-page-sheet--attendance-log:not(.form-page-sheet--landscape) {
+  aspect-ratio: 210 / 297 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
 .form-page-scale-inner .form-page-body {
   overflow: visible;
   flex: 0 1 auto;
@@ -415,6 +421,19 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-scale-inner .form-page-sheet--lined-notes .form-page-content--lined-notes {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+.form-page-scale-inner .form-page-sheet--attendance-log .form-page-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.form-page-scale-inner .form-page-sheet--attendance-log .form-page-content--attendance-log {
   flex: 1 1 auto !important;
   min-height: 0 !important;
 }
@@ -481,6 +500,10 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 /* Page 3 — always full A4 portrait tile (same visual weight as page 1). */
 .form-page-viewport--continuous .form-page-sheet--lined-notes:not(.form-page-sheet--landscape) {
+  aspect-ratio: 210 / 297 !important;
+}
+
+.form-page-viewport--continuous .form-page-sheet--attendance-log:not(.form-page-sheet--landscape) {
   aspect-ratio: 210 / 297 !important;
 }
 
@@ -1317,7 +1340,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-sheet .aff-panel,
 .form-page-sheet .def-grid,
 .form-page-sheet .def-compliance,
-.form-page-sheet .ln-panel {
+.form-page-sheet .ln-panel,
+.form-page-sheet .att-table-wrap {
   border: var(--form-panel-frame);
   box-shadow: none;
   outline: none;
@@ -1716,6 +1740,174 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-section:has(.ln-panel) .form-element-frame--flush {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Attendance log table — 20.4 Technician Attendance Log */
+.att-table-wrap {
+  --att-line: 1px solid rgb(148 163 184 / 0.45);
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  margin-top: 0;
+  border-radius: 0.625rem;
+  background: var(--ba-input-bg, #ffffff);
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  color: var(--ba-text-primary);
+}
+
+.att-accent-bar {
+  flex-shrink: 0;
+  min-height: 0.5rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%);
+  border-bottom: var(--att-line);
+}
+
+.att-table {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.att-th {
+  padding: 0.1875rem 0.25rem;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: middle;
+  border: none;
+  border-right: var(--att-line);
+  border-bottom: var(--att-line);
+  background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%);
+  color: #334155;
+  line-height: 1.2;
+}
+
+.att-th:last-child {
+  border-right: none;
+}
+
+.att-row:not(:last-child) .att-td {
+  border-bottom: var(--att-line);
+}
+
+.att-td {
+  vertical-align: middle;
+  border: none;
+  border-right: var(--att-line);
+  padding: 0;
+  height: 1%;
+}
+
+.att-td:last-child {
+  border-right: none;
+}
+
+.att-cell-input,
+.att-cell-value {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 100%;
+  padding: 0.125rem 0.25rem;
+  border: none;
+  background: transparent;
+  font: inherit;
+  line-height: 1.25;
+  color: inherit;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.att-td--center .att-cell-input,
+.att-td--center .att-cell-value {
+  text-align: center;
+  justify-content: center;
+}
+
+.att-cell-input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgb(37 99 235 / 0.35);
+  background: rgb(239 246 255 / 0.35);
+}
+
+.form-page-sheet--attendance-log {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-page-sheet--attendance-log .form-page-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.form-page-content--attendance-log {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.form-page-sheet--attendance-log .form-page-section:has(.att-table-wrap) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.form-page-sheet--attendance-log .form-page-section:has(.att-table-wrap) .form-page-section-title {
+  flex-shrink: 0;
+}
+
+.form-page-sheet--attendance-log .form-page-section:has(.att-table-wrap) > div,
+.form-page-sheet--attendance-log .form-page-section:has(.att-table-wrap) .form-element-frame--flush {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.form-page-sheet--attendance-log .form-page-section:has(.att-table-wrap) .att-table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.form-page-sheet .att-table-wrap,
+.form-page-sheet .att-cell-input,
+.form-page-sheet .att-cell-value {
+  color: #171717;
+}
+
+[data-theme='dark'] .att-table-wrap {
+  --att-line: 1px solid rgb(148 163 184 / 0.22);
+  background: rgb(15 23 42 / 0.35);
+}
+
+[data-theme='dark'] .att-th {
+  background: linear-gradient(180deg, rgb(30 41 59 / 0.9) 0%, rgb(15 23 42 / 0.85) 100%);
+  color: var(--ba-text-secondary);
+}
+
+[data-theme='dark'] .att-accent-bar {
+  background: linear-gradient(180deg, rgb(30 41 59 / 0.9) 0%, rgb(15 23 42 / 0.85) 100%);
+}
+
+[data-theme='dark'] .form-page-sheet .att-cell-input,
+[data-theme='dark'] .form-page-sheet .att-cell-value {
+  color: var(--ba-text-primary);
+}
+
+[data-theme='dark'] .att-cell-input:focus {
+  background-color: rgb(30 41 59 / 0.55);
+}
+
+.form-page-section:has(.att-table-wrap) .form-element-frame--flush {
   margin-top: 0;
   padding-top: 0;
 }

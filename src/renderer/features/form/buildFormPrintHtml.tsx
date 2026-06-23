@@ -282,6 +282,120 @@ const PRINT_OVERRIDES = `
     min-height: 0 !important;
   }
 
+  /* Attendance log — 20.4 Technician Attendance Log */
+  .form-print-root .att-table-wrap {
+    --att-line: 0.5px solid #64748b !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    margin-top: 0 !important;
+    border-radius: 0.625rem !important;
+    box-shadow: none !important;
+    font-size: 7pt !important;
+    line-height: 1.25 !important;
+    color: #171717 !important;
+    background: #ffffff !important;
+  }
+  .form-print-root .att-accent-bar {
+    flex-shrink: 0 !important;
+    min-height: 0.35rem !important;
+    background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%) !important;
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .att-table {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+  }
+  .form-print-root .att-th {
+    padding: 0.125rem 0.2rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    border: none !important;
+    border-right: 0.5px solid #64748b !important;
+    border-bottom: 0.5px solid #64748b !important;
+    background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%) !important;
+    color: #334155 !important;
+    line-height: 1.15 !important;
+  }
+  .form-print-root .att-th:last-child {
+    border-right: none !important;
+  }
+  .form-print-root .att-row:not(:last-child) .att-td {
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .att-td {
+    vertical-align: middle !important;
+    border: none !important;
+    border-right: 0.5px solid #64748b !important;
+    padding: 0 !important;
+    height: 1% !important;
+  }
+  .form-print-root .att-td:last-child {
+    border-right: none !important;
+  }
+  .form-print-root .att-cell-input,
+  .form-print-root .att-cell-value {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 100% !important;
+    padding: 0.1rem 0.2rem !important;
+    box-sizing: border-box !important;
+    color: #171717 !important;
+    background: transparent !important;
+  }
+  .form-print-root .att-td--center .att-cell-input,
+  .form-print-root .att-td--center .att-cell-value {
+    text-align: center !important;
+    justify-content: center !important;
+  }
+  .form-print-root .form-page-section:has(.att-table-wrap) .form-element-frame--flush {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  .form-print-root .form-page-content--attendance-log {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+  .form-print-root .form-page-sheet--attendance-log.form-page-sheet--fixed {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--attendance-log.form-page-sheet--fixed .form-page-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  .form-print-root .form-page-sheet--attendance-log.form-page-sheet--fixed .form-page-section:has(.att-table-wrap) {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--attendance-log.form-page-sheet--fixed .form-page-section:has(.att-table-wrap) > div,
+  .form-print-root .form-page-sheet--attendance-log.form-page-sheet--fixed .form-page-section:has(.att-table-wrap) .form-element-frame--flush {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--attendance-log.form-page-sheet--fixed .att-table-wrap {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+
   /* Affirmation block — match panel frame + thin grid lines in PDF. */
   .form-print-root .aff-panel {
     --aff-line: 0.5px solid #64748b !important;
@@ -517,7 +631,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .aff-panel,
   .form-print-root .def-grid,
   .form-print-root .def-compliance,
-  .form-print-root .ln-panel {
+  .form-print-root .ln-panel,
+  .form-print-root .att-table-wrap {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }

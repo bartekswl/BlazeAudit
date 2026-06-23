@@ -13,5 +13,7 @@ export * from './affirmationHtml';
 export * from './deficiencies';
 export * from './linedNotes';
 export * from './linedNotesHtml';
+export * from './attendanceLog';
+export * from './attendanceLogHtml';
 export * from './formPageHeader';
 export * from './formPageSize';

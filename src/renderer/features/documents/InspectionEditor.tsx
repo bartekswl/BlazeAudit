@@ -14,8 +14,6 @@ import { BlockFillIn } from './BlockFillIn';
 import { FormInspectionEditor } from './FormInspectionEditor';
 import { useRegisterDocumentOutline } from './DocumentOutlineContext';
 
-const AUTOSAVE_MS = 900;
-
 const compactInputCls =
   'w-full min-w-0 rounded border border-white/10 bg-neutral-950 px-2 py-1 text-xs text-neutral-100 outline-none focus:border-flame-500';
 
@@ -94,19 +92,9 @@ function BlockInspectionEditorInner({
 
   const [error, setError] = useState<string | null>(null);
 
-  const timerRef = useRef<number | null>(null);
-
-  const dirtyRef = useRef(false);
-
-  const changeGenRef = useRef(0);
+  const [isDirty, setIsDirty] = useState(false);
 
   const inspectionIdRef = useRef(inspection.id);
-
-  const saveRef = useRef<(overrides?: { status?: InspectionStatus }) => Promise<void>>(
-
-    async () => {},
-
-  );
 
 
 
@@ -116,7 +104,7 @@ function BlockInspectionEditorInner({
 
     inspectionIdRef.current = inspection.id;
 
-    if (!isNewInspection && dirtyRef.current) return;
+    if (!isNewInspection && isDirty) return;
 
     setTitle(inspection.title);
 
@@ -196,16 +184,6 @@ function BlockInspectionEditorInner({
 
     async (overrides?: { status?: InspectionStatus }) => {
 
-      if (timerRef.current) {
-
-        window.clearTimeout(timerRef.current);
-
-        timerRef.current = null;
-
-      }
-
-
-
       const payload = buildPayload(overrides);
 
       if (!payload.title) {
@@ -221,8 +199,6 @@ function BlockInspectionEditorInner({
       setSaveState('saving');
 
       setError(null);
-
-      const genAtStart = changeGenRef.current;
 
       try {
 
@@ -242,15 +218,7 @@ function BlockInspectionEditorInner({
 
         });
 
-        if (genAtStart !== changeGenRef.current) {
-
-          rescheduleSave();
-
-          return;
-
-        }
-
-        dirtyRef.current = false;
+        setIsDirty(false);
 
         setSaveState('saved');
 
@@ -274,45 +242,11 @@ function BlockInspectionEditorInner({
 
 
 
-  saveRef.current = save;
+  const markDirty = useCallback(() => {
 
-
-
-  const rescheduleSave = useCallback(() => {
-
-    dirtyRef.current = true;
+    setIsDirty(true);
 
     setSaveState((prev) => (prev === 'saved' || prev === 'error' ? 'idle' : prev));
-
-    if (timerRef.current) window.clearTimeout(timerRef.current);
-
-    timerRef.current = window.setTimeout(() => {
-
-      void saveRef.current();
-
-    }, AUTOSAVE_MS);
-
-  }, []);
-
-
-
-  const scheduleSave = useCallback(() => {
-
-    changeGenRef.current += 1;
-
-    rescheduleSave();
-
-  }, [rescheduleSave]);
-
-
-
-  useEffect(() => {
-
-    return () => {
-
-      if (timerRef.current) window.clearTimeout(timerRef.current);
-
-    };
 
   }, []);
 
@@ -322,9 +256,9 @@ function BlockInspectionEditorInner({
 
     setDocument((prev) => ({ ...prev, blocks: setBlockValue(prev.blocks, path, value) }));
 
-    scheduleSave();
+    markDirty();
 
-  }, [scheduleSave]);
+  }, [markDirty]);
 
 
 
@@ -332,9 +266,9 @@ function BlockInspectionEditorInner({
 
     setDocument((prev) => ({ ...prev, blocks: mutator(prev.blocks) }));
 
-    scheduleSave();
+    markDirty();
 
-  }, [scheduleSave]);
+  }, [markDirty]);
 
 
 
@@ -363,12 +297,6 @@ function BlockInspectionEditorInner({
     setError(null);
 
     try {
-
-      if (dirtyRef.current || timerRef.current) {
-
-        await save();
-
-      }
 
       const result = await window.blazeaudit.inspections.exportPdf(inspection.id);
 
@@ -432,11 +360,11 @@ function BlockInspectionEditorInner({
 
                   ? 'Save error'
 
-                  : dirtyRef.current
+                  : isDirty
 
                     ? 'Unsaved changes'
 
-                    : 'Autosave on'}
+                    : 'All changes saved'}
 
           </span>
 
@@ -536,7 +464,7 @@ function BlockInspectionEditorInner({
 
                 setTitle(e.target.value);
 
-                scheduleSave();
+                markDirty();
 
               }}
 
@@ -588,7 +516,7 @@ function BlockInspectionEditorInner({
 
                 setInspector(e.target.value);
 
-                scheduleSave();
+                markDirty();
 
               }}
 
@@ -610,7 +538,7 @@ function BlockInspectionEditorInner({
 
                 setInspectedAt(e.target.value);
 
-                scheduleSave();
+                markDirty();
 
               }}
 
@@ -630,7 +558,7 @@ function BlockInspectionEditorInner({
 
                 setCadence(e.target.value as CadencePreset);
 
-                scheduleSave();
+                markDirty();
 
               }}
 

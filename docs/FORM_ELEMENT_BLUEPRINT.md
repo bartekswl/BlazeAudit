@@ -38,6 +38,7 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `deficiencies` — Split inspection/repair deficiencies table (`.def-*`)
 - `recommendations` — 20.3 lined table with green header bar (`.ln-panel--green`)
 - `testingNotes` — Technician's testing notes with blue header bar (`.ln-panel--blue`)
+- `attendanceLog` — 20.4 Technician Attendance Log grid (`.att-*`)
 
 ---
 
@@ -47,7 +48,7 @@ All composite elements on a letter page share the same “form panel” language
 
 | Token | Value | Notes |
 |-------|-------|-------|
-| Inner cell line | `1px solid rgb(148 163 184 / 0.45)` | CSS var: `--ulc-line` / `--yns-line` / `--aff-line` / `--def-line` / `--ln-line` |
+| Inner cell line | `1px solid rgb(148 163 184 / 0.45)` | CSS var: `--ulc-line` / `--yns-line` / `--aff-line` / `--def-line` / `--ln-line` / `--att-line` |
 | **Outer panel frame** | **`1.5px solid #000000`** | CSS var: `--form-panel-frame` on `.form-page-sheet` — applies to **all** composite panels |
 | Panel radius | `0.625rem` | Rounded outer frame |
 | Panel shadow | **none** on `.form-page-sheet` panels | Avoid gray/blue bands between stacked panels |
@@ -68,7 +69,7 @@ Every built-in form panel on `.form-page-sheet` shares one thick **black** outer
 | Surface | Selector | Outer border |
 |---------|----------|--------------|
 | Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `1.5px solid #000000` |
-| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel` | via `border: var(--form-panel-frame)` |
+| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap` | via `border: var(--form-panel-frame)` |
 | PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `2pt solid #000000 !important` on the same selectors |
 
 Do **not** use the thin `--*-line` variable for the outer panel perimeter — that is for inner cells only.
@@ -129,6 +130,21 @@ Page 3 portrait — **20.3 Recommendations** (`recommendations`) and **Technicia
 | Page header | **`codeNameMeta`** — same Code–Name + building table as page 2 |
 | Value shape | `string` (legacy `string[]` rows joined with `\n` on read) |
 
+### Attendance log table (`.att-*`) — defaults
+
+Page 4 portrait — **20.4 Technician Attendance Log** (`attendanceLog`).
+
+| Area | Rule |
+|------|------|
+| Outer frame | **`--form-panel-frame`** on `.att-table-wrap` |
+| Panel frame | **`border-radius: 0.625rem`** + `overflow: hidden`; **`display: flex`** column, **`flex: 1`** on page 4 |
+| Accent bar | Slate gradient header strip (same as `.yns-th--summary`) — **not** blueprint red/black |
+| Table | **7 columns**, **28 fixed rows**; `table-layout: fixed`; column widths in `ATTENDANCE_LOG_COLUMNS` |
+| Row height | `tbody tr` use `height: 1%` so rows share remaining body evenly |
+| Page tile | **Always A4 portrait** (`aspect-ratio: 210/297`) in template + document viewport |
+| Section title | **20.4 Technician Attendance Log** in `.form-page-section-title` above the table |
+| Value shape | `{ rows: AttendanceLogRow[] }` — always normalized to 28 rows |
+
 ### ULC 20.1 panel (`.ulc-s1-*`) — defaults
 
 | Area | Rule |
@@ -171,7 +187,9 @@ Template viewer and document editor both respect `data-theme` on `<html>`. PDF e
 .form-page-sheet .yns-table-wrap,
 .form-page-sheet .aff-panel,
 .form-page-sheet .def-grid,
-.form-page-sheet .def-compliance {
+.form-page-sheet .def-compliance,
+.form-page-sheet .ln-panel,
+.form-page-sheet .att-table-wrap {
   box-shadow: none;
   outline: none;
   border: var(--form-panel-frame);
@@ -184,7 +202,7 @@ When changing page spacing, update **both** `components.css` and `PRINT_OVERRIDE
 
 ### Viewport scaling (template + document editor)
 
-The form page uses **dynamic reference width**: at scale `1` the sheet fills the column. When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom`. **Page 1** portrait sheets hug content height; **page 3** (`form-page-sheet--lined-notes`) and **page 2** landscape always keep fixed **A4** aspect ratio. PDF export is unaffected.
+The form page uses **dynamic reference width**: at scale `1` the sheet fills the column. When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom`. **Page 1** portrait sheets hug content height; **page 3** (`form-page-sheet--lined-notes`), **page 4** (`form-page-sheet--attendance-log`), and **page 2** landscape always keep fixed **A4** aspect ratio. PDF export is unaffected.
 
 ---
 
@@ -295,6 +313,7 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
+| 2026-06-21 | Attendance log element (`.att-*`): 7×28 grid, slate theme, A4-locked page 4. |
 | 2026-06-21 | Page 3 A4-locked tile (`form-page-sheet--lined-notes`); panels flex-fill body 10:18. |
 | 2026-06-21 | Deficiencies element (`.def-*`): rounded grid panel, dual repair header rows, column widths, compliance footer alignment. |
 | 2026-06-21 | Affirmation element (`.aff-*`): centered gray body text, inspector dropdowns, page spacing tokens, technician row heights. |

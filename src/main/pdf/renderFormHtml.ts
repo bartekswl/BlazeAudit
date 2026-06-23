@@ -16,6 +16,7 @@ import {
 import { loadFormPrintCss } from './loadFormPrintCss';
 import type { PdfInspectionExport } from '../../shared/pdf';
 import { renderAffirmationHtml } from '../../shared/form/affirmationHtml';
+import { renderAttendanceLogHtml } from '../../shared/form/attendanceLogHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
 import { renderYesNoSummaryHtml } from '../../shared/form/yesNoSummaryHtml';
@@ -142,6 +143,8 @@ function renderElementHtml(
       return framed(renderRecommendationsHtml(value), true);
     case 'testingNotes':
       return framed(renderTestingNotesHtml(value), true);
+    case 'attendanceLog':
+      return framed(renderAttendanceLogHtml(value), true);
     default:
       return '';
   }

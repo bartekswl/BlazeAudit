@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FileDown } from 'lucide-react';
 import { CADENCE_PRESETS, type CadencePreset } from '../../../shared/cadence';
 import type { DocumentContext } from '../../../shared/document';
@@ -17,7 +17,7 @@ import { FormPageViewport } from '../form/FormPageViewport';
 import { buildFormPrintHtml } from '../form/buildFormPrintHtml';
 import { collectLinedNotesVisibleLines } from '../form/collectLinedNotesVisibleLines';
 
-const AUTOSAVE_MS = 900;
+
 const compactInputCls = 'ba-input ba-input--compact';
 const compactFieldCls = `${compactInputCls} !py-1`;
 const toolbarBtnCls =
@@ -60,8 +60,7 @@ function FormInspectionEditorInner({
   const [exportingPdf, setExportingPdf] = useState(false);
   const [pdfMessage, setPdfMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const timerRef = useRef<number | null>(null);
-  const dirtyRef = useRef(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     void window.blazeaudit.inspections.resolveContext(inspection.id).then(setContext);
@@ -97,39 +96,36 @@ function FormInspectionEditorInner({
       });
       onSaved(saved);
       setSaveState('saved');
-      dirtyRef.current = false;
+      setIsDirty(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Save failed.');
       setSaveState('error');
     }
   }, [inspection.id, title, status, formDoc, inspectedAt, cadence, onSaved]);
 
-  const scheduleSave = useCallback(() => {
-    dirtyRef.current = true;
-    setSaveState('idle');
-    if (timerRef.current) window.clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => void save(), AUTOSAVE_MS);
-  }, [save]);
+  const markDirty = useCallback(() => {
+    setIsDirty(true);
+    setSaveState((prev) => (prev === 'saved' || prev === 'error' ? 'idle' : prev));
+  }, []);
 
   const onValueChange = (elementId: string, value: unknown) => {
     setFormDoc((prev) => ({
       ...prev,
       values: setElementValue(prev.values, elementId, value),
     }));
-    scheduleSave();
+    markDirty();
   };
 
   const onInspectionDateChange = (nextDate: string) => {
     setInspectedAt(nextDate);
     setFormDoc((prev) => syncFormDocumentInspectionDate(prev, nextDate || null));
-    scheduleSave();
+    markDirty();
   };
 
   const exportPdf = async () => {
     setExportingPdf(true);
     setPdfMessage(null);
     try {
-      if (dirtyRef.current) await save();
       const linedNotesVisibleLines = collectLinedNotesVisibleLines();
       const printHtml = await buildFormPrintHtml({
         form: formDoc.form,
@@ -155,7 +151,7 @@ function FormInspectionEditorInner({
   };
 
   const saveLabel =
-    saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved' : 'Save';
+    saveState === 'saving' ? 'Saving…' : saveState === 'saved' && !isDirty ? 'Saved' : 'Save';
 
   if (pageCount === 0) {
     return <p className="text-sm text-neutral-500">This form has no pages.</p>;
@@ -190,7 +186,7 @@ function FormInspectionEditorInner({
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value as InspectionStatus);
-                scheduleSave();
+                markDirty();
               }}
             >
               <option value="draft">Draft</option>
@@ -211,7 +207,7 @@ function FormInspectionEditorInner({
             value={cadence}
             onChange={(e) => {
               setCadence(e.target.value as CadencePreset);
-              scheduleSave();
+              markDirty();
             }}
           >
             {CADENCE_PRESETS.map((p) => (
