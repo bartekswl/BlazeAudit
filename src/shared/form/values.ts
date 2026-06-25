@@ -13,6 +13,7 @@ import { emptyAttendanceLogValue } from './attendanceLog';
 import { emptyDocumentationValue } from './documentation';
 import { emptyControlUnitTestValue } from './controlUnitTest';
 import { emptyControlUnitRecordValue } from './controlUnitRecord';
+import { emptyVoiceCommunicationTestValue } from './voiceCommunicationTest';
 import { emptyLinedNotesValue } from './linedNotes';
 import { emptyUlcSection1Value, normalizeUlcSection1Value } from './ulcSection1';
 import { emptyYesNoSummaryValue } from './yesNoSummary';
@@ -67,6 +68,8 @@ export function initialValueForElement(element: FormElement): unknown {
       return emptyControlUnitTestValue();
     case 'controlUnitRecord':
       return emptyControlUnitRecordValue();
+    case 'voiceCommunicationTest':
+      return emptyVoiceCommunicationTestValue();
     default: {
       const _exhaustive: never = element;
       return _exhaustive;

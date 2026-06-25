@@ -177,6 +177,24 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-8',
+        label: 'Page 8',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-voice-communication-test',
+            heading: '22.3 Voice Communication Test',
+            elements: [
+              {
+                kind: 'voiceCommunicationTest',
+                id: 'voice-communication-test',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

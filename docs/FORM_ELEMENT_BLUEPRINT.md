@@ -42,6 +42,7 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `documentation` — 21 Documentation Yes/No/N/A checklist (`.doc-*`)
 - `controlUnitTest` — 22 Control Unit or Transponder Test Record (`.cut-*`)
 - `controlUnitRecord` — 22.2 Control Unit or Transponder Record (`.cur-*`)
+- `voiceCommunicationTest` — 22.3 Voice Communication Test (`.vct-*`)
 
 ---
 
@@ -72,7 +73,7 @@ Every built-in form panel on `.form-page-sheet` shares one thick **black** outer
 | Surface | Selector | Outer border |
 |---------|----------|--------------|
 | Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `1.5px solid #000000` |
-| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel` | via `border: var(--form-panel-frame)` |
+| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel` | via `border: var(--form-panel-frame)` |
 | PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `2pt solid #000000 !important` on the same selectors |
 
 Do **not** use the thin `--*-line` variable for the outer panel perimeter — that is for inner cells only.
@@ -200,15 +201,32 @@ Page 7 portrait — **22.2 Control Unit or Transponder Record** (`controlUnitRec
 | Table font | Checklist table — see [Checklist table typography](#checklist-table-typography) |
 | Value shape | `{ fieldLocation, identification, checklist }` — checklist entries may include `time` on rows J and Q |
 
+### Voice communication test (`.vct-*`) — defaults
+
+Page 8 portrait — **22.3 Voice Communication Test** (`voiceCommunicationTest`).
+
+| Area | Rule |
+|------|------|
+| Outer frame | **`--form-panel-frame`** on `.vct-panel` |
+| Title | Centered bold — `22.3 Voice Communication Test` |
+| N/A bar | Grey strip — “There are no Voice Communication capabilities…” + section N/A checkbox |
+| Reference bar | Dark green — `(Reference Subsection 8.5)` |
+| Info rows | Olive-green strip — Location + Identification fill-ins (`VisibleWidthInput`) |
+| Table | Rows A–Q with Yes / No / N/A; light-green row tint |
+| Section N/A | When checked, sets **every checklist row to N/A** (no grey-out / disable); unchecking clears all row choices; editing any row unchecks section N/A |
+| Page tile | **Always A4 portrait** (`aspect-ratio: 210/297`) |
+| Table font | Checklist table — see [Checklist table typography](#checklist-table-typography) |
+| Value shape | `{ sectionNotApplicable, fieldLocation, identification, checklist }` |
+
 ### Checklist table typography
 
-Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`) share one typography rule so template, document, and PDF stay aligned.
+Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct-table`) share one typography rule so template, document, and PDF stay aligned.
 
 | Surface | Panel chrome (legend, bars, info rows) | Checklist table |
 |---------|------------------------------------------|-----------------|
 | **Screen** | Panel base `font-size` (may differ by page density) | `font-size: calc(1em + 1pt)` on the `<table>` only |
-| **PDF** | `7pt` (`.doc-panel`, `.cut-panel`) or `6.5pt` (`.cur-panel` compact) | Panel print size **+ 1pt** on the table (`8pt`, `8pt`, `7.5pt`) |
-| **Check marks** | — | Fixed size via `--form-check-mark-size` / `--form-check-input-size` on `.form-page-sheet` — same for `.doc-check`, `.cut-check`, `.cur-check`, `.yns-check` and their `*-check-input` radios (do **not** use `1em` / table-relative sizing) |
+| **PDF** | `7pt` (`.doc-panel`, `.cut-panel`, `.vct-panel`) or `6.5pt` (`.cur-panel` compact) | Panel print size **+ 1pt** on the table (`8pt`, `8pt`, `8pt`, `7.5pt`) |
+| **Check marks** | — | Fixed size via `--form-check-mark-size` / `--form-check-input-size` on `.form-page-sheet` — same for `.doc-check`, `.cut-check`, `.cur-check`, `.vct-check`, `.yns-check` and their `*-check-input` radios (do **not** use `1em` / table-relative sizing) |
 
 **Layout rule:** when changing table font size, do **not** change column widths, cell padding, or row min-heights — only the table `font-size` (and matching print override in `buildFormPrintHtml.tsx`).
 
@@ -216,7 +234,8 @@ Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`) share
 /* Example — apply on the table element, not the whole panel */
 .doc-table,
 .cut-table,
-.cur-table {
+.cur-table,
+.vct-table {
   font-size: calc(1em + 1pt);
 }
 
@@ -224,12 +243,14 @@ Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`) share
 .doc-check,
 .cut-check,
 .cur-check,
+.vct-check,
 .yns-check {
   font-size: var(--form-check-mark-size);
 }
 .doc-check-input,
 .cut-check-input,
 .cur-check-input,
+.vct-check-input,
 .yns-check-input {
   width: var(--form-check-input-size);
   height: var(--form-check-input-size);
@@ -246,7 +267,7 @@ Single-line fill-in fields inside a fixed-width cell must **not accept character
 | `overflow: hidden` | Clip any overflow visually |
 | Fixed `width` / `max-width` | When the blueprint box is a fixed size (e.g. `.cut-version-input`, `.cur-time-input`) |
 
-Reference implementations: `.cut-info-input`, `.cut-version-input`, `.cur-info-input`, `.cur-time-input`.
+Reference implementations: `.cut-info-input`, `.cut-version-input`, `.cur-info-input`, `.cur-time-input`, `.vct-info-input`.
 
 ### ULC 20.1 panel (`.ulc-s1-*`) — defaults
 
@@ -295,7 +316,8 @@ Template viewer and document editor both respect `data-theme` on `<html>`. PDF e
 .form-page-sheet .att-table-wrap,
 .form-page-sheet .doc-panel,
 .form-page-sheet .cut-panel,
-.form-page-sheet .cur-panel {
+.form-page-sheet .cur-panel,
+.form-page-sheet .vct-panel {
   box-shadow: none;
   outline: none;
   border: var(--form-panel-frame);
@@ -308,7 +330,7 @@ When changing page spacing, update **both** `components.css` and `PRINT_OVERRIDE
 
 ### Viewport scaling (template + document editor)
 
-The form page uses **dynamic reference width**: at scale `1` the sheet fills the column. When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom`. **Page 1** portrait sheets hug content height; **pages 3–7** (`form-page-sheet--lined-notes`, `--attendance-log`, `--documentation`, `--control-unit-test`, `--control-unit-record`) and **page 2** landscape always keep fixed **A4** aspect ratio. PDF export is unaffected.
+The form page uses **dynamic reference width**: at scale `1` the sheet fills the column. When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom`. **Page 1** portrait sheets hug content height; **pages 3–8** (`form-page-sheet--lined-notes`, `--attendance-log`, `--documentation`, `--control-unit-test`, `--control-unit-record`, `--voice-communication-test`) and **page 2** landscape always keep fixed **A4** aspect ratio. PDF export is unaffected.
 
 ---
 

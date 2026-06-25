@@ -21,5 +21,7 @@ export * from './controlUnitTest';
 export * from './controlUnitTestHtml';
 export * from './controlUnitRecord';
 export * from './controlUnitRecordHtml';
+export * from './voiceCommunicationTest';
+export * from './voiceCommunicationTestHtml';
 export * from './formPageHeader';
 export * from './formPageSize';

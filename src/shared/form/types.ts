@@ -90,6 +90,10 @@ export type FormElement =
   | {
       kind: 'controlUnitRecord';
       id: string;
+    }
+  | {
+      kind: 'voiceCommunicationTest';
+      id: string;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';
@@ -185,6 +189,7 @@ export type { AttendanceLogValue } from './attendanceLog';
 export type { DocumentationValue } from './documentation';
 export type { ControlUnitTestValue } from './controlUnitTest';
 export type { ControlUnitRecordValue } from './controlUnitRecord';
+export type { VoiceCommunicationTestValue } from './voiceCommunicationTest';
 export type {
   DeficienciesValue,
   DeficiencyControlRow,

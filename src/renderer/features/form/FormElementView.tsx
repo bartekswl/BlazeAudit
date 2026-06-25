@@ -10,6 +10,7 @@ import { FormAffirmationView } from './FormAffirmationView';
 import { FormAttendanceLogView } from './FormAttendanceLogView';
 import { FormControlUnitTestView } from './FormControlUnitTestView';
 import { FormControlUnitRecordView } from './FormControlUnitRecordView';
+import { FormVoiceCommunicationTestView } from './FormVoiceCommunicationTestView';
 import { FormDocumentationView } from './FormDocumentationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
@@ -53,7 +54,8 @@ export function FormElementView({
     element.kind === 'attendanceLog' ||
     element.kind === 'documentation' ||
     element.kind === 'controlUnitTest' ||
-    element.kind === 'controlUnitRecord';
+    element.kind === 'controlUnitRecord' ||
+    element.kind === 'voiceCommunicationTest';
 
   return (
     <div
@@ -375,6 +377,14 @@ function FormElementBody({
     case 'controlUnitRecord':
       return (
         <FormControlUnitRecordView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'voiceCommunicationTest':
+      return (
+        <FormVoiceCommunicationTestView
           value={value}
           readOnly={readOnly}
           onChange={onChange}

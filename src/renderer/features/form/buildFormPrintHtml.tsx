@@ -628,6 +628,7 @@ const PRINT_OVERRIDES = `
     overflow: hidden !important;
     margin-top: 0 !important;
     border-radius: 0.625rem !important;
+    border: 2pt solid #000000 !important;
     box-shadow: none !important;
     font-size: 6.5pt !important;
     line-height: 1.15 !important;
@@ -711,6 +712,94 @@ const PRINT_OVERRIDES = `
     box-shadow: none !important;
   }
   .form-print-root .form-page-content--control-unit-record {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Voice communication test — 22.3 */
+  .form-print-root .vct-panel {
+    --vct-line: 0.5px solid #64748b !important;
+    flex: 0 0 auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin-top: 0 !important;
+    border-radius: 0.625rem !important;
+    box-shadow: none !important;
+    font-size: 7pt !important;
+    line-height: 1.2 !important;
+    color: #171717 !important;
+    background: #ffffff !important;
+  }
+  .form-print-root .vct-na-bar {
+    background: #e2e8f0 !important;
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .vct-ref-bar {
+    background: linear-gradient(180deg, #1b6b2f 0%, #14532d 100%) !important;
+    color: #ffffff !important;
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .vct-info-row {
+    background: linear-gradient(180deg, #d9e4b8 0%, #c4d4a3 100%) !important;
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .vct-info-input,
+  .form-print-root .vct-info-value {
+    background: #ffffff !important;
+  }
+  .form-print-root .vct-th,
+  .form-print-root .vct-td {
+    border-right: 0.5px solid #64748b !important;
+    padding: 0.5pt 1.5pt !important;
+  }
+  .form-print-root .vct-row:not(:last-child) .vct-td,
+  .form-print-root .vct-th {
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .vct-th--yes {
+    background: #1b6b2f !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .vct-th--no {
+    background: #9b1c1c !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .vct-th--na {
+    background: #334155 !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .vct-td {
+    background: #edf7ef !important;
+  }
+  .form-print-root .vct-td--yes {
+    background: #edf7ef !important;
+  }
+  .form-print-root .vct-td--no {
+    background: #fdeeee !important;
+  }
+  .form-print-root .vct-td--na {
+    background: #f1f5f9 !important;
+  }
+  .form-print-root .vct-table-wrap {
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+  }
+  .form-print-root .vct-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    font-size: 8pt !important;
+  }
+  .form-print-root .form-page-section:has(.vct-panel) .form-element-frame--flush {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  .form-print-root .form-page-content--voice-communication-test {
     flex: 1 1 auto !important;
     min-height: 0 !important;
   }
@@ -831,6 +920,14 @@ const PRINT_OVERRIDES = `
     display: flex !important;
     flex-direction: column !important;
   }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.cur-panel) {
+    flex: 0 1 auto !important;
+    flex-shrink: 0 !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.yns-table-wrap) > div {
     flex: 1 1 auto !important;
     min-height: 0 !important;
@@ -858,6 +955,13 @@ const PRINT_OVERRIDES = `
     display: flex !important;
     flex-direction: column !important;
   }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.cur-panel) > div {
+    flex: 0 1 auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.ulc-s1-panel) .form-element-frame--flush {
     flex: 0 0 auto !important;
     min-height: auto !important;
@@ -870,6 +974,10 @@ const PRINT_OVERRIDES = `
     min-height: auto !important;
   }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.cut-panel) .form-element-frame--flush {
+    flex: 0 1 auto !important;
+    min-height: auto !important;
+  }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.cur-panel) .form-element-frame--flush {
     flex: 0 1 auto !important;
     min-height: auto !important;
   }
@@ -991,7 +1099,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .ln-panel,
   .form-print-root .att-table-wrap,
   .form-print-root .doc-panel,
-  .form-print-root .cut-panel {
+  .form-print-root .cut-panel,
+  .form-print-root .cur-panel,
+  .form-print-root .vct-panel {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }
@@ -999,7 +1109,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .ulc-s1-panel,
   .form-print-root .att-table-wrap,
   .form-print-root .doc-panel,
-  .form-print-root .cut-panel {
+  .form-print-root .cut-panel,
+  .form-print-root .cur-panel,
+  .form-print-root .vct-panel {
     overflow: hidden !important;
   }
 

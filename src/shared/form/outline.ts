@@ -27,6 +27,7 @@ function outlineEntryForSection(section: FormSection): { label: string; depth: n
   if (only?.kind === 'documentation') return { label: 'Documentation', depth: 1 };
   if (only?.kind === 'controlUnitTest') return { label: 'Control Unit Test', depth: 1 };
   if (only?.kind === 'controlUnitRecord') return { label: 'Control Unit Record', depth: 1 };
+  if (only?.kind === 'voiceCommunicationTest') return { label: 'Voice Communication Test', depth: 1 };
 
   const title = section.title?.trim();
   if (title) return { label: title, depth: 0 };

@@ -19,6 +19,7 @@ import { renderAffirmationHtml } from '../../shared/form/affirmationHtml';
 import { renderAttendanceLogHtml } from '../../shared/form/attendanceLogHtml';
 import { renderControlUnitTestHtml } from '../../shared/form/controlUnitTestHtml';
 import { renderControlUnitRecordHtml } from '../../shared/form/controlUnitRecordHtml';
+import { renderVoiceCommunicationTestHtml } from '../../shared/form/voiceCommunicationTestHtml';
 import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
@@ -154,6 +155,8 @@ function renderElementHtml(
       return framed(renderControlUnitTestHtml(value), true);
     case 'controlUnitRecord':
       return framed(renderControlUnitRecordHtml(value), true);
+    case 'voiceCommunicationTest':
+      return framed(renderVoiceCommunicationTestHtml(value), true);
     default:
       return '';
   }

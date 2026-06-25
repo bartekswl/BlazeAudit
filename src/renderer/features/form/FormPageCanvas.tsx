@@ -62,6 +62,9 @@ export function FormPageCanvas({
   const hasControlUnitRecord = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'controlUnitRecord'),
   );
+  const hasVoiceCommunicationTest = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'voiceCommunicationTest'),
+  );
 
   return (
     <div
@@ -74,6 +77,7 @@ export function FormPageCanvas({
         hasDocumentation && 'form-page-sheet--documentation',
         hasControlUnitTest && 'form-page-sheet--control-unit-test',
         hasControlUnitRecord && 'form-page-sheet--control-unit-record',
+        hasVoiceCommunicationTest && 'form-page-sheet--voice-communication-test',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -125,6 +129,7 @@ export function FormPageCanvas({
             hasDocumentation && 'form-page-content--documentation',
             hasControlUnitTest && 'form-page-content--control-unit-test',
             hasControlUnitRecord && 'form-page-content--control-unit-record',
+            hasVoiceCommunicationTest && 'form-page-content--voice-communication-test',
           )}
         >
           {page.sections.map((section) => {
@@ -146,6 +151,9 @@ export function FormPageCanvas({
             const isControlUnitRecordSection = section.elements.some(
               (element) => element.kind === 'controlUnitRecord',
             );
+            const isVoiceCommunicationTestSection = section.elements.some(
+              (element) => element.kind === 'voiceCommunicationTest',
+            );
             return (
             <section
               key={section.id}
@@ -158,6 +166,7 @@ export function FormPageCanvas({
                 isDocumentationSection && 'flex min-h-0 flex-col',
                 isControlUnitTestSection && 'flex min-h-0 flex-col',
                 isControlUnitRecordSection && 'flex min-h-0 flex-col',
+                isVoiceCommunicationTestSection && 'flex min-h-0 flex-col',
               )}
               style={
                 fixedPageLayout && section.heightPercent
@@ -172,7 +181,7 @@ export function FormPageCanvas({
               )}
               <div
                 className={cn(
-                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection) &&
+                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection) &&
                     'flex flex-1 flex-col',
                   !isUlcSection &&
                     !isLinedNotesSection &&
@@ -180,6 +189,7 @@ export function FormPageCanvas({
                     !isDocumentationSection &&
                     !isControlUnitTestSection &&
                     !isControlUnitRecordSection &&
+                    !isVoiceCommunicationTestSection &&
                     'space-y-3',
                 )}
               >
