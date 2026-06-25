@@ -1,11 +1,11 @@
 export const ATTENDANCE_LOG_ROW_COUNT = 28;
 
 export const ATTENDANCE_LOG_COLUMNS = [
-  { key: 'date', title: 'Date (MM/DD/YY)', widthPercent: 10.8, align: 'center' as const },
+  { key: 'date', title: 'Date (MM/DD/YY)', widthPercent: 11.25, align: 'center' as const },
   { key: 'personsAttending', title: 'Person(s) Attending', widthPercent: 20, align: 'left' as const },
   { key: 'timeIn', title: 'Time In', widthPercent: 8, align: 'center' as const },
   { key: 'timeOut', title: 'Time Out', widthPercent: 8, align: 'center' as const },
-  { key: 'notes', title: 'Notes (For the Day)', widthPercent: 25.2, align: 'left' as const },
+  { key: 'notes', title: 'Notes (For the Day)', widthPercent: 24.75, align: 'left' as const },
   { key: 'technicianName', title: 'Primary Technician Printed Name', widthPercent: 16, align: 'center' as const },
   { key: 'technicianCert', title: 'Primary Technician Certification No.', widthPercent: 12, align: 'center' as const },
 ] as const;

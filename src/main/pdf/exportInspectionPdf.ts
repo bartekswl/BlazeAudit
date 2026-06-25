@@ -52,7 +52,7 @@ export async function exportInspectionPdf(
     const pdf = await win.webContents.printToPDF({
       printBackground: true,
       preferCSSPageSize: true,
-      pageSize: 'Letter',
+      pageSize: 'A4',
       margins: { marginType: 'none' },
     });
 

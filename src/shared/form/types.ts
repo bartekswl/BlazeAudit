@@ -78,6 +78,10 @@ export type FormElement =
   | {
       kind: 'attendanceLog';
       id: string;
+    }
+  | {
+      kind: 'documentation';
+      id: string;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';
@@ -170,6 +174,7 @@ export type { UlcSection1Value } from './ulcSection1';
 export type { AffirmationValue } from './affirmation';
 export type { LinedNotesValue } from './linedNotes';
 export type { AttendanceLogValue } from './attendanceLog';
+export type { DocumentationValue } from './documentation';
 export type {
   DeficienciesValue,
   DeficiencyControlRow,

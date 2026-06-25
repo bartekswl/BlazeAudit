@@ -21,7 +21,10 @@ const PRINT_OVERRIDES = `
     print-color-adjust: exact;
   }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .form-print-root { display: block; }
+  .form-print-root { display: block; box-sizing: border-box; }
+  .form-print-root *,
+  .form-print-root *::before,
+  .form-print-root *::after { box-sizing: border-box; }
   .form-print-root .form-page-sheet {
     width: 210mm;
     height: 297mm;
@@ -396,6 +399,124 @@ const PRINT_OVERRIDES = `
     min-height: 0 !important;
   }
 
+  /* Documentation checklist — 21 Documentation */
+  .form-print-root .doc-panel {
+    --doc-line: 0.5px solid #64748b !important;
+    flex: 0 0 auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin-top: 0 !important;
+    border-radius: 0.625rem !important;
+    box-shadow: none !important;
+    font-size: 7pt !important;
+    line-height: 1.2 !important;
+    color: #171717 !important;
+    background: #ffffff !important;
+  }
+  .form-print-root .doc-note-bar {
+    background: linear-gradient(180deg, #a16207 0%, #92400e 100%) !important;
+    color: #ffffff !important;
+    border-top: 0.5px solid #64748b !important;
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .doc-th,
+  .form-print-root .doc-td {
+    border-right: 0.5px solid #64748b !important;
+    padding: 0.5pt 1.5pt !important;
+  }
+  .form-print-root .doc-row--notes .doc-td {
+    height: auto !important;
+    vertical-align: top !important;
+  }
+  .form-print-root .doc-row:not(:last-child) .doc-td,
+  .form-print-root .doc-th {
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .doc-th--yes {
+    background: #1b6b2f !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .doc-th--no {
+    background: #9b1c1c !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .doc-th--na {
+    background: #334155 !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .doc-td {
+    background: #fff7ed !important;
+  }
+  .form-print-root .doc-td--yes {
+    background: #edf7ef !important;
+  }
+  .form-print-root .doc-td--no {
+    background: #fdeeee !important;
+  }
+  .form-print-root .doc-td--na-disabled {
+    background: #e2e8f0 !important;
+  }
+  .form-print-root .doc-table-wrap {
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+  }
+  .form-print-root .doc-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+  .form-print-root .doc-ruled-stack {
+    --doc-ruled-line-height: 1.15em !important;
+    flex-shrink: 0 !important;
+    height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 3)) !important;
+    min-height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 3)) !important;
+    max-height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 3)) !important;
+  }
+  .form-print-root .doc-ruled-body {
+    height: 100% !important;
+    line-height: var(--doc-ruled-line-height, 1.15em) !important;
+  }
+  .form-print-root .doc-ruled-line {
+    flex: 0 0 var(--doc-ruled-line-height, 1.15em) !important;
+    height: var(--doc-ruled-line-height, 1.15em) !important;
+    border-bottom: 0.5px solid #64748b !important;
+    box-sizing: border-box !important;
+  }
+  .form-print-root .doc-ruled-stack--annex {
+    --doc-ruled-line-count: 11 !important;
+    --doc-ruled-line-height: calc(1.15em * 1.3) !important;
+  }
+  .form-print-root .doc-ruled-stack--annex .doc-ruled-line:last-child {
+    border-bottom: none !important;
+  }
+  .form-print-root .doc-ruled-stack--location {
+    --doc-ruled-line-count: 3 !important;
+  }
+  .form-print-root .doc-annex-header {
+    background: #1b6b2f !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .doc-annex {
+    flex: 0 0 auto !important;
+    border-top: none !important;
+  }
+  .form-print-root .doc-annex-body {
+    flex: 0 0 auto !important;
+  }
+  .form-print-root .form-page-section:has(.doc-panel) .form-element-frame--flush {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  .form-print-root .form-page-content--documentation {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+
   /* Affirmation block — match panel frame + thin grid lines in PDF. */
   .form-print-root .aff-panel {
     --aff-line: 0.5px solid #64748b !important;
@@ -496,6 +617,14 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.aff-panel) {
     flex: 0 0 auto !important;
   }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.doc-panel) {
+    flex: 0 1 auto !important;
+    flex-shrink: 0 !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.yns-table-wrap) > div {
     flex: 1 1 auto !important;
     min-height: 0 !important;
@@ -509,12 +638,23 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.aff-panel) > div {
     flex: 0 0 auto !important;
   }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.doc-panel) > div {
+    flex: 0 1 auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.ulc-s1-panel) .form-element-frame--flush {
     flex: 0 0 auto !important;
     min-height: auto !important;
   }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.aff-panel) .form-element-frame--flush {
     flex: 0 0 auto !important;
+  }
+  .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.doc-panel) .form-element-frame--flush {
+    flex: 0 1 auto !important;
+    min-height: auto !important;
   }
   .form-print-root .form-page-sheet--fixed .form-element-frame--flush {
     flex: 1 1 auto !important;
@@ -632,12 +772,15 @@ const PRINT_OVERRIDES = `
   .form-print-root .def-grid,
   .form-print-root .def-compliance,
   .form-print-root .ln-panel,
-  .form-print-root .att-table-wrap {
+  .form-print-root .att-table-wrap,
+  .form-print-root .doc-panel {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }
 
-  .form-print-root .ulc-s1-panel {
+  .form-print-root .ulc-s1-panel,
+  .form-print-root .att-table-wrap,
+  .form-print-root .doc-panel {
     overflow: hidden !important;
   }
 

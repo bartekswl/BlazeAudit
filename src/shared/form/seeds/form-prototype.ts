@@ -123,6 +123,24 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-5',
+        label: 'Page 5',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-documentation',
+            heading: '21 Documentation',
+            elements: [
+              {
+                kind: 'documentation',
+                id: 'documentation-checklist',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

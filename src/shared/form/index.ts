@@ -15,5 +15,7 @@ export * from './linedNotes';
 export * from './linedNotesHtml';
 export * from './attendanceLog';
 export * from './attendanceLogHtml';
+export * from './documentation';
+export * from './documentationHtml';
 export * from './formPageHeader';
 export * from './formPageSize';

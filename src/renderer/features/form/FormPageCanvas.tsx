@@ -53,6 +53,9 @@ export function FormPageCanvas({
   const hasAttendanceLog = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'attendanceLog'),
   );
+  const hasDocumentation = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'documentation'),
+  );
 
   return (
     <div
@@ -62,6 +65,7 @@ export function FormPageCanvas({
         isLandscape && 'form-page-sheet--landscape',
         hasLinedNotes && 'form-page-sheet--lined-notes',
         hasAttendanceLog && 'form-page-sheet--attendance-log',
+        hasDocumentation && 'form-page-sheet--documentation',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -110,6 +114,7 @@ export function FormPageCanvas({
             isLandscape && 'form-page-content--landscape',
             hasLinedNotes && 'form-page-content--lined-notes',
             hasAttendanceLog && 'form-page-content--attendance-log',
+            hasDocumentation && 'form-page-content--documentation',
           )}
         >
           {page.sections.map((section) => {
@@ -122,6 +127,9 @@ export function FormPageCanvas({
             const isAttendanceLogSection = section.elements.some(
               (element) => element.kind === 'attendanceLog',
             );
+            const isDocumentationSection = section.elements.some(
+              (element) => element.kind === 'documentation',
+            );
             return (
             <section
               key={section.id}
@@ -131,6 +139,7 @@ export function FormPageCanvas({
                 isUlcSection && 'flex flex-col',
                 isLinedNotesSection && 'flex min-h-0 flex-col',
                 isAttendanceLogSection && 'flex min-h-0 flex-col',
+                isDocumentationSection && 'flex min-h-0 flex-col',
               )}
               style={
                 fixedPageLayout && section.heightPercent
@@ -145,9 +154,13 @@ export function FormPageCanvas({
               )}
               <div
                 className={cn(
-                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection) &&
+                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection) &&
                     'flex flex-1 flex-col',
-                  !isUlcSection && !isLinedNotesSection && !isAttendanceLogSection && 'space-y-3',
+                  !isUlcSection &&
+                    !isLinedNotesSection &&
+                    !isAttendanceLogSection &&
+                    !isDocumentationSection &&
+                    'space-y-3',
                 )}
               >
                 {section.elements.map((element) => (

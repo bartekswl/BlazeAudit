@@ -8,6 +8,7 @@ import type {
 import { cn } from '../../lib/cn';
 import { FormAffirmationView } from './FormAffirmationView';
 import { FormAttendanceLogView } from './FormAttendanceLogView';
+import { FormDocumentationView } from './FormDocumentationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
 import { FormUlcSection1View } from './FormUlcSection1View';
@@ -47,7 +48,8 @@ export function FormElementView({
     element.kind === 'deficiencies' ||
     element.kind === 'recommendations' ||
     element.kind === 'testingNotes' ||
-    element.kind === 'attendanceLog';
+    element.kind === 'attendanceLog' ||
+    element.kind === 'documentation';
 
   return (
     <div
@@ -345,6 +347,14 @@ function FormElementBody({
     case 'attendanceLog':
       return (
         <FormAttendanceLogView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'documentation':
+      return (
+        <FormDocumentationView
           value={value}
           readOnly={readOnly}
           onChange={onChange}
