@@ -37,6 +37,8 @@ const PRINT_OVERRIDES = `
     overflow: hidden;
     break-after: page;
     page-break-after: always;
+    --form-check-mark-size: 8.5pt;
+    --form-check-input-size: 8.5pt;
   }
   .form-print-root .form-page-sheet:last-child {
     break-after: auto;
@@ -466,6 +468,7 @@ const PRINT_OVERRIDES = `
   .form-print-root .doc-table {
     width: 100% !important;
     table-layout: fixed !important;
+    font-size: 8pt !important;
   }
   .form-print-root .doc-ruled-stack {
     --doc-ruled-line-height: 1.15em !important;
@@ -600,6 +603,7 @@ const PRINT_OVERRIDES = `
   .form-print-root .cut-table {
     width: 100% !important;
     table-layout: fixed !important;
+    font-size: 8pt !important;
   }
   .form-print-root .form-page-section:has(.cut-panel) .form-element-frame--flush {
     margin-top: 0 !important;
@@ -609,6 +613,104 @@ const PRINT_OVERRIDES = `
     box-shadow: none !important;
   }
   .form-print-root .form-page-content--control-unit-test {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Control unit record — 22.2 */
+  .form-print-root .cur-panel {
+    --cur-line: 0.5px solid #64748b !important;
+    flex: 0 0 auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin-top: 0 !important;
+    border-radius: 0.625rem !important;
+    box-shadow: none !important;
+    font-size: 6.5pt !important;
+    line-height: 1.15 !important;
+    color: #171717 !important;
+    background: #ffffff !important;
+  }
+  .form-print-root .cur-title-bar,
+  .form-print-root .cur-ref-bar {
+    background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%) !important;
+    color: #ffffff !important;
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .cur-info-row {
+    background: linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .cur-info-input,
+  .form-print-root .cur-info-value {
+    background: #ffffff !important;
+  }
+  .form-print-root .cur-th,
+  .form-print-root .cur-td {
+    border-right: 0.5px solid #64748b !important;
+    padding: 0.5pt 1.5pt !important;
+  }
+  .form-print-root .cur-row:not(:last-child) .cur-td,
+  .form-print-root .cur-th {
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .cur-th--yes {
+    background: #1b6b2f !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .cur-th--no {
+    background: #9b1c1c !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .cur-th--na {
+    background: #334155 !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .cur-row:nth-child(even) .cur-td--letter,
+  .form-print-root .cur-row:nth-child(even) .cur-td--desc {
+    background: #eef2ff !important;
+  }
+  .form-print-root .cur-td--yes {
+    background: #edf7ef !important;
+  }
+  .form-print-root .cur-td--no {
+    background: #fdeeee !important;
+  }
+  .form-print-root .cur-td--na {
+    background: #f1f5f9 !important;
+  }
+  .form-print-root .cur-td--choice-block {
+    background: #171717 !important;
+    padding: 0 !important;
+  }
+  .form-print-root .cur-time-input,
+  .form-print-root .cur-time-value {
+    background: #ffffff !important;
+  }
+  .form-print-root .cur-table-wrap {
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+  }
+  .form-print-root .cur-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    font-size: 7.5pt !important;
+  }
+  .form-print-root .cur-footer-note {
+    border-top: 0.5px solid #64748b !important;
+    color: #475569 !important;
+  }
+  .form-print-root .form-page-section:has(.cur-panel) .form-element-frame--flush {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  .form-print-root .form-page-content--control-unit-record {
     flex: 1 1 auto !important;
     min-height: 0 !important;
   }

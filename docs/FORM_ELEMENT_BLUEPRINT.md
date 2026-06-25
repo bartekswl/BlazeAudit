@@ -41,6 +41,7 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `attendanceLog` — 20.4 Technician Attendance Log grid (`.att-*`)
 - `documentation` — 21 Documentation Yes/No/N/A checklist (`.doc-*`)
 - `controlUnitTest` — 22 Control Unit or Transponder Test Record (`.cut-*`)
+- `controlUnitRecord` — 22.2 Control Unit or Transponder Record (`.cur-*`)
 
 ---
 
@@ -162,6 +163,7 @@ Page 5 portrait — **21 Documentation** (`documentation`).
 | Row J | Location/media notes — **3 ruled lines** (no Yes/No/N/A) |
 | Annex | Green **ANNEX TABLE OF CONTENTS** header + flex-fill body |
 | Page tile | **Always A4 portrait** (`aspect-ratio: 210/297`) |
+| Table font | Checklist table — see [Checklist table typography](#checklist-table-typography) |
 | Value shape | `{ checklist, locationNotes, annexContents }` |
 
 ### Control unit test record (`.cut-*`) — defaults
@@ -177,7 +179,74 @@ Page 6 portrait — **22 Control Unit or Transponder Test Record** (`controlUnit
 | Table | Rows A–J with Yes / No / N/A |
 | Row F | Firmware + program software Date/Revision/Version fields; merged black Y/N/NA block |
 | Page tile | **Always A4 portrait** (`aspect-ratio: 210/297`) |
+| Table font | Checklist table — see [Checklist table typography](#checklist-table-typography) |
 | Value shape | `{ fieldLocation, identification, checklist, firmware, software }` |
+
+### Control unit record (`.cur-*`) — defaults
+
+Page 7 portrait — **22.2 Control Unit or Transponder Record** (`controlUnitRecord`).
+
+| Area | Rule |
+|------|------|
+| Outer frame | **`--form-panel-frame`** on `.cur-panel` |
+| Title bar | Blue gradient — `22.2 Control Unit or Transponder Record` |
+| Reference bar | Blue gradient — `(See 8.3) Complete section for each control unit or transponder.` |
+| Info rows | Lavender strip — field location + identification fill-ins |
+| Table | Rows A–EE with Yes / No / N/A; alternating row tint |
+| Row J | Inline **Time:** fill-in after description |
+| Row Q | Inline **Time:** fill-in; merged black Yes/No block (N/A only) |
+| Footer note | Editorial correction note below the table |
+| Page tile | **Always A4 portrait** (`aspect-ratio: 210/297`) |
+| Table font | Checklist table — see [Checklist table typography](#checklist-table-typography) |
+| Value shape | `{ fieldLocation, identification, checklist }` — checklist entries may include `time` on rows J and Q |
+
+### Checklist table typography
+
+Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`) share one typography rule so template, document, and PDF stay aligned.
+
+| Surface | Panel chrome (legend, bars, info rows) | Checklist table |
+|---------|------------------------------------------|-----------------|
+| **Screen** | Panel base `font-size` (may differ by page density) | `font-size: calc(1em + 1pt)` on the `<table>` only |
+| **PDF** | `7pt` (`.doc-panel`, `.cut-panel`) or `6.5pt` (`.cur-panel` compact) | Panel print size **+ 1pt** on the table (`8pt`, `8pt`, `7.5pt`) |
+| **Check marks** | — | Fixed size via `--form-check-mark-size` / `--form-check-input-size` on `.form-page-sheet` — same for `.doc-check`, `.cut-check`, `.cur-check`, `.yns-check` and their `*-check-input` radios (do **not** use `1em` / table-relative sizing) |
+
+**Layout rule:** when changing table font size, do **not** change column widths, cell padding, or row min-heights — only the table `font-size` (and matching print override in `buildFormPrintHtml.tsx`).
+
+```css
+/* Example — apply on the table element, not the whole panel */
+.doc-table,
+.cut-table,
+.cur-table {
+  font-size: calc(1em + 1pt);
+}
+
+/* Check marks — fixed size on .form-page-sheet, not table-relative */
+.doc-check,
+.cut-check,
+.cur-check,
+.yns-check {
+  font-size: var(--form-check-mark-size);
+}
+.doc-check-input,
+.cut-check-input,
+.cur-check-input,
+.yns-check-input {
+  width: var(--form-check-input-size);
+  height: var(--form-check-input-size);
+}
+```
+
+### Visible-width text inputs
+
+Single-line fill-in fields inside a fixed-width cell must **not accept characters that overflow the visible box**. Use `VisibleWidthInput` (`src/renderer/features/form/VisibleWidthInput.tsx`), which clamps input on type, paste, mount, and resize by comparing `scrollWidth` to `clientWidth`.
+
+| CSS | Rule |
+|-----|------|
+| `white-space: nowrap` | Prevent wrapping past the cell edge |
+| `overflow: hidden` | Clip any overflow visually |
+| Fixed `width` / `max-width` | When the blueprint box is a fixed size (e.g. `.cut-version-input`, `.cur-time-input`) |
+
+Reference implementations: `.cut-info-input`, `.cut-version-input`, `.cur-info-input`, `.cur-time-input`.
 
 ### ULC 20.1 panel (`.ulc-s1-*`) — defaults
 
@@ -225,7 +294,8 @@ Template viewer and document editor both respect `data-theme` on `<html>`. PDF e
 .form-page-sheet .ln-panel,
 .form-page-sheet .att-table-wrap,
 .form-page-sheet .doc-panel,
-.form-page-sheet .cut-panel {
+.form-page-sheet .cut-panel,
+.form-page-sheet .cur-panel {
   box-shadow: none;
   outline: none;
   border: var(--form-panel-frame);
@@ -238,7 +308,7 @@ When changing page spacing, update **both** `components.css` and `PRINT_OVERRIDE
 
 ### Viewport scaling (template + document editor)
 
-The form page uses **dynamic reference width**: at scale `1` the sheet fills the column. When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom`. **Page 1** portrait sheets hug content height; **pages 3–6** (`form-page-sheet--lined-notes`, `--attendance-log`, `--documentation`, `--control-unit-test`) and **page 2** landscape always keep fixed **A4** aspect ratio. PDF export is unaffected.
+The form page uses **dynamic reference width**: at scale `1` the sheet fills the column. When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom`. **Page 1** portrait sheets hug content height; **pages 3–7** (`form-page-sheet--lined-notes`, `--attendance-log`, `--documentation`, `--control-unit-test`, `--control-unit-record`) and **page 2** landscape always keep fixed **A4** aspect ratio. PDF export is unaffected.
 
 ---
 

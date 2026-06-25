@@ -9,6 +9,7 @@ import { cn } from '../../lib/cn';
 import { FormAffirmationView } from './FormAffirmationView';
 import { FormAttendanceLogView } from './FormAttendanceLogView';
 import { FormControlUnitTestView } from './FormControlUnitTestView';
+import { FormControlUnitRecordView } from './FormControlUnitRecordView';
 import { FormDocumentationView } from './FormDocumentationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
@@ -51,7 +52,8 @@ export function FormElementView({
     element.kind === 'testingNotes' ||
     element.kind === 'attendanceLog' ||
     element.kind === 'documentation' ||
-    element.kind === 'controlUnitTest';
+    element.kind === 'controlUnitTest' ||
+    element.kind === 'controlUnitRecord';
 
   return (
     <div
@@ -365,6 +367,14 @@ function FormElementBody({
     case 'controlUnitTest':
       return (
         <FormControlUnitTestView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'controlUnitRecord':
+      return (
+        <FormControlUnitRecordView
           value={value}
           readOnly={readOnly}
           onChange={onChange}

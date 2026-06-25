@@ -59,6 +59,9 @@ export function FormPageCanvas({
   const hasControlUnitTest = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'controlUnitTest'),
   );
+  const hasControlUnitRecord = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'controlUnitRecord'),
+  );
 
   return (
     <div
@@ -70,6 +73,7 @@ export function FormPageCanvas({
         hasAttendanceLog && 'form-page-sheet--attendance-log',
         hasDocumentation && 'form-page-sheet--documentation',
         hasControlUnitTest && 'form-page-sheet--control-unit-test',
+        hasControlUnitRecord && 'form-page-sheet--control-unit-record',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -120,6 +124,7 @@ export function FormPageCanvas({
             hasAttendanceLog && 'form-page-content--attendance-log',
             hasDocumentation && 'form-page-content--documentation',
             hasControlUnitTest && 'form-page-content--control-unit-test',
+            hasControlUnitRecord && 'form-page-content--control-unit-record',
           )}
         >
           {page.sections.map((section) => {
@@ -138,6 +143,9 @@ export function FormPageCanvas({
             const isControlUnitTestSection = section.elements.some(
               (element) => element.kind === 'controlUnitTest',
             );
+            const isControlUnitRecordSection = section.elements.some(
+              (element) => element.kind === 'controlUnitRecord',
+            );
             return (
             <section
               key={section.id}
@@ -149,6 +157,7 @@ export function FormPageCanvas({
                 isAttendanceLogSection && 'flex min-h-0 flex-col',
                 isDocumentationSection && 'flex min-h-0 flex-col',
                 isControlUnitTestSection && 'flex min-h-0 flex-col',
+                isControlUnitRecordSection && 'flex min-h-0 flex-col',
               )}
               style={
                 fixedPageLayout && section.heightPercent
@@ -163,13 +172,14 @@ export function FormPageCanvas({
               )}
               <div
                 className={cn(
-                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection) &&
+                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection) &&
                     'flex flex-1 flex-col',
                   !isUlcSection &&
                     !isLinedNotesSection &&
                     !isAttendanceLogSection &&
                     !isDocumentationSection &&
                     !isControlUnitTestSection &&
+                    !isControlUnitRecordSection &&
                     'space-y-3',
                 )}
               >
