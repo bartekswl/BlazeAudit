@@ -82,6 +82,10 @@ export type FormElement =
   | {
       kind: 'documentation';
       id: string;
+    }
+  | {
+      kind: 'controlUnitTest';
+      id: string;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';
@@ -175,6 +179,7 @@ export type { AffirmationValue } from './affirmation';
 export type { LinedNotesValue } from './linedNotes';
 export type { AttendanceLogValue } from './attendanceLog';
 export type { DocumentationValue } from './documentation';
+export type { ControlUnitTestValue } from './controlUnitTest';
 export type {
   DeficienciesValue,
   DeficiencyControlRow,

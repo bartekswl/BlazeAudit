@@ -17,6 +17,7 @@ import { loadFormPrintCss } from './loadFormPrintCss';
 import type { PdfInspectionExport } from '../../shared/pdf';
 import { renderAffirmationHtml } from '../../shared/form/affirmationHtml';
 import { renderAttendanceLogHtml } from '../../shared/form/attendanceLogHtml';
+import { renderControlUnitTestHtml } from '../../shared/form/controlUnitTestHtml';
 import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
@@ -148,6 +149,8 @@ function renderElementHtml(
       return framed(renderAttendanceLogHtml(value), true);
     case 'documentation':
       return framed(renderDocumentationHtml(value), true);
+    case 'controlUnitTest':
+      return framed(renderControlUnitTestHtml(value), true);
     default:
       return '';
   }

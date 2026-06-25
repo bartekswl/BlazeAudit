@@ -141,6 +141,24 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-6',
+        label: 'Page 6',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-control-unit-test',
+            heading: '22 Control Unit or Transponder Test Record',
+            elements: [
+              {
+                kind: 'controlUnitTest',
+                id: 'control-unit-test-record',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

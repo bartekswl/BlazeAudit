@@ -56,6 +56,9 @@ export function FormPageCanvas({
   const hasDocumentation = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'documentation'),
   );
+  const hasControlUnitTest = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'controlUnitTest'),
+  );
 
   return (
     <div
@@ -66,6 +69,7 @@ export function FormPageCanvas({
         hasLinedNotes && 'form-page-sheet--lined-notes',
         hasAttendanceLog && 'form-page-sheet--attendance-log',
         hasDocumentation && 'form-page-sheet--documentation',
+        hasControlUnitTest && 'form-page-sheet--control-unit-test',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -115,6 +119,7 @@ export function FormPageCanvas({
             hasLinedNotes && 'form-page-content--lined-notes',
             hasAttendanceLog && 'form-page-content--attendance-log',
             hasDocumentation && 'form-page-content--documentation',
+            hasControlUnitTest && 'form-page-content--control-unit-test',
           )}
         >
           {page.sections.map((section) => {
@@ -130,6 +135,9 @@ export function FormPageCanvas({
             const isDocumentationSection = section.elements.some(
               (element) => element.kind === 'documentation',
             );
+            const isControlUnitTestSection = section.elements.some(
+              (element) => element.kind === 'controlUnitTest',
+            );
             return (
             <section
               key={section.id}
@@ -140,6 +148,7 @@ export function FormPageCanvas({
                 isLinedNotesSection && 'flex min-h-0 flex-col',
                 isAttendanceLogSection && 'flex min-h-0 flex-col',
                 isDocumentationSection && 'flex min-h-0 flex-col',
+                isControlUnitTestSection && 'flex min-h-0 flex-col',
               )}
               style={
                 fixedPageLayout && section.heightPercent
@@ -154,12 +163,13 @@ export function FormPageCanvas({
               )}
               <div
                 className={cn(
-                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection) &&
+                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection) &&
                     'flex flex-1 flex-col',
                   !isUlcSection &&
                     !isLinedNotesSection &&
                     !isAttendanceLogSection &&
                     !isDocumentationSection &&
+                    !isControlUnitTestSection &&
                     'space-y-3',
                 )}
               >

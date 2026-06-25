@@ -17,5 +17,7 @@ export * from './attendanceLog';
 export * from './attendanceLogHtml';
 export * from './documentation';
 export * from './documentationHtml';
+export * from './controlUnitTest';
+export * from './controlUnitTestHtml';
 export * from './formPageHeader';
 export * from './formPageSize';
