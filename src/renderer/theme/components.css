@@ -3075,6 +3075,44 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-content--control-unit-test {
   flex: 1 1 auto;
   min-height: 0;
+  gap: 0;
+}
+
+.form-page-section--control-unit-chapter {
+  margin: 0;
+  padding: 0;
+}
+
+.form-page-section--control-unit-chapter .form-page-section-title {
+  margin: 0;
+  padding: 0;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.form-page-section--control-unit-test-sub {
+  margin: 0;
+  padding: 0;
+}
+
+.form-page-section--control-unit-test-sub .form-page-section-title {
+  flex-shrink: 0;
+  margin: 0.0625rem 0 0.5rem;
+  padding: 0;
+  line-height: 1.1;
+  font-size: calc(0.8125rem + 1pt);
+  text-align: center;
+}
+
+.form-page-sheet--control-unit-test .form-page-section--control-unit-test-sub {
+  flex: 0 1 auto;
+}
+
+.form-page-sheet--control-unit-test .form-page-section--control-unit-test-sub > div,
+.form-page-sheet--control-unit-test
+  .form-page-section--control-unit-test-sub
+  .form-element-frame--flush {
+  flex: 0 1 auto;
 }
 
 .form-page-sheet--control-unit-test .form-page-section:has(.cut-panel) {
@@ -6020,9 +6058,9 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.375rem 1rem;
-  padding: 0.25rem 0.5rem 0.125rem;
-  line-height: 1.25;
+  gap: 0.25rem 0.75rem;
+  padding: 0.125rem 0.5rem 0.0625rem;
+  line-height: 1.2;
 }
 
 .cfts-legend-item--pass,
@@ -6058,7 +6096,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .cfts-th {
-  padding: 0.1875rem 0.25rem;
+  padding: 0.125rem 0.25rem;
   font-weight: 700;
   text-align: center;
   vertical-align: middle;
@@ -6091,6 +6129,14 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   border-right: var(--cfts-line);
   padding: 0;
   vertical-align: middle;
+  background: #ffffff;
+}
+
+.cfts-row--alt .cfts-td {
+  background: #f8fafc;
+}
+
+.cfts-row:not(.cfts-row--alt) .cfts-td {
   background: #ffffff;
 }
 
@@ -6260,8 +6306,12 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: var(--ba-text-primary);
 }
 
-[data-theme='dark'] .cfts-row .cfts-td {
+[data-theme='dark'] .cfts-row:not(.cfts-row--alt) .cfts-td {
   background: rgb(15 23 42 / 0.55);
+}
+
+[data-theme='dark'] .cfts-row--alt .cfts-td {
+  background: rgb(30 41 59 / 0.45);
 }
 
 [data-theme='dark'] .cfts-legend-item--pass,

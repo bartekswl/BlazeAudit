@@ -95,11 +95,17 @@ function FormOutlineList({
             onClick={() => onNavigate?.(section.id, section.pageIndex)}
             className={cn(
               'flex w-full items-center gap-2 rounded-md py-1.5 text-left transition-colors hover:bg-[var(--ba-hover-bg)]',
-              section.depth === 0
-                ? 'font-medium text-[var(--ba-text-primary)]'
-                : 'font-normal text-[var(--ba-text-secondary)]',
+              section.subdued
+                ? 'font-normal text-[var(--ba-text-secondary)]'
+                : 'font-medium text-[var(--ba-text-primary)]',
             )}
-            style={{ paddingLeft: 8 + section.depth * 12, paddingRight: 8 }}
+            style={{
+              paddingLeft:
+                section.indentExtra === '0'
+                  ? 8
+                  : `calc(0.5rem + ${section.indentExtra})`,
+              paddingRight: 8,
+            }}
             title={section.label}
           >
             <span className="min-w-0 flex-1 truncate text-xs">{section.label}</span>

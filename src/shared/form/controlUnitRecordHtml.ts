@@ -4,7 +4,6 @@ import {
   CONTROL_UNIT_RECORD_IDENTIFICATION_LABEL,
   CONTROL_UNIT_RECORD_REF,
   CONTROL_UNIT_RECORD_ROWS,
-  CONTROL_UNIT_RECORD_TITLE,
   normalizeControlUnitRecordValue,
 } from './controlUnitRecord';
 import { renderCheckGlyphHtml } from './checkGlyph';
@@ -69,7 +68,7 @@ export function renderControlUnitRecordHtml(value: unknown): string {
   }).join('');
 
   return `<div class="cur-panel">
-    <div class="cur-title-bar">${escapeHtml(CONTROL_UNIT_RECORD_TITLE)}</div>
+    <div class="cur-title-bar" aria-hidden="true">&nbsp;</div>
     <div class="cur-ref-bar">${escapeHtml(CONTROL_UNIT_RECORD_REF)}</div>
     <div class="cur-info-strip">
       <div class="cur-info-row">

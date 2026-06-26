@@ -4,7 +4,6 @@ import {
   CONTROL_UNIT_RECORD_IDENTIFICATION_LABEL,
   CONTROL_UNIT_RECORD_REF,
   CONTROL_UNIT_RECORD_ROWS,
-  CONTROL_UNIT_RECORD_TITLE,
   normalizeControlUnitRecordValue,
   setControlUnitRecordChoice,
   setControlUnitRecordFieldLocation,
@@ -164,7 +163,9 @@ export function FormControlUnitRecordView({
 
   return (
     <div className="cur-panel">
-      <div className="cur-title-bar">{CONTROL_UNIT_RECORD_TITLE}</div>
+      <div className="cur-title-bar" aria-hidden="true">
+        {'\u00a0'}
+      </div>
       <div className="cur-ref-bar">{CONTROL_UNIT_RECORD_REF}</div>
 
       <div className="cur-info-strip">

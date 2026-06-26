@@ -1,6 +1,7 @@
-export const CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_ROW_COUNT = 11;
+export const CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_ROW_COUNT = 17;
 
-export const CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_BODY_ROW_HEIGHT = '1.125rem';
+/** Fixed body-row height — same on template, document, PDF, and fallback HTML. */
+export const CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_BODY_ROW_HEIGHT = '0.875rem';
 
 export const CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_TITLE =
   '23.3 Circuit Fault Tolerance Test Sheet';

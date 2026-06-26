@@ -6,9 +6,17 @@ export interface FormOutlineSection {
   label: string;
   pageIndex: number;
   pageLabel: string;
-  /** 0 = top-level section; 1+ = indented child in Contents. */
-  depth: number;
+  /** Secondary (unbold) styling — Summary, Affirmation, and similar child rows. */
+  subdued: boolean;
+  /** Extra left padding added to the Contents row (e.g. `2ch`, `12px`). */
+  indentExtra: string;
 }
+
+/** Small indent for numbered subsections (22.1.) — bold, same weight as chapters. */
+export const FORM_OUTLINE_SUBSECTION_INDENT = '0.75ch';
+
+/** Indent for unnumbered child rows (Summary, Affirmation, Technician's Testing Notes). */
+export const FORM_OUTLINE_CHILD_INDENT = '2ch';
 
 export function formSectionAnchorId(sectionId: string): string {
   return `form-section-${sectionId}`;
@@ -22,7 +30,8 @@ function outlineEntryForSection(section: FormSection): { label: string; depth: n
   if (only?.kind === 'yesNoSummary') return { label: 'Summary', depth: 1 };
   if (only?.kind === 'affirmation') return { label: 'Affirmation', depth: 1 };
   if (only?.kind === 'recommendations') return { label: 'Recommendations', depth: 1 };
-  if (only?.kind === 'testingNotes') return { label: 'Testing Notes', depth: 1 };
+  if (only?.kind === 'testingNotes')
+    return { label: "Technician's Testing Notes", depth: 1 };
   if (only?.kind === 'attendanceLog') return { label: 'Attendance Log', depth: 1 };
   if (only?.kind === 'documentation') return { label: 'Documentation', depth: 1 };
   if (only?.kind === 'controlUnitTest') return { label: 'Control Unit Test', depth: 1 };
@@ -53,13 +62,40 @@ function outlineEntryForSection(section: FormSection): { label: string; depth: n
   return { label: section.number != null ? `${section.number}` : section.id, depth: 0 };
 }
 
+/** Contents labels: leading section numbers get a trailing period (e.g. 22.1 → 22.1.). */
+export function formatOutlineSectionLabel(label: string): string {
+  const match = label.match(/^(\d+(?:\.\d+)*)(\s+)(.+)$/);
+  if (!match) return label;
+  const [, number, space, rest] = match;
+  if (number.endsWith('.')) return label;
+  return `${number}.${space}${rest}`;
+}
+
+/** True when the label is a numbered subsection (e.g. 21.1., 20.2.) — not a top-level chapter (21., 22.). */
+export function isOutlineSubSectionLabel(label: string): boolean {
+  return /^\d+\.\d+(?:\.\d+)*\.\s/.test(label);
+}
+
+function resolveOutlinePresentation(
+  label: string,
+  entryDepth: number,
+): Pick<FormOutlineSection, 'subdued' | 'indentExtra'> {
+  if (entryDepth > 0) {
+    return { subdued: true, indentExtra: FORM_OUTLINE_CHILD_INDENT };
+  }
+  if (isOutlineSubSectionLabel(label)) {
+    return { subdued: false, indentExtra: FORM_OUTLINE_SUBSECTION_INDENT };
+  }
+  return { subdued: false, indentExtra: '0' };
+}
+
 function formatOutlinePageLabel(startPageIndex: number, endPageIndex: number): string {
   const start = startPageIndex + 1;
   const end = endPageIndex + 1;
   return start === end ? `Page ${start}` : `Page ${start}-${end}`;
 }
 
-/** Collapse consecutive duplicate sections (same label + depth) into one row with a page range. */
+/** Collapse consecutive duplicate sections (same label + presentation) into one row with a page range. */
 function mergeConsecutiveOutlineSections(sections: FormOutlineSection[]): FormOutlineSection[] {
   if (sections.length === 0) return sections;
 
@@ -81,7 +117,8 @@ function mergeConsecutiveOutlineSections(sections: FormOutlineSection[]): FormOu
     const continuesRun =
       next != null &&
       next.label === prev.label &&
-      next.depth === prev.depth &&
+      next.subdued === prev.subdued &&
+      next.indentExtra === prev.indentExtra &&
       next.pageIndex === prev.pageIndex + 1;
 
     if (!continuesRun) {
@@ -116,10 +153,13 @@ export function buildFormOutline(form: FormDefinition): FormOutlineSection[] {
     const pageLabel = page.label ?? `Page ${pageIndex + 1}`;
     for (const section of page.sections) {
       const entry = outlineEntryForSection(section);
+      const label = formatOutlineSectionLabel(entry.label);
+      const presentation = resolveOutlinePresentation(label, entry.depth);
       sections.push({
         id: section.id,
-        label: entry.label,
-        depth: entry.depth,
+        label,
+        subdued: presentation.subdued,
+        indentExtra: presentation.indentExtra,
         pageIndex,
         pageLabel,
       });

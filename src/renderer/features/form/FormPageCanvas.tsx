@@ -232,6 +232,10 @@ export function FormPageCanvas({
             const isControlUnitTestSection = section.elements.some(
               (element) => element.kind === 'controlUnitTest',
             );
+            const isControlUnitChapterSection =
+              hasControlUnitTest && section.id === 'section-control-unit-chapter';
+            const isControlUnitTestTitleSection =
+              hasControlUnitTest && section.id === 'section-control-unit-test';
             const isControlUnitRecordSection = section.elements.some(
               (element) => element.kind === 'controlUnitRecord',
             );
@@ -281,6 +285,8 @@ export function FormPageCanvas({
                   'form-page-section--emergency-power-supply-test',
                 isFieldDeviceChapterSection && 'form-page-section--field-device-chapter',
                 isFieldDeviceLegendTitleSection && 'form-page-section--field-device-legend-sub',
+                isControlUnitChapterSection && 'form-page-section--control-unit-chapter',
+                isControlUnitTestTitleSection && 'form-page-section--control-unit-test-sub',
               )}
               style={sectionHeightStyle}
             >
@@ -289,7 +295,7 @@ export function FormPageCanvas({
               )}
               <div
                 className={cn(
-                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection || isPowerSuppliesSection || isAnnunciatorTestSection || isFieldDeviceLegendTitleSection || isIndividualDeviceRecordSection || isCircuitFaultToleranceTestSheetSection) &&
+                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection || isPowerSuppliesSection || isAnnunciatorTestSection || isFieldDeviceLegendTitleSection || isControlUnitTestTitleSection || isIndividualDeviceRecordSection || isCircuitFaultToleranceTestSheetSection) &&
                     'flex flex-1 flex-col',
                   !isUlcSection &&
                     !isLinedNotesSection &&

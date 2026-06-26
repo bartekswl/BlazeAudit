@@ -1,4 +1,5 @@
 import {
+  CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_BODY_ROW_HEIGHT,
   CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_DATA_COLUMNS,
   CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_HEADER_ROW1,
   CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_HEADER_ROW2,
@@ -83,7 +84,7 @@ export function renderCircuitFaultToleranceTestSheetHtml(value: unknown): string
     })
     .join('');
 
-  return `<div class="cfts-panel" style="--cfts-row-count:${CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_ROW_COUNT}">
+  return `<div class="cfts-panel" style="--cfts-row-count:${CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_ROW_COUNT};--cfts-body-row-height:${CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_BODY_ROW_HEIGHT}">
     <div class="cfts-legend">${legend}</div>
     <div class="cfts-table-wrap">
       <table class="cfts-table" data-row-count="${CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_ROW_COUNT}">

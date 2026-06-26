@@ -1299,6 +1299,25 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-content--control-unit-test {
     flex: 1 1 auto !important;
     min-height: 0 !important;
+    gap: 0 !important;
+  }
+  .form-print-root .form-page-section--control-unit-chapter {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .form-print-root .form-page-section--control-unit-chapter .form-page-section-title {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+  }
+  .form-print-root .form-page-section--control-unit-test-sub .form-page-section-title {
+    flex-shrink: 0 !important;
+    margin: 0.0625rem 0 0.5rem !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
+    font-size: calc(0.8125rem + 1pt) !important;
+    text-align: center !important;
   }
 
   /* Control unit record — 22.2 */
@@ -2360,8 +2379,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--circuit-fault-tolerance-test-sheet.form-page-sheet--landscape .cfts-th--banner {
     background: #1b6b2f !important;
     color: #ffffff !important;
-    font-size: 8pt !important;
-    padding: 2pt 3pt !important;
+    font-size: 7.75pt !important;
+    padding: 1.5pt 3pt !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -2369,8 +2388,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--circuit-fault-tolerance-test-sheet.form-page-sheet--landscape .cfts-th--sub {
     background: #b6d7a8 !important;
     color: #171717 !important;
-    font-size: 6.75pt !important;
-    padding: 1.5pt 3pt !important;
+    font-size: 6.25pt !important;
+    padding: 1pt 3pt !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -2405,10 +2424,18 @@ const PRINT_OVERRIDES = `
     font-weight: 700 !important;
   }
 
+  .form-print-root .form-page-sheet--circuit-fault-tolerance-test-sheet.form-page-sheet--landscape .cfts-row--alt .cfts-td {
+    background: #f8fafc !important;
+  }
+
+  .form-print-root .form-page-sheet--circuit-fault-tolerance-test-sheet.form-page-sheet--landscape .cfts-row:not(.cfts-row--alt) .cfts-td {
+    background: #ffffff !important;
+  }
+
   .form-print-root .form-page-sheet--circuit-fault-tolerance-test-sheet.form-page-sheet--landscape .cfts-legend {
-    font-size: 8pt !important;
+    font-size: 7.5pt !important;
     flex-shrink: 0 !important;
-    padding: 2pt 4pt 1pt !important;
+    padding: 1pt 4pt 0.5pt !important;
   }
 
   .form-print-root .form-page-sheet--circuit-fault-tolerance-test-sheet.form-page-sheet--landscape .cfts-th,

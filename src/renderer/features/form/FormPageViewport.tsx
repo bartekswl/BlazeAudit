@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { useDocumentOutlineRail } from '../documents/DocumentOutlineContext';
 
@@ -6,6 +6,44 @@ const SCALE_EPSILON = 0.001;
 const ZOOM_PERCENT_MIN = 75;
 const ZOOM_PERCENT_MAX = 150;
 const ZOOM_PERCENT_STEP = 5;
+/** Matches DocumentOutlineRail width transition (ms). */
+const CONTENTS_PANEL_TRANSITION_MS = 400;
+
+type ScrollAnchor = {
+  el: HTMLElement;
+  offsetFromViewportTop: number;
+};
+
+function captureScrollAnchor(scrollRoot: HTMLElement): ScrollAnchor | null {
+  const rootRect = scrollRoot.getBoundingClientRect();
+  const probeY = rootRect.top + 64;
+
+  const candidates = [
+    ...scrollRoot.querySelectorAll<HTMLElement>('[data-form-page-index]'),
+    ...scrollRoot.querySelectorAll<HTMLElement>('[id^="form-section-"]'),
+  ];
+
+  for (const el of candidates) {
+    const rect = el.getBoundingClientRect();
+    if (rect.top <= probeY && rect.bottom > rootRect.top) {
+      return { el, offsetFromViewportTop: rect.top - rootRect.top };
+    }
+  }
+
+  return null;
+}
+
+function restoreScrollAnchor(scrollRoot: HTMLElement, anchor: ScrollAnchor | null): void {
+  if (!anchor?.el.isConnected) return;
+
+  const rootRect = scrollRoot.getBoundingClientRect();
+  const anchorRect = anchor.el.getBoundingClientRect();
+  const drift = anchorRect.top - rootRect.top - anchor.offsetFromViewportTop;
+
+  if (Math.abs(drift) > 0.5) {
+    scrollRoot.scrollTop += drift;
+  }
+}
 
 function clampZoomPercent(value: number): number {
   return Math.min(ZOOM_PERCENT_MAX, Math.max(ZOOM_PERCENT_MIN, value));
@@ -37,6 +75,8 @@ export function FormPageViewport({
   const hostRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const referenceWidthRef = useRef(0);
+  const scrollAnchorRef = useRef<ScrollAnchor | null>(null);
+  const preserveScrollUntilRef = useRef(0);
   const [zoomPercent, setZoomPercent] = useState(100);
   const [visiblePageIndex, setVisiblePageIndex] = useState(0);
   const [innerStyle, setInnerStyle] = useState<CSSProperties>({ width: '100%' });
@@ -80,28 +120,63 @@ export function FormPageViewport({
     );
   }, [contentsExpanded, userZoom]);
 
+  const scheduleScrollRestore = useCallback((anchor: ScrollAnchor | null) => {
+    const scroll = scrollRef.current;
+    if (!scroll || !anchor) return;
+
+    const run = () => restoreScrollAnchor(scroll, anchor);
+    requestAnimationFrame(() => requestAnimationFrame(run));
+  }, []);
+
+  const updateScaleAndPreserveScroll = useCallback(() => {
+    updateScale();
+    if (performance.now() < preserveScrollUntilRef.current) {
+      scheduleScrollRestore(scrollAnchorRef.current);
+    }
+  }, [updateScale, scheduleScrollRestore]);
+
   useEffect(() => {
     if (!continuous) setZoomPercent(100);
   }, [continuous, pageIndex]);
 
   useEffect(() => {
+    const scroll = scrollRef.current;
+    const anchor = scroll ? captureScrollAnchor(scroll) : null;
+    scrollAnchorRef.current = anchor;
+    preserveScrollUntilRef.current = performance.now() + CONTENTS_PANEL_TRANSITION_MS + 50;
+
     if (!contentsExpanded && hostRef.current) {
       referenceWidthRef.current = hostRef.current.clientWidth;
     }
     updateScale();
-  }, [contentsExpanded, updateScale]);
+    scheduleScrollRestore(anchor);
+
+    const t = window.setTimeout(() => {
+      scheduleScrollRestore(scrollAnchorRef.current);
+      preserveScrollUntilRef.current = 0;
+    }, CONTENTS_PANEL_TRANSITION_MS + 50);
+
+    return () => window.clearTimeout(t);
+  }, [contentsExpanded, updateScale, scheduleScrollRestore]);
 
   useEffect(() => {
     const host = hostRef.current;
     const inner = innerRef.current;
     if (!host || !inner) return;
 
-    const ro = new ResizeObserver(() => updateScale());
+    const ro = new ResizeObserver(() => updateScaleAndPreserveScroll());
     ro.observe(host);
     ro.observe(inner);
-    updateScale();
+    updateScaleAndPreserveScroll();
     return () => ro.disconnect();
-  }, [updateScale, continuous, pageIndex, children]);
+  }, [updateScaleAndPreserveScroll, continuous, pageIndex, children]);
+
+  useLayoutEffect(() => {
+    if (performance.now() >= preserveScrollUntilRef.current) return;
+    const scroll = scrollRef.current;
+    if (!scroll) return;
+    restoreScrollAnchor(scroll, scrollAnchorRef.current);
+  }, [innerStyle]);
 
   useEffect(() => {
     if (!showZoomControls) return;

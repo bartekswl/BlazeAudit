@@ -259,6 +259,9 @@ function renderPageHtml(
   const hasFieldDeviceLegendPage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'fieldDeviceTestingLegend'),
   );
+  const hasControlUnitTestPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'controlUnitTest'),
+  );
   const hasFieldDeviceTestingNotesPage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'fieldDeviceTestingNotes'),
   );
@@ -287,6 +290,10 @@ function renderPageHtml(
         hasFieldDeviceLegendPage && section.id === 'section-field-device-records';
       const isFieldDeviceLegendTitleSection =
         hasFieldDeviceLegendPage && section.id === 'section-field-device-testing-legend';
+      const isControlUnitChapterSection =
+        hasControlUnitTestPage && section.id === 'section-control-unit-chapter';
+      const isControlUnitTestTitleSection =
+        hasControlUnitTestPage && section.id === 'section-control-unit-test';
       const sectionCls = [
         isUlcSection ? 'form-page-section form-page-section--ulc' : 'form-page-section',
         isEmergencyPowerSupplyTestOnlySection
@@ -294,6 +301,8 @@ function renderPageHtml(
           : '',
         isFieldDeviceChapterSection ? 'form-page-section--field-device-chapter' : '',
         isFieldDeviceLegendTitleSection ? 'form-page-section--field-device-legend-sub' : '',
+        isControlUnitChapterSection ? 'form-page-section--control-unit-chapter' : '',
+        isControlUnitTestTitleSection ? 'form-page-section--control-unit-test-sub' : '',
       ]
         .filter(Boolean)
         .join(' ');

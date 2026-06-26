@@ -67,7 +67,7 @@ export function formPrototypeDefinition(): FormDefinition {
         sections: [
           {
             id: 'section-deficiencies',
-            heading: '20.2 DEFICIENCIES',
+            heading: '20.2 Deficiencies',
             elements: [
               {
                 kind: 'deficiencies',
@@ -95,7 +95,6 @@ export function formPrototypeDefinition(): FormDefinition {
           },
           {
             id: 'section-testing-notes',
-            heading: "Technician's Testing Notes",
             elements: [
               {
                 kind: 'testingNotes',
@@ -148,8 +147,13 @@ export function formPrototypeDefinition(): FormDefinition {
         regions: [],
         sections: [
           {
-            id: 'section-control-unit-test',
+            id: 'section-control-unit-chapter',
             heading: '22 Control Unit or Transponder Test Record',
+            elements: [],
+          },
+          {
+            id: 'section-control-unit-test',
+            heading: '22.1 Control Unit or Transponder Inspection',
             elements: [
               {
                 kind: 'controlUnitTest',
