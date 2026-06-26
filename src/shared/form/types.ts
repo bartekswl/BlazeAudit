@@ -138,6 +138,10 @@ export type FormElement =
   | {
       kind: 'fieldDeviceTestingNotes';
       id: string;
+    }
+  | {
+      kind: 'individualDeviceRecord';
+      id: string;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';
@@ -244,6 +248,7 @@ export type { AncillaryDeviceCircuitTestValue } from './ancillaryDeviceCircuitTe
 export type { FireSignalReceivingCentreInterconnectionValue } from './fireSignalReceivingCentreInterconnection';
 export type { DataCommunicationLinkFaultToleranceValue } from './dataCommunicationLinkFaultTolerance';
 export type { FieldDeviceTestingLegendValue } from './fieldDeviceTestingLegend';
+export type { IndividualDeviceRecordValue } from './individualDeviceRecord';
 export type { FieldDeviceTestingNotesValue } from './fieldDeviceTestingNotes';
 export type {
   DeficienciesValue,

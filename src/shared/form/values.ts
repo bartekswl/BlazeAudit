@@ -25,6 +25,7 @@ import { emptyFireSignalReceivingCentreInterconnectionValue } from './fireSignal
 import { emptyDataCommunicationLinkFaultToleranceValue } from './dataCommunicationLinkFaultTolerance';
 import { emptyFieldDeviceTestingLegendValue } from './fieldDeviceTestingLegend';
 import { emptyFieldDeviceTestingNotesValue } from './fieldDeviceTestingNotes';
+import { emptyIndividualDeviceRecordValue } from './individualDeviceRecord';
 import { emptyLinedNotesValue } from './linedNotes';
 import { emptyUlcSection1Value, normalizeUlcSection1Value } from './ulcSection1';
 import { emptyYesNoSummaryValue } from './yesNoSummary';
@@ -103,6 +104,8 @@ export function initialValueForElement(element: FormElement): unknown {
       return emptyFieldDeviceTestingLegendValue();
     case 'fieldDeviceTestingNotes':
       return emptyFieldDeviceTestingNotesValue();
+    case 'individualDeviceRecord':
+      return emptyIndividualDeviceRecordValue();
     default: {
       const _exhaustive: never = element;
       return _exhaustive;

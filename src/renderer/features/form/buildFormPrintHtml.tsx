@@ -2111,7 +2111,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .adc-panel,
   .form-print-root .fsrc-panel,
   .form-print-root .dclft-panel,
-  .form-print-root .fdtl-panel {
+  .form-print-root .fdtl-panel,
+  .form-print-root .idr-panel {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }
@@ -2129,7 +2130,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .adc-panel,
   .form-print-root .fsrc-panel,
   .form-print-root .dclft-panel,
-  .form-print-root .fdtl-panel {
+  .form-print-root .fdtl-panel,
+  .form-print-root .idr-panel {
     overflow: hidden !important;
   }
 
@@ -2196,6 +2198,124 @@ const PRINT_OVERRIDES = `
   .form-print-root .def-head-strip--repair .def-head-cell {
     background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%) !important;
     color: #334155 !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .form-page-body,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .form-page-content--individual-device-record,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .form-page-section:has(.idr-panel),
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .form-page-section:has(.idr-panel) > div,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-panel,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-table-wrap {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .form-page-section-title {
+    font-size: 11pt !important;
+    margin-bottom: 4pt !important;
+    flex-shrink: 0 !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-panel {
+    --idr-line: 0.5px solid #64748b;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    font-size: 7.75pt !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-table {
+    height: 100% !important;
+    font-size: 7.75pt !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-table thead {
+    height: auto !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th {
+    background: #b6d7a8 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-size: 8pt !important;
+    padding: 2pt 1pt !important;
+    vertical-align: bottom !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--horizontal {
+    vertical-align: middle !important;
+    padding: 2pt 1.5pt !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--horizontal .idr-th-text {
+    line-height: 1.15 !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--vertical {
+    height: 26mm !important;
+    padding: 2pt 1pt !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--vertical .idr-th-text {
+    max-height: 25mm !important;
+    font-size: 8pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-table tbody tr {
+    height: 1% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-row .idr-td {
+    height: 1% !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    padding: 0 !important;
+    vertical-align: middle !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-cell-input,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-cell-value,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-choice-cell,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-choice-value {
+    min-height: 0 !important;
+    height: 100% !important;
+    font-size: 7.75pt !important;
+    line-height: 1.1 !important;
+    padding: 0.5pt 1pt !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-choice-cell,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-choice-value {
+    font-size: 8.5pt !important;
+    font-weight: 700 !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-row--alt .idr-td {
+    background: #eaf4e3 !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-row:not(.idr-row--alt) .idr-td {
+    background: #ffffff !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-legend {
+    font-size: 8pt !important;
+    flex-shrink: 0 !important;
+    padding: 2pt 4pt 1pt !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-row .idr-td {
+    border-right: 0.5px solid #64748b !important;
+    border-bottom: 0.5px solid #64748b !important;
+    box-sizing: border-box !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th:last-child,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-row .idr-td:last-child {
+    border-right: none !important;
   }
 `;
 

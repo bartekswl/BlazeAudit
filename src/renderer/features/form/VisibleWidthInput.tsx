@@ -3,8 +3,24 @@ import { cn } from '../../lib/cn';
 
 /** Trim text until it fits the input's rendered width (single line). */
 export function clampInputToVisibleWidth(input: HTMLInputElement, value: string): string {
+  const inIdrGrid = Boolean(input.closest('.idr-table'));
   const box = input.closest('.fdtl-field-box, [data-visible-width-box]') as HTMLElement | null;
   const cell = input.closest('td, th') as HTMLElement | null;
+
+  if (inIdrGrid) {
+    const inputWidth = input.clientWidth;
+    // Layout not ready — do not block typing.
+    if (inputWidth < 8) return value;
+
+    let next = value;
+    input.value = next;
+    while (next.length > 0 && input.scrollWidth > inputWidth) {
+      next = next.slice(0, -1);
+      input.value = next;
+    }
+    return next;
+  }
+
   const width = box?.clientWidth || cell?.clientWidth || input.clientWidth || 0;
   if (width <= 0) return value;
 

@@ -1,5 +1,10 @@
 import { useCallback, useMemo } from 'react';
-import { buildFormOutline, scrollToFormSection, type BuiltinTemplate } from '../../../shared/form';
+import {
+  buildFormOutline,
+  createEmptyFormValues,
+  scrollToFormSection,
+  type BuiltinTemplate,
+} from '../../../shared/form';
 import { useRegisterFormOutline } from '../documents/DocumentOutlineContext';
 import { FormPageCanvas } from './FormPageCanvas';
 import { FormPageViewport } from './FormPageViewport';
@@ -11,6 +16,7 @@ export function BuiltinFormViewer({
 }) {
   const formSections = useMemo(() => buildFormOutline(template.form), [template.form]);
   const pageCount = template.form.pages.length;
+  const previewValues = useMemo(() => createEmptyFormValues(template.form), [template.form]);
 
   const handleOutlineNavigate = useCallback((sectionId: string, _pageIndex: number) => {
     window.requestAnimationFrame(() => {
@@ -48,6 +54,7 @@ export function BuiltinFormViewer({
                 page={page}
                 pageIndex={pageIndex}
                 template={template}
+                values={previewValues}
                 readOnly
               />
             ))}

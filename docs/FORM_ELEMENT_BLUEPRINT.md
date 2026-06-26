@@ -54,6 +54,7 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `dataCommunicationLinkFaultTolerance` — 22.12 Operation Test Circuit Fault Tolerance (`.dclft-*`)
 - `fieldDeviceTestingLegend` — 23.1 Field Device Testing - Legend and Notes (`.fdtl-*`)
 - `fieldDeviceTestingNotes` — 23.1.1 Testing Notes static numbered list (`.fdtn-*`)
+- `individualDeviceRecord` — 23.2 Individual Device Record landscape grid (`.idr-*`)
 
 ---
 
@@ -763,6 +764,7 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
+| 2026-06-26 | Page 17 landscape: `.idr-*` (23.2) Individual Device Record — 12 columns, **19 rows**, Yes/X/Dash legend. |
 | 2026-06-25 | `.fdtl-*`: `VisibleWidthInput` required; title spacing 23↔23.1 vs 23.1↔table; PDF fields fill cell. |
 | 2026-06-25 | `.fdtl-*` blueprint: fixed-width fill-ins, empty-field frames, Type/Model 13%, font-only tweaks. |
 | 2026-06-25 | Page 15: `.fdtl-*` (23.1) field device legend table — 7 sections, smoke-detector sub-rows, yellow/white zebra. |

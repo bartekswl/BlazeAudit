@@ -22,6 +22,7 @@ import { FormFireSignalReceivingCentreInterconnectionView } from './FormFireSign
 import { FormDataCommunicationLinkFaultToleranceView } from './FormDataCommunicationLinkFaultToleranceView';
 import { FormFieldDeviceTestingLegendView } from './FormFieldDeviceTestingLegendView';
 import { FormFieldDeviceTestingNotesView } from './FormFieldDeviceTestingNotesView';
+import { FormIndividualDeviceRecordView } from './FormIndividualDeviceRecordView';
 import { FormDocumentationView } from './FormDocumentationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
@@ -77,7 +78,8 @@ export function FormElementView({
     element.kind === 'fireSignalReceivingCentreInterconnection' ||
     element.kind === 'dataCommunicationLinkFaultTolerance' ||
     element.kind === 'fieldDeviceTestingLegend' ||
-    element.kind === 'fieldDeviceTestingNotes';
+    element.kind === 'fieldDeviceTestingNotes' ||
+    element.kind === 'individualDeviceRecord';
 
   return (
     <div
@@ -501,6 +503,14 @@ function FormElementBody({
       );
     case 'fieldDeviceTestingNotes':
       return <FormFieldDeviceTestingNotesView />;
+    case 'individualDeviceRecord':
+      return (
+        <FormIndividualDeviceRecordView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
     default:
       return null;
   }

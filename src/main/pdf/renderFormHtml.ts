@@ -31,6 +31,7 @@ import { renderFireSignalReceivingCentreInterconnectionHtml } from '../../shared
 import { renderDataCommunicationLinkFaultToleranceHtml } from '../../shared/form/dataCommunicationLinkFaultToleranceHtml';
 import { renderFieldDeviceTestingLegendHtml } from '../../shared/form/fieldDeviceTestingLegendHtml';
 import { renderFieldDeviceTestingNotesHtml } from '../../shared/form/fieldDeviceTestingNotesHtml';
+import { renderIndividualDeviceRecordHtml } from '../../shared/form/individualDeviceRecordHtml';
 import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
@@ -190,6 +191,8 @@ function renderElementHtml(
       return framed(renderFieldDeviceTestingLegendHtml(value), true);
     case 'fieldDeviceTestingNotes':
       return framed(renderFieldDeviceTestingNotesHtml(), true);
+    case 'individualDeviceRecord':
+      return framed(renderIndividualDeviceRecordHtml(value), true);
     default:
       return '';
   }
@@ -338,6 +341,9 @@ function renderPageHtml(
   const hasDclFaultTolerancePage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'dataCommunicationLinkFaultTolerance'),
   );
+  const hasIndividualDeviceRecordPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'individualDeviceRecord'),
+  );
 
   const sheetClasses = [
     'form-page',
@@ -353,6 +359,7 @@ function renderPageHtml(
     hasDclFaultTolerancePage ? 'form-page-sheet--dcl-fault-tolerance' : '',
     hasFieldDeviceLegendPage ? 'form-page-sheet--field-device-legend' : '',
     hasFieldDeviceTestingNotesPage ? 'form-page-sheet--field-device-testing-notes' : '',
+    hasIndividualDeviceRecordPage ? 'form-page-sheet--individual-device-record' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -367,6 +374,7 @@ function renderPageHtml(
     hasDclFaultTolerancePage ? 'form-page-content--dcl-fault-tolerance' : '',
     hasFieldDeviceLegendPage ? 'form-page-content--field-device-legend' : '',
     hasFieldDeviceTestingNotesPage ? 'form-page-content--field-device-testing-notes' : '',
+    hasIndividualDeviceRecordPage ? 'form-page-content--individual-device-record' : '',
   ]
     .filter(Boolean)
     .join(' ');

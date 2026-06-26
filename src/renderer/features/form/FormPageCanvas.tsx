@@ -100,6 +100,9 @@ export function FormPageCanvas({
   const hasFieldDeviceTestingNotesPage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'fieldDeviceTestingNotes'),
   );
+  const hasIndividualDeviceRecordPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'individualDeviceRecord'),
+  );
 
   return (
     <div
@@ -121,6 +124,7 @@ export function FormPageCanvas({
         hasDclFaultTolerancePage && 'form-page-sheet--dcl-fault-tolerance',
         hasFieldDeviceLegendPage && 'form-page-sheet--field-device-legend',
         hasFieldDeviceTestingNotesPage && 'form-page-sheet--field-device-testing-notes',
+        hasIndividualDeviceRecordPage && 'form-page-sheet--individual-device-record',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -180,6 +184,7 @@ export function FormPageCanvas({
             hasDclFaultTolerancePage && 'form-page-content--dcl-fault-tolerance',
             hasFieldDeviceLegendPage && 'form-page-content--field-device-legend',
             hasFieldDeviceTestingNotesPage && 'form-page-content--field-device-testing-notes',
+            hasIndividualDeviceRecordPage && 'form-page-content--individual-device-record',
           )}
         >
           {page.sections.map((section) => {
@@ -208,6 +213,9 @@ export function FormPageCanvas({
               hasFieldDeviceLegendPage && section.id === 'section-field-device-records';
             const isFieldDeviceLegendTitleSection =
               hasFieldDeviceLegendPage && section.id === 'section-field-device-testing-legend';
+            const isIndividualDeviceRecordSection = section.elements.some(
+              (element) => element.kind === 'individualDeviceRecord',
+            );
             const isDocumentationSection = section.elements.some(
               (element) => element.kind === 'documentation',
             );
@@ -257,6 +265,7 @@ export function FormPageCanvas({
                 isVoiceCommunicationTestSection && 'flex min-h-0 flex-col',
                 isPowerSuppliesSection && 'flex min-h-0 flex-col',
                 isAnnunciatorTestSection && 'flex min-h-0 flex-col',
+                isIndividualDeviceRecordSection && 'flex min-h-0 flex-col',
                 isEmergencyPowerSupplyTestOnlySection &&
                   'form-page-section--emergency-power-supply-test',
                 isFieldDeviceChapterSection && 'form-page-section--field-device-chapter',
@@ -269,7 +278,7 @@ export function FormPageCanvas({
               )}
               <div
                 className={cn(
-                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection || isPowerSuppliesSection || isAnnunciatorTestSection || isFieldDeviceLegendTitleSection) &&
+                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection || isPowerSuppliesSection || isAnnunciatorTestSection || isFieldDeviceLegendTitleSection || isIndividualDeviceRecordSection) &&
                     'flex flex-1 flex-col',
                   !isUlcSection &&
                     !isLinedNotesSection &&
@@ -284,6 +293,7 @@ export function FormPageCanvas({
                     !isVoiceCommunicationTestSection &&
                     !isPowerSuppliesSection &&
                     !isAnnunciatorTestSection &&
+                    !isIndividualDeviceRecordSection &&
                     'space-y-3',
                 )}
               >

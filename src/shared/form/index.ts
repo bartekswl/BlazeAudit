@@ -46,5 +46,7 @@ export * from './fieldDeviceTestingLegend';
 export * from './fieldDeviceTestingLegendHtml';
 export * from './fieldDeviceTestingNotes';
 export * from './fieldDeviceTestingNotesHtml';
+export * from './individualDeviceRecord';
+export * from './individualDeviceRecordHtml';
 export * from './formPageHeader';
 export * from './formPageSize';

@@ -376,6 +376,25 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-17',
+        label: 'Page 17',
+        orientation: 'landscape',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-individual-device-record',
+            heading: '23.2 Individual Device Record',
+            elements: [
+              {
+                kind: 'individualDeviceRecord',
+                id: 'individual-device-record',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }
