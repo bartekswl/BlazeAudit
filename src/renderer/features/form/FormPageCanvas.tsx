@@ -88,6 +88,12 @@ export function FormPageCanvas({
   const hasAncillaryDeviceCircuitTestPage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'ancillaryDeviceCircuitTest'),
   );
+  const hasFsrcInterconnectionPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'fireSignalReceivingCentreInterconnection'),
+  );
+  const hasDclFaultTolerancePage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'dataCommunicationLinkFaultTolerance'),
+  );
 
   return (
     <div
@@ -105,6 +111,8 @@ export function FormPageCanvas({
         hasAnnunciatorTestPage && 'form-page-sheet--annunciator-device-test',
         hasRtsuPrinterTestPage && 'form-page-sheet--rtsu-printer-test',
         hasAncillaryDeviceCircuitTestPage && 'form-page-sheet--ancillary-device-circuit-test',
+        hasFsrcInterconnectionPage && 'form-page-sheet--fsrc-interconnection',
+        hasDclFaultTolerancePage && 'form-page-sheet--dcl-fault-tolerance',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -160,6 +168,8 @@ export function FormPageCanvas({
             hasEmergencyPowerSupplyTestOnlyPage && 'form-page-content--emergency-power-supply-test',
             hasAnnunciatorTestPage && 'form-page-content--annunciator-device-test',
             hasAncillaryDeviceCircuitTestPage && 'form-page-content--ancillary-device-circuit-test',
+            hasFsrcInterconnectionPage && 'form-page-content--fsrc-interconnection',
+            hasDclFaultTolerancePage && 'form-page-content--dcl-fault-tolerance',
           )}
         >
           {page.sections.map((section) => {
@@ -174,6 +184,12 @@ export function FormPageCanvas({
             );
             const isAncillaryDeviceCircuitTestSection = section.elements.some(
               (element) => element.kind === 'ancillaryDeviceCircuitTest',
+            );
+            const isFsrcInterconnectionSection = section.elements.some(
+              (element) => element.kind === 'fireSignalReceivingCentreInterconnection',
+            );
+            const isDclFaultToleranceSection = section.elements.some(
+              (element) => element.kind === 'dataCommunicationLinkFaultTolerance',
             );
             const isDocumentationSection = section.elements.some(
               (element) => element.kind === 'documentation',
@@ -240,6 +256,8 @@ export function FormPageCanvas({
                     !isLinedNotesSection &&
                     !isAttendanceLogSection &&
                     !isAncillaryDeviceCircuitTestSection &&
+                    !isFsrcInterconnectionSection &&
+                    !isDclFaultToleranceSection &&
                     !isDocumentationSection &&
                     !isControlUnitTestSection &&
                     !isControlUnitRecordSection &&

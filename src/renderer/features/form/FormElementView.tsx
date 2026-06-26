@@ -18,6 +18,8 @@ import { FormSequentialDisplayTestView } from './FormSequentialDisplayTestView';
 import { FormRemoteTroubleSignalUnitTestView } from './FormRemoteTroubleSignalUnitTestView';
 import { FormPrinterTestView } from './FormPrinterTestView';
 import { FormAncillaryDeviceCircuitTestView } from './FormAncillaryDeviceCircuitTestView';
+import { FormFireSignalReceivingCentreInterconnectionView } from './FormFireSignalReceivingCentreInterconnectionView';
+import { FormDataCommunicationLinkFaultToleranceView } from './FormDataCommunicationLinkFaultToleranceView';
 import { FormDocumentationView } from './FormDocumentationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
@@ -69,7 +71,9 @@ export function FormElementView({
     element.kind === 'sequentialDisplayTest' ||
     element.kind === 'remoteTroubleSignalUnitTest' ||
     element.kind === 'printerTest' ||
-    element.kind === 'ancillaryDeviceCircuitTest';
+    element.kind === 'ancillaryDeviceCircuitTest' ||
+    element.kind === 'fireSignalReceivingCentreInterconnection' ||
+    element.kind === 'dataCommunicationLinkFaultTolerance';
 
   return (
     <div
@@ -78,6 +82,8 @@ export function FormElementView({
         flushFrame && 'form-element-frame--flush',
         flushFrame &&
           element.kind !== 'ancillaryDeviceCircuitTest' &&
+          element.kind !== 'fireSignalReceivingCentreInterconnection' &&
+          element.kind !== 'dataCommunicationLinkFaultTolerance' &&
           'flex min-h-0 flex-1 flex-col',
       )}
     >
@@ -458,6 +464,22 @@ function FormElementBody({
     case 'ancillaryDeviceCircuitTest':
       return (
         <FormAncillaryDeviceCircuitTestView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'fireSignalReceivingCentreInterconnection':
+      return (
+        <FormFireSignalReceivingCentreInterconnectionView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'dataCommunicationLinkFaultTolerance':
+      return (
+        <FormDataCommunicationLinkFaultToleranceView
           value={value}
           readOnly={readOnly}
           onChange={onChange}

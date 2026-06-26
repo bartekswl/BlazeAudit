@@ -299,6 +299,42 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-13',
+        label: 'Page 13',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-fire-signal-receiving-centre-interconnection',
+            heading: '22.11 Interconnection to the Fire Signal Receiving Centre',
+            elements: [
+              {
+                kind: 'fireSignalReceivingCentreInterconnection',
+                id: 'fire-signal-receiving-centre-interconnection',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'page-14',
+        label: 'Page 14',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-data-communication-link-fault-tolerance',
+            heading: '22.12 Operation Test Circuit Fault Tolerance',
+            elements: [
+              {
+                kind: 'dataCommunicationLinkFaultTolerance',
+                id: 'data-communication-link-fault-tolerance',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

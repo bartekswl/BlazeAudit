@@ -35,6 +35,10 @@ function outlineEntryForSection(section: FormSection): { label: string; depth: n
   if (only?.kind === 'remoteTroubleSignalUnitTest') return { label: 'Remote Trouble Signal Unit Test', depth: 1 };
   if (only?.kind === 'printerTest') return { label: 'Printer Test', depth: 1 };
   if (only?.kind === 'ancillaryDeviceCircuitTest') return { label: 'Ancillary Device Circuit Test', depth: 1 };
+  if (only?.kind === 'fireSignalReceivingCentreInterconnection')
+    return { label: 'Fire Signal Receiving Centre Interconnection', depth: 1 };
+  if (only?.kind === 'dataCommunicationLinkFaultTolerance')
+    return { label: 'Operation Test Circuit Fault Tolerance', depth: 1 };
 
   const title = section.title?.trim();
   if (title) return { label: title, depth: 0 };

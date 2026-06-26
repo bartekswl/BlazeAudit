@@ -576,6 +576,224 @@ const PRINT_OVERRIDES = `
     box-shadow: none !important;
   }
 
+  /* Fire signal receiving centre interconnection — 22.11 (single table, top offset) */
+  .form-print-root .form-page-sheet--fsrc-interconnection .form-page-body {
+    overflow: visible !important;
+  }
+  .form-print-root .form-page-content--fsrc-interconnection {
+    flex: 0 1 auto !important;
+    margin-top: 0 !important;
+    padding-top: 18mm !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .form-page-section:has(.fsrc-panel) .form-page-section-title {
+    margin-bottom: 3pt !important;
+    font-size: 9.5pt !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-panel {
+    --fsrc-line: 0.5px solid #64748b !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    margin-top: 0 !important;
+    border-radius: 0.625rem !important;
+    box-shadow: none !important;
+    font-size: 8pt !important;
+    line-height: 1.15 !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-na-bar {
+    background: #cfe2f3 !important;
+    border-bottom: 0.5px solid #64748b !important;
+    padding: 1pt 3pt !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-ref-bar {
+    background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%) !important;
+    color: #ffffff !important;
+    border-bottom: 0.5px solid #64748b !important;
+    padding: 1pt 3pt !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-info-row {
+    background: #cfe2f3 !important;
+    border-bottom: 0.5px solid #64748b !important;
+    min-height: 0 !important;
+    padding: 0.5pt 2pt !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-table-wrap {
+    flex: 0 1 auto !important;
+    overflow: hidden !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-table {
+    width: 100% !important;
+    height: auto !important;
+    table-layout: fixed !important;
+    font-size: 8.25pt !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-th,
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-td {
+    border-right: 0.5px solid #64748b !important;
+    padding: 0.5pt 1pt !important;
+    box-sizing: border-box !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-row .fsrc-td {
+    padding-top: 2pt !important;
+    padding-bottom: 2pt !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-td--desc {
+    padding-top: 2.5pt !important;
+    padding-bottom: 2.5pt !important;
+    padding-left: 1.5pt !important;
+    padding-right: 1.5pt !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-th:last-child,
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-td:last-child {
+    border-right: none !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-row .fsrc-td,
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-th {
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-th--yes {
+    background: #1b6b2f !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-th--no {
+    background: #9b1c1c !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-th--na {
+    background: #171717 !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-td--na-blocked,
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-td--choice-block {
+    background: #cfe2f3 !important;
+    padding: 0 !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-check-cell {
+    min-height: 0 !important;
+    padding: 0.5pt !important;
+  }
+  .form-print-root .form-page-sheet--fsrc-interconnection .fsrc-footer-note {
+    border-top: 0.5px solid #64748b !important;
+    padding: 1pt 2pt 1.5pt !important;
+    font-size: 7.5pt !important;
+    text-align: center !important;
+  }
+  .form-print-root .form-page-section:has(.fsrc-panel) .form-element-frame--flush {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Data communication link fault tolerance — 22.12 (dual stacked panels) */
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .form-page-body {
+    overflow: visible !important;
+  }
+  .form-print-root .form-page-content--dcl-fault-tolerance {
+    flex: 0 1 auto !important;
+    margin-top: 0 !important;
+    padding-top: 16mm !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .form-page-section:has(.dclft-stack) .form-page-section-title {
+    margin-bottom: 4pt !important;
+    font-size: 8.5pt !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-stack {
+    gap: 18pt !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-panel {
+    --dclft-line: 0.5px solid #64748b !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    margin-top: 0 !important;
+    border-radius: 0.625rem !important;
+    box-shadow: none !important;
+    font-size: 7pt !important;
+    line-height: 1.12 !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-na-bar {
+    background: #cfe2f3 !important;
+    border-bottom: 0.5px solid #64748b !important;
+    padding: 1pt 3pt !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-ref-bar {
+    background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%) !important;
+    color: #ffffff !important;
+    border-bottom: 0.5px solid #64748b !important;
+    padding: 1pt 3pt !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-info-row {
+    background: #cfe2f3 !important;
+    border-bottom: 0.5px solid #64748b !important;
+    min-height: 0 !important;
+    padding: 0.5pt 2pt !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-table-wrap {
+    flex: 0 1 auto !important;
+    overflow: hidden !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-table {
+    width: 100% !important;
+    height: auto !important;
+    table-layout: fixed !important;
+    font-size: 7.25pt !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-th,
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-td {
+    border-right: 0.5px solid #64748b !important;
+    padding: 0.5pt 1pt !important;
+    box-sizing: border-box !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-row .dclft-td {
+    padding-top: 2pt !important;
+    padding-bottom: 2pt !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-td--desc {
+    padding-top: 2.5pt !important;
+    padding-bottom: 2.5pt !important;
+    padding-left: 1.5pt !important;
+    padding-right: 1.5pt !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-th:last-child,
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-td:last-child {
+    border-right: none !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-row .dclft-td,
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-th {
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-th--yes {
+    background: #1b6b2f !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-th--no {
+    background: #9b1c1c !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-th--na {
+    background: #171717 !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-check-cell {
+    min-height: 0 !important;
+    padding: 0.5pt !important;
+  }
+  .form-print-root .form-page-section:has(.dclft-stack) .form-element-frame--flush {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   /* Documentation checklist — 21 Documentation */
   .form-print-root .doc-panel {
     --doc-line: 0.5px solid #64748b !important;
@@ -1599,7 +1817,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .epst-panel,
   .form-print-root .artu-panel,
   .form-print-root .asd-panel,
-  .form-print-root .adc-panel {
+  .form-print-root .adc-panel,
+  .form-print-root .fsrc-panel,
+  .form-print-root .dclft-panel {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }
@@ -1614,7 +1834,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .epst-panel,
   .form-print-root .artu-panel,
   .form-print-root .asd-panel,
-  .form-print-root .adc-panel {
+  .form-print-root .adc-panel,
+  .form-print-root .fsrc-panel,
+  .form-print-root .dclft-panel {
     overflow: hidden !important;
   }
 

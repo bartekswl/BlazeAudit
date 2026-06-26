@@ -27,6 +27,8 @@ import { renderSequentialDisplayTestHtml } from '../../shared/form/sequentialDis
 import { renderRemoteTroubleSignalUnitTestHtml } from '../../shared/form/remoteTroubleSignalUnitTestHtml';
 import { renderPrinterTestHtml } from '../../shared/form/printerTestHtml';
 import { renderAncillaryDeviceCircuitTestHtml } from '../../shared/form/ancillaryDeviceCircuitTestHtml';
+import { renderFireSignalReceivingCentreInterconnectionHtml } from '../../shared/form/fireSignalReceivingCentreInterconnectionHtml';
+import { renderDataCommunicationLinkFaultToleranceHtml } from '../../shared/form/dataCommunicationLinkFaultToleranceHtml';
 import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
@@ -178,6 +180,10 @@ function renderElementHtml(
       return framed(renderPrinterTestHtml(value), true);
     case 'ancillaryDeviceCircuitTest':
       return framed(renderAncillaryDeviceCircuitTestHtml(value), true);
+    case 'fireSignalReceivingCentreInterconnection':
+      return framed(renderFireSignalReceivingCentreInterconnectionHtml(value), true);
+    case 'dataCommunicationLinkFaultTolerance':
+      return framed(renderDataCommunicationLinkFaultToleranceHtml(value), true);
     default:
       return '';
   }
@@ -305,6 +311,14 @@ function renderPageHtml(
   const hasAncillaryDeviceCircuitTestPage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'ancillaryDeviceCircuitTest'),
   );
+  const hasFsrcInterconnectionPage = page.sections.some((section) =>
+    section.elements.some(
+      (element) => element.kind === 'fireSignalReceivingCentreInterconnection',
+    ),
+  );
+  const hasDclFaultTolerancePage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'dataCommunicationLinkFaultTolerance'),
+  );
 
   const sheetClasses = [
     'form-page',
@@ -316,6 +330,8 @@ function renderPageHtml(
     hasAnnunciatorTestPage ? 'form-page-sheet--annunciator-device-test' : '',
     hasRtsuPrinterTestPage ? 'form-page-sheet--rtsu-printer-test' : '',
     hasAncillaryDeviceCircuitTestPage ? 'form-page-sheet--ancillary-device-circuit-test' : '',
+    hasFsrcInterconnectionPage ? 'form-page-sheet--fsrc-interconnection' : '',
+    hasDclFaultTolerancePage ? 'form-page-sheet--dcl-fault-tolerance' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -326,6 +342,8 @@ function renderPageHtml(
     hasEmergencyPowerSupplyTestOnlyPage ? 'form-page-content--emergency-power-supply-test' : '',
     hasAnnunciatorTestPage ? 'form-page-content--annunciator-device-test' : '',
     hasAncillaryDeviceCircuitTestPage ? 'form-page-content--ancillary-device-circuit-test' : '',
+    hasFsrcInterconnectionPage ? 'form-page-content--fsrc-interconnection' : '',
+    hasDclFaultTolerancePage ? 'form-page-content--dcl-fault-tolerance' : '',
   ]
     .filter(Boolean)
     .join(' ');

@@ -50,6 +50,8 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `remoteTroubleSignalUnitTest` — 22.8 Remote Trouble Signal Unit Test and Inspection (`.rtsu-*`)
 - `printerTest` — 22.9 Printer Test (`.prt-*`)
 - `ancillaryDeviceCircuitTest` — 22.10 Ancillary Device Circuit Test (`.adc-*`)
+- `fireSignalReceivingCentreInterconnection` — 22.11 Interconnection to the Fire Signal Receiving Centre (`.fsrc-*`)
+- `dataCommunicationLinkFaultTolerance` — 22.12 Operation Test Circuit Fault Tolerance (`.dclft-*`)
 
 ---
 
@@ -80,7 +82,7 @@ Every built-in form panel on `.form-page-sheet` shares one thick **black** outer
 | Surface | Selector | Outer border |
 |---------|----------|--------------|
 | Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `1.5px solid #000000` |
-| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel`, `.psi-panel`, `.epst-panel`, `.artu-panel`, `.asd-panel`, `.rtsu-panel`, `.prt-panel`, `.adc-panel` | via `border: var(--form-panel-frame)` |
+| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel`, `.psi-panel`, `.epst-panel`, `.artu-panel`, `.asd-panel`, `.rtsu-panel`, `.prt-panel`, `.adc-panel`, `.fsrc-panel`, `.dclft-panel` | via `border: var(--form-panel-frame)` |
 | PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `2pt solid #000000 !important` on the same selectors |
 
 Do **not** use the thin `--*-line` variable for the outer panel perimeter — that is for inner cells only.
@@ -264,6 +266,7 @@ Scoped under `.form-print-root .form-page-sheet--ancillary-device-circuit-test`:
 | `:not(:last-child)` only on row bottom borders | Vertical grid lines do not meet footnote bar |
 | `overflow: visible` on `.adc-panel` (screen) | Rounded corners gap — inner grid sticks past frame; use **`overflow: hidden`** on panel only (page sheet stays `overflow: visible`) |
 | `overflow: visible` on `.adc-table-wrap` in PDF | Frame/grid misalignment at panel edges |
+| Section N/A grey-out (`opacity`, `*-disabled` strips, `disabled={sectionNotApplicable}` on inputs) | Panel becomes unreadable — use VCT section-N/A pattern instead |
 | Extra `<tr>` filler rows in JSX/CSS | Breaks row-count parity and keyboard bounds |
 
 **Verification checklist**
@@ -272,6 +275,41 @@ Scoped under `.form-print-root .form-page-sheet--ancillary-device-circuit-test`:
 - [ ] Document: editable inputs rows 1–48; Enter blocked on row 48
 - [ ] PDF: all 48 rows + both footnotes on one A4 page; closed outer frame; headings and footnotes readable
 - [ ] Column widths match across template, document, PDF (40/5/15/8/8/24)
+
+### Fire signal receiving centre interconnection (`.fsrc-*`) — defaults
+
+Page 13 portrait — **22.11 Interconnection to the Fire Signal Receiving Centre** (`fireSignalReceivingCentreInterconnection`).
+
+| Area | Rule |
+|------|------|
+| Title | **22.11 Interconnection to the Fire Signal Receiving Centre** in `.form-page-section-title` above panel |
+| Page offset | Single table on page — **`padding-top: 2rem`** on `.form-page-content--fsrc-interconnection` (screen); **`14.85mm`** in PDF (`PRINT_OVERRIDES`) so content sits lower on the sheet |
+| Outer frame | **`--form-panel-frame`** on `.fsrc-panel`; **`overflow: hidden`** + `border-radius: 0.625rem` |
+| N/A bar | Light blue (`#cfe2f3`) — section N/A checkbox |
+| Section N/A | Same as [Section N/A bar](#section-na-bar-vct--fsrc--and-similar-checklist-panels) — rows C–F/H auto-fill N/A; **no grey-out** |
+| Reference bar | Dark blue gradient — complete 22.11 for each transmitter |
+| Info rows | Light blue strip — Communicator Location, Circuit Disconnect Means Location, Circuit Panel/Breaker Identification |
+| Table | Rows A–H; A/B = Yes/No only (N/A column blocked blue); C–F/H = Yes/No/N/A; G = Company/Address/Telephone fill-ins + merged choice block |
+| Footer note | Editorial note on item A below table inside panel |
+| Page tile | **A4 portrait** (`aspect-ratio: 210/297`) |
+| Value shape | `{ sectionNotApplicable, communicatorLocation, circuitDisconnectMeansLocation, circuitPanelBreakerIdentification, checklist, recordFields }` |
+
+### Data communication link fault tolerance (`.dclft-*`) — defaults
+
+Page 14 portrait — **22.12 Operation Test Circuit Fault Tolerance** (`dataCommunicationLinkFaultTolerance`).
+
+| Area | Rule |
+|------|------|
+| Title | **22.12 Operation Test Circuit Fault Tolerance** in `.form-page-section-title` above stack |
+| Layout | **Two stacked panels** in `.dclft-stack` — primary DCL block + additional DCL block (`gap: 1.25rem` screen, `6pt` PDF) |
+| Outer frame | **`--form-panel-frame`** on each `.dclft-panel`; **`overflow: hidden`** + `border-radius: 0.625rem` |
+| N/A bar | Light blue — primary: *no DCL circuits*; additional: *no **additional** DCL circuits* |
+| Section N/A | [Section N/A bar](#section-na-bar-vct--fsrc--and-similar-checklist-panels) — all rows A–F auto-fill N/A; **no grey-out** |
+| Reference bar | Dark blue gradient — refer to Section 12 DCL operation tests and 23.3 |
+| Info rows | Control Unit or Transponder Location / Identification, DCL Circuit Identification |
+| Table | Rows A–F — full Yes / No / N/A on every row |
+| Page tile | **A4 portrait** (`aspect-ratio: 210/297`); natural height (no page-fill stretch) |
+| Value shape | `{ primary: DclftBlock, additional: DclftBlock }` — each block has `sectionNotApplicable`, three info fields, `checklist` |
 
 ### Documentation checklist (`.doc-*`) — defaults
 
@@ -431,6 +469,19 @@ Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct
 | **PDF checked glyph** | — | Read-only ticks use `form-check-glyph--checked` (`FormCheckGlyph` / `renderCheckGlyphHtml`) — print rule bumps **checked** glyph to `11.5pt`; unchecked stays `8.5pt`; radio/checkbox **input** size unchanged |
 
 **Editable Yes/No/N/A cells:** one control only — `<label class="…-check-cell">` wrapping a **`type="radio"`** (or section N/A `checkbox`) with `sr-only` label. **Never** stack a native input and a visible `☐`/`☑` character in the same cell.
+
+### Section N/A bar (`.vct-*`, `.fsrc-*`, and similar checklist panels)
+
+Forms with a top **“(This Section is Not Applicable)”** checkbox (22.3, 22.8, 22.9, 22.11, 22.12, etc.) must follow the **22.3 Voice Communication Test** pattern — **not** the grey-out/disable overlay pattern.
+
+| Rule | Detail |
+|------|--------|
+| **No grey-out** | **Never** apply `opacity`, `pointer-events: none`, or `*-header-strip--disabled` / `*-table-wrap--disabled` when section N/A is checked — panel stays full colour and readable |
+| **Check on section N/A** | `set*SectionNotApplicable(value, true)` sets every row that **supports N/A** to `choice: 'na'`; rows without an N/A column (e.g. 22.11 A/B) keep `choice: null` |
+| **Uncheck section N/A** | Clears **all** checklist row choices to `null` |
+| **Edit a checklist row** | `set*Choice()` sets `sectionNotApplicable: false` (unchecks section N/A) |
+| **Info / fill-in rows** | Stay editable in document mode — do **not** pass `disabled={sectionNotApplicable}` to inputs |
+| **Reference** | `voiceCommunicationTest.ts` + `FormVoiceCommunicationTestView.tsx` |
 
 **Layout rule:** when changing table font size, do **not** change column widths, cell padding, or row min-heights — only the table `font-size` (and matching print override in `buildFormPrintHtml.tsx`).
 
@@ -663,6 +714,9 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
+| 2026-06-25 | Page 14: `.dclft-*` (22.12) dual stacked DCL circuit fault tolerance panels — rows A–F, independent section N/A per block. |
+| 2026-06-25 | Section N/A blueprint: no grey-out on checklist panels (VCT pattern); 22.11 `.fsrc-*` fixed to match. |
+| 2026-06-25 | Page 13: `.fsrc-*` (22.11) FSRC interconnection checklist — light-blue headers, rows A–H, top page padding on single-table page. |
 | 2026-06-25 | **22.10 `.adc-*` blueprint expanded** — screen vs PDF layout, flex-fill print rules, border/grid, typography, anti-patterns, file map, verification checklist. |
 | 2026-06-25 | Fixed-row grid tables blueprint: row-count parity (template/document/PDF), col widths, Enter bounds; `.att-*` row height; `.adc-*` PDF flex-fill exception documented. |
 | 2026-06-25 | Page 12: `.adc-*` (22.10) full-page grid — 48 rows, purple/orange/green/red headers, footnotes. |

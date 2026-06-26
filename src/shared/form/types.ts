@@ -122,6 +122,14 @@ export type FormElement =
   | {
       kind: 'ancillaryDeviceCircuitTest';
       id: string;
+    }
+  | {
+      kind: 'fireSignalReceivingCentreInterconnection';
+      id: string;
+    }
+  | {
+      kind: 'dataCommunicationLinkFaultTolerance';
+      id: string;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';
@@ -225,6 +233,8 @@ export type { SequentialDisplayTestValue } from './sequentialDisplayTest';
 export type { RemoteTroubleSignalUnitTestValue } from './remoteTroubleSignalUnitTest';
 export type { PrinterTestValue } from './printerTest';
 export type { AncillaryDeviceCircuitTestValue } from './ancillaryDeviceCircuitTest';
+export type { FireSignalReceivingCentreInterconnectionValue } from './fireSignalReceivingCentreInterconnection';
+export type { DataCommunicationLinkFaultToleranceValue } from './dataCommunicationLinkFaultTolerance';
 export type {
   DeficienciesValue,
   DeficiencyControlRow,
