@@ -728,8 +728,8 @@ const PRINT_OVERRIDES = `
     margin-top: 0 !important;
     border-radius: 0.625rem !important;
     box-shadow: none !important;
-    font-size: 7pt !important;
-    line-height: 1.2 !important;
+    font-size: 6.5pt !important;
+    line-height: 1.15 !important;
     color: #171717 !important;
     background: #ffffff !important;
   }
@@ -790,8 +790,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .vct-table {
     width: 100% !important;
     table-layout: fixed !important;
-    font-size: 8pt !important;
+    font-size: 7.5pt !important;
   }
+
   .form-print-root .form-page-section:has(.vct-panel) .form-element-frame--flush {
     margin-top: 0 !important;
     padding-top: 0 !important;
@@ -802,6 +803,137 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-content--voice-communication-test {
     flex: 1 1 auto !important;
     min-height: 0 !important;
+    gap: 3pt !important;
+    margin-top: 2pt !important;
+  }
+  .form-print-root .form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel) .form-page-section-title,
+  .form-print-root .form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) .form-page-section-title {
+    margin-bottom: 2pt !important;
+    font-size: 8.5pt !important;
+  }
+  .form-print-root .form-page-sheet--voice-communication-test .vct-na-bar,
+  .form-print-root .form-page-sheet--voice-communication-test .vct-ref-bar,
+  .form-print-root .form-page-sheet--voice-communication-test .psi-banner {
+    padding: 1pt 3pt !important;
+    line-height: 1.1 !important;
+  }
+  .form-print-root .form-page-sheet--voice-communication-test .vct-info-row,
+  .form-print-root .form-page-sheet--voice-communication-test .psi-info-row {
+    min-height: 0 !important;
+    padding: 0.5pt 2pt !important;
+  }
+  .form-print-root .form-page-sheet--voice-communication-test .vct-th,
+  .form-print-root .form-page-sheet--voice-communication-test .vct-td,
+  .form-print-root .form-page-sheet--voice-communication-test .psi-th,
+  .form-print-root .form-page-sheet--voice-communication-test .psi-td {
+    padding: 0.5pt 1pt !important;
+  }
+  .form-print-root .form-page-sheet--voice-communication-test .vct-check-cell,
+  .form-print-root .form-page-sheet--voice-communication-test .psi-check-cell {
+    min-height: 0 !important;
+    padding: 0.5pt !important;
+  }
+  .form-print-root .form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .form-print-root .form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) > div,
+  .form-print-root
+    .form-page-sheet--voice-communication-test
+    .form-page-section:has(.psi-panel)
+    .form-element-frame--flush {
+    flex: 0 0 auto !important;
+    height: auto !important;
+  }
+  .form-print-root .form-page-sheet--voice-communication-test .psi-panel {
+    height: auto !important;
+    grid-template-rows: auto auto auto !important;
+  }
+  .form-print-root .form-page-sheet--voice-communication-test .psi-table-wrap {
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+  }
+  .form-print-root .form-page-sheet--voice-communication-test .psi-table,
+  .form-print-root .form-page-sheet--voice-communication-test .psi-table thead,
+  .form-print-root .form-page-sheet--voice-communication-test .psi-table tbody,
+  .form-print-root .form-page-sheet--voice-communication-test .psi-table tbody tr {
+    height: auto !important;
+  }
+
+  /* 22.5 only — full page slot */
+  .form-print-root .form-page-content--emergency-power-supply-test {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-section--emergency-power-supply-test {
+    flex: 0 1 auto !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 95% !important;
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-section--emergency-power-supply-test .form-element-frame--flush {
+    flex: 0 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    padding-bottom: 1pt !important;
+    font-size: 7pt !important;
+    line-height: 1.12 !important;
+  }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table-wrap {
+    flex: 0 1 auto !important;
+    overflow: visible !important;
+  }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table-wrap > .epst-table,
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table--generator {
+    height: auto !important;
+    table-layout: fixed !important;
+    font-size: 8pt !important;
+  }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table-wrap > .epst-table tbody tr,
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table--generator tbody tr {
+    height: auto !important;
+  }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-desc-line {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 8ch minmax(2.25rem, max-content) !important;
+    column-gap: 1.5pt !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-desc-line .epst-desc-text {
+    grid-column: 1 !important;
+    min-width: 0 !important;
+  }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-desc-line .epst-field-value,
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-desc-line .epst-field-input {
+    grid-column: 2 !important;
+  }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-desc-line .epst-field-unit {
+    grid-column: 3 !important;
+  }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-desc-line--wide .epst-field-value,
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-desc-line--wide .epst-field-input {
+    grid-column: 2 / 4 !important;
+  }
+  .form-print-root .form-page-section--emergency-power-supply-test .form-page-section-title {
+    margin-bottom: 2pt !important;
+    font-size: 8.5pt !important;
   }
 
   /* Affirmation block — match panel frame + thin grid lines in PDF. */
@@ -1101,7 +1233,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .doc-panel,
   .form-print-root .cut-panel,
   .form-print-root .cur-panel,
-  .form-print-root .vct-panel {
+  .form-print-root .vct-panel,
+  .form-print-root .psi-panel,
+  .form-print-root .epst-panel {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }
@@ -1111,7 +1245,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .doc-panel,
   .form-print-root .cut-panel,
   .form-print-root .cur-panel,
-  .form-print-root .vct-panel {
+  .form-print-root .vct-panel,
+  .form-print-root .psi-panel,
+  .form-print-root .epst-panel {
     overflow: hidden !important;
   }
 

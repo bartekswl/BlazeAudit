@@ -11,6 +11,8 @@ import { FormAttendanceLogView } from './FormAttendanceLogView';
 import { FormControlUnitTestView } from './FormControlUnitTestView';
 import { FormControlUnitRecordView } from './FormControlUnitRecordView';
 import { FormVoiceCommunicationTestView } from './FormVoiceCommunicationTestView';
+import { FormPowerSupplyInspectionView } from './FormPowerSupplyInspectionView';
+import { FormEmergencyPowerSupplyTestView } from './FormEmergencyPowerSupplyTestView';
 import { FormDocumentationView } from './FormDocumentationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
@@ -55,7 +57,9 @@ export function FormElementView({
     element.kind === 'documentation' ||
     element.kind === 'controlUnitTest' ||
     element.kind === 'controlUnitRecord' ||
-    element.kind === 'voiceCommunicationTest';
+    element.kind === 'voiceCommunicationTest' ||
+    element.kind === 'powerSupplyInspection' ||
+    element.kind === 'emergencyPowerSupplyTest';
 
   return (
     <div
@@ -385,6 +389,22 @@ function FormElementBody({
     case 'voiceCommunicationTest':
       return (
         <FormVoiceCommunicationTestView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'powerSupplyInspection':
+      return (
+        <FormPowerSupplyInspectionView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'emergencyPowerSupplyTest':
+      return (
+        <FormEmergencyPowerSupplyTestView
           value={value}
           readOnly={readOnly}
           onChange={onChange}

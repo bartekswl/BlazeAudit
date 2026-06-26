@@ -193,6 +193,35 @@ export function formPrototypeDefinition(): FormDefinition {
               },
             ],
           },
+          {
+            id: 'section-power-supply-inspection',
+            heading: '22.4 Power Supply Inspection',
+            elements: [
+              {
+                kind: 'powerSupplyInspection',
+                id: 'power-supply-inspection',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'page-9',
+        label: 'Page 9',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-emergency-power-supply-test',
+            heading: '22.5 Emergency Power Supply Test and Inspection',
+            heightPercent: 95,
+            elements: [
+              {
+                kind: 'emergencyPowerSupplyTest',
+                id: 'emergency-power-supply-test',
+              },
+            ],
+          },
         ],
       },
     ],

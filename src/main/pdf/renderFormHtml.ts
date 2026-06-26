@@ -20,6 +20,8 @@ import { renderAttendanceLogHtml } from '../../shared/form/attendanceLogHtml';
 import { renderControlUnitTestHtml } from '../../shared/form/controlUnitTestHtml';
 import { renderControlUnitRecordHtml } from '../../shared/form/controlUnitRecordHtml';
 import { renderVoiceCommunicationTestHtml } from '../../shared/form/voiceCommunicationTestHtml';
+import { renderPowerSupplyInspectionHtml } from '../../shared/form/powerSupplyInspectionHtml';
+import { renderEmergencyPowerSupplyTestHtml } from '../../shared/form/emergencyPowerSupplyTestHtml';
 import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
@@ -157,6 +159,10 @@ function renderElementHtml(
       return framed(renderControlUnitRecordHtml(value), true);
     case 'voiceCommunicationTest':
       return framed(renderVoiceCommunicationTestHtml(value), true);
+    case 'powerSupplyInspection':
+      return framed(renderPowerSupplyInspectionHtml(value), true);
+    case 'emergencyPowerSupplyTest':
+      return framed(renderEmergencyPowerSupplyTestHtml(value), true);
     default:
       return '';
   }
@@ -221,15 +227,30 @@ function renderPageHtml(
     .map((section) => {
       const isUlcSection =
         section.elements.length === 1 && section.elements[0]?.kind === 'ulcSection1';
+      const isEmergencyPowerSupplyTestSection = section.elements.some(
+        (element) => element.kind === 'emergencyPowerSupplyTest',
+      );
+      const isPowerSupplyInspectionSection = section.elements.some(
+        (element) => element.kind === 'powerSupplyInspection',
+      );
+      const isEmergencyPowerSupplyTestOnlySection =
+        isEmergencyPowerSupplyTestSection && !isPowerSupplyInspectionSection;
       const elements = section.elements
         .map((el) => renderElementHtml(el, values[el.id], context, totalPages))
         .join('');
       const height = section.heightPercent
-        ? ` style="min-height:${section.heightPercent}%"`
+        ? isEmergencyPowerSupplyTestOnlySection
+          ? ` style="min-height:${section.heightPercent}%"`
+          : ` style="height:${section.heightPercent}%;min-height:${section.heightPercent}%;max-height:${section.heightPercent}%"`
         : '';
-      const sectionCls = isUlcSection
-        ? 'form-page-section form-page-section--ulc'
-        : 'form-page-section';
+      const sectionCls = [
+        isUlcSection ? 'form-page-section form-page-section--ulc' : 'form-page-section',
+        isEmergencyPowerSupplyTestOnlySection
+          ? 'form-page-section--emergency-power-supply-test'
+          : '',
+      ]
+        .filter(Boolean)
+        .join(' ');
       const elementsCls = isUlcSection
         ? 'form-page-section-elements--ulc'
         : 'form-page-section-elements';
@@ -244,13 +265,41 @@ function renderPageHtml(
     })
     .join('');
 
-  const orientationCls = page.orientation === 'landscape' ? ' form-page-sheet--landscape' : '';
+  const hasVoiceCommunicationTest = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'voiceCommunicationTest'),
+  );
+  const hasEmergencyPowerSupplyTestPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'emergencyPowerSupplyTest'),
+  );
+  const hasEmergencyPowerSupplyTestOnlyPage =
+    hasEmergencyPowerSupplyTestPage && !page.sections.some((section) =>
+      section.elements.some((element) => element.kind === 'powerSupplyInspection'),
+    );
+
+  const sheetClasses = [
+    'form-page',
+    'form-page-sheet',
+    'form-page-sheet--fixed',
+    page.orientation === 'landscape' ? 'form-page-sheet--landscape' : '',
+    hasVoiceCommunicationTest ? 'form-page-sheet--voice-communication-test' : '',
+    hasEmergencyPowerSupplyTestOnlyPage ? 'form-page-sheet--emergency-power-supply-test' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const contentClasses = [
+    'form-page-content',
+    hasVoiceCommunicationTest ? 'form-page-content--voice-communication-test' : '',
+    hasEmergencyPowerSupplyTestOnlyPage ? 'form-page-content--emergency-power-supply-test' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return `
-    <section class="form-page form-page-sheet${orientationCls}">
+    <section class="${sheetClasses}">
       <div class="form-page-body" style="height:${bodyPercent}%">
         ${headerHtml}
-        <div class="form-page-content">${sections}</div>
+        <div class="${contentClasses}">${sections}</div>
       </div>
       <footer class="form-page-footer" style="height:${FORM_FOOTER_HEIGHT_PERCENT}%">
         <div class="form-page-footer-count">Page ${pageIndex + 1} of ${totalPages}</div>

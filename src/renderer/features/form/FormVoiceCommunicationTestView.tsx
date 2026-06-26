@@ -5,7 +5,6 @@ import {
   VOICE_COMMUNICATION_TEST_NOT_APPLICABLE_TEXT,
   VOICE_COMMUNICATION_TEST_REF,
   VOICE_COMMUNICATION_TEST_ROWS,
-  VOICE_COMMUNICATION_TEST_TITLE,
   normalizeVoiceCommunicationTestValue,
   setVoiceCommunicationTestChoice,
   setVoiceCommunicationTestFieldLocation,
@@ -148,8 +147,6 @@ export function FormVoiceCommunicationTestView({
 
   return (
     <div className="vct-panel">
-      <div className="vct-title">{VOICE_COMMUNICATION_TEST_TITLE}</div>
-
       <div className="vct-na-bar">
         <span className="vct-na-text">{VOICE_COMMUNICATION_TEST_NOT_APPLICABLE_TEXT}</span>
         {readOnly ? (

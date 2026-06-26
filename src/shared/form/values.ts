@@ -14,6 +14,8 @@ import { emptyDocumentationValue } from './documentation';
 import { emptyControlUnitTestValue } from './controlUnitTest';
 import { emptyControlUnitRecordValue } from './controlUnitRecord';
 import { emptyVoiceCommunicationTestValue } from './voiceCommunicationTest';
+import { emptyPowerSupplyInspectionValue } from './powerSupplyInspection';
+import { emptyEmergencyPowerSupplyTestValue } from './emergencyPowerSupplyTest';
 import { emptyLinedNotesValue } from './linedNotes';
 import { emptyUlcSection1Value, normalizeUlcSection1Value } from './ulcSection1';
 import { emptyYesNoSummaryValue } from './yesNoSummary';
@@ -70,6 +72,10 @@ export function initialValueForElement(element: FormElement): unknown {
       return emptyControlUnitRecordValue();
     case 'voiceCommunicationTest':
       return emptyVoiceCommunicationTestValue();
+    case 'powerSupplyInspection':
+      return emptyPowerSupplyInspectionValue();
+    case 'emergencyPowerSupplyTest':
+      return emptyEmergencyPowerSupplyTestValue();
     default: {
       const _exhaustive: never = element;
       return _exhaustive;

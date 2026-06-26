@@ -5,7 +5,6 @@ import {
   VOICE_COMMUNICATION_TEST_NOT_APPLICABLE_TEXT,
   VOICE_COMMUNICATION_TEST_REF,
   VOICE_COMMUNICATION_TEST_ROWS,
-  VOICE_COMMUNICATION_TEST_TITLE,
   normalizeVoiceCommunicationTestValue,
 } from './voiceCommunicationTest';
 
@@ -51,7 +50,6 @@ export function renderVoiceCommunicationTestHtml(value: unknown): string {
   }).join('');
 
   return `<div class="vct-panel">
-    <div class="vct-title">${escapeHtml(VOICE_COMMUNICATION_TEST_TITLE)}</div>
     <div class="vct-na-bar">
       <span class="vct-na-text">${escapeHtml(VOICE_COMMUNICATION_TEST_NOT_APPLICABLE_TEXT)}</span>
       <span class="vct-na-check-wrap">

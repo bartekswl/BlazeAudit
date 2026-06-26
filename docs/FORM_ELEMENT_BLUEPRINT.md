@@ -43,6 +43,8 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `controlUnitTest` — 22 Control Unit or Transponder Test Record (`.cut-*`)
 - `controlUnitRecord` — 22.2 Control Unit or Transponder Record (`.cur-*`)
 - `voiceCommunicationTest` — 22.3 Voice Communication Test (`.vct-*`)
+- `powerSupplyInspection` — 22.4 Power Supply Inspection (`.psi-*`)
+- `emergencyPowerSupplyTest` — 22.5 Emergency Power Supply Test and Inspection (`.epst-*`)
 
 ---
 
@@ -61,7 +63,7 @@ All composite elements on a letter page share the same “form panel” language
 | Page top → code | `padding-top: 1.75rem` on `.form-page-body` | Space above template code line |
 | Section gap | `1.5rem` on `.form-page-content` | **Even** gap between all stacked panels |
 | Section title → panel | `margin-bottom: 0.75rem` on `.form-page-section-title` | e.g. “20.1 …” heading → ULC panel |
-| ULC section height | **`minHeight`** % | Never `maxHeight` — prevents PDF overlap |
+| ULC section height | **`minHeight`** % only | **Never** `height` + `maxHeight` on any `heightPercent` section — locks page 1 ULC and overlaps summary |
 | PDF outer frame | **`2pt solid #000000`** | Print-only — same black frame on every composite panel |
 | PDF inner lines | `0.5px solid #64748b` | Print-only; fixes Chromium dropped borders |
 | Row dividers | Single thin line | No thick gray separator bands between rows |
@@ -73,7 +75,7 @@ Every built-in form panel on `.form-page-sheet` shares one thick **black** outer
 | Surface | Selector | Outer border |
 |---------|----------|--------------|
 | Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `1.5px solid #000000` |
-| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel` | via `border: var(--form-panel-frame)` |
+| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel`, `.psi-panel`, `.epst-panel` | via `border: var(--form-panel-frame)` |
 | PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `2pt solid #000000 !important` on the same selectors |
 
 Do **not** use the thin `--*-line` variable for the outer panel perimeter — that is for inner cells only.
@@ -81,6 +83,10 @@ Do **not** use the thin `--*-line` variable for the outer panel perimeter — th
 Inner grid lines use **single-edge borders** only (`border-right` + `border-bottom` per cell, never full `border` on adjacent cells) so shared edges do not stack to double thickness. Exceptions: deficiencies **inspect/repair split** (`.def-grid-left` `2px`) and **device/control divider** (`.def-section-divider` `2px` top).
 
 **ULC PDF corners:** use **`box-shadow: inset 0 0 0 2pt #000`** instead of `border` on `.ulc-s1-panel` — Chromium print breaks rounded bottom corners with `border` + `overflow: hidden`.
+
+**Rounded panel corners (`.vct-panel`, `.psi-panel`, `.epst-panel`, etc.):** composite panels need **`border-radius: 0.625rem`** + **`overflow: hidden`** on the panel root so inner tables/banners clip to the frame and corners meet the black outer edge. In PDF (`PRINT_OVERRIDES` in `buildFormPrintHtml.tsx`), add the panel to the **`2pt solid #000000` border list** and the **`overflow: hidden`** list — **both** `.psi-panel` and `.epst-panel` must be included or export corners gap and colors drift.
+
+**Editable field frames:** white inputs use **`--form-field-frame: 1px solid rgb(148 163 184 / 0.55)`** on `.form-page-sheet` — apply to every fill-in (info rows, measure fields, spec strip, inline table fields) in template, document, and PDF so empty fields stay visible on white backgrounds.
 
 ### Affirmation block (`.aff-*`) — defaults
 
@@ -218,9 +224,44 @@ Page 8 portrait — **22.3 Voice Communication Test** (`voiceCommunicationTest`)
 | Table font | Checklist table — see [Checklist table typography](#checklist-table-typography) |
 | Value shape | `{ sectionNotApplicable, fieldLocation, identification, checklist }` |
 
+### Power supply inspection (`.psi-*`) — defaults
+
+Page 8 portrait — **22.4 Power Supply Inspection** (`powerSupplyInspection`), stacked below 22.3.
+
+| Area | Rule |
+|------|------|
+| Outer frame | **`--form-panel-frame`** on `.psi-panel` |
+| Panel frame | **`border-radius: 0.625rem`** + **`overflow: hidden`** |
+| Banner | Black — `(Reference 9.1) Complete section for each power supply` |
+| Info rows | Olive-gold strip — field location + identification (`VisibleWidthInput` with **`--form-field-frame`**) |
+| Table | Rows A–H with Yes / No / N/A; olive/tan alternating rows |
+| Layout | Section **`height: auto`** — table ends at row H (no stretch filler below) |
+| PDF colors | **From `components.css` only** — do **not** add global `.form-print-root .psi-*` background rules in `PRINT_OVERRIDES` (breaks other pages / prints wrong reds) |
+| PDF layout | **Scoped** to `.form-page-sheet--voice-communication-test` only — `height: auto`, no stretch below row H |
+| PDF frame | Include `.psi-panel` in **`2pt` border** + **`overflow: hidden`** lists in `buildFormPrintHtml.tsx` |
+
+### Emergency power supply test (`.epst-*`) — defaults
+
+Page 9 portrait — **22.5 Emergency Power Supply Test and Inspection** (`emergencyPowerSupplyTest`).
+
+| Area | Rule |
+|------|------|
+| Outer frame | **`--form-panel-frame`** on `.epst-panel` |
+| Panel frame | **`border-radius: 0.625rem`** + **`overflow: hidden`** |
+| Spec strip | Grey `#e2e8f0` — provided-by / battery type / capacity / NBC time |
+| Battery capacity | **8ch** white field + `AH` — show framed field in **template (read-only) and document**, not plain text |
+| Measure rows C–E | Label + **8ch** field + unit (VDC / mA / A) in one desc cell; **`display: grid`** columns `1fr 8ch 2.25rem` so VDC/mA/A align; olive merged block for Yes/No/N/A |
+| Rows M, P, Q, S | Inline fill + unit in desc cell; olive block (no checkboxes) |
+| Row R | Normal Yes / No / N/A |
+| Section height | **`minHeight` only** (no `maxHeight`) on page 9 — all rows A–S + generator A–C must render |
+| PDF colors | **From `components.css` only** — same as screen; never duplicate cell backgrounds in global `PRINT_OVERRIDES` |
+| PDF layout | **Scoped** to `.form-page-sheet--emergency-power-supply-test` — `height: auto`, `overflow: visible` on section |
+| PDF frame | Include `.epst-panel` in PDF border/overflow lists; **layout-only** print rules (e.g. `epst-desc-line` grid) scoped to page 9 sheet class |
+| Value shape | See `emergencyPowerSupplyTest.ts` |
+
 ### Checklist table typography
 
-Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct-table`) share one typography rule so template, document, and PDF stay aligned.
+Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct-table`, `.psi-table`, `.epst-table`) share one typography rule so template, document, and PDF stay aligned.
 
 | Surface | Panel chrome (legend, bars, info rows) | Checklist table |
 |---------|------------------------------------------|-----------------|
@@ -330,7 +371,7 @@ When changing page spacing, update **both** `components.css` and `PRINT_OVERRIDE
 
 ### Viewport scaling (template + document editor)
 
-The form page uses **dynamic reference width**: at scale `1` the sheet fills the column. When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom`. **Page 1** portrait sheets hug content height; **pages 3–8** (`form-page-sheet--lined-notes`, `--attendance-log`, `--documentation`, `--control-unit-test`, `--control-unit-record`, `--voice-communication-test`) and **page 2** landscape always keep fixed **A4** aspect ratio. PDF export is unaffected.
+The form page uses **dynamic reference width**: at scale `1` the sheet fills the column. When the Contents rail opens, the whole page **zooms out uniformly** via CSS `zoom`. **Page 1** portrait sheets hug content height; **pages 3–9** (`form-page-sheet--lined-notes`, `--attendance-log`, `--documentation`, `--control-unit-test`, `--control-unit-record`, `--voice-communication-test`, `--emergency-power-supply-test`) and **page 2** landscape always keep fixed **A4** aspect ratio. PDF export is unaffected.
 
 ---
 
@@ -368,6 +409,7 @@ Use this list every time. Check off in the PR / session notes.
   - Chromium border dropout (solid lines, `print-color-adjust: exact`)
   - Section stacking / gap if PDF still overlaps
   - Bold outer frame (`2pt`) if panel border prints too light
+  - **22.4 / 22.5:** layout only, **scoped** to `.form-page-sheet--voice-communication-test` / `--emergency-power-supply-test` — **never** global `.form-print-root .psi-*` / `.epst-*` cell background colors (live CSS owns colors)
 - [ ] Optional fallback: `src/shared/form/<name>Html.ts` + case in `src/main/pdf/renderFormHtml.ts`
 
 ### 5. Seed & sync
@@ -401,7 +443,7 @@ Use this list every time. Check off in the PR / session notes.
 | Template viewer | `src/renderer/features/form/BuiltinFormViewer.tsx` |
 | Document editor | `src/renderer/features/documents/FormInspectionEditor.tsx` |
 | Styles | `src/renderer/theme/components.css` |
-| PDF (primary) | `src/renderer/features/form/buildFormPrintHtml.ts` |
+| PDF (primary) | `src/renderer/features/form/buildFormPrintHtml.tsx` |
 | PDF (export IPC) | `src/main/pdf/exportInspectionPdf.ts` |
 | PDF (fallback HTML) | `src/main/pdf/renderFormHtml.ts` |
 | Seeds | `src/shared/form/seeds/*.ts`, registry in `src/shared/document/defaults.ts` |
@@ -413,7 +455,9 @@ Use this list every time. Check off in the PR / session notes.
 | Don’t | Do instead |
 |-------|------------|
 | Maintain separate PDF HTML/CSS copied from React | SSR `FormPageCanvas` + live `components.css` |
-| Use `maxHeight` on ULC-only sections | Use `minHeight` so content pushes the next section down |
+| Use `maxHeight` on ULC-only sections | Use `minHeight` only on **every** `heightPercent` section (`FormPageCanvas`) |
+| Global `.form-print-root .psi-*` / `.epst-*` colors in `PRINT_OVERRIDES` | Colors in `components.css`; print adds **page-scoped layout** only |
+| Unscoped `.form-page-section:has(.psi-panel)` print flex/height | Scope to `.form-page-sheet--voice-communication-test` or `--emergency-power-supply-test` |
 | Stack `box-shadow` on adjacent panels | `box-shadow: none` on `.form-page-sheet` panels |
 | Add section `heading` duplicating table headers | Let the table header row speak for itself |
 | Thick gray `<tr>` separator bands | `.row:not(:last-child) td { border-bottom: var(--line) }` |
