@@ -79,6 +79,15 @@ export function FormPageCanvas({
         element.kind === 'annunciatorDeviceTest' || element.kind === 'sequentialDisplayTest',
     ),
   );
+  const hasRtsuPrinterTestPage = page.sections.some((section) =>
+    section.elements.some(
+      (element) =>
+        element.kind === 'remoteTroubleSignalUnitTest' || element.kind === 'printerTest',
+    ),
+  );
+  const hasAncillaryDeviceCircuitTestPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'ancillaryDeviceCircuitTest'),
+  );
 
   return (
     <div
@@ -94,6 +103,8 @@ export function FormPageCanvas({
         hasVoiceCommunicationTest && 'form-page-sheet--voice-communication-test',
         hasEmergencyPowerSupplyTestOnlyPage && 'form-page-sheet--emergency-power-supply-test',
         hasAnnunciatorTestPage && 'form-page-sheet--annunciator-device-test',
+        hasRtsuPrinterTestPage && 'form-page-sheet--rtsu-printer-test',
+        hasAncillaryDeviceCircuitTestPage && 'form-page-sheet--ancillary-device-circuit-test',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -148,6 +159,7 @@ export function FormPageCanvas({
             hasVoiceCommunicationTest && 'form-page-content--voice-communication-test',
             hasEmergencyPowerSupplyTestOnlyPage && 'form-page-content--emergency-power-supply-test',
             hasAnnunciatorTestPage && 'form-page-content--annunciator-device-test',
+            hasAncillaryDeviceCircuitTestPage && 'form-page-content--ancillary-device-circuit-test',
           )}
         >
           {page.sections.map((section) => {
@@ -159,6 +171,9 @@ export function FormPageCanvas({
             );
             const isAttendanceLogSection = section.elements.some(
               (element) => element.kind === 'attendanceLog',
+            );
+            const isAncillaryDeviceCircuitTestSection = section.elements.some(
+              (element) => element.kind === 'ancillaryDeviceCircuitTest',
             );
             const isDocumentationSection = section.elements.some(
               (element) => element.kind === 'documentation',
@@ -224,6 +239,7 @@ export function FormPageCanvas({
                   !isUlcSection &&
                     !isLinedNotesSection &&
                     !isAttendanceLogSection &&
+                    !isAncillaryDeviceCircuitTestSection &&
                     !isDocumentationSection &&
                     !isControlUnitTestSection &&
                     !isControlUnitRecordSection &&

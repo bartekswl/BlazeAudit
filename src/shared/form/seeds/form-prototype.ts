@@ -253,6 +253,52 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-11',
+        label: 'Page 11',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-remote-trouble-signal-unit-test',
+            heading: '22.8 Remote Trouble Signal Unit Test and Inspection',
+            elements: [
+              {
+                kind: 'remoteTroubleSignalUnitTest',
+                id: 'remote-trouble-signal-unit-test',
+              },
+            ],
+          },
+          {
+            id: 'section-printer-test',
+            heading: '22.9 Printer Test',
+            elements: [
+              {
+                kind: 'printerTest',
+                id: 'printer-test',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'page-12',
+        label: 'Page 12',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-ancillary-device-circuit-test',
+            heading: '22.10 Ancillary Device Circuit Test',
+            elements: [
+              {
+                kind: 'ancillaryDeviceCircuitTest',
+                id: 'ancillary-device-circuit-test',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

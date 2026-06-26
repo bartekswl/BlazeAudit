@@ -3,9 +3,12 @@ import { cn } from '../../lib/cn';
 
 /** Trim text until it fits the input's rendered width (single line). */
 export function clampInputToVisibleWidth(input: HTMLInputElement, value: string): string {
+  const width = input.clientWidth > 0 ? input.clientWidth : input.closest('td')?.clientWidth ?? 0;
+  if (width <= 0) return value;
+
   let next = value;
   input.value = next;
-  while (next.length > 0 && input.scrollWidth > input.clientWidth) {
+  while (next.length > 0 && input.scrollWidth > width) {
     next = next.slice(0, -1);
     input.value = next;
   }

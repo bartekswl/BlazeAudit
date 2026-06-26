@@ -15,6 +15,9 @@ import { FormPowerSupplyInspectionView } from './FormPowerSupplyInspectionView';
 import { FormEmergencyPowerSupplyTestView } from './FormEmergencyPowerSupplyTestView';
 import { FormAnnunciatorDeviceTestView } from './FormAnnunciatorDeviceTestView';
 import { FormSequentialDisplayTestView } from './FormSequentialDisplayTestView';
+import { FormRemoteTroubleSignalUnitTestView } from './FormRemoteTroubleSignalUnitTestView';
+import { FormPrinterTestView } from './FormPrinterTestView';
+import { FormAncillaryDeviceCircuitTestView } from './FormAncillaryDeviceCircuitTestView';
 import { FormDocumentationView } from './FormDocumentationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
@@ -63,13 +66,19 @@ export function FormElementView({
     element.kind === 'powerSupplyInspection' ||
     element.kind === 'emergencyPowerSupplyTest' ||
     element.kind === 'annunciatorDeviceTest' ||
-    element.kind === 'sequentialDisplayTest';
+    element.kind === 'sequentialDisplayTest' ||
+    element.kind === 'remoteTroubleSignalUnitTest' ||
+    element.kind === 'printerTest' ||
+    element.kind === 'ancillaryDeviceCircuitTest';
 
   return (
     <div
       className={cn(
         'form-element-frame',
-        flushFrame && 'form-element-frame--flush flex min-h-0 flex-1 flex-col',
+        flushFrame && 'form-element-frame--flush',
+        flushFrame &&
+          element.kind !== 'ancillaryDeviceCircuitTest' &&
+          'flex min-h-0 flex-1 flex-col',
       )}
     >
       <FormElementBody
@@ -425,6 +434,30 @@ function FormElementBody({
     case 'sequentialDisplayTest':
       return (
         <FormSequentialDisplayTestView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'remoteTroubleSignalUnitTest':
+      return (
+        <FormRemoteTroubleSignalUnitTestView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'printerTest':
+      return (
+        <FormPrinterTestView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'ancillaryDeviceCircuitTest':
+      return (
+        <FormAncillaryDeviceCircuitTestView
           value={value}
           readOnly={readOnly}
           onChange={onChange}

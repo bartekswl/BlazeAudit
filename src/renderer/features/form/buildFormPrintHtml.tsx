@@ -321,6 +321,9 @@ const PRINT_OVERRIDES = `
     border-collapse: collapse !important;
     table-layout: fixed !important;
   }
+  .form-print-root .att-td {
+    height: 1% !important;
+  }
   .form-print-root .att-th {
     padding: 0.125rem 0.2rem !important;
     font-weight: 700 !important;
@@ -344,7 +347,6 @@ const PRINT_OVERRIDES = `
     border: none !important;
     border-right: 0.5px solid #64748b !important;
     padding: 0 !important;
-    height: 1% !important;
   }
   .form-print-root .att-td:last-child {
     border-right: none !important;
@@ -403,6 +405,175 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--attendance-log.form-page-sheet--fixed .att-table-wrap {
     flex: 1 1 auto !important;
     min-height: 0 !important;
+  }
+
+  /* Ancillary device circuit test — 22.10 (PDF: flex-fill 48 rows + footnotes on one A4 page) */
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test.form-page-sheet--fixed {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test.form-page-sheet--fixed .form-page-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test.form-page-sheet--fixed .form-page-content--ancillary-device-circuit-test {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin-top: 0 !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test.form-page-sheet--fixed .form-page-section:has(.adc-panel) {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test.form-page-sheet--fixed .form-page-section:has(.adc-panel) > div,
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test.form-page-sheet--fixed .form-page-section:has(.adc-panel) .form-element-frame--flush {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .form-page-section:has(.adc-panel) .form-page-section-title {
+    flex-shrink: 0 !important;
+    margin: 0 0 1pt !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
+    font-size: 8pt !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-panel {
+    --adc-line: 0.5px solid #64748b !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    border-radius: 0.625rem !important;
+    box-shadow: none !important;
+    font-size: 6pt !important;
+    line-height: 1.1 !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-table-wrap {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    width: 100% !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-table {
+    font-size: 6.25pt !important;
+    table-layout: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-collapse: collapse !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-table tbody tr {
+    height: 1% !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-td {
+    height: 1% !important;
+    vertical-align: middle !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-check-cell {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 0.25pt !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-col--identify {
+    width: 40% !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-col--facu {
+    width: 5% !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-col--other {
+    width: 15% !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-col--yes,
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-col--no {
+    width: 8% !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-col--method {
+    width: 24% !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-table thead .adc-th {
+    font-size: 7.25pt !important;
+    line-height: 1.12 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0.75pt 1pt !important;
+    vertical-align: middle !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-table thead tr:first-child .adc-th {
+    padding: 1pt !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-table thead tr:nth-child(2) .adc-th {
+    padding: 0.75pt 1pt !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th--identify,
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th--operation-group {
+    background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%) !important;
+    color: #334155 !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th,
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-td {
+    border: none !important;
+    border-right: 0.5px solid #64748b !important;
+    padding: 0.25pt 1pt !important;
+    box-sizing: border-box !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th:last-child,
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-td:last-child {
+    border-right: none !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-row .adc-td,
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th {
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th--powered-group,
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th--facu {
+    background: linear-gradient(180deg, #6d28d9 0%, #5b21b6 100%) !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th--other {
+    background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%) !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th--yes {
+    background: #1b6b2f !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th--no {
+    background: #9b1c1c !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-th--method {
+    background: #171717 !important;
+    color: #ffffff !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-footnotes {
+    flex-shrink: 0 !important;
+    border-top: 0.5px solid #64748b !important;
+    padding: 1pt 2pt 1.5pt !important;
+    font-size: 7pt !important;
+    line-height: 1.2 !important;
+  }
+  .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-footnote {
+    font-size: inherit !important;
+  }
+  .form-print-root .form-page-section:has(.adc-panel) .form-element-frame--flush {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   /* Documentation checklist — 21 Documentation */
@@ -1047,6 +1218,85 @@ const PRINT_OVERRIDES = `
     padding: 0.5pt !important;
   }
 
+  /* Remote trouble signal unit + printer page — 22.8 + 22.9 (natural height, no stretch) */
+  .form-print-root .form-page-sheet--rtsu-printer-test .form-page-body {
+    overflow: visible !important;
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .form-page-content {
+    flex: 0 1 auto !important;
+    gap: 0 !important;
+    margin-top: 0 !important;
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .form-page-section:has(.rtsu-panel) {
+    padding-top: 14.85mm !important; /* 5% of A4 page height */
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .form-page-section:has(.prt-panel) {
+    padding-top: 14.85mm !important; /* 5% of A4 page height */
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .form-page-section:has(.rtsu-panel) .form-page-section-title,
+  .form-print-root .form-page-sheet--rtsu-printer-test .form-page-section:has(.prt-panel) .form-page-section-title {
+    margin-bottom: 6pt !important;
+    font-size: 8.5pt !important;
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .rtsu-panel,
+  .form-print-root .form-page-sheet--rtsu-printer-test .prt-panel {
+    --rtsu-line: 0.5px solid #64748b !important;
+    --prt-line: 0.5px solid #64748b !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    margin-top: 0 !important;
+    border-radius: 0.625rem !important;
+    box-shadow: none !important;
+    font-size: 7.75pt !important;
+    line-height: 1.15 !important;
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .rtsu-table-wrap,
+  .form-print-root .form-page-sheet--rtsu-printer-test .prt-table-wrap {
+    flex: 0 1 auto !important;
+    overflow: visible !important;
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .rtsu-table,
+  .form-print-root .form-page-sheet--rtsu-printer-test .prt-table {
+    width: 100% !important;
+    height: auto !important;
+    table-layout: fixed !important;
+    font-size: 8.25pt !important;
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .rtsu-table tbody tr,
+  .form-print-root .form-page-sheet--rtsu-printer-test .prt-table tbody tr {
+    height: auto !important;
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .rtsu-th,
+  .form-print-root .form-page-sheet--rtsu-printer-test .rtsu-td,
+  .form-print-root .form-page-sheet--rtsu-printer-test .prt-th,
+  .form-print-root .form-page-sheet--rtsu-printer-test .prt-td {
+    border-right: 0.5px solid #64748b !important;
+    padding: 1pt 2pt !important;
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .rtsu-row:not(:last-child) .rtsu-td,
+  .form-print-root .form-page-sheet--rtsu-printer-test .rtsu-th,
+  .form-print-root .form-page-sheet--rtsu-printer-test .prt-row:not(:last-child) .prt-td,
+  .form-print-root .form-page-sheet--rtsu-printer-test .prt-th {
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .rtsu-check-cell,
+  .form-print-root .form-page-sheet--rtsu-printer-test .prt-check-cell {
+    min-height: 1.125rem !important;
+    padding: 1pt !important;
+  }
+  .form-print-root .form-page-sheet--rtsu-printer-test .form-page-section:has(.rtsu-panel) .form-element-frame--flush,
+  .form-print-root .form-page-sheet--rtsu-printer-test .form-page-section:has(.prt-panel) .form-element-frame--flush {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   /* Affirmation block — match panel frame + thin grid lines in PDF. */
   .form-print-root .aff-panel {
     --aff-line: 0.5px solid #64748b !important;
@@ -1348,7 +1598,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .psi-panel,
   .form-print-root .epst-panel,
   .form-print-root .artu-panel,
-  .form-print-root .asd-panel {
+  .form-print-root .asd-panel,
+  .form-print-root .adc-panel {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }
@@ -1362,7 +1613,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .psi-panel,
   .form-print-root .epst-panel,
   .form-print-root .artu-panel,
-  .form-print-root .asd-panel {
+  .form-print-root .asd-panel,
+  .form-print-root .adc-panel {
     overflow: hidden !important;
   }
 

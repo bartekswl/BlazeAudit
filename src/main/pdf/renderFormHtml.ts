@@ -24,6 +24,9 @@ import { renderPowerSupplyInspectionHtml } from '../../shared/form/powerSupplyIn
 import { renderEmergencyPowerSupplyTestHtml } from '../../shared/form/emergencyPowerSupplyTestHtml';
 import { renderAnnunciatorDeviceTestHtml } from '../../shared/form/annunciatorDeviceTestHtml';
 import { renderSequentialDisplayTestHtml } from '../../shared/form/sequentialDisplayTestHtml';
+import { renderRemoteTroubleSignalUnitTestHtml } from '../../shared/form/remoteTroubleSignalUnitTestHtml';
+import { renderPrinterTestHtml } from '../../shared/form/printerTestHtml';
+import { renderAncillaryDeviceCircuitTestHtml } from '../../shared/form/ancillaryDeviceCircuitTestHtml';
 import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
@@ -169,6 +172,12 @@ function renderElementHtml(
       return framed(renderAnnunciatorDeviceTestHtml(value), true);
     case 'sequentialDisplayTest':
       return framed(renderSequentialDisplayTestHtml(value), true);
+    case 'remoteTroubleSignalUnitTest':
+      return framed(renderRemoteTroubleSignalUnitTestHtml(value), true);
+    case 'printerTest':
+      return framed(renderPrinterTestHtml(value), true);
+    case 'ancillaryDeviceCircuitTest':
+      return framed(renderAncillaryDeviceCircuitTestHtml(value), true);
     default:
       return '';
   }
@@ -287,6 +296,15 @@ function renderPageHtml(
         element.kind === 'annunciatorDeviceTest' || element.kind === 'sequentialDisplayTest',
     ),
   );
+  const hasRtsuPrinterTestPage = page.sections.some((section) =>
+    section.elements.some(
+      (element) =>
+        element.kind === 'remoteTroubleSignalUnitTest' || element.kind === 'printerTest',
+    ),
+  );
+  const hasAncillaryDeviceCircuitTestPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'ancillaryDeviceCircuitTest'),
+  );
 
   const sheetClasses = [
     'form-page',
@@ -296,6 +314,8 @@ function renderPageHtml(
     hasVoiceCommunicationTest ? 'form-page-sheet--voice-communication-test' : '',
     hasEmergencyPowerSupplyTestOnlyPage ? 'form-page-sheet--emergency-power-supply-test' : '',
     hasAnnunciatorTestPage ? 'form-page-sheet--annunciator-device-test' : '',
+    hasRtsuPrinterTestPage ? 'form-page-sheet--rtsu-printer-test' : '',
+    hasAncillaryDeviceCircuitTestPage ? 'form-page-sheet--ancillary-device-circuit-test' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -305,6 +325,7 @@ function renderPageHtml(
     hasVoiceCommunicationTest ? 'form-page-content--voice-communication-test' : '',
     hasEmergencyPowerSupplyTestOnlyPage ? 'form-page-content--emergency-power-supply-test' : '',
     hasAnnunciatorTestPage ? 'form-page-content--annunciator-device-test' : '',
+    hasAncillaryDeviceCircuitTestPage ? 'form-page-content--ancillary-device-circuit-test' : '',
   ]
     .filter(Boolean)
     .join(' ');

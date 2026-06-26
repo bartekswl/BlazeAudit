@@ -8,6 +8,7 @@ import {
   type AttendanceLogValue,
 } from '../../../shared/form/attendanceLog';
 import { cn } from '../../lib/cn';
+import { handleFixedRowGridTextInputKeyDown } from './formGridTableKeyboard';
 
 function AttendanceCell({
   value,
@@ -27,6 +28,7 @@ function AttendanceCell({
       className="att-cell-input"
       value={value}
       onChange={(e) => onChange?.(e.target.value)}
+      onKeyDown={handleFixedRowGridTextInputKeyDown}
     />
   );
 }
@@ -52,7 +54,7 @@ export function FormAttendanceLogView({
       style={{ '--att-row-count': String(ATTENDANCE_LOG_ROW_COUNT) } as CSSProperties}
     >
       <div className="att-accent-bar" aria-hidden="true" />
-      <table className="att-table">
+      <table className="att-table" data-row-count={ATTENDANCE_LOG_ROW_COUNT}>
         <thead>
           <tr>
             {ATTENDANCE_LOG_COLUMNS.map((col) => (

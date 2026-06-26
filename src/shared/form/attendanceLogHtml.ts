@@ -35,7 +35,7 @@ export function renderAttendanceLogHtml(value: unknown): string {
 
   return `<div class="att-table-wrap" style="--att-row-count:${ATTENDANCE_LOG_ROW_COUNT}">
     <div class="att-accent-bar" aria-hidden="true"></div>
-    <table class="att-table">
+    <table class="att-table" data-row-count="${ATTENDANCE_LOG_ROW_COUNT}">
       <thead><tr>${header}</tr></thead>
       <tbody>${body}</tbody>
     </table>

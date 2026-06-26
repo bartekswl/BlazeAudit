@@ -18,6 +18,9 @@ import { emptyPowerSupplyInspectionValue } from './powerSupplyInspection';
 import { emptyEmergencyPowerSupplyTestValue } from './emergencyPowerSupplyTest';
 import { emptyAnnunciatorDeviceTestValue } from './annunciatorDeviceTest';
 import { emptySequentialDisplayTestValue } from './sequentialDisplayTest';
+import { emptyRemoteTroubleSignalUnitTestValue } from './remoteTroubleSignalUnitTest';
+import { emptyPrinterTestValue } from './printerTest';
+import { emptyAncillaryDeviceCircuitTestValue } from './ancillaryDeviceCircuitTest';
 import { emptyLinedNotesValue } from './linedNotes';
 import { emptyUlcSection1Value, normalizeUlcSection1Value } from './ulcSection1';
 import { emptyYesNoSummaryValue } from './yesNoSummary';
@@ -82,6 +85,12 @@ export function initialValueForElement(element: FormElement): unknown {
       return emptyAnnunciatorDeviceTestValue();
     case 'sequentialDisplayTest':
       return emptySequentialDisplayTestValue();
+    case 'remoteTroubleSignalUnitTest':
+      return emptyRemoteTroubleSignalUnitTestValue();
+    case 'printerTest':
+      return emptyPrinterTestValue();
+    case 'ancillaryDeviceCircuitTest':
+      return emptyAncillaryDeviceCircuitTestValue();
     default: {
       const _exhaustive: never = element;
       return _exhaustive;

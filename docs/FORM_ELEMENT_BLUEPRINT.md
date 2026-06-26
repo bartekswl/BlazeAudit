@@ -47,6 +47,9 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `emergencyPowerSupplyTest` — 22.5 Emergency Power Supply Test and Inspection (`.epst-*`)
 - `annunciatorDeviceTest` — 22.6 Annunciator / Remote Trouble / Display & Control Centre (`.artu-*`)
 - `sequentialDisplayTest` — 22.7 Annunciators or Sequential Displays (`.asd-*`)
+- `remoteTroubleSignalUnitTest` — 22.8 Remote Trouble Signal Unit Test and Inspection (`.rtsu-*`)
+- `printerTest` — 22.9 Printer Test (`.prt-*`)
+- `ancillaryDeviceCircuitTest` — 22.10 Ancillary Device Circuit Test (`.adc-*`)
 
 ---
 
@@ -77,7 +80,7 @@ Every built-in form panel on `.form-page-sheet` shares one thick **black** outer
 | Surface | Selector | Outer border |
 |---------|----------|--------------|
 | Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `1.5px solid #000000` |
-| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel`, `.psi-panel`, `.epst-panel`, `.artu-panel`, `.asd-panel` | via `border: var(--form-panel-frame)` |
+| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel`, `.psi-panel`, `.epst-panel`, `.artu-panel`, `.asd-panel`, `.rtsu-panel`, `.prt-panel`, `.adc-panel` | via `border: var(--form-panel-frame)` |
 | PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `2pt solid #000000 !important` on the same selectors |
 
 Do **not** use the thin `--*-line` variable for the outer panel perimeter — that is for inner cells only.
@@ -152,10 +155,123 @@ Page 4 portrait — **20.4 Technician Attendance Log** (`attendanceLog`).
 | Panel frame | **`border-radius: 0.625rem`** + `overflow: hidden`; **`display: flex`** column, **`flex: 1`** on page 4 |
 | Accent bar | Slate gradient header strip (same as `.yns-th--summary`) — **not** blueprint red/black |
 | Table | **7 columns**, **28 fixed rows**; `table-layout: fixed`; column widths in `ATTENDANCE_LOG_COLUMNS` |
-| Row height | `tbody tr` use `height: 1%` so rows share remaining body evenly |
+| Row height | See [Fixed-row grid tables](#fixed-row-grid-tables) — `--att-row-count: 28` on panel; tbody rows fill remaining height evenly |
 | Page tile | **Always A4 portrait** (`aspect-ratio: 210/297`) in template + document viewport |
 | Section title | **20.4 Technician Attendance Log** in `.form-page-section-title` above the table |
 | Value shape | `{ rows: AttendanceLogRow[] }` — always normalized to 28 rows |
+
+### Fixed-row grid tables
+
+Tables with a **fixed number of empty/fillable rows** (attendance log, ancillary device circuit test, etc.) must render **exactly** that many rows on **template**, **document**, and **PDF**. Never add filler rows in JSX/CSS for spacing; never clip rows because of `overflow: hidden`.
+
+| Rule | Detail |
+|------|--------|
+| **Row count constant** | Export `*_ROW_COUNT` from `src/shared/form/<name>.ts` (single source of truth) |
+| **Normalize** | `normalize*()` always returns exactly `ROW_COUNT` rows — pad with empty rows, ignore extras beyond the count |
+| **React view** | Map `normalize*(value).rows` — do **not** slice, append, or synthesize rows in the component |
+| **Fallback HTML** | `*Html.ts` uses the same `ROW_COUNT`, `normalize*`, and column widths |
+| **CSS variable** | Set `--*-row-count: ROW_COUNT` on the panel/wrap via inline `style` |
+| **Row height** | Export `*_BODY_ROW_HEIGHT` from shared module; set `--*-body-row-height` on panel via inline style for **screen**. **PDF:** see per-element rules — `.att-*` uses flex-fill on a locked A4 page; `.adc-*` also flex-fills but only inside `.form-page-sheet--ancillary-device-circuit-test.form-page-sheet--fixed` (see below). Do **not** apply generic page-fill stretch outside those scoped print blocks |
+| **Column widths** | Shared column config with inline `width:%` on `<col>` / `<th>` so PDF Chromium matches document (class-only widths can drift) |
+| **`data-row-count`** | Set on `<table data-row-count={ROW_COUNT}>` for keyboard bounds |
+| **Enter key** | Use `handleFixedRowGridTextInputKeyDown` — Enter moves to the same column on the next row; **blocked on the last row** |
+| **PDF print** | Mirror row/column rules in scoped `PRINT_OVERRIDES`; include explicit col widths |
+
+Reference: `.att-*` (28 rows), `.adc-*` (48 rows).
+
+### Ancillary device circuit test (`.adc-*`) — defaults
+
+Page 12 portrait — **22.10 Ancillary Device Circuit Test** (`ancillaryDeviceCircuitTest`).
+
+**Source files**
+
+| Layer | Path |
+|-------|------|
+| Types + constants + normalize | `src/shared/form/ancillaryDeviceCircuitTest.ts` |
+| Fallback HTML | `src/shared/form/ancillaryDeviceCircuitTestHtml.ts` |
+| React view | `src/renderer/features/form/FormAncillaryDeviceCircuitTestView.tsx` |
+| Screen CSS | `src/renderer/theme/components.css` (`.adc-*`, `.form-page-sheet--ancillary-device-circuit-test`) |
+| PDF overrides | `src/renderer/features/form/buildFormPrintHtml.tsx` (`PRINT_OVERRIDES`, scoped to `.form-page-sheet--ancillary-device-circuit-test`) |
+| Keyboard | `src/renderer/features/form/formGridTableKeyboard.ts` (`handleFixedRowGridTextInputKeyDown`) |
+| Page classes | `FormPageCanvas.tsx` → `form-page-sheet--ancillary-device-circuit-test`, `form-page-content--ancillary-device-circuit-test` |
+
+**Layout summary**
+
+| Surface | Page tile | Table height | Row count |
+|---------|-----------|--------------|-----------|
+| Template / document | **Content-hugging** — `aspect-ratio: auto`, `height: auto`, `overflow: visible` on sheet + body (same pattern as 22.5 EPST). **Never** lock page 12 to A4 aspect-ratio or `overflow: hidden` — 48 rows are taller than one screen tile and the bottom row will clip | Fixed `--adc-body-row-height` (`1.0625rem`) on every tbody row | Exactly **48** `<tr>` in DOM always |
+| PDF export | Fixed **A4** sheet (`297mm`, `overflow: hidden`) via `form-page-sheet--fixed` | **Flex-fill** into remaining body after meta header + section title; table `height: 100%`; tbody `tr`/`td` `height: 1%` splits space among **exactly 48 rows** | Same 48 rows — no filler, no clip |
+
+| Area | Rule |
+|------|------|
+| Title | **22.10 Ancillary Device Circuit Test** in `.form-page-section-title` above panel (not inside table) |
+| Outer frame | **`--form-panel-frame`** on `.adc-panel`; PDF also `2pt solid #000` via global `.form-print-root .adc-panel` border block |
+| Table | **6 columns** (`ANCILLARY_DEVICE_CIRCUIT_TEST_DATA_COLUMNS`), **48 fixed rows**; 2-row grouped header (`rowSpan` / `colSpan`) |
+| Column ratios | Identify 40% · FACU 5% · Other 15% · Yes 8% · No 8% · Method 24% — inline `width:%` on `<col>` **and** explicit `.adc-col--*` widths in PDF `PRINT_OVERRIDES` |
+| Header colors | Identify + operation group: slate gradient · Powered-by group + FACU: purple · Other: orange · Yes: green · No: red · Method: black |
+| Footnotes | `.adc-footnotes` below table **inside** panel — `ANCILLARY_DEVICE_CIRCUIT_TEST_FOOTNOTE_FACU` (`* FACU …`) + `ANCILLARY_DEVICE_CIRCUIT_TEST_FOOTNOTE_NOTE`; `flex-shrink: 0` in PDF |
+| Text inputs | Plain `<input class="adc-cell-input">` on Identify, Other, Method — **not** `VisibleWidthInput` (layout bugs). `handleFixedRowGridTextInputKeyDown` on Enter; blocked on row 48 |
+| Check cells | Full-cell `<label class="adc-check-cell">` + radio for Yes/No; `FormCheckGlyph` when read-only |
+| Value shape | `{ rows: AncillaryDeviceCircuitRow[] }` — `normalizeAncillaryDeviceCircuitTestValue()` always returns **48** rows |
+| Constants | `ANCILLARY_DEVICE_CIRCUIT_TEST_ROW_COUNT`, `ANCILLARY_DEVICE_CIRCUIT_TEST_BODY_ROW_HEIGHT`, `ANCILLARY_DEVICE_CIRCUIT_TEST_DATA_COLUMNS` |
+| `data-row-count` | `<table data-row-count={48}>` for keyboard bounds |
+
+**Screen CSS (template + document)**
+
+| Rule | Detail |
+|------|------|
+| Panel | `.adc-panel` — flex column, **`overflow: hidden`** + **`box-sizing: border-box`** + `border-radius: 0.625rem` (clips inner grid to frame corners — same as `.epst-panel` / `.doc-panel`); `--adc-body-row-height` via inline style |
+| Table wrap | `.adc-table-wrap` — `overflow: hidden`, `width: 100%` (grid flush with panel frame) |
+| Row height | `tbody tr`, `.adc-td`, `.adc-check-cell` use `var(--adc-body-row-height)` |
+| Grid lines | Every `.adc-row .adc-td` has `border-bottom` (including row 48) so verticals meet footnote divider; last column `border-right: none` (panel frame = right edge) |
+| Section / frame | `.form-page-section:has(.adc-panel)` — no `flex-1` stretch on panel; `FormElementView` flush frame **without** `flex-1` |
+| Page sheet | `.form-page-sheet--ancillary-device-circuit-test` — `aspect-ratio: auto`, `height: auto`, `overflow: visible` (override default A4 tile) |
+
+**PDF CSS (`PRINT_OVERRIDES` — copy this pattern, do not improvise)**
+
+Scoped under `.form-print-root .form-page-sheet--ancillary-device-circuit-test`:
+
+1. **Flex chain** (only when `.form-page-sheet--fixed`): body → content → section → frame → `.adc-panel` → `.adc-table-wrap` all `flex: 1 1 auto; min-height: 0`.
+2. **Panel** — `overflow: hidden`, `box-sizing: border-box`, `--adc-line: 0.5px solid #64748b`.
+3. **Table** — `height: 100%`, `table-layout: fixed`, `border-collapse: collapse`.
+4. **Body rows** — `tbody tr` and `.adc-td` → `height: 1%` (valid here because DOM has exactly 48 `<tr>`; splits remaining height after thead).
+5. **Check cells** — `min-height: 0`, `height: 100%`. **Never** set `min-height: 1.125rem` on `.adc-check-cell` in print (inflates rows → clips row 48 / footnotes).
+6. **Thead** — `height: auto`, compact padding; **font-size 7.25pt** (larger than body).
+7. **Body cells** — table `font-size: 6.25pt`.
+8. **Footnotes** — `flex-shrink: 0`, `border-top`, **font-size 7pt** (FACU + Note lines).
+9. **Borders** — `border-right` on all cells except `:last-child`; `border-bottom` on all `.adc-th` and `.adc-row .adc-td`; `box-sizing: border-box`.
+10. **Global print frame** — include `.adc-panel` in the shared `2pt` border + `overflow: hidden` panel list at bottom of `PRINT_OVERRIDES`.
+
+**Typography**
+
+| Part | Screen | PDF |
+|------|--------|-----|
+| Panel base | `calc(0.5625rem + 0.5pt)` | 6pt |
+| Body table | inherits + 0.5pt on `.adc-table` | 6.25pt on `.adc-table` |
+| Column headings | inherits | **7.25pt** on `.adc-table thead .adc-th` |
+| Footnotes (`* FACU …`, Note) | `calc(1em - 0.5pt)` | **7pt** on `.adc-footnotes` |
+
+**Do NOT (22.10 — learned the hard way)**
+
+| Anti-pattern | Why |
+|--------------|-----|
+| A4 `aspect-ratio: 210/297` + `overflow: hidden` on page 12 screen tile | Clips row 48 |
+| `flex: 1` / `height: 100%` on `.adc-panel` in **screen** CSS | Unpredictable stretch |
+| `VisibleWidthInput` on grid cells | Typing/clamping bugs at zero width |
+| `useFixedRowGridTableHeights` or measured row-height JS | Collapsed rows / wrong PDF |
+| Fixed pt row height in PDF without flex-fill | Content taller than A4 → half row clipped, footnotes missing |
+| Duplicate/conflicting print rules for `.adc-check-cell` | e.g. `min-height: 1.125rem` overriding `height: 1%` |
+| `:not(:last-child)` only on row bottom borders | Vertical grid lines do not meet footnote bar |
+| `overflow: visible` on `.adc-panel` (screen) | Rounded corners gap — inner grid sticks past frame; use **`overflow: hidden`** on panel only (page sheet stays `overflow: visible`) |
+| `overflow: visible` on `.adc-table-wrap` in PDF | Frame/grid misalignment at panel edges |
+| Extra `<tr>` filler rows in JSX/CSS | Breaks row-count parity and keyboard bounds |
+
+**Verification checklist**
+
+- [ ] Template: all 48 rows visible, footnotes below, no clipped bottom row
+- [ ] Document: editable inputs rows 1–48; Enter blocked on row 48
+- [ ] PDF: all 48 rows + both footnotes on one A4 page; closed outer frame; headings and footnotes readable
+- [ ] Column widths match across template, document, PDF (40/5/15/8/8/24)
 
 ### Documentation checklist (`.doc-*`) — defaults
 
@@ -283,9 +399,29 @@ Page 9 portrait — **22.5 Emergency Power Supply Test and Inspection** (`emerge
 | Panel grid | **`auto auto minmax(0, 1fr)`** — na bar, header strip, table (not four `auto` rows) |
 | Value shape | `{ sectionNotApplicable, fieldLocation, identification, checklist }` |
 
+### Remote trouble signal unit test (`.rtsu-*`) — defaults
+
+| Area | Rule |
+|------|------|
+| Page | **11** — stacked sections with default `1.5rem` gap; panels at natural height (no page fill) |
+| Theme | Green N/A bar, dark-green ref strip, olive info rows (white labels) |
+| Checklist | Rows A–D — radio full-cell pattern; **auto row height** (base `.rtsu-check-cell` min-height) |
+| Panel grid | Default flex column — na bar, header strip, table wrap |
+| Value shape | `{ sectionNotApplicable, fieldLocation, identification, checklist }` |
+
+### Printer test (`.prt-*`) — defaults
+
+| Area | Rule |
+|------|------|
+| Page | **11** — second stacked section below 22.8 |
+| Theme | Light-blue N/A bar, dark-blue ref strip, medium-blue info rows |
+| Checklist | Rows A–B — radio full-cell pattern; **auto row height** |
+| Panel grid | Default flex column |
+| Value shape | `{ sectionNotApplicable, fieldLocation, identification, checklist }` |
+
 ### Checklist table typography
 
-Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct-table`, `.psi-table`, `.epst-table`, `.artu-table`, `.asd-table`) share one typography rule so template, document, and PDF stay aligned.
+Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct-table`, `.psi-table`, `.epst-table`, `.artu-table`, `.asd-table`, `.rtsu-table`, `.prt-table`) share one typography rule so template, document, and PDF stay aligned.
 
 | Surface | Panel chrome (legend, bars, info rows) | Checklist table |
 |---------|------------------------------------------|-----------------|
@@ -433,6 +569,7 @@ Use this list every time. Check off in the PR / session notes.
 - [ ] Support `readOnly` (template + PDF) and editable mode (document)
 - [ ] Wire in `FormElementView.tsx` (`case` + `flushFrame` if full-bleed panel)
 - [ ] **Editable UX:** make whole click targets (e.g. full Yes/No cell = `<label>` + `cursor: pointer`)
+- [ ] **Fixed-row grids:** if table has `*_ROW_COUNT`, follow [Fixed-row grid tables](#fixed-row-grid-tables) (normalize, CSS var, col widths, `data-row-count`, Enter bounds)
 
 ### 3. CSS (structure + theme)
 
@@ -526,6 +663,10 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
+| 2026-06-25 | **22.10 `.adc-*` blueprint expanded** — screen vs PDF layout, flex-fill print rules, border/grid, typography, anti-patterns, file map, verification checklist. |
+| 2026-06-25 | Fixed-row grid tables blueprint: row-count parity (template/document/PDF), col widths, Enter bounds; `.att-*` row height; `.adc-*` PDF flex-fill exception documented. |
+| 2026-06-25 | Page 12: `.adc-*` (22.10) full-page grid — 48 rows, purple/orange/green/red headers, footnotes. |
+| 2026-06-25 | Page 11: `.rtsu-*` (22.8) + `.prt-*` (22.9) stacked at natural height; green/blue themes; no page-fill scaling. |
 | 2026-06-25 | Page 10: `.artu-*` (22.6) + `.asd-*` (22.7) on fixed A4 50/50; radio full-cell checklist; `FormCheckGlyph` + PDF `form-check-glyph--checked` at 11.5pt. |
 | 2026-06-21 | Control unit test element (`.cut-*`): 22.1 inspection table, row F firmware/software fields, A4 page 6. |
 | 2026-06-21 | Documentation element (`.doc-*`): 21.1 Yes/No/N/A checklist, annex section, A4 page 5. |
