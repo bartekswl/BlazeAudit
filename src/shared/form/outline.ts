@@ -51,6 +51,46 @@ function outlineEntryForSection(section: FormSection): { label: string; depth: n
   return { label: section.number != null ? `${section.number}` : section.id, depth: 0 };
 }
 
+function formatOutlinePageLabel(startPageIndex: number, endPageIndex: number): string {
+  const start = startPageIndex + 1;
+  const end = endPageIndex + 1;
+  return start === end ? `Page ${start}` : `Page ${start}-${end}`;
+}
+
+/** Collapse consecutive duplicate sections (same label + depth) into one row with a page range. */
+function mergeConsecutiveOutlineSections(sections: FormOutlineSection[]): FormOutlineSection[] {
+  if (sections.length === 0) return sections;
+
+  const merged: FormOutlineSection[] = [];
+  let runStart = 0;
+
+  const flushRun = (runEnd: number) => {
+    const first = sections[runStart];
+    const last = sections[runEnd];
+    merged.push({
+      ...first,
+      pageLabel: formatOutlinePageLabel(first.pageIndex, last.pageIndex),
+    });
+  };
+
+  for (let i = 1; i <= sections.length; i += 1) {
+    const prev = sections[i - 1];
+    const next = sections[i];
+    const continuesRun =
+      next != null &&
+      next.label === prev.label &&
+      next.depth === prev.depth &&
+      next.pageIndex === prev.pageIndex + 1;
+
+    if (!continuesRun) {
+      flushRun(i - 1);
+      runStart = i;
+    }
+  }
+
+  return merged;
+}
+
 export function scrollToFormSection(sectionId: string): void {
   const target = document.getElementById(formSectionAnchorId(sectionId));
   if (!target) return;
@@ -83,5 +123,5 @@ export function buildFormOutline(form: FormDefinition): FormOutlineSection[] {
       });
     }
   }
-  return sections;
+  return mergeConsecutiveOutlineSections(sections);
 }

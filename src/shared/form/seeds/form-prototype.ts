@@ -395,6 +395,25 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      ...[18, 19, 20, 21].map((pageNumber) => ({
+        id: `page-${pageNumber}`,
+        label: `Page ${pageNumber}`,
+        orientation: 'landscape' as const,
+        header: 'codeNameMeta' as const,
+        regions: [],
+        sections: [
+          {
+            id: `section-individual-device-record-${pageNumber}`,
+            heading: '23.2 Individual Device Record',
+            elements: [
+              {
+                kind: 'individualDeviceRecord' as const,
+                id: `individual-device-record-${pageNumber}`,
+              },
+            ],
+          },
+        ],
+      })),
     ],
   };
 }

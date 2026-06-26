@@ -764,6 +764,7 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
+| 2026-06-26 | Pages 17–21: duplicate `.idr-*` (23.2) landscape sheets; Contents shows one row with `Page 17-21`. |
 | 2026-06-26 | Page 17 landscape: `.idr-*` (23.2) Individual Device Record — 12 columns, **19 rows**, Yes/X/Dash legend. |
 | 2026-06-25 | `.fdtl-*`: `VisibleWidthInput` required; title spacing 23↔23.1 vs 23.1↔table; PDF fields fill cell. |
 | 2026-06-25 | `.fdtl-*` blueprint: fixed-width fill-ins, empty-field frames, Type/Model 13%, font-only tweaks. |
