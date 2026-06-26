@@ -52,6 +52,8 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `ancillaryDeviceCircuitTest` — 22.10 Ancillary Device Circuit Test (`.adc-*`)
 - `fireSignalReceivingCentreInterconnection` — 22.11 Interconnection to the Fire Signal Receiving Centre (`.fsrc-*`)
 - `dataCommunicationLinkFaultTolerance` — 22.12 Operation Test Circuit Fault Tolerance (`.dclft-*`)
+- `fieldDeviceTestingLegend` — 23.1 Field Device Testing - Legend and Notes (`.fdtl-*`)
+- `fieldDeviceTestingNotes` — 23.1.1 Testing Notes static numbered list (`.fdtn-*`)
 
 ---
 
@@ -82,7 +84,7 @@ Every built-in form panel on `.form-page-sheet` shares one thick **black** outer
 | Surface | Selector | Outer border |
 |---------|----------|--------------|
 | Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `1.5px solid #000000` |
-| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel`, `.psi-panel`, `.epst-panel`, `.artu-panel`, `.asd-panel`, `.rtsu-panel`, `.prt-panel`, `.adc-panel`, `.fsrc-panel`, `.dclft-panel` | via `border: var(--form-panel-frame)` |
+| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel`, `.psi-panel`, `.epst-panel`, `.artu-panel`, `.asd-panel`, `.rtsu-panel`, `.prt-panel`, `.adc-panel`, `.fsrc-panel`, `.dclft-panel`, `.fdtl-panel` | via `border: var(--form-panel-frame)` |
 | PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `2pt solid #000000 !important` on the same selectors |
 
 Do **not** use the thin `--*-line` variable for the outer panel perimeter — that is for inner cells only.
@@ -311,6 +313,51 @@ Page 14 portrait — **22.12 Operation Test Circuit Fault Tolerance** (`dataComm
 | Page tile | **A4 portrait** (`aspect-ratio: 210/297`); natural height (no page-fill stretch) |
 | Value shape | `{ primary: DclftBlock, additional: DclftBlock }` — each block has `sectionNotApplicable`, three info fields, `checklist` |
 
+### Field device testing legend (`.fdtl-*`) — defaults
+
+Page 15 portrait — **23 Field Device Records** + **23.1 Field Device Testing - Legend and Notes** (`fieldDeviceTestingLegend`).
+
+| Area | Rule |
+|------|------|
+| Titles | **23** ↔ **23.1**: tight (≈0 margin). **23.1** ↔ **table**: normal (`margin-bottom` on 23.1 title — `0.5rem` screen / `2pt` PDF) |
+| **Fill-in fields** | Plain `<input class="fdtl-field-input">` in document mode (same pattern as `.adc-cell-input`) — CSS `overflow:hidden` + `white-space:nowrap` clips overflow; **do not** use `VisibleWidthInput` in full-width grid cells (`scrollWidth` lies) |
+| **Empty fields** | Framed **`fdtl-field-box`** (border on box); text/value **`z-index: 1`** inside — descenders not clipped (`line-height: 1.2`, vertical padding) |
+| **PDF fill-ins** | Border on `.fdtl-field-box`; text inside with `line-height: 1.15` |
+| **PDF Description column** | **`padding-left: 4pt`** on `.fdtl-td--desc` / `.fdtl-th--desc` — must come **after** generic `.fdtl-td { padding: 0 }` in print overrides |
+| Outer frame | **`--form-panel-frame`** on `.fdtl-panel`; **`overflow: hidden`** + `border-radius: 0.625rem` |
+| Column widths | `colgroup` — Device `4.5rem`; Type/Model **`13%`** each; Description fills remainder. **`table-layout: fixed`**. |
+| Column headers | Dark blue gradient — Device / Description / Type / Model Number |
+| Section headers | Dark blue full-width rows (7 device categories) |
+| Data rows | Yellow / white zebra; Device column bold centered |
+| Smoke rows (S, PS, DS, MC) | `rowspan="3"` on Device; sub-rows for sensitivity lines; **blocked** grey Type/Model on sub-rows |
+| Smoke sub-rows | `.fdtl-sub-field` grid: `auto minmax(0,1fr)` — label fixed width, fill-in takes remaining Description space |
+| Typography | Bump **`font-size` only** when adjusting legibility — do **not** change column widths, cell padding, or row heights in the same pass |
+| Page tile | **A4 portrait**; PDF **flex-fill** (`table height:100%`, `tbody tr height:1%`) so all rows fit one page |
+| Value shape | `{ devices: Record<id, { type, modelNumber, sensitivityTestMethod, manufacturerSensitivityRange }> }` |
+
+**Do NOT on `.fdtl-*`**
+
+| Anti-pattern | Why |
+|--------------|-----|
+| **`VisibleWidthInput` on `.fdtl-*` grid cells** | `scrollWidth` on full-width table inputs rejects every keystroke — use plain `<input>` |
+| `minmax(…, 1fr)` min on sensitivity grid that grows with content | Sensitivity fill-in pushes row width |
+| Flex/auto width on Type/Model cells | Breaks fixed grid; fields “move” at end of text |
+| Increasing font + padding/columns together | Shifts row count / PDF fit |
+
+### Field device testing notes (`.fdtn-*`) — defaults
+
+Page **16** — **23.1.1 Testing Notes** (`fieldDeviceTestingNotes`).
+
+| Area | Rule |
+|------|------|
+| Content | Section **`heading`** = title; element = intro line + **22-item** ordered list — **no** tables, fields, or panel frame |
+| Layout | Plain prose on white; `.fdtn-list` uses `list-style: decimal` |
+| Surfaces | Same static copy in template, document, and PDF — **no** stored value / `onChange` |
+| Page tile | **Always A4 portrait** (`aspect-ratio: 210/297`) — not content-hug height |
+| Typography | `calc(0.5625rem + 2pt)` screen; **`7.75pt`** PDF; **`#000000`** on **`#ffffff`** |
+| PDF layout | Title **centered**; body **`padding-top: 10mm`**; title **`margin-bottom: 10pt` + `padding-bottom: 8pt`**; list **`space-between` + `gap: 10pt`** |
+| Value shape | `{}` (empty — content lives in `fieldDeviceTestingNotes.ts`) |
+
 ### Documentation checklist (`.doc-*`) — defaults
 
 Page 5 portrait — **21 Documentation** (`documentation`).
@@ -535,7 +582,9 @@ Single-line fill-in fields inside a fixed-width cell must **not accept character
 | `overflow: hidden` | Clip any overflow visually |
 | Fixed `width` / `max-width` | When the blueprint box is a fixed size (e.g. `.cut-version-input`, `.cur-time-input`) |
 
-Reference implementations: `.cut-info-input`, `.cut-version-input`, `.cur-info-input`, `.cur-time-input`, `.vct-info-input`.
+Reference implementations: `.cut-info-input`, `.cut-version-input`, `.cur-info-input`, `.cur-time-input`, `.vct-info-input`. **Not** `.fdtl-field-input` — grid cells use plain `<input>` (see `.fdtl-*`).
+
+**`.fdtl-*` Type/Model/sensitivity cells:** plain `<input>` inside `.fdtl-field-box` — `VisibleWidthInput` breaks editing in full-width table cells.
 
 ### ULC 20.1 panel (`.ulc-s1-*`) — defaults
 
@@ -714,6 +763,9 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
+| 2026-06-25 | `.fdtl-*`: `VisibleWidthInput` required; title spacing 23↔23.1 vs 23.1↔table; PDF fields fill cell. |
+| 2026-06-25 | `.fdtl-*` blueprint: fixed-width fill-ins, empty-field frames, Type/Model 13%, font-only tweaks. |
+| 2026-06-25 | Page 15: `.fdtl-*` (23.1) field device legend table — 7 sections, smoke-detector sub-rows, yellow/white zebra. |
 | 2026-06-25 | Page 14: `.dclft-*` (22.12) dual stacked DCL circuit fault tolerance panels — rows A–F, independent section N/A per block. |
 | 2026-06-25 | Section N/A blueprint: no grey-out on checklist panels (VCT pattern); 22.11 `.fsrc-*` fixed to match. |
 | 2026-06-25 | Page 13: `.fsrc-*` (22.11) FSRC interconnection checklist — light-blue headers, rows A–H, top page padding on single-table page. |

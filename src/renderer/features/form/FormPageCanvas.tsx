@@ -94,6 +94,12 @@ export function FormPageCanvas({
   const hasDclFaultTolerancePage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'dataCommunicationLinkFaultTolerance'),
   );
+  const hasFieldDeviceLegendPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'fieldDeviceTestingLegend'),
+  );
+  const hasFieldDeviceTestingNotesPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'fieldDeviceTestingNotes'),
+  );
 
   return (
     <div
@@ -113,6 +119,8 @@ export function FormPageCanvas({
         hasAncillaryDeviceCircuitTestPage && 'form-page-sheet--ancillary-device-circuit-test',
         hasFsrcInterconnectionPage && 'form-page-sheet--fsrc-interconnection',
         hasDclFaultTolerancePage && 'form-page-sheet--dcl-fault-tolerance',
+        hasFieldDeviceLegendPage && 'form-page-sheet--field-device-legend',
+        hasFieldDeviceTestingNotesPage && 'form-page-sheet--field-device-testing-notes',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -170,6 +178,8 @@ export function FormPageCanvas({
             hasAncillaryDeviceCircuitTestPage && 'form-page-content--ancillary-device-circuit-test',
             hasFsrcInterconnectionPage && 'form-page-content--fsrc-interconnection',
             hasDclFaultTolerancePage && 'form-page-content--dcl-fault-tolerance',
+            hasFieldDeviceLegendPage && 'form-page-content--field-device-legend',
+            hasFieldDeviceTestingNotesPage && 'form-page-content--field-device-testing-notes',
           )}
         >
           {page.sections.map((section) => {
@@ -191,6 +201,13 @@ export function FormPageCanvas({
             const isDclFaultToleranceSection = section.elements.some(
               (element) => element.kind === 'dataCommunicationLinkFaultTolerance',
             );
+            const isFieldDeviceLegendSection = section.elements.some(
+              (element) => element.kind === 'fieldDeviceTestingLegend',
+            );
+            const isFieldDeviceChapterSection =
+              hasFieldDeviceLegendPage && section.id === 'section-field-device-records';
+            const isFieldDeviceLegendTitleSection =
+              hasFieldDeviceLegendPage && section.id === 'section-field-device-testing-legend';
             const isDocumentationSection = section.elements.some(
               (element) => element.kind === 'documentation',
             );
@@ -242,6 +259,8 @@ export function FormPageCanvas({
                 isAnnunciatorTestSection && 'flex min-h-0 flex-col',
                 isEmergencyPowerSupplyTestOnlySection &&
                   'form-page-section--emergency-power-supply-test',
+                isFieldDeviceChapterSection && 'form-page-section--field-device-chapter',
+                isFieldDeviceLegendTitleSection && 'form-page-section--field-device-legend-sub',
               )}
               style={sectionHeightStyle}
             >
@@ -250,7 +269,7 @@ export function FormPageCanvas({
               )}
               <div
                 className={cn(
-                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection || isPowerSuppliesSection || isAnnunciatorTestSection) &&
+                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection || isPowerSuppliesSection || isAnnunciatorTestSection || isFieldDeviceLegendTitleSection) &&
                     'flex flex-1 flex-col',
                   !isUlcSection &&
                     !isLinedNotesSection &&
@@ -258,6 +277,7 @@ export function FormPageCanvas({
                     !isAncillaryDeviceCircuitTestSection &&
                     !isFsrcInterconnectionSection &&
                     !isDclFaultToleranceSection &&
+                    !isFieldDeviceLegendSection &&
                     !isDocumentationSection &&
                     !isControlUnitTestSection &&
                     !isControlUnitRecordSection &&

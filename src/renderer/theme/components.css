@@ -475,6 +475,12 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   flex-direction: column !important;
 }
 
+.form-page-scale-inner .form-page-sheet--field-device-testing-notes:not(.form-page-sheet--landscape) {
+  aspect-ratio: 210 / 297 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
 .form-page-scale-inner .form-page-body {
   overflow: visible;
   flex: 0 1 auto;
@@ -517,6 +523,19 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-scale-inner .form-page-sheet--documentation .form-page-content--documentation {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+.form-page-scale-inner .form-page-sheet--field-device-testing-notes .form-page-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.form-page-scale-inner .form-page-sheet--field-device-testing-notes .form-page-content--field-device-testing-notes {
   flex: 1 1 auto !important;
   min-height: 0 !important;
 }
@@ -771,6 +790,10 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   min-height: calc(100vw * 297 / 210 * 0.86);
 }
 
+.form-page-viewport--continuous .form-page-sheet--field-device-testing-notes:not(.form-page-sheet--landscape) {
+  aspect-ratio: 210 / 297 !important;
+}
+
 .form-page-viewport--continuous .form-page-sheet--landscape .form-page-body {
   flex: 0 1 auto;
   padding: 0.625rem 0.5rem 0;
@@ -1000,8 +1023,17 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-section:has(.prt-panel) .form-page-section-title,
 .form-page-section:has(.adc-panel) .form-page-section-title,
 .form-page-section:has(.fsrc-panel) .form-page-section-title,
-.form-page-section:has(.dclft-panel) .form-page-section-title {
+.form-page-section:has(.dclft-panel) .form-page-section-title,
+.form-page-section:has(.fdtl-panel) .form-page-section-title {
   font-size: calc(0.8125rem + 1pt);
+}
+
+.form-page-section:has(.fdtn-panel) .form-page-section-title {
+  font-size: calc(0.8125rem + 2pt);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.375rem;
+  text-align: center;
+  color: #000000;
 }
 
 .form-element-frame {
@@ -1632,7 +1664,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-sheet .prt-panel,
 .form-page-sheet .adc-panel,
 .form-page-sheet .fsrc-panel,
-.form-page-sheet .dclft-panel {
+.form-page-sheet .dclft-panel,
+.form-page-sheet .fdtl-panel {
   border: var(--form-panel-frame);
   box-shadow: none;
   outline: none;
@@ -5260,6 +5293,322 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: inherit;
 }
 
+/* Field device testing legend — 23.1 */
+.fdtl-panel {
+  --fdtl-line: 1px solid rgb(148 163 184 / 0.45);
+  --fdtl-field-height: 1.125rem;
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  width: 100%;
+  overflow: hidden;
+  margin-top: 0;
+  border-radius: 0.625rem;
+  box-sizing: border-box;
+  background: var(--ba-input-bg, #ffffff);
+  font-size: calc(0.5625rem + 1pt);
+  line-height: 1.1;
+  color: var(--ba-text-primary);
+}
+
+.fdtl-table-wrap {
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.fdtl-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 1em;
+}
+
+.fdtl-col--device {
+  width: 4.5rem;
+}
+
+.fdtl-col--type,
+.fdtl-col--model {
+  width: 13%;
+}
+
+.fdtl-th {
+  padding: 0.0625rem 0.125rem;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: middle;
+  border: none;
+  border-right: var(--fdtl-line);
+  border-bottom: var(--fdtl-line);
+  background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%);
+  color: #ffffff;
+}
+
+.fdtl-th:last-child {
+  border-right: none;
+}
+
+.fdtl-row .fdtl-td {
+  border-bottom: var(--fdtl-line);
+}
+
+.fdtl-td {
+  padding: 0.03125rem 0.125rem;
+  vertical-align: middle;
+  border: none;
+  border-right: var(--fdtl-line);
+}
+
+.fdtl-td:last-child {
+  border-right: none;
+}
+
+.fdtl-row--yellow .fdtl-td {
+  background: #fff9c3;
+}
+
+.fdtl-row--white .fdtl-td {
+  background: #ffffff;
+}
+
+.fdtl-row--section .fdtl-td--section {
+  padding: 0.0625rem 0.25rem;
+  text-align: center;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%);
+  border-right: none;
+}
+
+.fdtl-td--device {
+  text-align: center;
+  font-weight: 700;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.fdtl-td--desc {
+  text-align: left;
+  vertical-align: middle;
+  padding-left: 0.25rem;
+}
+
+.fdtl-td--type,
+.fdtl-td--model {
+  vertical-align: middle;
+  overflow: hidden;
+  max-width: 0;
+  padding: 0;
+}
+
+.fdtl-td--sub {
+  overflow: hidden;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 0;
+}
+
+.fdtl-td--blocked {
+  background: #6b7280 !important;
+  padding: 0;
+}
+
+.fdtl-sub-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.fdtl-sub-label {
+  flex-shrink: 0;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.fdtl-sub-input {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.fdtl-sub-input .fdtl-field-box {
+  width: 100%;
+  max-width: 100%;
+}
+
+.fdtl-field-box {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: var(--fdtl-field-height);
+  overflow: visible;
+  border: var(--form-field-frame);
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.fdtl-field-input,
+.fdtl-field-value,
+.fdtl-field-line {
+  display: block;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: var(--fdtl-field-height);
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+.fdtl-field-input,
+.fdtl-field-value {
+  border: none;
+  background: #ffffff;
+  padding: 0.0625rem 0.125rem;
+  font: inherit;
+  line-height: 1.2;
+  color: inherit;
+}
+
+.fdtl-field-input:focus {
+  outline: none;
+}
+
+.fdtl-field-box:has(.fdtl-field-input:focus) {
+  box-shadow: inset 0 0 0 1px #2563eb;
+}
+
+.fdtl-field-line {
+  background: #ffffff;
+  border: none;
+  padding: 0.0625rem 0.125rem;
+}
+
+.fdtl-field-value {
+  padding: 0.0625rem 0.125rem;
+}
+
+.fdtl-row--smoke-main .fdtl-td--device {
+  vertical-align: middle;
+}
+
+/* Field device testing notes — 23.1.1 (static prose) */
+.fdtn-panel {
+  width: 100%;
+  font-size: calc(0.5625rem + 2pt);
+  line-height: 1.22;
+  color: #000000;
+  background: transparent;
+}
+
+.fdtn-intro {
+  margin: 0 0 0.5rem;
+  font-weight: 400;
+  color: #000000;
+  background: transparent;
+}
+
+.fdtn-list {
+  margin: 0;
+  padding-left: 1.125rem;
+  list-style: decimal;
+  color: #000000;
+  background: transparent;
+}
+
+.fdtn-item {
+  margin-bottom: 0.375rem;
+  padding-left: 0.125rem;
+  color: #000000;
+  background: transparent;
+}
+
+.fdtn-item::marker {
+  color: #000000;
+}
+
+.fdtn-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-page-sheet--field-device-testing-notes {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-page-sheet--field-device-testing-notes .form-page-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-page-content--field-device-testing-notes {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 0;
+  gap: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-page-section:has(.fdtn-panel) .form-element-frame--flush {
+  margin-top: 0;
+  padding-top: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-page-sheet--field-device-testing-notes .form-page-section:has(.fdtn-panel) {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.form-page-sheet--field-device-testing-notes .fdtn-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-page-sheet--field-device-testing-notes .fdtn-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.25rem;
+}
+
+.form-page-sheet--field-device-testing-notes .fdtn-item {
+  margin-bottom: 0;
+}
+
+.form-page-sheet--field-device-testing-notes .fdtn-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-page-sheet .fdtn-panel {
+  color: #000000;
+}
+
 /* Printer test — 22.9 */
 .prt-panel {
   --prt-line: 1px solid rgb(148 163 184 / 0.45);
@@ -8245,6 +8594,88 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-sheet .dclft-info-input,
 .form-page-sheet .dclft-info-value {
   color: #171717;
+}
+
+/* Field device testing legend page — 23.1 */
+.form-page-sheet--field-device-legend {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-page-sheet--field-device-legend .form-page-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-page-content--field-device-legend {
+  flex: 0 1 auto;
+  min-height: 0;
+  margin-top: 0;
+  gap: 0;
+}
+
+.form-page-section--field-device-chapter {
+  margin: 0;
+  padding: 0;
+}
+
+.form-page-section--field-device-chapter .form-page-section-title {
+  margin: 0;
+  padding: 0;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.form-page-section--field-device-legend-sub {
+  margin: 0;
+  padding: 0;
+}
+
+.form-page-section--field-device-legend-sub .form-page-section-title {
+  flex-shrink: 0;
+  margin: 0.0625rem 0 0.5rem;
+  padding: 0;
+  line-height: 1.1;
+  font-size: calc(0.8125rem + 1pt);
+  text-align: center;
+}
+
+.form-page-sheet--field-device-legend .form-page-section--field-device-legend-sub {
+  flex: 0 1 auto;
+}
+
+.form-page-sheet--field-device-legend .form-page-section--field-device-legend-sub > div,
+.form-page-sheet--field-device-legend
+  .form-page-section--field-device-legend-sub
+  .form-element-frame--flush {
+  flex: 0 1 auto;
+}
+
+.form-page-section:has(.fdtl-panel) .form-element-frame--flush {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.form-page-sheet .fdtl-panel,
+.form-page-sheet .fdtl-table,
+.form-page-sheet .fdtl-th,
+.form-page-sheet .fdtl-td {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.form-page-sheet .fdtl-panel,
+.form-page-sheet .fdtl-field-input,
+.form-page-sheet .fdtl-field-value {
+  color: #171717;
+}
+
+.form-page-sheet--field-device-legend .fdtl-td--type,
+.form-page-sheet--field-device-legend .fdtl-td--model {
+  padding: 0;
 }
 
 /* Remote trouble signal unit + printer test page — 22.8 + 22.9 (stacked, natural height) */

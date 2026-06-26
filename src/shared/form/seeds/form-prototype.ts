@@ -335,6 +335,47 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-15',
+        label: 'Page 15',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-field-device-records',
+            heading: '23 Field Device Records',
+            elements: [],
+          },
+          {
+            id: 'section-field-device-testing-legend',
+            heading: '23.1 Field Device Testing - Legend and Notes',
+            elements: [
+              {
+                kind: 'fieldDeviceTestingLegend',
+                id: 'field-device-testing-legend',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'page-16',
+        label: 'Page 16',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-field-device-testing-notes',
+            heading: '23.1.1 Testing Notes',
+            elements: [
+              {
+                kind: 'fieldDeviceTestingNotes',
+                id: 'field-device-testing-notes',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

@@ -130,6 +130,14 @@ export type FormElement =
   | {
       kind: 'dataCommunicationLinkFaultTolerance';
       id: string;
+    }
+  | {
+      kind: 'fieldDeviceTestingLegend';
+      id: string;
+    }
+  | {
+      kind: 'fieldDeviceTestingNotes';
+      id: string;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';
@@ -235,6 +243,8 @@ export type { PrinterTestValue } from './printerTest';
 export type { AncillaryDeviceCircuitTestValue } from './ancillaryDeviceCircuitTest';
 export type { FireSignalReceivingCentreInterconnectionValue } from './fireSignalReceivingCentreInterconnection';
 export type { DataCommunicationLinkFaultToleranceValue } from './dataCommunicationLinkFaultTolerance';
+export type { FieldDeviceTestingLegendValue } from './fieldDeviceTestingLegend';
+export type { FieldDeviceTestingNotesValue } from './fieldDeviceTestingNotes';
 export type {
   DeficienciesValue,
   DeficiencyControlRow,

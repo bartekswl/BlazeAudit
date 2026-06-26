@@ -29,6 +29,8 @@ import { renderPrinterTestHtml } from '../../shared/form/printerTestHtml';
 import { renderAncillaryDeviceCircuitTestHtml } from '../../shared/form/ancillaryDeviceCircuitTestHtml';
 import { renderFireSignalReceivingCentreInterconnectionHtml } from '../../shared/form/fireSignalReceivingCentreInterconnectionHtml';
 import { renderDataCommunicationLinkFaultToleranceHtml } from '../../shared/form/dataCommunicationLinkFaultToleranceHtml';
+import { renderFieldDeviceTestingLegendHtml } from '../../shared/form/fieldDeviceTestingLegendHtml';
+import { renderFieldDeviceTestingNotesHtml } from '../../shared/form/fieldDeviceTestingNotesHtml';
 import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
@@ -184,6 +186,10 @@ function renderElementHtml(
       return framed(renderFireSignalReceivingCentreInterconnectionHtml(value), true);
     case 'dataCommunicationLinkFaultTolerance':
       return framed(renderDataCommunicationLinkFaultToleranceHtml(value), true);
+    case 'fieldDeviceTestingLegend':
+      return framed(renderFieldDeviceTestingLegendHtml(value), true);
+    case 'fieldDeviceTestingNotes':
+      return framed(renderFieldDeviceTestingNotesHtml(), true);
     default:
       return '';
   }
@@ -244,6 +250,13 @@ function renderPageHtml(
         ? `<div class="form-page-header">${headerInner}</div>`
         : '';
 
+  const hasFieldDeviceLegendPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'fieldDeviceTestingLegend'),
+  );
+  const hasFieldDeviceTestingNotesPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'fieldDeviceTestingNotes'),
+  );
+
   const sections = page.sections
     .map((section) => {
       const isUlcSection =
@@ -264,11 +277,17 @@ function renderPageHtml(
           ? ` style="min-height:${section.heightPercent}%"`
           : ` style="height:${section.heightPercent}%;min-height:${section.heightPercent}%;max-height:${section.heightPercent}%"`
         : '';
+      const isFieldDeviceChapterSection =
+        hasFieldDeviceLegendPage && section.id === 'section-field-device-records';
+      const isFieldDeviceLegendTitleSection =
+        hasFieldDeviceLegendPage && section.id === 'section-field-device-testing-legend';
       const sectionCls = [
         isUlcSection ? 'form-page-section form-page-section--ulc' : 'form-page-section',
         isEmergencyPowerSupplyTestOnlySection
           ? 'form-page-section--emergency-power-supply-test'
           : '',
+        isFieldDeviceChapterSection ? 'form-page-section--field-device-chapter' : '',
+        isFieldDeviceLegendTitleSection ? 'form-page-section--field-device-legend-sub' : '',
       ]
         .filter(Boolean)
         .join(' ');
@@ -332,6 +351,8 @@ function renderPageHtml(
     hasAncillaryDeviceCircuitTestPage ? 'form-page-sheet--ancillary-device-circuit-test' : '',
     hasFsrcInterconnectionPage ? 'form-page-sheet--fsrc-interconnection' : '',
     hasDclFaultTolerancePage ? 'form-page-sheet--dcl-fault-tolerance' : '',
+    hasFieldDeviceLegendPage ? 'form-page-sheet--field-device-legend' : '',
+    hasFieldDeviceTestingNotesPage ? 'form-page-sheet--field-device-testing-notes' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -344,6 +365,8 @@ function renderPageHtml(
     hasAncillaryDeviceCircuitTestPage ? 'form-page-content--ancillary-device-circuit-test' : '',
     hasFsrcInterconnectionPage ? 'form-page-content--fsrc-interconnection' : '',
     hasDclFaultTolerancePage ? 'form-page-content--dcl-fault-tolerance' : '',
+    hasFieldDeviceLegendPage ? 'form-page-content--field-device-legend' : '',
+    hasFieldDeviceTestingNotesPage ? 'form-page-content--field-device-testing-notes' : '',
   ]
     .filter(Boolean)
     .join(' ');

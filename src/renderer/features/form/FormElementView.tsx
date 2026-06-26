@@ -20,6 +20,8 @@ import { FormPrinterTestView } from './FormPrinterTestView';
 import { FormAncillaryDeviceCircuitTestView } from './FormAncillaryDeviceCircuitTestView';
 import { FormFireSignalReceivingCentreInterconnectionView } from './FormFireSignalReceivingCentreInterconnectionView';
 import { FormDataCommunicationLinkFaultToleranceView } from './FormDataCommunicationLinkFaultToleranceView';
+import { FormFieldDeviceTestingLegendView } from './FormFieldDeviceTestingLegendView';
+import { FormFieldDeviceTestingNotesView } from './FormFieldDeviceTestingNotesView';
 import { FormDocumentationView } from './FormDocumentationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
@@ -73,7 +75,9 @@ export function FormElementView({
     element.kind === 'printerTest' ||
     element.kind === 'ancillaryDeviceCircuitTest' ||
     element.kind === 'fireSignalReceivingCentreInterconnection' ||
-    element.kind === 'dataCommunicationLinkFaultTolerance';
+    element.kind === 'dataCommunicationLinkFaultTolerance' ||
+    element.kind === 'fieldDeviceTestingLegend' ||
+    element.kind === 'fieldDeviceTestingNotes';
 
   return (
     <div
@@ -84,6 +88,8 @@ export function FormElementView({
           element.kind !== 'ancillaryDeviceCircuitTest' &&
           element.kind !== 'fireSignalReceivingCentreInterconnection' &&
           element.kind !== 'dataCommunicationLinkFaultTolerance' &&
+          element.kind !== 'fieldDeviceTestingLegend' &&
+          element.kind !== 'fieldDeviceTestingNotes' &&
           'flex min-h-0 flex-1 flex-col',
       )}
     >
@@ -485,6 +491,16 @@ function FormElementBody({
           onChange={onChange}
         />
       );
+    case 'fieldDeviceTestingLegend':
+      return (
+        <FormFieldDeviceTestingLegendView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'fieldDeviceTestingNotes':
+      return <FormFieldDeviceTestingNotesView />;
     default:
       return null;
   }

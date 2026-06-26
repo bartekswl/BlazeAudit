@@ -39,6 +39,9 @@ function outlineEntryForSection(section: FormSection): { label: string; depth: n
     return { label: 'Fire Signal Receiving Centre Interconnection', depth: 1 };
   if (only?.kind === 'dataCommunicationLinkFaultTolerance')
     return { label: 'Operation Test Circuit Fault Tolerance', depth: 1 };
+  if (only?.kind === 'fieldDeviceTestingLegend')
+    return { label: 'Field Device Testing - Legend and Notes', depth: 1 };
+  if (only?.kind === 'fieldDeviceTestingNotes') return { label: 'Testing Notes', depth: 1 };
 
   const title = section.title?.trim();
   if (title) return { label: title, depth: 0 };
