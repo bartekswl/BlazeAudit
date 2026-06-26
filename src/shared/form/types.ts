@@ -102,6 +102,14 @@ export type FormElement =
   | {
       kind: 'emergencyPowerSupplyTest';
       id: string;
+    }
+  | {
+      kind: 'annunciatorDeviceTest';
+      id: string;
+    }
+  | {
+      kind: 'sequentialDisplayTest';
+      id: string;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';
@@ -200,6 +208,8 @@ export type { ControlUnitRecordValue } from './controlUnitRecord';
 export type { VoiceCommunicationTestValue } from './voiceCommunicationTest';
 export type { PowerSupplyInspectionValue } from './powerSupplyInspection';
 export type { EmergencyPowerSupplyTestValue } from './emergencyPowerSupplyTest';
+export type { AnnunciatorDeviceTestValue } from './annunciatorDeviceTest';
+export type { SequentialDisplayTestValue } from './sequentialDisplayTest';
 export type {
   DeficienciesValue,
   DeficiencyControlRow,

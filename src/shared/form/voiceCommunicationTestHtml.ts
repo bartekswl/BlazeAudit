@@ -7,6 +7,7 @@ import {
   VOICE_COMMUNICATION_TEST_ROWS,
   normalizeVoiceCommunicationTestValue,
 } from './voiceCommunicationTest';
+import { renderCheckGlyphHtml } from './checkGlyph';
 
 function escapeHtml(value: string): string {
   return value
@@ -14,10 +15,6 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
 }
 
 function renderChoiceCells(choice: 'yes' | 'no' | 'na' | null): string {
@@ -30,7 +27,7 @@ function renderChoiceCells(choice: 'yes' | 'no' | 'na' | null): string {
           : variant === 'no'
             ? 'vct-td vct-td--no'
             : 'vct-td vct-td--na';
-      return `<td class="${tdCls}"><span class="vct-check-cell vct-check-cell--readonly"><span class="vct-check">${checkMark(variant === choice)}</span></span></td>`;
+      return `<td class="${tdCls}"><span class="vct-check-cell vct-check-cell--readonly">${renderCheckGlyphHtml('vct-check', variant === choice)}</span></td>`;
     })
     .join('');
 }
@@ -53,7 +50,7 @@ export function renderVoiceCommunicationTestHtml(value: unknown): string {
     <div class="vct-na-bar">
       <span class="vct-na-text">${escapeHtml(VOICE_COMMUNICATION_TEST_NOT_APPLICABLE_TEXT)}</span>
       <span class="vct-na-check-wrap">
-        <span class="vct-na-check">${checkMark(data.sectionNotApplicable)}</span>
+        ${renderCheckGlyphHtml('vct-na-check', data.sectionNotApplicable)}
         <span class="vct-na-suffix">${escapeHtml(VOICE_COMMUNICATION_TEST_NOT_APPLICABLE_SUFFIX)}</span>
       </span>
     </div>

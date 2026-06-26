@@ -7,6 +7,7 @@ import {
   CONTROL_UNIT_RECORD_TITLE,
   normalizeControlUnitRecordValue,
 } from './controlUnitRecord';
+import { renderCheckGlyphHtml } from './checkGlyph';
 
 function escapeHtml(value: string): string {
   return value
@@ -16,17 +17,13 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
-}
-
 function renderChoiceCells(
   choice: 'yes' | 'no' | 'na' | null,
   yesDisabled?: boolean,
   noDisabled?: boolean,
 ): string {
   if (yesDisabled && noDisabled) {
-    return `<td colspan="2" class="cur-td cur-td--choice-block" aria-hidden="true"></td><td class="cur-td cur-td--na"><span class="cur-check-cell cur-check-cell--readonly"><span class="cur-check">${checkMark(choice === 'na')}</span></span></td>`;
+    return `<td colspan="2" class="cur-td cur-td--choice-block" aria-hidden="true"></td><td class="cur-td cur-td--na"><span class="cur-check-cell cur-check-cell--readonly">${renderCheckGlyphHtml('cur-check', choice === 'na')}</span></td>`;
   }
 
   const variants: Array<'yes' | 'no' | 'na'> = ['yes', 'no', 'na'];
@@ -38,7 +35,7 @@ function renderChoiceCells(
           : variant === 'no'
             ? 'cur-td cur-td--no'
             : 'cur-td cur-td--na';
-      return `<td class="${tdCls}"><span class="cur-check-cell cur-check-cell--readonly"><span class="cur-check">${checkMark(variant === choice)}</span></span></td>`;
+      return `<td class="${tdCls}"><span class="cur-check-cell cur-check-cell--readonly">${renderCheckGlyphHtml('cur-check', variant === choice)}</span></td>`;
     })
     .join('');
 }

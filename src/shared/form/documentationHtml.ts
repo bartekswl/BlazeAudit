@@ -9,6 +9,7 @@ import {
   DOCUMENTATION_NOTE,
   normalizeDocumentationValue,
 } from './documentation';
+import { renderCheckGlyphHtml } from './checkGlyph';
 
 function escapeHtml(value: string): string {
   return value
@@ -16,10 +17,6 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
 }
 
 function renderChoiceCells(
@@ -38,7 +35,7 @@ function renderChoiceCells(
           : variant === 'no'
             ? 'doc-td doc-td--no'
             : 'doc-td doc-td--na';
-      return `<td class="${tdCls}"><span class="doc-check-cell doc-check-cell--readonly"><span class="doc-check">${checkMark(variant === choice)}</span></span></td>`;
+      return `<td class="${tdCls}"><span class="doc-check-cell doc-check-cell--readonly">${renderCheckGlyphHtml('doc-check', variant === choice)}</span></td>`;
     })
     .join('');
 }

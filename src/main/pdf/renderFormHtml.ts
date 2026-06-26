@@ -22,6 +22,8 @@ import { renderControlUnitRecordHtml } from '../../shared/form/controlUnitRecord
 import { renderVoiceCommunicationTestHtml } from '../../shared/form/voiceCommunicationTestHtml';
 import { renderPowerSupplyInspectionHtml } from '../../shared/form/powerSupplyInspectionHtml';
 import { renderEmergencyPowerSupplyTestHtml } from '../../shared/form/emergencyPowerSupplyTestHtml';
+import { renderAnnunciatorDeviceTestHtml } from '../../shared/form/annunciatorDeviceTestHtml';
+import { renderSequentialDisplayTestHtml } from '../../shared/form/sequentialDisplayTestHtml';
 import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
@@ -163,6 +165,10 @@ function renderElementHtml(
       return framed(renderPowerSupplyInspectionHtml(value), true);
     case 'emergencyPowerSupplyTest':
       return framed(renderEmergencyPowerSupplyTestHtml(value), true);
+    case 'annunciatorDeviceTest':
+      return framed(renderAnnunciatorDeviceTestHtml(value), true);
+    case 'sequentialDisplayTest':
+      return framed(renderSequentialDisplayTestHtml(value), true);
     default:
       return '';
   }
@@ -275,6 +281,12 @@ function renderPageHtml(
     hasEmergencyPowerSupplyTestPage && !page.sections.some((section) =>
       section.elements.some((element) => element.kind === 'powerSupplyInspection'),
     );
+  const hasAnnunciatorTestPage = page.sections.some((section) =>
+    section.elements.some(
+      (element) =>
+        element.kind === 'annunciatorDeviceTest' || element.kind === 'sequentialDisplayTest',
+    ),
+  );
 
   const sheetClasses = [
     'form-page',
@@ -283,6 +295,7 @@ function renderPageHtml(
     page.orientation === 'landscape' ? 'form-page-sheet--landscape' : '',
     hasVoiceCommunicationTest ? 'form-page-sheet--voice-communication-test' : '',
     hasEmergencyPowerSupplyTestOnlyPage ? 'form-page-sheet--emergency-power-supply-test' : '',
+    hasAnnunciatorTestPage ? 'form-page-sheet--annunciator-device-test' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -291,6 +304,7 @@ function renderPageHtml(
     'form-page-content',
     hasVoiceCommunicationTest ? 'form-page-content--voice-communication-test' : '',
     hasEmergencyPowerSupplyTestOnlyPage ? 'form-page-content--emergency-power-supply-test' : '',
+    hasAnnunciatorTestPage ? 'form-page-content--annunciator-device-test' : '',
   ]
     .filter(Boolean)
     .join(' ');

@@ -8,6 +8,7 @@ import {
 } from '../../../shared/form/ulcSection1';
 import { InspectionDateField } from '../../components/InspectionDateField';
 import { cn } from '../../lib/cn';
+import { FormCheckGlyph } from './FormCheckGlyph';
 
 const inputCls = 'ulc-s1-input';
 const labelCls = 'ulc-s1-label';
@@ -185,7 +186,7 @@ function StageCheckbox({
   return (
     <label className="ulc-s1-check" htmlFor={id}>
       {readOnly ? (
-        <span className="ulc-s1-check-box">{checked ? '☑' : '☐'}</span>
+        <FormCheckGlyph checked={checked} className="ulc-s1-check-box" />
       ) : (
         <input id={id} type="checkbox" className="ulc-s1-check-input" checked={checked} onChange={onCheck} />
       )}
@@ -295,7 +296,7 @@ export function FormUlcSection1View({
             />
             <label className="ulc-s1-check ulc-s1-check--other">
               {readOnly ? (
-                <span className="ulc-s1-check-box">{value.stageOther ? '☑' : '☐'}</span>
+                <FormCheckGlyph checked={value.stageOther} className="ulc-s1-check-box" />
               ) : (
                 <input
                   type="checkbox"

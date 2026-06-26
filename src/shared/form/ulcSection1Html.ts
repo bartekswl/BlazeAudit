@@ -6,6 +6,7 @@ import {
   resolveUlcSection1Field,
   type UlcSection1Value,
 } from './ulcSection1';
+import { renderCheckGlyphHtml } from './checkGlyph';
 
 function escapeHtml(value: string): string {
   return value
@@ -20,8 +21,8 @@ function dash(value: string | null | undefined): string {
   return trimmed ? escapeHtml(trimmed) : '&nbsp;';
 }
 
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
+function systemCheck(label: string, checked: boolean): string {
+  return `<label class="ulc-s1-check">${renderCheckGlyphHtml('ulc-s1-check-box', checked)}<span>${escapeHtml(label)}</span></label>`;
 }
 
 function fieldCell(
@@ -55,10 +56,6 @@ function phoneFaxCell(
   const phone = resolveUlcSection1Field(phoneKey, value, context);
   const fax = resolveUlcSection1Field(faxKey, value, context);
   return `<div class="ulc-s1-phone-fax"><div class="ulc-s1-cell"><div class="ulc-s1-label">Phone:</div><div class="ulc-s1-value">${dash(phone)}</div></div><div class="ulc-s1-cell"><div class="ulc-s1-label">Fax:</div><div class="ulc-s1-value">${dash(fax)}</div></div></div>`;
-}
-
-function systemCheck(label: string, checked: boolean): string {
-  return `<label class="ulc-s1-check"><span class="ulc-s1-check-box">${checkMark(checked)}</span><span>${escapeHtml(label)}</span></label>`;
 }
 
 function companyBlockHtml(context: DocumentContext): string {
@@ -100,7 +97,7 @@ export function renderUlcSection1Html(valueRaw: unknown, context: DocumentContex
     '</div>',
     '<div class="ulc-s1-service">',
     `<div class="ulc-s1-service-row ulc-s1-service-row--header">${dateCell('dateOfService', 'Date of Service:', value, context)}${dateCell('lastServiceDate', 'Last Service Date:', value, context)}${fieldCell('workOrderNumber', 'Work Order Number:', value, context)}</div>`,
-    `<div class="ulc-s1-service-row ulc-s1-service-row--stage"><span class="ulc-s1-check"><span class="ulc-s1-check-box">${checkMark(value.stageSingle)}</span><span>Single Stage</span></span><span class="ulc-s1-check"><span class="ulc-s1-check-box">${checkMark(value.stageTwo)}</span><span>Two Stage</span></span><span class="ulc-s1-check ulc-s1-check--other"><span class="ulc-s1-check-box">${checkMark(value.stageOther)}</span><span>Other:</span><span class="ulc-s1-value ulc-s1-value--inline">${dash(value.stageOtherText)}</span></span></div>`,
+    `<div class="ulc-s1-service-row ulc-s1-service-row--stage"><span class="ulc-s1-check">${renderCheckGlyphHtml('ulc-s1-check-box', value.stageSingle)}<span>Single Stage</span></span><span class="ulc-s1-check">${renderCheckGlyphHtml('ulc-s1-check-box', value.stageTwo)}<span>Two Stage</span></span><span class="ulc-s1-check ulc-s1-check--other">${renderCheckGlyphHtml('ulc-s1-check-box', value.stageOther)}<span>Other:</span><span class="ulc-s1-value ulc-s1-value--inline">${dash(value.stageOtherText)}</span></span></div>`,
     '<div class="ulc-s1-system-block">',
     `<div class="ulc-s1-system-types"><div class="ulc-s1-system-row">${systemCheck('Addressable', value.systemAddressable)}${systemCheck('Conventional', value.systemConventional)}</div><div class="ulc-s1-system-row ulc-s1-system-row--alt">${systemCheck('Wireless', value.systemWireless)}${systemCheck('Hybrid', value.systemHybrid)}</div></div>`,
     `<div class="ulc-s1-circuits"><div class="ulc-s1-circuits-title">Number of Conventional Circuits</div>${fieldCell('circuitsInitiating', 'Initiating:', value, context)}${fieldCell('circuitsNotification', 'Notification:', value, context)}${fieldCell('circuitsVoicePaging', 'Voice Paging:', value, context)}</div>`,

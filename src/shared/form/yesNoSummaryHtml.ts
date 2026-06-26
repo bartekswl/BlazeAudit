@@ -1,5 +1,6 @@
 import type { YesNoSummaryItem, YesNoSummaryItemValue } from './types';
 import { normalizeYesNoSummaryValue } from './yesNoSummary';
+import { renderCheckGlyphHtml } from './checkGlyph';
 
 function escapeHtml(value: string): string {
   return value
@@ -7,10 +8,6 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
 }
 
 function fillInHtml(text: string | undefined): string {
@@ -44,8 +41,8 @@ export function renderYesNoSummaryHtml(
     .map((item) => {
       const row = value[item.id];
       return `<tr class="yns-row">
-        <td class="yns-td yns-td--yes"><span class="yns-check">${checkMark(row?.choice === 'yes')}</span></td>
-        <td class="yns-td yns-td--no"><span class="yns-check">${checkMark(row?.choice === 'no')}</span></td>
+        <td class="yns-td yns-td--yes"><span class="yns-check-cell yns-check-cell--readonly">${renderCheckGlyphHtml('yns-check', row?.choice === 'yes')}</span></td>
+        <td class="yns-td yns-td--no"><span class="yns-check-cell yns-check-cell--readonly">${renderCheckGlyphHtml('yns-check', row?.choice === 'no')}</span></td>
         <td class="yns-td yns-td--summary">${summaryCellHtml(item, row)}</td>
       </tr>`;
     })

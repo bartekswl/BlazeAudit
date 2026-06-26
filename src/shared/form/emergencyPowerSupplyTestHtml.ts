@@ -19,6 +19,7 @@ import {
   measureVoltageLabel,
   normalizeEmergencyPowerSupplyTestValue,
 } from './emergencyPowerSupplyTest';
+import { renderCheckGlyphHtml } from './checkGlyph';
 
 function escapeHtml(value: string): string {
   return value
@@ -26,10 +27,6 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
 }
 
 function renderInfoValue(value: string): string {
@@ -45,7 +42,7 @@ function renderChoiceCells(choice: 'yes' | 'no' | 'na' | null): string {
           : variant === 'no'
             ? 'epst-td epst-td--no'
             : 'epst-td epst-td--na';
-      return `<td class="${tdCls}"><span class="epst-check-cell epst-check-cell--readonly"><span class="epst-check">${checkMark(variant === choice)}</span></span></td>`;
+      return `<td class="${tdCls}"><span class="epst-check-cell epst-check-cell--readonly">${renderCheckGlyphHtml('epst-check', variant === choice)}</span></td>`;
     })
     .join('');
 }
@@ -117,15 +114,15 @@ export function renderEmergencyPowerSupplyTestHtml(value: unknown): string {
 
   const specProvided = EMERGENCY_POWER_SUPPLY_PROVIDED_BY_OPTIONS.map(
     (opt) =>
-      `<span class="epst-spec-option"><span class="epst-spec-check">${checkMark(data.providedBy[opt.id] ?? false)}</span><span>${escapeHtml(opt.label)}</span></span>`,
+      `<span class="epst-spec-option">${renderCheckGlyphHtml('epst-spec-check', data.providedBy[opt.id] ?? false)}<span>${escapeHtml(opt.label)}</span></span>`,
   ).join('');
   const specBatteryType = EMERGENCY_POWER_SUPPLY_BATTERY_TYPE_OPTIONS.map(
     (opt) =>
-      `<span class="epst-spec-option"><span class="epst-spec-check">${checkMark(data.batteryType[opt.id] ?? false)}</span><span>${escapeHtml(opt.label)}</span></span>`,
+      `<span class="epst-spec-option">${renderCheckGlyphHtml('epst-spec-check', data.batteryType[opt.id] ?? false)}<span>${escapeHtml(opt.label)}</span></span>`,
   ).join('');
   const specNbc = EMERGENCY_POWER_SUPPLY_NBC_TIME_OPTIONS.map(
     (opt) =>
-      `<span class="epst-spec-option"><span class="epst-spec-check">${checkMark(data.nbcAlarmTime === opt.id)}</span><span>${escapeHtml(opt.label)}</span></span>`,
+      `<span class="epst-spec-option">${renderCheckGlyphHtml('epst-spec-check', data.nbcAlarmTime === opt.id)}<span>${escapeHtml(opt.label)}</span></span>`,
   ).join('');
 
   const body = EMERGENCY_POWER_SUPPLY_TEST_ROWS.map((row, rowIndex) => {

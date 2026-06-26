@@ -18,9 +18,7 @@ import {
 import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
-}
+import { FormCheckGlyph } from './FormCheckGlyph';
 
 function ChoiceCell({
   choice,
@@ -47,7 +45,7 @@ function ChoiceCell({
     return (
       <td className={tdCls}>
         <span className="psi-check-cell psi-check-cell--readonly">
-          <span className="psi-check">{checkMark(variant === choice)}</span>
+          <FormCheckGlyph checked={variant === choice} className="psi-check" />
         </span>
       </td>
     );

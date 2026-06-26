@@ -13,6 +13,8 @@ import { FormControlUnitRecordView } from './FormControlUnitRecordView';
 import { FormVoiceCommunicationTestView } from './FormVoiceCommunicationTestView';
 import { FormPowerSupplyInspectionView } from './FormPowerSupplyInspectionView';
 import { FormEmergencyPowerSupplyTestView } from './FormEmergencyPowerSupplyTestView';
+import { FormAnnunciatorDeviceTestView } from './FormAnnunciatorDeviceTestView';
+import { FormSequentialDisplayTestView } from './FormSequentialDisplayTestView';
 import { FormDocumentationView } from './FormDocumentationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
@@ -59,7 +61,9 @@ export function FormElementView({
     element.kind === 'controlUnitRecord' ||
     element.kind === 'voiceCommunicationTest' ||
     element.kind === 'powerSupplyInspection' ||
-    element.kind === 'emergencyPowerSupplyTest';
+    element.kind === 'emergencyPowerSupplyTest' ||
+    element.kind === 'annunciatorDeviceTest' ||
+    element.kind === 'sequentialDisplayTest';
 
   return (
     <div
@@ -405,6 +409,22 @@ function FormElementBody({
     case 'emergencyPowerSupplyTest':
       return (
         <FormEmergencyPowerSupplyTestView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'annunciatorDeviceTest':
+      return (
+        <FormAnnunciatorDeviceTestView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'sequentialDisplayTest':
+      return (
+        <FormSequentialDisplayTestView
           value={value}
           readOnly={readOnly}
           onChange={onChange}

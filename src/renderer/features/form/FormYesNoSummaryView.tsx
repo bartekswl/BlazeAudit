@@ -5,9 +5,7 @@ import {
   setYesNoSummaryFillIn,
 } from '../../../shared/form/yesNoSummary';
 
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
-}
+import { FormCheckGlyph } from './FormCheckGlyph';
 
 function SummaryText({
   item,
@@ -69,7 +67,7 @@ function ChoiceCell({
     return (
       <td className={tdCls}>
         <span className="yns-check-cell yns-check-cell--readonly">
-          <span className="yns-check">{checkMark(variant === choice)}</span>
+          <FormCheckGlyph checked={variant === choice} className="yns-check" />
         </span>
       </td>
     );

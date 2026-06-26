@@ -73,6 +73,12 @@ export function FormPageCanvas({
   );
   const hasEmergencyPowerSupplyTestOnlyPage =
     hasEmergencyPowerSupplyTestPage && !hasPowerSupplyInspectionPage;
+  const hasAnnunciatorTestPage = page.sections.some((section) =>
+    section.elements.some(
+      (element) =>
+        element.kind === 'annunciatorDeviceTest' || element.kind === 'sequentialDisplayTest',
+    ),
+  );
 
   return (
     <div
@@ -87,6 +93,7 @@ export function FormPageCanvas({
         hasControlUnitRecord && 'form-page-sheet--control-unit-record',
         hasVoiceCommunicationTest && 'form-page-sheet--voice-communication-test',
         hasEmergencyPowerSupplyTestOnlyPage && 'form-page-sheet--emergency-power-supply-test',
+        hasAnnunciatorTestPage && 'form-page-sheet--annunciator-device-test',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -140,6 +147,7 @@ export function FormPageCanvas({
             hasControlUnitRecord && 'form-page-content--control-unit-record',
             hasVoiceCommunicationTest && 'form-page-content--voice-communication-test',
             hasEmergencyPowerSupplyTestOnlyPage && 'form-page-content--emergency-power-supply-test',
+            hasAnnunciatorTestPage && 'form-page-content--annunciator-device-test',
           )}
         >
           {page.sections.map((section) => {
@@ -172,6 +180,14 @@ export function FormPageCanvas({
             );
             const isEmergencyPowerSupplyTestOnlySection =
               isEmergencyPowerSupplyTestSection && !isPowerSupplyInspectionSection;
+            const isAnnunciatorDeviceTestSection = section.elements.some(
+              (element) => element.kind === 'annunciatorDeviceTest',
+            );
+            const isSequentialDisplayTestSection = section.elements.some(
+              (element) => element.kind === 'sequentialDisplayTest',
+            );
+            const isAnnunciatorTestSection =
+              isAnnunciatorDeviceTestSection || isSequentialDisplayTestSection;
             const isPowerSuppliesSection =
               isPowerSupplyInspectionSection || isEmergencyPowerSupplyTestSection;
             const sectionHeightStyle =
@@ -192,6 +208,7 @@ export function FormPageCanvas({
                 isControlUnitRecordSection && 'flex min-h-0 flex-col',
                 isVoiceCommunicationTestSection && 'flex min-h-0 flex-col',
                 isPowerSuppliesSection && 'flex min-h-0 flex-col',
+                isAnnunciatorTestSection && 'flex min-h-0 flex-col',
                 isEmergencyPowerSupplyTestOnlySection &&
                   'form-page-section--emergency-power-supply-test',
               )}
@@ -202,7 +219,7 @@ export function FormPageCanvas({
               )}
               <div
                 className={cn(
-                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection || isPowerSuppliesSection) &&
+                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection || isPowerSuppliesSection || isAnnunciatorTestSection) &&
                     'flex flex-1 flex-col',
                   !isUlcSection &&
                     !isLinedNotesSection &&
@@ -212,6 +229,7 @@ export function FormPageCanvas({
                     !isControlUnitRecordSection &&
                     !isVoiceCommunicationTestSection &&
                     !isPowerSuppliesSection &&
+                    !isAnnunciatorTestSection &&
                     'space-y-3',
                 )}
               >

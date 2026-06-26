@@ -38,9 +38,7 @@ import {
 import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
-}
+import { FormCheckGlyph } from './FormCheckGlyph';
 
 function OliveChoiceBlock({
   variant,
@@ -133,7 +131,7 @@ function ChoiceCell({
     return (
       <td className={tdCls}>
         <span className="epst-check-cell epst-check-cell--readonly">
-          <span className="epst-check">{checkMark(variant === choice)}</span>
+          <FormCheckGlyph checked={variant === choice} className="epst-check" />
         </span>
       </td>
     );
@@ -223,7 +221,7 @@ function CheckboxOption({
   if (readOnly) {
     return (
       <span className="epst-spec-option">
-        <span className="epst-spec-check">{checkMark(checked)}</span>
+        <FormCheckGlyph checked={checked} className="epst-spec-check" />
         <span>{label}</span>
       </span>
     );
@@ -525,9 +523,10 @@ export function FormEmergencyPowerSupplyTestView({
             {EMERGENCY_POWER_SUPPLY_NBC_TIME_OPTIONS.map((opt) =>
               readOnly ? (
                 <span key={opt.id} className="epst-spec-option">
-                  <span className="epst-spec-check">
-                    {checkMark(data.nbcAlarmTime === opt.id)}
-                  </span>
+                  <FormCheckGlyph
+                    checked={data.nbcAlarmTime === opt.id}
+                    className="epst-spec-check"
+                  />
                   <span>{opt.label}</span>
                 </span>
               ) : (

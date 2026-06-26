@@ -16,9 +16,7 @@ import {
 import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
-}
+import { FormCheckGlyph } from './FormCheckGlyph';
 
 function ChoiceCell({
   choice,
@@ -45,7 +43,7 @@ function ChoiceCell({
     return (
       <td className={tdCls}>
         <span className="vct-check-cell vct-check-cell--readonly">
-          <span className="vct-check">{checkMark(variant === choice)}</span>
+          <FormCheckGlyph checked={variant === choice} className="vct-check" />
         </span>
       </td>
     );
@@ -151,7 +149,7 @@ export function FormVoiceCommunicationTestView({
         <span className="vct-na-text">{VOICE_COMMUNICATION_TEST_NOT_APPLICABLE_TEXT}</span>
         {readOnly ? (
           <span className="vct-na-check-wrap">
-            <span className="vct-na-check">{checkMark(data.sectionNotApplicable)}</span>
+            <FormCheckGlyph checked={data.sectionNotApplicable} className="vct-na-check" />
             <span className="vct-na-suffix">{VOICE_COMMUNICATION_TEST_NOT_APPLICABLE_SUFFIX}</span>
           </span>
         ) : (

@@ -40,6 +40,10 @@ const PRINT_OVERRIDES = `
     --form-check-mark-size: 8.5pt;
     --form-check-input-size: 8.5pt;
   }
+  .form-print-root .form-check-glyph--checked {
+    font-size: 11.5pt !important;
+    line-height: 1 !important;
+  }
   .form-print-root .form-page-sheet:last-child {
     break-after: auto;
     page-break-after: auto;
@@ -936,6 +940,113 @@ const PRINT_OVERRIDES = `
     font-size: 8.5pt !important;
   }
 
+  /* Annunciator page — 22.6 + 22.7 (layout only; colors from components.css) */
+  .form-print-root .form-page-content--annunciator-device-test {
+    display: grid !important;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    gap: 3pt !important;
+    margin-top: 2pt !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .form-page-section:has(.artu-panel),
+  .form-print-root .form-page-sheet--annunciator-device-test .form-page-section:has(.asd-panel) {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .form-page-section:has(.artu-panel) .form-page-section-title,
+  .form-print-root .form-page-sheet--annunciator-device-test .form-page-section:has(.asd-panel) .form-page-section-title {
+    flex-shrink: 0 !important;
+    margin: 0 0 1pt !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
+    font-size: 8.5pt !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-panel,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-panel {
+    --artu-line: 0.5px solid #64748b !important;
+    --asd-line: 0.5px solid #64748b !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin-top: 0 !important;
+    border-radius: 0.625rem !important;
+    box-shadow: none !important;
+    font-size: 6.75pt !important;
+    line-height: 1.1 !important;
+    display: grid !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-panel {
+    grid-template-rows: auto auto auto minmax(0, 1fr) !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-panel {
+    grid-template-rows: auto auto minmax(0, 1fr) !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-th,
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-td,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-th,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-td {
+    border-right: 0.5px solid #64748b !important;
+    padding: 0.5pt 1pt !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-row:not(:last-child) .artu-td,
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-th,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-row:not(:last-child) .asd-td,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-th {
+    border-bottom: 0.5px solid #64748b !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-table-wrap,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-table-wrap {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-table,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-table {
+    width: 100% !important;
+    height: 100% !important;
+    table-layout: fixed !important;
+    font-size: 7.25pt !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-table tbody tr,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-table tbody tr {
+    height: calc(100% / 13) !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .form-page-section:has(.artu-panel) .form-element-frame--flush,
+  .form-print-root .form-page-sheet--annunciator-device-test .form-page-section:has(.asd-panel) .form-element-frame--flush {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-na-bar,
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-ref-bar,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-na-bar,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-ref-bar {
+    padding: 0.5pt 2pt !important;
+    line-height: 1.08 !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-info-row,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-info-row {
+    min-height: 0 !important;
+    padding: 0.5pt 2pt !important;
+  }
+  .form-print-root .form-page-sheet--annunciator-device-test .artu-check-cell,
+  .form-print-root .form-page-sheet--annunciator-device-test .asd-check-cell {
+    min-height: 0 !important;
+    padding: 0.5pt !important;
+  }
+
   /* Affirmation block — match panel frame + thin grid lines in PDF. */
   .form-print-root .aff-panel {
     --aff-line: 0.5px solid #64748b !important;
@@ -1235,7 +1346,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .cur-panel,
   .form-print-root .vct-panel,
   .form-print-root .psi-panel,
-  .form-print-root .epst-panel {
+  .form-print-root .epst-panel,
+  .form-print-root .artu-panel,
+  .form-print-root .asd-panel {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }
@@ -1247,7 +1360,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .cur-panel,
   .form-print-root .vct-panel,
   .form-print-root .psi-panel,
-  .form-print-root .epst-panel {
+  .form-print-root .epst-panel,
+  .form-print-root .artu-panel,
+  .form-print-root .asd-panel {
     overflow: hidden !important;
   }
 

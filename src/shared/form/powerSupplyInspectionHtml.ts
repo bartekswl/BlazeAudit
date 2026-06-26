@@ -8,6 +8,7 @@ import {
   POWER_SUPPLY_INSPECTION_SUBTITLE,
   normalizePowerSupplyInspectionValue,
 } from './powerSupplyInspection';
+import { renderCheckGlyphHtml } from './checkGlyph';
 
 function escapeHtml(value: string): string {
   return value
@@ -15,10 +16,6 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
 }
 
 function renderInfoValue(value: string): string {
@@ -35,7 +32,7 @@ function renderChoiceCells(choice: 'yes' | 'no' | 'na' | null): string {
           : variant === 'no'
             ? 'psi-td psi-td--no'
             : 'psi-td psi-td--na';
-      return `<td class="${tdCls}"><span class="psi-check-cell psi-check-cell--readonly"><span class="psi-check">${checkMark(variant === choice)}</span></span></td>`;
+      return `<td class="${tdCls}"><span class="psi-check-cell psi-check-cell--readonly">${renderCheckGlyphHtml('psi-check', variant === choice)}</span></td>`;
     })
     .join('');
 }

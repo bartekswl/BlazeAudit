@@ -45,6 +45,8 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `voiceCommunicationTest` — 22.3 Voice Communication Test (`.vct-*`)
 - `powerSupplyInspection` — 22.4 Power Supply Inspection (`.psi-*`)
 - `emergencyPowerSupplyTest` — 22.5 Emergency Power Supply Test and Inspection (`.epst-*`)
+- `annunciatorDeviceTest` — 22.6 Annunciator / Remote Trouble / Display & Control Centre (`.artu-*`)
+- `sequentialDisplayTest` — 22.7 Annunciators or Sequential Displays (`.asd-*`)
 
 ---
 
@@ -75,7 +77,7 @@ Every built-in form panel on `.form-page-sheet` shares one thick **black** outer
 | Surface | Selector | Outer border |
 |---------|----------|--------------|
 | Screen (template + document) | `.form-page-sheet` sets `--form-panel-frame` | `1.5px solid #000000` |
-| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel`, `.psi-panel`, `.epst-panel` | via `border: var(--form-panel-frame)` |
+| Applied to | `.ulc-s1-panel`, `.yns-table-wrap`, `.aff-panel`, `.def-grid`, `.def-compliance`, `.ln-panel`, `.att-table-wrap`, `.doc-panel`, `.cut-panel`, `.cur-panel`, `.vct-panel`, `.psi-panel`, `.epst-panel`, `.artu-panel`, `.asd-panel` | via `border: var(--form-panel-frame)` |
 | PDF export | `PRINT_OVERRIDES` in `buildFormPrintHtml.tsx` | `2pt solid #000000 !important` on the same selectors |
 
 Do **not** use the thin `--*-line` variable for the outer panel perimeter — that is for inner cells only.
@@ -259,15 +261,40 @@ Page 9 portrait — **22.5 Emergency Power Supply Test and Inspection** (`emerge
 | PDF frame | Include `.epst-panel` in PDF border/overflow lists; **layout-only** print rules (e.g. `epst-desc-line` grid) scoped to page 9 sheet class |
 | Value shape | See `emergencyPowerSupplyTest.ts` |
 
+### Annunciator device test (`.artu-*`) — defaults
+
+| Area | Rule |
+|------|------|
+| Page | **10** — top half of fixed A4 (`grid-template-rows: 1fr 1fr` on `.form-page-content--annunciator-device-test`) |
+| Title | **Outside** panel — `.form-page-section-title` (same font as 22.5) |
+| N/A bar | Grey strip + section N/A **checkbox** (no duplicate glyph in edit mode) |
+| Checklist | Yes / No / N/A rows A–M — **`type="radio"`** per row, full-cell `<label class="artu-check-cell">`, **no** visible `☐`/`☑` beside the radio in edit mode |
+| Read-only / PDF glyph | `FormCheckGlyph` / `renderCheckGlyphHtml` — class `form-check-glyph--checked` when ticked |
+| Value shape | `{ sectionNotApplicable, fieldLocation, identification, checklist }` |
+
+### Sequential display test (`.asd-*`) — defaults
+
+| Area | Rule |
+|------|------|
+| Page | **10** — bottom half of fixed A4 |
+| Title | **Outside** panel — `.form-page-section-title` |
+| Header strip | Olive block: ref lines + location/ID (white labels) |
+| Checklist | Same radio / full-cell pattern as `.artu-*`; zebra rows via `.asd-row--alt` |
+| Panel grid | **`auto auto minmax(0, 1fr)`** — na bar, header strip, table (not four `auto` rows) |
+| Value shape | `{ sectionNotApplicable, fieldLocation, identification, checklist }` |
+
 ### Checklist table typography
 
-Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct-table`, `.psi-table`, `.epst-table`) share one typography rule so template, document, and PDF stay aligned.
+Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct-table`, `.psi-table`, `.epst-table`, `.artu-table`, `.asd-table`) share one typography rule so template, document, and PDF stay aligned.
 
 | Surface | Panel chrome (legend, bars, info rows) | Checklist table |
 |---------|------------------------------------------|-----------------|
 | **Screen** | Panel base `font-size` (may differ by page density) | `font-size: calc(1em + 1pt)` on the `<table>` only |
 | **PDF** | `7pt` (`.doc-panel`, `.cut-panel`, `.vct-panel`) or `6.5pt` (`.cur-panel` compact) | Panel print size **+ 1pt** on the table (`8pt`, `8pt`, `8pt`, `7.5pt`) |
-| **Check marks** | — | Fixed size via `--form-check-mark-size` / `--form-check-input-size` on `.form-page-sheet` — same for `.doc-check`, `.cut-check`, `.cur-check`, `.vct-check`, `.yns-check` and their `*-check-input` radios (do **not** use `1em` / table-relative sizing) |
+| **Check marks** | — | Fixed size via `--form-check-mark-size` / `--form-check-input-size` on `.form-page-sheet` — same for `.doc-check`, `.cut-check`, `.cur-check`, `.vct-check`, `.psi-check`, `.epst-check`, `.artu-check`, `.asd-check`, `.yns-check` and their `*-check-input` radios (do **not** use `1em` / table-relative sizing) |
+| **PDF checked glyph** | — | Read-only ticks use `form-check-glyph--checked` (`FormCheckGlyph` / `renderCheckGlyphHtml`) — print rule bumps **checked** glyph to `11.5pt`; unchecked stays `8.5pt`; radio/checkbox **input** size unchanged |
+
+**Editable Yes/No/N/A cells:** one control only — `<label class="…-check-cell">` wrapping a **`type="radio"`** (or section N/A `checkbox`) with `sr-only` label. **Never** stack a native input and a visible `☐`/`☑` character in the same cell.
 
 **Layout rule:** when changing table font size, do **not** change column widths, cell padding, or row min-heights — only the table `font-size` (and matching print override in `buildFormPrintHtml.tsx`).
 
@@ -285,6 +312,10 @@ Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct
 .cut-check,
 .cur-check,
 .vct-check,
+.psi-check,
+.epst-check,
+.artu-check,
+.asd-check,
 .yns-check {
   font-size: var(--form-check-mark-size);
 }
@@ -292,9 +323,18 @@ Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct
 .cut-check-input,
 .cur-check-input,
 .vct-check-input,
+.psi-check-input,
+.epst-check-input,
+.artu-check-input,
+.asd-check-input,
 .yns-check-input {
   width: var(--form-check-input-size);
   height: var(--form-check-input-size);
+}
+
+/* PDF only — larger tick inside same box */
+.form-print-root .form-check-glyph--checked {
+  font-size: 11.5pt !important;
 }
 ```
 
@@ -464,6 +504,7 @@ Use this list every time. Check off in the PR / session notes.
 | Stack `border` + `outline` + `inset box-shadow` on same edge in PDF | One owner per edge; print overrides only where Chromium drops lines |
 | Hardcode light colors without dark pair | Always add `[data-theme='dark']` rules |
 | Tiny radio/checkbox hit target only | Full-cell `<label class="…-check-cell">` in editable mode |
+| Checkbox + visible `☐`/`☑` in same editable cell | Radio (or section N/A checkbox) only — glyph via `FormCheckGlyph` in read-only/PDF |
 
 ---
 
@@ -485,6 +526,7 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
+| 2026-06-25 | Page 10: `.artu-*` (22.6) + `.asd-*` (22.7) on fixed A4 50/50; radio full-cell checklist; `FormCheckGlyph` + PDF `form-check-glyph--checked` at 11.5pt. |
 | 2026-06-21 | Control unit test element (`.cut-*`): 22.1 inspection table, row F firmware/software fields, A4 page 6. |
 | 2026-06-21 | Documentation element (`.doc-*`): 21.1 Yes/No/N/A checklist, annex section, A4 page 5. |
 | 2026-06-21 | Attendance log element (`.att-*`): 7×28 grid, slate theme, A4-locked page 4. |

@@ -224,6 +224,35 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       },
+      {
+        id: 'page-10',
+        label: 'Page 10',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-annunciator-device-test',
+            heading:
+              '22.6 Annunciator, Remote Trouble Signal Unit, Display & Control Centre Test and Inspection',
+            elements: [
+              {
+                kind: 'annunciatorDeviceTest',
+                id: 'annunciator-device-test',
+              },
+            ],
+          },
+          {
+            id: 'section-sequential-display-test',
+            heading: '22.7 Annunciators or Sequential Displays',
+            elements: [
+              {
+                kind: 'sequentialDisplayTest',
+                id: 'sequential-display-test',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

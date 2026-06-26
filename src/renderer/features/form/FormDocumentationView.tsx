@@ -22,9 +22,7 @@ import { clampLinedNotesToMaxLines } from '../../../shared/form/linedNotes';
 import { DocRuleRows } from './DocRuleRows';
 import { cn } from '../../lib/cn';
 
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
-}
+import { FormCheckGlyph } from './FormCheckGlyph';
 
 function ChoiceCell({
   choice,
@@ -58,7 +56,7 @@ function ChoiceCell({
     return (
       <td className={tdCls}>
         <span className="doc-check-cell doc-check-cell--readonly">
-          <span className="doc-check">{checkMark(variant === choice)}</span>
+          <FormCheckGlyph checked={variant === choice} className="doc-check" />
         </span>
       </td>
     );

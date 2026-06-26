@@ -9,6 +9,7 @@ import {
   normalizeControlUnitTestValue,
   type ControlUnitTestVersionFields,
 } from './controlUnitTest';
+import { renderCheckGlyphHtml } from './checkGlyph';
 
 function escapeHtml(value: string): string {
   return value
@@ -16,10 +17,6 @@ function escapeHtml(value: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function checkMark(checked: boolean): string {
-  return checked ? '☑' : '☐';
 }
 
 function renderChoiceCells(choice: 'yes' | 'no' | 'na' | null): string {
@@ -32,7 +29,7 @@ function renderChoiceCells(choice: 'yes' | 'no' | 'na' | null): string {
           : variant === 'no'
             ? 'cut-td cut-td--no'
             : 'cut-td cut-td--na';
-      return `<td class="${tdCls}"><span class="cut-check-cell cut-check-cell--readonly"><span class="cut-check">${checkMark(variant === choice)}</span></span></td>`;
+      return `<td class="${tdCls}"><span class="cut-check-cell cut-check-cell--readonly">${renderCheckGlyphHtml('cut-check', variant === choice)}</span></td>`;
     })
     .join('');
 }
