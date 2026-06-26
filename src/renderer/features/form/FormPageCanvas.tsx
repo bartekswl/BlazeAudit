@@ -103,6 +103,9 @@ export function FormPageCanvas({
   const hasIndividualDeviceRecordPage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'individualDeviceRecord'),
   );
+  const hasCircuitFaultToleranceTestSheetPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'circuitFaultToleranceTestSheet'),
+  );
 
   return (
     <div
@@ -125,6 +128,8 @@ export function FormPageCanvas({
         hasFieldDeviceLegendPage && 'form-page-sheet--field-device-legend',
         hasFieldDeviceTestingNotesPage && 'form-page-sheet--field-device-testing-notes',
         hasIndividualDeviceRecordPage && 'form-page-sheet--individual-device-record',
+        hasCircuitFaultToleranceTestSheetPage &&
+          'form-page-sheet--circuit-fault-tolerance-test-sheet',
         fixedPageLayout && 'form-page-sheet--fixed',
       )}
     >
@@ -185,6 +190,8 @@ export function FormPageCanvas({
             hasFieldDeviceLegendPage && 'form-page-content--field-device-legend',
             hasFieldDeviceTestingNotesPage && 'form-page-content--field-device-testing-notes',
             hasIndividualDeviceRecordPage && 'form-page-content--individual-device-record',
+            hasCircuitFaultToleranceTestSheetPage &&
+              'form-page-content--circuit-fault-tolerance-test-sheet',
           )}
         >
           {page.sections.map((section) => {
@@ -215,6 +222,9 @@ export function FormPageCanvas({
               hasFieldDeviceLegendPage && section.id === 'section-field-device-testing-legend';
             const isIndividualDeviceRecordSection = section.elements.some(
               (element) => element.kind === 'individualDeviceRecord',
+            );
+            const isCircuitFaultToleranceTestSheetSection = section.elements.some(
+              (element) => element.kind === 'circuitFaultToleranceTestSheet',
             );
             const isDocumentationSection = section.elements.some(
               (element) => element.kind === 'documentation',
@@ -266,6 +276,7 @@ export function FormPageCanvas({
                 isPowerSuppliesSection && 'flex min-h-0 flex-col',
                 isAnnunciatorTestSection && 'flex min-h-0 flex-col',
                 isIndividualDeviceRecordSection && 'flex min-h-0 flex-col',
+                isCircuitFaultToleranceTestSheetSection && 'flex min-h-0 flex-col',
                 isEmergencyPowerSupplyTestOnlySection &&
                   'form-page-section--emergency-power-supply-test',
                 isFieldDeviceChapterSection && 'form-page-section--field-device-chapter',
@@ -278,7 +289,7 @@ export function FormPageCanvas({
               )}
               <div
                 className={cn(
-                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection || isPowerSuppliesSection || isAnnunciatorTestSection || isFieldDeviceLegendTitleSection || isIndividualDeviceRecordSection) &&
+                  (isUlcSection || isLinedNotesSection || isAttendanceLogSection || isDocumentationSection || isControlUnitTestSection || isControlUnitRecordSection || isVoiceCommunicationTestSection || isPowerSuppliesSection || isAnnunciatorTestSection || isFieldDeviceLegendTitleSection || isIndividualDeviceRecordSection || isCircuitFaultToleranceTestSheetSection) &&
                     'flex flex-1 flex-col',
                   !isUlcSection &&
                     !isLinedNotesSection &&
@@ -294,6 +305,7 @@ export function FormPageCanvas({
                     !isPowerSuppliesSection &&
                     !isAnnunciatorTestSection &&
                     !isIndividualDeviceRecordSection &&
+                    !isCircuitFaultToleranceTestSheetSection &&
                     'space-y-3',
                 )}
               >

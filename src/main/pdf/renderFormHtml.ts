@@ -32,6 +32,7 @@ import { renderDataCommunicationLinkFaultToleranceHtml } from '../../shared/form
 import { renderFieldDeviceTestingLegendHtml } from '../../shared/form/fieldDeviceTestingLegendHtml';
 import { renderFieldDeviceTestingNotesHtml } from '../../shared/form/fieldDeviceTestingNotesHtml';
 import { renderIndividualDeviceRecordHtml } from '../../shared/form/individualDeviceRecordHtml';
+import { renderCircuitFaultToleranceTestSheetHtml } from '../../shared/form/circuitFaultToleranceTestSheetHtml';
 import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
@@ -193,6 +194,8 @@ function renderElementHtml(
       return framed(renderFieldDeviceTestingNotesHtml(), true);
     case 'individualDeviceRecord':
       return framed(renderIndividualDeviceRecordHtml(value), true);
+    case 'circuitFaultToleranceTestSheet':
+      return framed(renderCircuitFaultToleranceTestSheetHtml(value), true);
     default:
       return '';
   }
@@ -344,6 +347,9 @@ function renderPageHtml(
   const hasIndividualDeviceRecordPage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'individualDeviceRecord'),
   );
+  const hasCircuitFaultToleranceTestSheetPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'circuitFaultToleranceTestSheet'),
+  );
 
   const sheetClasses = [
     'form-page',
@@ -360,6 +366,9 @@ function renderPageHtml(
     hasFieldDeviceLegendPage ? 'form-page-sheet--field-device-legend' : '',
     hasFieldDeviceTestingNotesPage ? 'form-page-sheet--field-device-testing-notes' : '',
     hasIndividualDeviceRecordPage ? 'form-page-sheet--individual-device-record' : '',
+    hasCircuitFaultToleranceTestSheetPage
+      ? 'form-page-sheet--circuit-fault-tolerance-test-sheet'
+      : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -375,6 +384,9 @@ function renderPageHtml(
     hasFieldDeviceLegendPage ? 'form-page-content--field-device-legend' : '',
     hasFieldDeviceTestingNotesPage ? 'form-page-content--field-device-testing-notes' : '',
     hasIndividualDeviceRecordPage ? 'form-page-content--individual-device-record' : '',
+    hasCircuitFaultToleranceTestSheetPage
+      ? 'form-page-content--circuit-fault-tolerance-test-sheet'
+      : '',
   ]
     .filter(Boolean)
     .join(' ');

@@ -23,6 +23,7 @@ import { FormDataCommunicationLinkFaultToleranceView } from './FormDataCommunica
 import { FormFieldDeviceTestingLegendView } from './FormFieldDeviceTestingLegendView';
 import { FormFieldDeviceTestingNotesView } from './FormFieldDeviceTestingNotesView';
 import { FormIndividualDeviceRecordView } from './FormIndividualDeviceRecordView';
+import { FormCircuitFaultToleranceTestSheetView } from './FormCircuitFaultToleranceTestSheetView';
 import { FormDocumentationView } from './FormDocumentationView';
 import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
@@ -79,7 +80,8 @@ export function FormElementView({
     element.kind === 'dataCommunicationLinkFaultTolerance' ||
     element.kind === 'fieldDeviceTestingLegend' ||
     element.kind === 'fieldDeviceTestingNotes' ||
-    element.kind === 'individualDeviceRecord';
+    element.kind === 'individualDeviceRecord' ||
+    element.kind === 'circuitFaultToleranceTestSheet';
 
   return (
     <div
@@ -506,6 +508,14 @@ function FormElementBody({
     case 'individualDeviceRecord':
       return (
         <FormIndividualDeviceRecordView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'circuitFaultToleranceTestSheet':
+      return (
+        <FormCircuitFaultToleranceTestSheetView
           value={value}
           readOnly={readOnly}
           onChange={onChange}

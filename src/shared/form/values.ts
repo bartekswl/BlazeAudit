@@ -26,6 +26,7 @@ import { emptyDataCommunicationLinkFaultToleranceValue } from './dataCommunicati
 import { emptyFieldDeviceTestingLegendValue } from './fieldDeviceTestingLegend';
 import { emptyFieldDeviceTestingNotesValue } from './fieldDeviceTestingNotes';
 import { emptyIndividualDeviceRecordValue } from './individualDeviceRecord';
+import { emptyCircuitFaultToleranceTestSheetValue } from './circuitFaultToleranceTestSheet';
 import { emptyLinedNotesValue } from './linedNotes';
 import { emptyUlcSection1Value, normalizeUlcSection1Value } from './ulcSection1';
 import { emptyYesNoSummaryValue } from './yesNoSummary';
@@ -106,6 +107,8 @@ export function initialValueForElement(element: FormElement): unknown {
       return emptyFieldDeviceTestingNotesValue();
     case 'individualDeviceRecord':
       return emptyIndividualDeviceRecordValue();
+    case 'circuitFaultToleranceTestSheet':
+      return emptyCircuitFaultToleranceTestSheetValue();
     default: {
       const _exhaustive: never = element;
       return _exhaustive;

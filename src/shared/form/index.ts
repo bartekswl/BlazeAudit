@@ -48,5 +48,7 @@ export * from './fieldDeviceTestingNotes';
 export * from './fieldDeviceTestingNotesHtml';
 export * from './individualDeviceRecord';
 export * from './individualDeviceRecordHtml';
+export * from './circuitFaultToleranceTestSheet';
+export * from './circuitFaultToleranceTestSheetHtml';
 export * from './formPageHeader';
 export * from './formPageSize';

@@ -142,6 +142,10 @@ export type FormElement =
   | {
       kind: 'individualDeviceRecord';
       id: string;
+    }
+  | {
+      kind: 'circuitFaultToleranceTestSheet';
+      id: string;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';
@@ -249,6 +253,7 @@ export type { FireSignalReceivingCentreInterconnectionValue } from './fireSignal
 export type { DataCommunicationLinkFaultToleranceValue } from './dataCommunicationLinkFaultTolerance';
 export type { FieldDeviceTestingLegendValue } from './fieldDeviceTestingLegend';
 export type { IndividualDeviceRecordValue } from './individualDeviceRecord';
+export type { CircuitFaultToleranceTestSheetValue } from './circuitFaultToleranceTestSheet';
 export type { FieldDeviceTestingNotesValue } from './fieldDeviceTestingNotes';
 export type {
   DeficienciesValue,

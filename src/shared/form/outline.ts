@@ -44,6 +44,8 @@ function outlineEntryForSection(section: FormSection): { label: string; depth: n
   if (only?.kind === 'fieldDeviceTestingNotes') return { label: 'Testing Notes', depth: 1 };
   if (only?.kind === 'individualDeviceRecord')
     return { label: 'Individual Device Record', depth: 1 };
+  if (only?.kind === 'circuitFaultToleranceTestSheet')
+    return { label: 'Circuit Fault Tolerance Test Sheet', depth: 1 };
 
   const title = section.title?.trim();
   if (title) return { label: title, depth: 0 };

@@ -414,6 +414,25 @@ export function formPrototypeDefinition(): FormDefinition {
           },
         ],
       })),
+      {
+        id: 'page-22',
+        label: 'Page 22',
+        orientation: 'landscape',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
+          {
+            id: 'section-circuit-fault-tolerance-test-sheet',
+            heading: '23.3 Circuit Fault Tolerance Test Sheet',
+            elements: [
+              {
+                kind: 'circuitFaultToleranceTestSheet',
+                id: 'circuit-fault-tolerance-test-sheet',
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 }

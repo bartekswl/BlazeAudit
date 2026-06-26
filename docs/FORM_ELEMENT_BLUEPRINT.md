@@ -55,6 +55,7 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `fieldDeviceTestingLegend` — 23.1 Field Device Testing - Legend and Notes (`.fdtl-*`)
 - `fieldDeviceTestingNotes` — 23.1.1 Testing Notes static numbered list (`.fdtn-*`)
 - `individualDeviceRecord` — 23.2 Individual Device Record landscape grid (`.idr-*`)
+- `circuitFaultToleranceTestSheet` — 23.3 Circuit Fault Tolerance Test Sheet landscape grid (`.cfts-*`)
 
 ---
 
@@ -764,6 +765,7 @@ We are adding/changing a built-in form element. Follow the blueprint:
 
 | Date | Change |
 |------|--------|
+| 2026-06-26 | Page 22 landscape: `.cfts-*` (23.3) circuit fault tolerance sheet — grouped header, 11 rows, P/F/Dash. |
 | 2026-06-26 | Pages 17–21: duplicate `.idr-*` (23.2) landscape sheets; Contents shows one row with `Page 17-21`. |
 | 2026-06-26 | Page 17 landscape: `.idr-*` (23.2) Individual Device Record — 12 columns, **19 rows**, Yes/X/Dash legend. |
 | 2026-06-25 | `.fdtl-*`: `VisibleWidthInput` required; title spacing 23↔23.1 vs 23.1↔table; PDF fields fill cell. |
