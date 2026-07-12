@@ -1,37 +1,37 @@
 import { type InputHTMLAttributes, useLayoutEffect, useRef } from 'react';
 import { cn } from '../../lib/cn';
 
-/** Trim text until it fits the input's rendered width (single line). */
-export function clampInputToVisibleWidth(input: HTMLInputElement, value: string): string {
-  const inTableGrid = Boolean(input.closest('.idr-table, .cfts-table'));
-  const box = input.closest('.fdtl-field-box, [data-visible-width-box]') as HTMLElement | null;
-  const cell = input.closest('td, th') as HTMLElement | null;
+const INPUT_CLIENT_WIDTH_CLAMP_SELECTOR = [
+  '.idr-table',
+  '.cfts-table',
+  '.cur-table',
+  '.vct-table',
+  '.epst-table',
+  '.cur-info-row',
+  '.vct-info-row',
+  '.epst-info-row',
+  '.cut-info-row',
+  '.psi-info-row',
+  '.cut-version-field',
+  '.aff-cell',
+  '.epst-field-input',
+  '[data-visible-width-fill]',
+].join(', ');
 
-  if (inTableGrid) {
-    const inputWidth = input.clientWidth;
-    // Layout not ready — do not block typing.
-    if (inputWidth < 8) return value;
+function usesInputClientWidthClamp(input: HTMLInputElement): boolean {
+  return Boolean(input.closest(INPUT_CLIENT_WIDTH_CLAMP_SELECTOR));
+}
 
-    let next = value;
-    input.value = next;
-    while (next.length > 0 && input.scrollWidth > inputWidth) {
-      next = next.slice(0, -1);
-      input.value = next;
-    }
-    return next;
-  }
-
-  const width = box?.clientWidth || cell?.clientWidth || input.clientWidth || 0;
-  if (width <= 0) return value;
-
+/** Trim text until it fits the input element's rendered width (single line). */
+function clampToInputClientWidth(input: HTMLInputElement, value: string): string {
   const style = getComputedStyle(input);
   const inset =
     parseFloat(style.paddingLeft) +
     parseFloat(style.paddingRight) +
     parseFloat(style.borderLeftWidth) +
     parseFloat(style.borderRightWidth);
-  const maxWidth = Math.floor(width - inset);
-  // Too narrow to measure reliably — do not block typing.
+  const maxWidth = Math.floor(input.clientWidth - inset);
+  // Layout not ready — do not block typing.
   if (maxWidth < 8) return value;
 
   let next = value;
@@ -41,6 +41,22 @@ export function clampInputToVisibleWidth(input: HTMLInputElement, value: string)
     input.value = next;
   }
   return next;
+}
+
+/** Trim text until it fits the input's rendered width (single line). */
+export function clampInputToVisibleWidth(input: HTMLInputElement, value: string): string {
+  if (usesInputClientWidthClamp(input)) {
+    return clampToInputClientWidth(input, value);
+  }
+
+  const box = input.closest('.fdtl-field-box, [data-visible-width-box]') as HTMLElement | null;
+  if (box) {
+    if (box.clientWidth < 8) return value;
+    return clampToInputClientWidth(input, value);
+  }
+
+  // Default: measure the input itself, not a wider table cell.
+  return clampToInputClientWidth(input, value);
 }
 
 export function VisibleWidthInput({

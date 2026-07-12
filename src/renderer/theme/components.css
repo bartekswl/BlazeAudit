@@ -3024,9 +3024,9 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .cut-version-input,
 .cut-version-value,
 .cut-version-line {
-  width: 3.5rem;
-  max-width: 3.5rem;
-  min-width: 3.5rem;
+  width: 7rem;
+  max-width: 7rem;
+  min-width: 7rem;
 }
 
 .cut-version-input {
@@ -3049,7 +3049,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 .cut-version-line {
   display: inline-block;
-  min-width: 3.5rem;
+  min-width: 7rem;
   border-bottom: 1px solid rgb(148 163 184 / 0.75);
   vertical-align: baseline;
 }
