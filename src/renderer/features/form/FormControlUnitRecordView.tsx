@@ -16,6 +16,7 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
 function ChoiceCell({
   choice,
@@ -23,12 +24,14 @@ function ChoiceCell({
   readOnly,
   variant,
   onSelect,
+  onClear,
 }: {
   choice: ControlUnitRecordChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: ControlUnitRecordChoice;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'cur-td',
@@ -55,8 +58,7 @@ function ChoiceCell({
           type="radio"
           className="cur-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -77,7 +79,7 @@ function ChoiceCells({
   yesDisabled?: boolean;
   noDisabled?: boolean;
   readOnly?: boolean;
-  onChoice: (choice: ControlUnitRecordChoice) => void;
+  onChoice: (choice: ControlUnitRecordChoice | null) => void;
 }) {
   const groupName = `cur-${rowId}`;
 
@@ -91,6 +93,7 @@ function ChoiceCells({
           readOnly={readOnly}
           variant="na"
           onSelect={() => onChoice('na')}
+        onClear={() => onChoice(null)}
         />
       </>
     );
@@ -104,6 +107,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="yes"
         onSelect={() => onChoice('yes')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
@@ -111,6 +115,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="no"
         onSelect={() => onChoice('no')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
@@ -118,6 +123,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="na"
         onSelect={() => onChoice('na')}
+        onClear={() => onChoice(null)}
       />
     </>
   );

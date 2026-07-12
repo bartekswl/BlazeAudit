@@ -116,7 +116,23 @@ export function setSequentialDisplayTestSectionNotApplicable(
   value: SequentialDisplayTestValue,
   sectionNotApplicable: boolean,
 ): SequentialDisplayTestValue {
-  return { ...value, sectionNotApplicable };
+  if (!sectionNotApplicable) {
+    return {
+      ...value,
+      sectionNotApplicable: false,
+      checklist: Object.fromEntries(
+        SEQUENTIAL_DISPLAY_TEST_ROWS.map((row) => [row.id, { choice: null }]),
+      ),
+    };
+  }
+
+  return {
+    ...value,
+    sectionNotApplicable: true,
+    checklist: Object.fromEntries(
+      SEQUENTIAL_DISPLAY_TEST_ROWS.map((row) => [row.id, { choice: 'na' as const }]),
+    ),
+  };
 }
 
 export function setSequentialDisplayTestFieldLocation(
@@ -141,6 +157,7 @@ export function setSequentialDisplayTestChoice(
   const row = value.checklist[rowId] ?? { choice: null };
   return {
     ...value,
+    sectionNotApplicable: false,
     checklist: {
       ...value.checklist,
       [rowId]: { ...row, choice },

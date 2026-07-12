@@ -20,6 +20,7 @@ import {
 } from '../../../shared/form/fireSignalReceivingCentreInterconnection';
 import { cn } from '../../lib/cn';
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
 function ChoiceCell({
   choice,
@@ -27,12 +28,14 @@ function ChoiceCell({
   readOnly,
   variant,
   onSelect,
+  onClear,
 }: {
   choice: FsrcChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: FsrcChoice;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'fsrc-td',
@@ -59,8 +62,7 @@ function ChoiceCell({
           type="radio"
           className="fsrc-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -79,7 +81,7 @@ function ChoiceCells({
   rowValue: { choice: FsrcChoice | null };
   mode: FsrcRowDef['choiceMode'];
   readOnly?: boolean;
-  onChoice: (choice: FsrcChoice) => void;
+  onChoice: (choice: FsrcChoice | null) => void;
 }) {
   const groupName = `fsrc-${rowId}`;
 
@@ -96,6 +98,7 @@ function ChoiceCells({
           readOnly={readOnly}
           variant="yes"
           onSelect={() => onChoice('yes')}
+          onClear={() => onChoice(null)}
         />
         <ChoiceCell
           choice={rowValue.choice}
@@ -103,6 +106,7 @@ function ChoiceCells({
           readOnly={readOnly}
           variant="no"
           onSelect={() => onChoice('no')}
+          onClear={() => onChoice(null)}
         />
         <td className="fsrc-td fsrc-td--na-blocked" aria-hidden="true" />
       </>
@@ -117,6 +121,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="yes"
         onSelect={() => onChoice('yes')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
@@ -124,6 +129,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="no"
         onSelect={() => onChoice('no')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
@@ -131,6 +137,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="na"
         onSelect={() => onChoice('na')}
+        onClear={() => onChoice(null)}
       />
     </>
   );
@@ -201,16 +208,78 @@ function RecordField({
 }
 
 function DescCell({ row }: { row: FsrcRowDef }) {
-  if (row.bullets?.length) {
-    return (
-      <ul className="fsrc-desc-list">
-        {row.bullets.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    );
-  }
   return <span className="fsrc-desc-text">{row.text}</span>;
+}
+
+function renderFsrcTableRows(
+  data: FireSignalReceivingCentreInterconnectionValue,
+  readOnly: boolean | undefined,
+  emit: (next: FireSignalReceivingCentreInterconnectionValue) => void,
+) {
+  return FSRC_ROWS.flatMap((row, index) => {
+    const alt = index % 2 === 1;
+
+    if (row.subItems?.length) {
+      return row.subItems.map((subItem, subIndex) => (
+        <tr key={subItem.id} className={cn('fsrc-row', alt && 'fsrc-row--alt')}>
+          {subIndex === 0 ? (
+            <td rowSpan={row.subItems!.length} className="fsrc-td fsrc-td--letter">
+              {row.letter}
+            </td>
+          ) : null}
+          <td className="fsrc-td fsrc-td--desc">
+            <span className="fsrc-desc-text">{subItem.text}</span>
+          </td>
+          <ChoiceCells
+            rowId={subItem.id}
+            rowValue={data.checklist[subItem.id] ?? { choice: null }}
+            mode={row.choiceMode}
+            readOnly={readOnly}
+            onChoice={(choice) => emit(setFsrcChoice(data, subItem.id, choice))}
+          />
+        </tr>
+      ));
+    }
+
+    const rowValue = data.checklist[row.id] ?? { choice: null };
+    return (
+      <tr key={row.id} className={cn('fsrc-row', alt && 'fsrc-row--alt')}>
+        <td className="fsrc-td fsrc-td--letter">{row.letter}</td>
+        <td className="fsrc-td fsrc-td--desc">
+          <DescCell row={row} />
+          {row.choiceMode === 'record-fields' ? (
+            <div className="fsrc-record-fields">
+              <RecordField
+                label="Company:"
+                value={data.recordFields.company}
+                readOnly={readOnly}
+                onChange={(next) => emit(setFsrcRecordField(data, 'company', next))}
+              />
+              <RecordField
+                label="Address:"
+                value={data.recordFields.address}
+                readOnly={readOnly}
+                onChange={(next) => emit(setFsrcRecordField(data, 'address', next))}
+              />
+              <RecordField
+                label="Telephone:"
+                value={data.recordFields.telephone}
+                readOnly={readOnly}
+                onChange={(next) => emit(setFsrcRecordField(data, 'telephone', next))}
+              />
+            </div>
+          ) : null}
+        </td>
+        <ChoiceCells
+          rowId={row.id}
+          rowValue={rowValue}
+          mode={row.choiceMode}
+          readOnly={readOnly}
+          onChoice={(choice) => emit(setFsrcChoice(data, row.id, choice))}
+        />
+      </tr>
+    );
+  });
 }
 
 export function FormFireSignalReceivingCentreInterconnectionView({
@@ -283,48 +352,7 @@ export function FormFireSignalReceivingCentreInterconnectionView({
               <th className="fsrc-th fsrc-th--na">N/A</th>
             </tr>
           </thead>
-          <tbody>
-            {FSRC_ROWS.map((row, index) => {
-              const rowValue = data.checklist[row.id] ?? { choice: null };
-              return (
-                <tr key={row.id} className={cn('fsrc-row', index % 2 === 1 && 'fsrc-row--alt')}>
-                  <td className="fsrc-td fsrc-td--letter">{row.letter}</td>
-                  <td className="fsrc-td fsrc-td--desc">
-                    <DescCell row={row} />
-                    {row.choiceMode === 'record-fields' ? (
-                      <div className="fsrc-record-fields">
-                        <RecordField
-                          label="Company:"
-                          value={data.recordFields.company}
-                          readOnly={readOnly}
-                          onChange={(next) => emit(setFsrcRecordField(data, 'company', next))}
-                        />
-                        <RecordField
-                          label="Address:"
-                          value={data.recordFields.address}
-                          readOnly={readOnly}
-                          onChange={(next) => emit(setFsrcRecordField(data, 'address', next))}
-                        />
-                        <RecordField
-                          label="Telephone:"
-                          value={data.recordFields.telephone}
-                          readOnly={readOnly}
-                          onChange={(next) => emit(setFsrcRecordField(data, 'telephone', next))}
-                        />
-                      </div>
-                    ) : null}
-                  </td>
-                  <ChoiceCells
-                    rowId={row.id}
-                    rowValue={rowValue}
-                    mode={row.choiceMode}
-                    readOnly={readOnly}
-                    onChoice={(choice) => emit(setFsrcChoice(data, row.id, choice))}
-                  />
-                </tr>
-              );
-            })}
-          </tbody>
+          <tbody>{renderFsrcTableRows(data, readOnly, emit)}</tbody>
         </table>
       </div>
 

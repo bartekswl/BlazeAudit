@@ -11,6 +11,7 @@ import {
   type FdtlTableItem,
 } from '../../../shared/form/fieldDeviceTestingLegend';
 import { cn } from '../../lib/cn';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function FieldCell({
   value,
@@ -30,13 +31,11 @@ function FieldCell({
   }
 
   return (
-    <div className="fdtl-field-box">
-      <input
-        type="text"
+    <div className="fdtl-field-box" data-visible-width-box>
+      <VisibleWidthInput
         className="fdtl-field-input"
         value={value}
-        spellCheck={false}
-        onChange={(e) => onChange?.(e.target.value)}
+        onChange={(next) => onChange?.(next)}
       />
     </div>
   );

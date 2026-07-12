@@ -18,14 +18,18 @@ export type DocumentOutlineRegistration = {
   onFormNavigate?: (sectionId: string, pageIndex: number) => void;
 };
 
-type DocumentOutlineContextValue = {
+type RegistrationContextValue = {
   registration: DocumentOutlineRegistration | null;
   setRegistration: (registration: DocumentOutlineRegistration | null) => void;
+};
+
+type ExpandedContextValue = {
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
 };
 
-const DocumentOutlineContext = createContext<DocumentOutlineContextValue | null>(null);
+const RegistrationContext = createContext<RegistrationContextValue | null>(null);
+const ExpandedContext = createContext<ExpandedContextValue | null>(null);
 
 export function DocumentOutlineProvider({ children }: { children: ReactNode }) {
   const [registration, setRegistration] = useState<DocumentOutlineRegistration | null>(null);
@@ -35,18 +39,30 @@ export function DocumentOutlineProvider({ children }: { children: ReactNode }) {
     if (!registration) setExpanded(false);
   }, [registration]);
 
-  const value = useMemo(
-    () => ({ registration, setRegistration, expanded, setExpanded }),
-    [registration, expanded],
+  const registrationValue = useMemo(
+    () => ({ registration, setRegistration }),
+    [registration],
   );
 
+  const expandedValue = useMemo(() => ({ expanded, setExpanded }), [expanded]);
+
   return (
-    <DocumentOutlineContext.Provider value={value}>{children}</DocumentOutlineContext.Provider>
+    <RegistrationContext.Provider value={registrationValue}>
+      <ExpandedContext.Provider value={expandedValue}>{children}</ExpandedContext.Provider>
+    </RegistrationContext.Provider>
   );
 }
 
-function useDocumentOutlineContext() {
-  const ctx = useContext(DocumentOutlineContext);
+function useRegistrationContext() {
+  const ctx = useContext(RegistrationContext);
+  if (!ctx) {
+    throw new Error('DocumentOutlineProvider is required.');
+  }
+  return ctx;
+}
+
+function useExpandedContext() {
+  const ctx = useContext(ExpandedContext);
   if (!ctx) {
     throw new Error('DocumentOutlineProvider is required.');
   }
@@ -58,7 +74,7 @@ export function useRegisterDocumentOutline(
   blocks: Block[],
   onNavigate?: (blockId: string) => void,
 ) {
-  const { setRegistration } = useDocumentOutlineContext();
+  const { setRegistration } = useRegistrationContext();
   const onNavigateRef = useRef(onNavigate);
   onNavigateRef.current = onNavigate;
 
@@ -78,7 +94,7 @@ export function useRegisterFormOutline(
   formSections: FormOutlineSection[],
   onFormNavigate?: (sectionId: string, pageIndex: number) => void,
 ) {
-  const { setRegistration } = useDocumentOutlineContext();
+  const { setRegistration } = useRegistrationContext();
   const onFormNavigateRef = useRef(onFormNavigate);
   onFormNavigateRef.current = onFormNavigate;
 
@@ -94,6 +110,12 @@ export function useRegisterFormOutline(
   }, [title, formSections, setRegistration]);
 }
 
+/** Contents rail UI — registration + expand/collapse. */
 export function useDocumentOutlineRail() {
-  return useDocumentOutlineContext();
+  return { ...useRegistrationContext(), ...useExpandedContext() };
+}
+
+/** Contents panel width only — avoids re-rendering editors when registration changes. */
+export function useContentsPanelExpanded(): boolean {
+  return useExpandedContext().expanded;
 }

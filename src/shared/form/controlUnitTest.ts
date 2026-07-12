@@ -164,7 +164,7 @@ export function normalizeControlUnitTestValue(raw: unknown): ControlUnitTestValu
 export function setControlUnitTestChoice(
   value: ControlUnitTestValue,
   rowId: string,
-  choice: ControlUnitTestChoice,
+  choice: ControlUnitTestChoice | null,
 ): ControlUnitTestValue {
   return {
     ...value,

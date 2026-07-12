@@ -129,7 +129,7 @@ export function normalizePowerSupplyInspectionValue(raw: unknown): PowerSupplyIn
 export function setPowerSupplyInspectionChoice(
   value: PowerSupplyInspectionValue,
   rowId: string,
-  choice: PowerSupplyInspectionChoice,
+  choice: PowerSupplyInspectionChoice | null,
 ): PowerSupplyInspectionValue {
   return {
     ...value,

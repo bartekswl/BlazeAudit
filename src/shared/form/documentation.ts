@@ -216,7 +216,7 @@ export function normalizeDocumentationValue(raw: unknown): DocumentationValue {
 export function setDocumentationChoice(
   value: DocumentationValue,
   rowId: string,
-  choice: DocumentationChoice,
+  choice: DocumentationChoice | null,
 ): DocumentationValue {
   return {
     ...value,

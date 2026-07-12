@@ -219,7 +219,7 @@ export function normalizeControlUnitRecordValue(raw: unknown): ControlUnitRecord
 export function setControlUnitRecordChoice(
   value: ControlUnitRecordValue,
   rowId: string,
-  choice: ControlUnitRecordChoice,
+  choice: ControlUnitRecordChoice | null,
 ): ControlUnitRecordValue {
   return {
     ...value,

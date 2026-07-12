@@ -15,32 +15,33 @@ import {
 } from '../../../shared/form/annunciatorDeviceTest';
 import { cn } from '../../lib/cn';
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function ChoiceCell({
   choice,
   groupName,
   readOnly,
   variant,
-  disabled,
   onSelect,
+  onClear,
 }: {
   choice: AnnunciatorDeviceTestChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: AnnunciatorDeviceTestChoice;
-  disabled?: boolean;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'artu-td',
     variant === 'yes' && 'artu-td--yes',
     variant === 'no' && 'artu-td--no',
     variant === 'na' && 'artu-td--na',
-    disabled && 'artu-td--disabled',
   );
   const label = variant === 'yes' ? 'Yes' : variant === 'no' ? 'No' : 'N/A';
 
-  if (readOnly || disabled) {
+  if (readOnly) {
     return (
       <td className={tdCls}>
         <span className="artu-check-cell artu-check-cell--readonly">
@@ -57,8 +58,7 @@ function ChoiceCell({
           type="radio"
           className="artu-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -70,14 +70,12 @@ function ChoiceCells({
   rowId,
   rowValue,
   readOnly,
-  disabled,
   onChoice,
 }: {
   rowId: string;
   rowValue: { choice: AnnunciatorDeviceTestChoice | null };
   readOnly?: boolean;
-  disabled?: boolean;
-  onChoice: (choice: AnnunciatorDeviceTestChoice) => void;
+  onChoice: (choice: AnnunciatorDeviceTestChoice | null) => void;
 }) {
   const groupName = `artu-${rowId}`;
 
@@ -87,27 +85,58 @@ function ChoiceCells({
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="yes"
         onSelect={() => onChoice('yes')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="no"
         onSelect={() => onChoice('no')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="na"
         onSelect={() => onChoice('na')}
+        onClear={() => onChoice(null)}
       />
     </>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  readOnly,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  readOnly?: boolean;
+  onChange?: (next: string) => void;
+}) {
+  return (
+    <div className="artu-info-row">
+      <span className="artu-info-label">{label}</span>
+      {readOnly ? (
+        value.trim() ? (
+          <span className="artu-info-value">{value}</span>
+        ) : (
+          <span className="artu-info-line" />
+        )
+      ) : (
+        <VisibleWidthInput
+          className="artu-info-input"
+          value={value}
+          onChange={(next) => onChange?.(next)}
+        />
+      )}
+    </div>
   );
 }
 
@@ -121,7 +150,6 @@ export function FormAnnunciatorDeviceTestView({
   onChange?: (next: AnnunciatorDeviceTestValue) => void;
 }) {
   const data = normalizeAnnunciatorDeviceTestValue(value);
-  const disabled = data.sectionNotApplicable;
 
   const emit = (next: AnnunciatorDeviceTestValue) => onChange?.(next);
 
@@ -157,48 +185,22 @@ export function FormAnnunciatorDeviceTestView({
         ))}
       </div>
 
-      <div className={cn('artu-info-strip', disabled && 'artu-info-strip--disabled')}>
-        <div className="artu-info-row">
-          <span className="artu-info-label">{ANNUNCIATOR_DEVICE_TEST_LOCATION_LABEL}</span>
-          {readOnly || disabled ? (
-            data.fieldLocation.trim() ? (
-              <span className="artu-info-value">{data.fieldLocation}</span>
-            ) : (
-              <span className="artu-info-line" />
-            )
-          ) : (
-            <input
-              type="text"
-              className="artu-info-input"
-              value={data.fieldLocation}
-              onChange={(event) =>
-                emit(setAnnunciatorDeviceTestFieldLocation(data, event.target.value))
-              }
-            />
-          )}
-        </div>
-        <div className="artu-info-row">
-          <span className="artu-info-label">{ANNUNCIATOR_DEVICE_TEST_IDENTIFICATION_LABEL}</span>
-          {readOnly || disabled ? (
-            data.identification.trim() ? (
-              <span className="artu-info-value">{data.identification}</span>
-            ) : (
-              <span className="artu-info-line" />
-            )
-          ) : (
-            <input
-              type="text"
-              className="artu-info-input"
-              value={data.identification}
-              onChange={(event) =>
-                emit(setAnnunciatorDeviceTestIdentification(data, event.target.value))
-              }
-            />
-          )}
-        </div>
+      <div className="artu-info-strip">
+        <InfoRow
+          label={ANNUNCIATOR_DEVICE_TEST_LOCATION_LABEL}
+          value={data.fieldLocation}
+          readOnly={readOnly}
+          onChange={(next) => emit(setAnnunciatorDeviceTestFieldLocation(data, next))}
+        />
+        <InfoRow
+          label={ANNUNCIATOR_DEVICE_TEST_IDENTIFICATION_LABEL}
+          value={data.identification}
+          readOnly={readOnly}
+          onChange={(next) => emit(setAnnunciatorDeviceTestIdentification(data, next))}
+        />
       </div>
 
-      <div className={cn('artu-table-wrap', disabled && 'artu-table-wrap--disabled')}>
+      <div className="artu-table-wrap">
         <table className="artu-table">
           <thead>
             <tr>
@@ -222,7 +224,6 @@ export function FormAnnunciatorDeviceTestView({
                     rowId={row.id}
                     rowValue={rowValue}
                     readOnly={readOnly}
-                    disabled={disabled}
                     onChoice={(choice) =>
                       emit(setAnnunciatorDeviceTestChoice(data, row.id, choice))
                     }

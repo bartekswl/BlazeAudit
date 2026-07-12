@@ -44,7 +44,7 @@ function technicianFieldsHtml(
   return `<div class="aff-tech-grid">
     <div class="aff-cell aff-cell--name">${fieldValue(name)}</div>
     <div class="aff-cell aff-cell--identification">${fieldValue(identification)}</div>
-    <div class="aff-cell aff-cell--date">${formatAffirmationDate(tech.date)}</div>
+    <div class="aff-cell aff-cell--date">${tech.inspectorId ? formatAffirmationDate(tech.date) : '&nbsp;'}</div>
     <div class="aff-cell aff-cell--sig">${fieldValue(tech.signature)}</div>
     ${labelCells}
   </div>`;

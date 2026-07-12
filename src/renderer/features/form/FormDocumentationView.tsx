@@ -23,6 +23,7 @@ import { DocRuleRows } from './DocRuleRows';
 import { cn } from '../../lib/cn';
 
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
 function ChoiceCell({
   choice,
@@ -31,6 +32,7 @@ function ChoiceCell({
   variant,
   disabled,
   onSelect,
+  onClear,
 }: {
   choice: DocumentationChoice | null;
   groupName: string;
@@ -38,6 +40,7 @@ function ChoiceCell({
   variant: DocumentationChoice;
   disabled?: boolean;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'doc-td',
@@ -69,8 +72,7 @@ function ChoiceCell({
           type="radio"
           className="doc-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -89,7 +91,7 @@ function ChoiceCells({
   naDisabled?: boolean;
   rowValue: { choice: DocumentationChoice | null };
   readOnly?: boolean;
-  onChoice: (choice: DocumentationChoice) => void;
+  onChoice: (choice: DocumentationChoice | null) => void;
 }) {
   const groupName = `doc-${rowId}`;
 
@@ -101,6 +103,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="yes"
         onSelect={() => onChoice('yes')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
@@ -108,6 +111,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="no"
         onSelect={() => onChoice('no')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
@@ -116,6 +120,7 @@ function ChoiceCells({
         variant="na"
         disabled={naDisabled}
         onSelect={() => onChoice('na')}
+        onClear={() => onChoice(null)}
       />
     </>
   );
@@ -222,7 +227,7 @@ function DocumentationISection({
 }: {
   data: DocumentationValue;
   readOnly?: boolean;
-  onChoice: (rowId: string, choice: DocumentationChoice) => void;
+  onChoice: (rowId: string, choice: DocumentationChoice | null) => void;
 }) {
   const rowSpan = 1 + DOCUMENTATION_I_SUBITEMS.length;
 
@@ -266,7 +271,7 @@ export function FormDocumentationView({
 }) {
   const data = normalizeDocumentationValue(rawValue);
 
-  const setChoice = (rowId: string, choice: DocumentationChoice) => {
+  const setChoice = (rowId: string, choice: DocumentationChoice | null) => {
     onChange?.(setDocumentationChoice(data, rowId, choice));
   };
 

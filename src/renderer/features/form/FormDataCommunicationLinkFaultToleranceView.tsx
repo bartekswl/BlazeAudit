@@ -19,6 +19,7 @@ import {
 } from '../../../shared/form/dataCommunicationLinkFaultTolerance';
 import { cn } from '../../lib/cn';
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
 function ChoiceCell({
   choice,
@@ -26,12 +27,14 @@ function ChoiceCell({
   readOnly,
   variant,
   onSelect,
+  onClear,
 }: {
   choice: DclftChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: DclftChoice;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'dclft-td',
@@ -58,8 +61,7 @@ function ChoiceCell({
           type="radio"
           className="dclft-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -195,6 +197,7 @@ function DclftPanel({
                     onSelect={() =>
                       onEmit((value) => setDclftChoice(value, blockId, row.id, 'yes'))
                     }
+        onClear={() => onEmit((value) => setDclftChoice(value, blockId, row.id, null))}
                   />
                   <ChoiceCell
                     choice={rowValue.choice}
@@ -204,6 +207,7 @@ function DclftPanel({
                     onSelect={() =>
                       onEmit((value) => setDclftChoice(value, blockId, row.id, 'no'))
                     }
+        onClear={() => onEmit((value) => setDclftChoice(value, blockId, row.id, null))}
                   />
                   <ChoiceCell
                     choice={rowValue.choice}
@@ -213,6 +217,7 @@ function DclftPanel({
                     onSelect={() =>
                       onEmit((value) => setDclftChoice(value, blockId, row.id, 'na'))
                     }
+        onClear={() => onEmit((value) => setDclftChoice(value, blockId, row.id, null))}
                   />
                 </tr>
               );

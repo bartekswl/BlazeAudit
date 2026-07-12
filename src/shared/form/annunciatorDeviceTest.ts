@@ -112,7 +112,23 @@ export function setAnnunciatorDeviceTestSectionNotApplicable(
   value: AnnunciatorDeviceTestValue,
   sectionNotApplicable: boolean,
 ): AnnunciatorDeviceTestValue {
-  return { ...value, sectionNotApplicable };
+  if (!sectionNotApplicable) {
+    return {
+      ...value,
+      sectionNotApplicable: false,
+      checklist: Object.fromEntries(
+        ANNUNCIATOR_DEVICE_TEST_ROWS.map((row) => [row.id, { choice: null }]),
+      ),
+    };
+  }
+
+  return {
+    ...value,
+    sectionNotApplicable: true,
+    checklist: Object.fromEntries(
+      ANNUNCIATOR_DEVICE_TEST_ROWS.map((row) => [row.id, { choice: 'na' as const }]),
+    ),
+  };
 }
 
 export function setAnnunciatorDeviceTestFieldLocation(
@@ -137,6 +153,7 @@ export function setAnnunciatorDeviceTestChoice(
   const row = value.checklist[rowId] ?? { choice: null };
   return {
     ...value,
+    sectionNotApplicable: false,
     checklist: {
       ...value.checklist,
       [rowId]: { ...row, choice },

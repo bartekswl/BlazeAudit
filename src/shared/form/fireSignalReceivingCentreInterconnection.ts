@@ -22,11 +22,17 @@ export type FsrcChoice = 'yes' | 'no' | 'na';
 
 export type FsrcRowChoiceMode = 'yes-no-na' | 'yes-no-na-blocked' | 'record-fields';
 
+export type FsrcSubitem = {
+  id: string;
+  text: string;
+};
+
 export type FsrcRowDef = {
   id: string;
   letter: string;
   text?: string;
-  bullets?: string[];
+  /** When set, each sub-item gets its own Yes/No(/N/A) choice column group. */
+  subItems?: FsrcSubitem[];
   choiceMode: FsrcRowChoiceMode;
 };
 
@@ -34,9 +40,15 @@ export const FSRC_ROWS: FsrcRowDef[] = [
   {
     id: 'fsrc-a',
     letter: 'A',
-    bullets: [
-      'The fire signal receiving centre transmitter is integral to the fire alarm control unit.',
-      'A supervised interconnection between the fire alarm control unit and a separately installed fire signal receiving centre transmitter is provided.',
+    subItems: [
+      {
+        id: 'fsrc-a-integral',
+        text: 'The fire signal receiving centre transmitter is integral to the fire alarm control unit.',
+      },
+      {
+        id: 'fsrc-a-supervised',
+        text: 'A supervised interconnection between the fire alarm control unit and a separately installed fire signal receiving centre transmitter is provided.',
+      },
     ],
     choiceMode: 'yes-no-na-blocked',
   },
@@ -84,6 +96,43 @@ export const FSRC_ROWS: FsrcRowDef[] = [
   },
 ];
 
+export function fsrcChoiceEntryIds(row: FsrcRowDef): string[] {
+  if (row.choiceMode === 'record-fields') return [];
+  if (row.subItems?.length) return row.subItems.map((item) => item.id);
+  return [row.id];
+}
+
+function fsrcAllChoiceEntryIds(): string[] {
+  return FSRC_ROWS.flatMap(fsrcChoiceEntryIds);
+}
+
+function migrateFsrcChecklist(
+  checklist: Record<string, FsrcRowValue>,
+): Record<string, FsrcRowValue> {
+  const next = { ...checklist };
+  const legacy = next['fsrc-a'];
+  if (legacy && !next['fsrc-a-integral']) {
+    next['fsrc-a-integral'] = legacy;
+  }
+  delete next['fsrc-a'];
+  return next;
+}
+
+function buildEmptyChecklistChoiceEntries(): Array<[string, FsrcRowValue]> {
+  return fsrcAllChoiceEntryIds().map((id): [string, FsrcRowValue] => [id, { choice: null }]);
+}
+
+function buildSectionNotApplicableChoiceEntries(): Array<[string, FsrcRowValue]> {
+  return FSRC_ROWS.flatMap((row) =>
+    fsrcChoiceEntryIds(row).map(
+      (id): [string, FsrcRowValue] => [
+        id,
+        { choice: row.choiceMode === 'yes-no-na' ? 'na' : null },
+      ],
+    ),
+  );
+}
+
 export interface FsrcRowValue {
   choice: FsrcChoice | null;
 }
@@ -104,12 +153,7 @@ export interface FireSignalReceivingCentreInterconnectionValue {
 }
 
 function emptyChecklist(): Record<string, FsrcRowValue> {
-  return Object.fromEntries(
-    FSRC_ROWS.filter((row) => row.choiceMode !== 'record-fields').map((row) => [
-      row.id,
-      { choice: null },
-    ]),
-  );
+  return Object.fromEntries(buildEmptyChecklistChoiceEntries());
 }
 
 export function emptyFireSignalReceivingCentreInterconnectionValue(): FireSignalReceivingCentreInterconnectionValue {
@@ -133,7 +177,10 @@ export function normalizeFireSignalReceivingCentreInterconnectionValue(
   const checklistRaw = record.checklist;
   const checklist =
     checklistRaw && typeof checklistRaw === 'object'
-      ? { ...base.checklist, ...(checklistRaw as Record<string, FsrcRowValue>) }
+      ? migrateFsrcChecklist({
+          ...base.checklist,
+          ...(checklistRaw as Record<string, FsrcRowValue>),
+        })
       : base.checklist;
 
   const recordFieldsRaw = record.recordFields;
@@ -180,24 +227,14 @@ export function setFsrcSectionNotApplicable(
     return {
       ...value,
       sectionNotApplicable: false,
-      checklist: Object.fromEntries(
-        FSRC_ROWS.filter((row) => row.choiceMode !== 'record-fields').map((row) => [
-          row.id,
-          { choice: null },
-        ]),
-      ),
+      checklist: Object.fromEntries(buildEmptyChecklistChoiceEntries()),
     };
   }
 
   return {
     ...value,
     sectionNotApplicable: true,
-    checklist: Object.fromEntries(
-      FSRC_ROWS.filter((row) => row.choiceMode !== 'record-fields').map((row) => [
-        row.id,
-        { choice: row.choiceMode === 'yes-no-na' ? ('na' as const) : null },
-      ]),
-    ),
+    checklist: Object.fromEntries(buildSectionNotApplicableChoiceEntries()),
   };
 }
 
@@ -225,7 +262,7 @@ export function setFsrcCircuitPanelBreakerIdentification(
 export function setFsrcChoice(
   value: FireSignalReceivingCentreInterconnectionValue,
   rowId: string,
-  choice: FsrcChoice,
+  choice: FsrcChoice | null,
 ): FireSignalReceivingCentreInterconnectionValue {
   const row = value.checklist[rowId] ?? { choice: null };
   return {

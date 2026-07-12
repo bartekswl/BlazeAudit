@@ -55,7 +55,7 @@ export function renderPrinterTestHtml(value: unknown): string {
         <span class="prt-na-suffix">${escapeHtml(PRINTER_TEST_NOT_APPLICABLE_SUFFIX)}</span>
       </span>
     </div>
-    <div class="prt-header-strip${data.sectionNotApplicable ? ' prt-header-strip--disabled' : ''}">
+    <div class="prt-header-strip">
       <div class="prt-ref-bar">${escapeHtml(PRINTER_TEST_REF)}</div>
       <div class="prt-info-row">
         <span class="prt-info-label">${escapeHtml(PRINTER_TEST_LOCATION_LABEL)}</span>
@@ -66,7 +66,7 @@ export function renderPrinterTestHtml(value: unknown): string {
         ${renderInfoValue(data.identification)}
       </div>
     </div>
-    <div class="prt-table-wrap${data.sectionNotApplicable ? ' prt-table-wrap--disabled' : ''}">
+    <div class="prt-table-wrap">
       <table class="prt-table">
         <thead>
           <tr>

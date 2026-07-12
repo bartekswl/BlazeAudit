@@ -1,3 +1,4 @@
+import { memo, useCallback, useRef } from 'react';
 import type { DocumentContext } from '../../../shared/document';
 import {
   FORM_FOOTER_HEIGHT_PERCENT,
@@ -9,23 +10,12 @@ import {
   type FormDefinition,
   type FormPage,
 } from '../../../shared/form';
+import { pageElementIds, pageValuesChanged } from '../../../shared/form/pageElementIds';
 import { cn } from '../../lib/cn';
 import { FormPageMetaHeader } from './FormPageMetaHeader';
 import { FormElementView } from './FormElementView';
 
-export function FormPageCanvas({
-  form,
-  page,
-  pageIndex,
-  template,
-  context,
-  values,
-  readOnly,
-  onValueChange,
-  fixedPageLayout = false,
-  linedNotesVisibleLines,
-  linedNotesRowHeights,
-}: {
+type FormPageCanvasProps = {
   form: FormDefinition;
   page: FormPage;
   pageIndex: number;
@@ -40,7 +30,28 @@ export function FormPageCanvas({
   linedNotesVisibleLines?: Record<string, number>;
   /** PDF — pixel height per ruled row (measured from fixed A4 layout). */
   linedNotesRowHeights?: Record<string, number>;
-}) {
+};
+
+function FormPageCanvasInner({
+  form,
+  page,
+  pageIndex,
+  template,
+  context,
+  values,
+  readOnly,
+  onValueChange,
+  fixedPageLayout = false,
+  linedNotesVisibleLines,
+  linedNotesRowHeights,
+}: FormPageCanvasProps) {
+  const onValueChangeRef = useRef(onValueChange);
+  onValueChangeRef.current = onValueChange;
+
+  const dispatchElementChange = useCallback((elementId: string, value: unknown) => {
+    onValueChangeRef.current?.(elementId, value);
+  }, []);
+
   const bodyPercent = pageBodyPercent(page);
   const totalPages = form.pages.length;
   const isLandscape = page.orientation === 'landscape';
@@ -328,10 +339,8 @@ export function FormPageCanvas({
                         ? resolveFormBinding(element.binding, context ?? null, template)
                         : undefined
                     }
-                    onChange={
-                      onValueChange
-                        ? (next) => onValueChange(element.id, next)
-                        : undefined
+                    onElementValueChange={
+                      onValueChange ? dispatchElementChange : undefined
                     }
                     linedNotesVisibleLines={linedNotesVisibleLines}
                     linedNotesRowHeights={linedNotesRowHeights}
@@ -356,3 +365,30 @@ export function FormPageCanvas({
     </div>
   );
 }
+
+const pageElementIdCache = new WeakMap<FormPage, string[]>();
+
+function cachedPageElementIds(page: FormPage): string[] {
+  let ids = pageElementIdCache.get(page);
+  if (!ids) {
+    ids = pageElementIds(page);
+    pageElementIdCache.set(page, ids);
+  }
+  return ids;
+}
+
+function formPageCanvasPropsEqual(prev: FormPageCanvasProps, next: FormPageCanvasProps): boolean {
+  if (prev.page !== next.page) return false;
+  if (prev.pageIndex !== next.pageIndex) return false;
+  if (prev.form !== next.form) return false;
+  if (prev.readOnly !== next.readOnly) return false;
+  if (prev.fixedPageLayout !== next.fixedPageLayout) return false;
+  if (prev.template !== next.template) return false;
+  if (prev.context !== next.context) return false;
+  if (prev.onValueChange !== next.onValueChange) return false;
+  if (prev.linedNotesVisibleLines !== next.linedNotesVisibleLines) return false;
+  if (prev.linedNotesRowHeights !== next.linedNotesRowHeights) return false;
+  return !pageValuesChanged(prev.values, next.values, cachedPageElementIds(prev.page));
+}
+
+export const FormPageCanvas = memo(FormPageCanvasInner, formPageCanvasPropsEqual);

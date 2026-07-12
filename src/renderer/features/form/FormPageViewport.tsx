@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
-import { useDocumentOutlineRail } from '../documents/DocumentOutlineContext';
+import { useContentsPanelExpanded } from '../documents/DocumentOutlineContext';
 
 const SCALE_EPSILON = 0.001;
 const ZOOM_PERCENT_MIN = 75;
 const ZOOM_PERCENT_MAX = 150;
 const ZOOM_PERCENT_STEP = 5;
 /** Matches DocumentOutlineRail width transition (ms). */
-const CONTENTS_PANEL_TRANSITION_MS = 400;
+const CONTENTS_PANEL_TRANSITION_MS = 250;
 
 type ScrollAnchor = {
   el: HTMLElement;
@@ -69,14 +69,13 @@ export function FormPageViewport({
   const canPrev = pageIndex > 0;
   const canNext = pageIndex < totalPages - 1;
   const multiPage = !continuous && totalPages > 1 && onPageChange;
-  const { expanded: contentsExpanded } = useDocumentOutlineRail();
+  const contentsExpanded = useContentsPanelExpanded();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const referenceWidthRef = useRef(0);
   const scrollAnchorRef = useRef<ScrollAnchor | null>(null);
-  const preserveScrollUntilRef = useRef(0);
   const [zoomPercent, setZoomPercent] = useState(100);
   const [visiblePageIndex, setVisiblePageIndex] = useState(0);
   const [innerStyle, setInnerStyle] = useState<CSSProperties>({ width: '100%' });
@@ -120,63 +119,36 @@ export function FormPageViewport({
     );
   }, [contentsExpanded, userZoom]);
 
-  const scheduleScrollRestore = useCallback((anchor: ScrollAnchor | null) => {
-    const scroll = scrollRef.current;
-    if (!scroll || !anchor) return;
-
-    const run = () => restoreScrollAnchor(scroll, anchor);
-    requestAnimationFrame(() => requestAnimationFrame(run));
-  }, []);
-
-  const updateScaleAndPreserveScroll = useCallback(() => {
-    updateScale();
-    if (performance.now() < preserveScrollUntilRef.current) {
-      scheduleScrollRestore(scrollAnchorRef.current);
-    }
-  }, [updateScale, scheduleScrollRestore]);
-
   useEffect(() => {
     if (!continuous) setZoomPercent(100);
   }, [continuous, pageIndex]);
 
   useEffect(() => {
     const scroll = scrollRef.current;
-    const anchor = scroll ? captureScrollAnchor(scroll) : null;
-    scrollAnchorRef.current = anchor;
-    preserveScrollUntilRef.current = performance.now() + CONTENTS_PANEL_TRANSITION_MS + 50;
+    scrollAnchorRef.current = scroll ? captureScrollAnchor(scroll) : null;
 
     if (!contentsExpanded && hostRef.current) {
       referenceWidthRef.current = hostRef.current.clientWidth;
     }
     updateScale();
-    scheduleScrollRestore(anchor);
 
     const t = window.setTimeout(() => {
-      scheduleScrollRestore(scrollAnchorRef.current);
-      preserveScrollUntilRef.current = 0;
-    }, CONTENTS_PANEL_TRANSITION_MS + 50);
+      const root = scrollRef.current;
+      if (root) restoreScrollAnchor(root, scrollAnchorRef.current);
+    }, CONTENTS_PANEL_TRANSITION_MS);
 
     return () => window.clearTimeout(t);
-  }, [contentsExpanded, updateScale, scheduleScrollRestore]);
+  }, [contentsExpanded, updateScale]);
 
   useEffect(() => {
     const host = hostRef.current;
-    const inner = innerRef.current;
-    if (!host || !inner) return;
+    if (!host) return;
 
-    const ro = new ResizeObserver(() => updateScaleAndPreserveScroll());
+    const ro = new ResizeObserver(() => updateScale());
     ro.observe(host);
-    ro.observe(inner);
-    updateScaleAndPreserveScroll();
+    updateScale();
     return () => ro.disconnect();
-  }, [updateScaleAndPreserveScroll, continuous, pageIndex, children]);
-
-  useLayoutEffect(() => {
-    if (performance.now() >= preserveScrollUntilRef.current) return;
-    const scroll = scrollRef.current;
-    if (!scroll) return;
-    restoreScrollAnchor(scroll, scrollAnchorRef.current);
-  }, [innerStyle]);
+  }, [updateScale, continuous, pageIndex]);
 
   useEffect(() => {
     if (!showZoomControls) return;
@@ -234,7 +206,7 @@ export function FormPageViewport({
 
     sheets.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [continuous, children]);
+  }, [continuous, totalPages]);
 
   const zoomLabel = `${zoomPercent}%`;
   const atMinZoom = zoomPercent <= ZOOM_PERCENT_MIN;

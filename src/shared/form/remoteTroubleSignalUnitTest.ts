@@ -89,7 +89,23 @@ export function setRemoteTroubleSignalUnitTestSectionNotApplicable(
   value: RemoteTroubleSignalUnitTestValue,
   sectionNotApplicable: boolean,
 ): RemoteTroubleSignalUnitTestValue {
-  return { ...value, sectionNotApplicable };
+  if (!sectionNotApplicable) {
+    return {
+      ...value,
+      sectionNotApplicable: false,
+      checklist: Object.fromEntries(
+        REMOTE_TROUBLE_SIGNAL_UNIT_TEST_ROWS.map((row) => [row.id, { choice: null }]),
+      ),
+    };
+  }
+
+  return {
+    ...value,
+    sectionNotApplicable: true,
+    checklist: Object.fromEntries(
+      REMOTE_TROUBLE_SIGNAL_UNIT_TEST_ROWS.map((row) => [row.id, { choice: 'na' as const }]),
+    ),
+  };
 }
 
 export function setRemoteTroubleSignalUnitTestFieldLocation(
@@ -109,11 +125,12 @@ export function setRemoteTroubleSignalUnitTestIdentification(
 export function setRemoteTroubleSignalUnitTestChoice(
   value: RemoteTroubleSignalUnitTestValue,
   rowId: string,
-  choice: RemoteTroubleSignalUnitTestChoice,
+  choice: RemoteTroubleSignalUnitTestChoice | null,
 ): RemoteTroubleSignalUnitTestValue {
   const row = value.checklist[rowId] ?? { choice: null };
   return {
     ...value,
+    sectionNotApplicable: false,
     checklist: {
       ...value.checklist,
       [rowId]: { ...row, choice },

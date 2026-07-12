@@ -275,10 +275,15 @@ const PRINT_OVERRIDES = `
     flex-direction: column !important;
   }
   .form-print-root .form-page-sheet--lined-notes.form-page-sheet--fixed .form-page-section:has(.ln-panel--blue) {
-    flex: 18 1 0 !important;
+    flex: 17 1 0 !important;
     min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--lined-notes .form-page-section:has(.ln-panel--blue) .form-page-section-title {
+    margin: 0.5pt 0 1pt !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
   }
   .form-print-root .form-page-sheet--lined-notes.form-page-sheet--fixed .form-page-section:has(.ln-panel) > div {
     flex: 1 1 auto !important;
@@ -885,7 +890,7 @@ const PRINT_OVERRIDES = `
   }
   .form-print-root .form-page-sheet--field-device-legend .fdtl-col--type,
   .form-print-root .form-page-sheet--field-device-legend .fdtl-col--model {
-    width: 13% !important;
+    width: 18% !important;
   }
   .form-print-root .form-page-sheet--field-device-legend .fdtl-table tbody tr {
     height: 1% !important;
@@ -1273,7 +1278,7 @@ const PRINT_OVERRIDES = `
     vertical-align: top !important;
   }
   .form-print-root .cut-td--choice-block {
-    background: #171717 !important;
+    background: #cfe2f3 !important;
     padding: 0 !important;
   }
   .form-print-root .cut-version-input,
@@ -1387,7 +1392,7 @@ const PRINT_OVERRIDES = `
     background: #f1f5f9 !important;
   }
   .form-print-root .cur-td--choice-block {
-    background: #171717 !important;
+    background: #cfe2f3 !important;
     padding: 0 !important;
   }
   .form-print-root .cur-time-input,
@@ -2243,12 +2248,12 @@ const PRINT_OVERRIDES = `
     --idr-line: 0.5px solid #64748b;
     overflow: hidden !important;
     box-sizing: border-box !important;
-    font-size: 7.75pt !important;
+    font-size: 9pt !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-table {
     height: 100% !important;
-    font-size: 7.75pt !important;
+    font-size: 9pt !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-table thead {
@@ -2259,7 +2264,7 @@ const PRINT_OVERRIDES = `
     background: #b6d7a8 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    font-size: 8pt !important;
+    font-size: 9pt !important;
     padding: 2pt 3pt !important;
     vertical-align: bottom !important;
   }
@@ -2280,7 +2285,7 @@ const PRINT_OVERRIDES = `
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--vertical .idr-th-text {
     max-height: 25mm !important;
-    font-size: 8pt !important;
+    font-size: 9pt !important;
     line-height: 1.1 !important;
   }
 
@@ -2302,15 +2307,29 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-choice-value {
     min-height: 0 !important;
     height: 100% !important;
-    font-size: 7.75pt !important;
+    font-size: 9pt !important;
     line-height: 1.1 !important;
     padding: 0 !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-choice-cell,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-choice-value {
-    font-size: 8.5pt !important;
+    font-size: 9.5pt !important;
     font-weight: 700 !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-td--deviceLocation .idr-cell-value,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-td--deviceLocation .idr-cell-input {
+    text-align: left !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-td:not(.idr-td--deviceLocation) {
+    text-align: center !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-td:not(.idr-td--deviceLocation) .idr-cell-value,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-td:not(.idr-td--deviceLocation) .idr-cell-input {
+    text-align: center !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-row--alt .idr-td {

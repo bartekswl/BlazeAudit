@@ -132,7 +132,7 @@ html[data-theme='light'] *::-webkit-scrollbar-thumb:hover {
 }
 
 .app-enter {
-  animation: app-enter 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: app-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .app-exit {
@@ -151,5 +151,35 @@ html[data-theme='light'] *::-webkit-scrollbar-thumb:hover {
   z-index: 30;
   pointer-events: none;
   background: radial-gradient(circle at 50% 42%, rgb(249 115 22 / 0.2), transparent 62%);
-  animation: flame-reveal 1.25s ease-out forwards;
+  animation: flame-reveal 0.55s ease-out forwards;
+}
+
+.boot-loader {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.875rem;
+  color: var(--ba-text-muted, #a3a3a3);
+}
+
+.boot-loader-spinner {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 2px solid rgb(249 115 22 / 0.2);
+  border-top-color: #f97316;
+  border-radius: 9999px;
+  animation: boot-spin 0.75s linear infinite;
+}
+
+.boot-loader-label {
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+}
+
+@keyframes boot-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

@@ -210,7 +210,7 @@ export function setDclftChoice(
   value: DataCommunicationLinkFaultToleranceValue,
   blockId: DclftBlockId,
   rowId: string,
-  choice: DclftChoice,
+  choice: DclftChoice | null,
 ): DataCommunicationLinkFaultToleranceValue {
   const block = value[blockId];
   const row = block.checklist[rowId] ?? { choice: null };

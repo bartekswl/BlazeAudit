@@ -15,32 +15,33 @@ import {
 } from '../../../shared/form/remoteTroubleSignalUnitTest';
 import { cn } from '../../lib/cn';
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function ChoiceCell({
   choice,
   groupName,
   readOnly,
   variant,
-  disabled,
   onSelect,
+  onClear,
 }: {
   choice: RemoteTroubleSignalUnitTestChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: RemoteTroubleSignalUnitTestChoice;
-  disabled?: boolean;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'rtsu-td',
     variant === 'yes' && 'rtsu-td--yes',
     variant === 'no' && 'rtsu-td--no',
     variant === 'na' && 'rtsu-td--na',
-    disabled && 'rtsu-td--disabled',
   );
   const label = variant === 'yes' ? 'Yes' : variant === 'no' ? 'No' : 'N/A';
 
-  if (readOnly || disabled) {
+  if (readOnly) {
     return (
       <td className={tdCls}>
         <span className="rtsu-check-cell rtsu-check-cell--readonly">
@@ -57,8 +58,7 @@ function ChoiceCell({
           type="radio"
           className="rtsu-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -70,14 +70,12 @@ function ChoiceCells({
   rowId,
   rowValue,
   readOnly,
-  disabled,
   onChoice,
 }: {
   rowId: string;
   rowValue: { choice: RemoteTroubleSignalUnitTestChoice | null };
   readOnly?: boolean;
-  disabled?: boolean;
-  onChoice: (choice: RemoteTroubleSignalUnitTestChoice) => void;
+  onChoice: (choice: RemoteTroubleSignalUnitTestChoice | null) => void;
 }) {
   const groupName = `rtsu-${rowId}`;
 
@@ -87,27 +85,58 @@ function ChoiceCells({
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="yes"
         onSelect={() => onChoice('yes')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="no"
         onSelect={() => onChoice('no')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="na"
         onSelect={() => onChoice('na')}
+        onClear={() => onChoice(null)}
       />
     </>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  readOnly,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  readOnly?: boolean;
+  onChange?: (next: string) => void;
+}) {
+  return (
+    <div className="rtsu-info-row">
+      <span className="rtsu-info-label">{label}</span>
+      {readOnly ? (
+        value.trim() ? (
+          <span className="rtsu-info-value">{value}</span>
+        ) : (
+          <span className="rtsu-info-line" />
+        )
+      ) : (
+        <VisibleWidthInput
+          className="rtsu-info-input"
+          value={value}
+          onChange={(next) => onChange?.(next)}
+        />
+      )}
+    </div>
   );
 }
 
@@ -121,7 +150,6 @@ export function FormRemoteTroubleSignalUnitTestView({
   onChange?: (next: RemoteTroubleSignalUnitTestValue) => void;
 }) {
   const data = normalizeRemoteTroubleSignalUnitTestValue(value);
-  const disabled = data.sectionNotApplicable;
 
   const emit = (next: RemoteTroubleSignalUnitTestValue) => onChange?.(next);
 
@@ -149,49 +177,23 @@ export function FormRemoteTroubleSignalUnitTestView({
         )}
       </div>
 
-      <div className={cn('rtsu-header-strip', disabled && 'rtsu-header-strip--disabled')}>
+      <div className="rtsu-header-strip">
         <div className="rtsu-ref-bar">{REMOTE_TROUBLE_SIGNAL_UNIT_TEST_REF}</div>
-        <div className="rtsu-info-row">
-          <span className="rtsu-info-label">{REMOTE_TROUBLE_SIGNAL_UNIT_TEST_LOCATION_LABEL}</span>
-          {readOnly || disabled ? (
-            data.fieldLocation.trim() ? (
-              <span className="rtsu-info-value">{data.fieldLocation}</span>
-            ) : (
-              <span className="rtsu-info-line" />
-            )
-          ) : (
-            <input
-              type="text"
-              className="rtsu-info-input"
-              value={data.fieldLocation}
-              onChange={(event) =>
-                emit(setRemoteTroubleSignalUnitTestFieldLocation(data, event.target.value))
-              }
-            />
-          )}
-        </div>
-        <div className="rtsu-info-row">
-          <span className="rtsu-info-label">{REMOTE_TROUBLE_SIGNAL_UNIT_TEST_IDENTIFICATION_LABEL}</span>
-          {readOnly || disabled ? (
-            data.identification.trim() ? (
-              <span className="rtsu-info-value">{data.identification}</span>
-            ) : (
-              <span className="rtsu-info-line" />
-            )
-          ) : (
-            <input
-              type="text"
-              className="rtsu-info-input"
-              value={data.identification}
-              onChange={(event) =>
-                emit(setRemoteTroubleSignalUnitTestIdentification(data, event.target.value))
-              }
-            />
-          )}
-        </div>
+        <InfoRow
+          label={REMOTE_TROUBLE_SIGNAL_UNIT_TEST_LOCATION_LABEL}
+          value={data.fieldLocation}
+          readOnly={readOnly}
+          onChange={(next) => emit(setRemoteTroubleSignalUnitTestFieldLocation(data, next))}
+        />
+        <InfoRow
+          label={REMOTE_TROUBLE_SIGNAL_UNIT_TEST_IDENTIFICATION_LABEL}
+          value={data.identification}
+          readOnly={readOnly}
+          onChange={(next) => emit(setRemoteTroubleSignalUnitTestIdentification(data, next))}
+        />
       </div>
 
-      <div className={cn('rtsu-table-wrap', disabled && 'rtsu-table-wrap--disabled')}>
+      <div className="rtsu-table-wrap">
         <table className="rtsu-table">
           <thead>
             <tr>
@@ -215,7 +217,6 @@ export function FormRemoteTroubleSignalUnitTestView({
                     rowId={row.id}
                     rowValue={rowValue}
                     readOnly={readOnly}
-                    disabled={disabled}
                     onChoice={(choice) =>
                       emit(setRemoteTroubleSignalUnitTestChoice(data, row.id, choice))
                     }

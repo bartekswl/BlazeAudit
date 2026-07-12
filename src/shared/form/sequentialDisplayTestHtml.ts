@@ -59,7 +59,7 @@ export function renderSequentialDisplayTestHtml(value: unknown): string {
         <span class="asd-na-suffix">${escapeHtml(SEQUENTIAL_DISPLAY_TEST_NOT_APPLICABLE_SUFFIX)}</span>
       </span>
     </div>
-    <div class="asd-header-strip${data.sectionNotApplicable ? ' asd-header-strip--disabled' : ''}">
+    <div class="asd-header-strip">
       <div class="asd-ref-bar">${refLines}</div>
       <div class="asd-info-row">
         <span class="asd-info-label">${escapeHtml(SEQUENTIAL_DISPLAY_TEST_LOCATION_LABEL)}</span>
@@ -70,7 +70,7 @@ export function renderSequentialDisplayTestHtml(value: unknown): string {
         ${renderInfoValue(data.identification)}
       </div>
     </div>
-    <div class="asd-table-wrap${data.sectionNotApplicable ? ' asd-table-wrap--disabled' : ''}">
+    <div class="asd-table-wrap">
       <table class="asd-table">
         <thead>
           <tr>

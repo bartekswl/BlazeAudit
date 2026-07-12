@@ -1,6 +1,6 @@
 /** Flex grow ratio for recommendations vs testing-notes panels on page 3. */
 export const RECOMMENDATIONS_ROW_COUNT = 10;
-export const TESTING_NOTES_ROW_COUNT = 18;
+export const TESTING_NOTES_ROW_COUNT = 17;
 
 export const LINED_NOTES_LINE_HEIGHT_REM = 1.375;
 

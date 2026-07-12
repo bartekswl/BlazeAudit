@@ -21,11 +21,37 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function renderDescCell(row: FsrcRowDef): string {
-  if (row.bullets?.length) {
-    return `<ul class="fsrc-desc-list">${row.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
-  }
-  return `<span class="fsrc-desc-text">${escapeHtml(row.text ?? '')}</span>`;
+function renderDescCell(row: FsrcRowDef, text?: string): string {
+  return `<span class="fsrc-desc-text">${escapeHtml(text ?? row.text ?? '')}</span>`;
+}
+
+function renderFsrcTableBody(data: ReturnType<typeof normalizeFireSignalReceivingCentreInterconnectionValue>): string {
+  return FSRC_ROWS.flatMap((row, index) => {
+    const zebra = index % 2 === 1 ? ' fsrc-row--alt' : '';
+
+    if (row.subItems?.length) {
+      return row.subItems.map((subItem, subIndex) => {
+        const rowValue = data.checklist[subItem.id] ?? { choice: null };
+        const letterCell =
+          subIndex === 0
+            ? `<td rowspan="${row.subItems!.length}" class="fsrc-td fsrc-td--letter">${escapeHtml(row.letter)}</td>`
+            : '';
+        return `<tr class="fsrc-row${zebra}">${letterCell}<td class="fsrc-td fsrc-td--desc">${renderDescCell(row, subItem.text)}</td>${renderChoiceCells(rowValue.choice, row.choiceMode)}</tr>`;
+      });
+    }
+
+    const rowValue = data.checklist[row.id] ?? { choice: null };
+    const desc =
+      row.choiceMode === 'record-fields'
+        ? `${renderDescCell(row)}${renderRecordFields(
+            data.recordFields.company,
+            data.recordFields.address,
+            data.recordFields.telephone,
+          )}`
+        : renderDescCell(row);
+
+    return `<tr class="fsrc-row${zebra}"><td class="fsrc-td fsrc-td--letter">${escapeHtml(row.letter)}</td><td class="fsrc-td fsrc-td--desc">${desc}</td>${renderChoiceCells(rowValue.choice, row.choiceMode)}</tr>`;
+  }).join('');
 }
 
 function renderChoiceCell(variant: FsrcChoice, choice: FsrcChoice | null): string {
@@ -69,20 +95,7 @@ function renderRecordFields(
 export function renderFireSignalReceivingCentreInterconnectionHtml(value: unknown): string {
   const data = normalizeFireSignalReceivingCentreInterconnectionValue(value);
 
-  const body = FSRC_ROWS.map((row, index) => {
-    const zebra = index % 2 === 1 ? ' fsrc-row--alt' : '';
-    const rowValue = data.checklist[row.id] ?? { choice: null };
-    const desc =
-      row.choiceMode === 'record-fields'
-        ? `${renderDescCell(row)}${renderRecordFields(
-            data.recordFields.company,
-            data.recordFields.address,
-            data.recordFields.telephone,
-          )}`
-        : renderDescCell(row);
-
-    return `<tr class="fsrc-row${zebra}"><td class="fsrc-td fsrc-td--letter">${escapeHtml(row.letter)}</td><td class="fsrc-td fsrc-td--desc">${desc}</td>${renderChoiceCells(rowValue.choice, row.choiceMode)}</tr>`;
-  }).join('');
+  const body = renderFsrcTableBody(data);
 
   return `<div class="fsrc-panel">
     <div class="fsrc-na-bar">

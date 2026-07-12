@@ -126,6 +126,7 @@ export function setAffirmationInspector(
       inspectorId: inspector?.id ?? null,
       name: inspector?.name ?? '',
       identification: inspector?.licenseNumber ?? '',
+      date: inspector ? value[technician].date : null,
     },
   };
 }
@@ -163,7 +164,7 @@ export function applyAffirmationDefaults(
       next = setAffirmationInspector(next, technician, preferMatch);
       changed = true;
     }
-    if (!next[technician].date && options.inspectionDate) {
+    if (!next[technician].date && options.inspectionDate && next[technician].inspectorId) {
       next = setAffirmationTechnicianField(next, technician, 'date', options.inspectionDate);
       changed = true;
     }

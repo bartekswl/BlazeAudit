@@ -55,7 +55,7 @@ export function renderRemoteTroubleSignalUnitTestHtml(value: unknown): string {
         <span class="rtsu-na-suffix">${escapeHtml(REMOTE_TROUBLE_SIGNAL_UNIT_TEST_NOT_APPLICABLE_SUFFIX)}</span>
       </span>
     </div>
-    <div class="rtsu-header-strip${data.sectionNotApplicable ? ' rtsu-header-strip--disabled' : ''}">
+    <div class="rtsu-header-strip">
       <div class="rtsu-ref-bar">${escapeHtml(REMOTE_TROUBLE_SIGNAL_UNIT_TEST_REF)}</div>
       <div class="rtsu-info-row">
         <span class="rtsu-info-label">${escapeHtml(REMOTE_TROUBLE_SIGNAL_UNIT_TEST_LOCATION_LABEL)}</span>
@@ -66,7 +66,7 @@ export function renderRemoteTroubleSignalUnitTestHtml(value: unknown): string {
         ${renderInfoValue(data.identification)}
       </div>
     </div>
-    <div class="rtsu-table-wrap${data.sectionNotApplicable ? ' rtsu-table-wrap--disabled' : ''}">
+    <div class="rtsu-table-wrap">
       <table class="rtsu-table">
         <thead>
           <tr>

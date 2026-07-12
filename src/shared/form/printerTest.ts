@@ -75,7 +75,23 @@ export function setPrinterTestSectionNotApplicable(
   value: PrinterTestValue,
   sectionNotApplicable: boolean,
 ): PrinterTestValue {
-  return { ...value, sectionNotApplicable };
+  if (!sectionNotApplicable) {
+    return {
+      ...value,
+      sectionNotApplicable: false,
+      checklist: Object.fromEntries(
+        PRINTER_TEST_ROWS.map((row) => [row.id, { choice: null }]),
+      ),
+    };
+  }
+
+  return {
+    ...value,
+    sectionNotApplicable: true,
+    checklist: Object.fromEntries(
+      PRINTER_TEST_ROWS.map((row) => [row.id, { choice: 'na' as const }]),
+    ),
+  };
 }
 
 export function setPrinterTestFieldLocation(
@@ -95,11 +111,12 @@ export function setPrinterTestIdentification(
 export function setPrinterTestChoice(
   value: PrinterTestValue,
   rowId: string,
-  choice: PrinterTestChoice,
+  choice: PrinterTestChoice | null,
 ): PrinterTestValue {
   const row = value.checklist[rowId] ?? { choice: null };
   return {
     ...value,
+    sectionNotApplicable: false,
     checklist: {
       ...value.checklist,
       [rowId]: { ...row, choice },

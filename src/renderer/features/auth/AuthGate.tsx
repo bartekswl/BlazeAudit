@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { AuthStatus } from '../../../shared/auth';
 import { cn } from '../../lib/cn';
+import { StartupLoader } from '../../components/StartupLoader';
 import { TitleBar } from '../../components/TitleBar';
 import { ActivationScreen } from './ActivationScreen';
 import { AuthRefreshContext } from './authContext';
@@ -8,9 +9,9 @@ import { notifyAccountThemeSync } from '../../theme/ThemeProvider';
 import { LoginScreen } from './LoginScreen';
 import { SetPasswordScreen } from './SetPasswordScreen';
 
-const UNLOCK_MS = 920;
-const APP_ENTER_MS = 1100;
-const LOCK_MS = 720;
+const UNLOCK_MS = 420;
+const APP_ENTER_MS = 420;
+const LOCK_MS = 480;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -66,10 +67,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       if (next.phase === 'unlocked') {
         setAppVisible(true);
         setAuthOverlay(false);
-        setAppMotion('enter');
         notifyAccountThemeSync();
-        await delay(APP_ENTER_MS);
-        setAppMotion(null);
       } else {
         setAuthOverlay(true);
       }
@@ -88,7 +86,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
     return (
       <div className="flex h-screen flex-col bg-neutral-950">
         <TitleBar />
-        <div className="grid flex-1 place-items-center text-sm text-neutral-500">Loading…</div>
+        <StartupLoader />
       </div>
     );
   }

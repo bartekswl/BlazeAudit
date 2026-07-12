@@ -24,6 +24,7 @@ import {
 } from '../../../shared/form/ancillaryDeviceCircuitTest';
 import { cn } from '../../lib/cn';
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { handleFixedRowGridTextInputKeyDown } from './formGridTableKeyboard';
 
 function TextCell({
@@ -56,12 +57,14 @@ function OperationCell({
   readOnly,
   variant,
   onSelect,
+  onClear,
 }: {
   choice: AncillaryDeviceCircuitOperationChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: AncillaryDeviceCircuitOperationChoice;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn('adc-td', variant === 'yes' && 'adc-td--yes', variant === 'no' && 'adc-td--no');
   const label = variant === 'yes' ? 'Yes' : 'No';
@@ -83,8 +86,7 @@ function OperationCell({
           type="radio"
           className="adc-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -200,6 +202,9 @@ export function FormAncillaryDeviceCircuitTestView({
                   onSelect={() =>
                     emit(setAncillaryDeviceCircuitOperationConfirmed(data, rowIndex, 'yes'))
                   }
+                  onClear={() =>
+                    emit(setAncillaryDeviceCircuitOperationConfirmed(data, rowIndex, null))
+                  }
                 />
                 <OperationCell
                   choice={row.operationConfirmed}
@@ -208,6 +213,9 @@ export function FormAncillaryDeviceCircuitTestView({
                   variant="no"
                   onSelect={() =>
                     emit(setAncillaryDeviceCircuitOperationConfirmed(data, rowIndex, 'no'))
+                  }
+                  onClear={() =>
+                    emit(setAncillaryDeviceCircuitOperationConfirmed(data, rowIndex, null))
                   }
                 />
                 <td className="adc-td adc-td--method">

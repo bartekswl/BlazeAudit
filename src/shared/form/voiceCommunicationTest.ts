@@ -178,7 +178,7 @@ export function setVoiceCommunicationTestSectionNotApplicable(
 export function setVoiceCommunicationTestChoice(
   value: VoiceCommunicationTestValue,
   rowId: string,
-  choice: VoiceCommunicationTestChoice,
+  choice: VoiceCommunicationTestChoice | null,
 ): VoiceCommunicationTestValue {
   return {
     ...value,

@@ -19,9 +19,7 @@ export function BuiltinFormViewer({
   const previewValues = useMemo(() => createEmptyFormValues(template.form), [template.form]);
 
   const handleOutlineNavigate = useCallback((sectionId: string, _pageIndex: number) => {
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => scrollToFormSection(sectionId));
-    });
+    window.requestAnimationFrame(() => scrollToFormSection(sectionId));
   }, []);
 
   useRegisterFormOutline(template.title || template.name, formSections, handleOutlineNavigate);

@@ -59,7 +59,7 @@ export function renderAnnunciatorDeviceTestHtml(value: unknown): string {
       </span>
     </div>
     <div class="artu-ref-bar">${refLines}</div>
-    <div class="artu-info-strip${data.sectionNotApplicable ? ' artu-info-strip--disabled' : ''}">
+    <div class="artu-info-strip">
       <div class="artu-info-row">
         <span class="artu-info-label">${escapeHtml(ANNUNCIATOR_DEVICE_TEST_LOCATION_LABEL)}</span>
         ${renderInfoValue(data.fieldLocation)}
@@ -69,7 +69,7 @@ export function renderAnnunciatorDeviceTestHtml(value: unknown): string {
         ${renderInfoValue(data.identification)}
       </div>
     </div>
-    <div class="artu-table-wrap${data.sectionNotApplicable ? ' artu-table-wrap--disabled' : ''}">
+    <div class="artu-table-wrap">
       <table class="artu-table">
         <thead>
           <tr>

@@ -15,32 +15,33 @@ import {
 } from '../../../shared/form/printerTest';
 import { cn } from '../../lib/cn';
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function ChoiceCell({
   choice,
   groupName,
   readOnly,
   variant,
-  disabled,
   onSelect,
+  onClear,
 }: {
   choice: PrinterTestChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: PrinterTestChoice;
-  disabled?: boolean;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'prt-td',
     variant === 'yes' && 'prt-td--yes',
     variant === 'no' && 'prt-td--no',
     variant === 'na' && 'prt-td--na',
-    disabled && 'prt-td--disabled',
   );
   const label = variant === 'yes' ? 'Yes' : variant === 'no' ? 'No' : 'N/A';
 
-  if (readOnly || disabled) {
+  if (readOnly) {
     return (
       <td className={tdCls}>
         <span className="prt-check-cell prt-check-cell--readonly">
@@ -57,8 +58,7 @@ function ChoiceCell({
           type="radio"
           className="prt-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -70,14 +70,12 @@ function ChoiceCells({
   rowId,
   rowValue,
   readOnly,
-  disabled,
   onChoice,
 }: {
   rowId: string;
   rowValue: { choice: PrinterTestChoice | null };
   readOnly?: boolean;
-  disabled?: boolean;
-  onChoice: (choice: PrinterTestChoice) => void;
+  onChoice: (choice: PrinterTestChoice | null) => void;
 }) {
   const groupName = `prt-${rowId}`;
 
@@ -87,27 +85,58 @@ function ChoiceCells({
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="yes"
         onSelect={() => onChoice('yes')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="no"
         onSelect={() => onChoice('no')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="na"
         onSelect={() => onChoice('na')}
+        onClear={() => onChoice(null)}
       />
     </>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  readOnly,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  readOnly?: boolean;
+  onChange?: (next: string) => void;
+}) {
+  return (
+    <div className="prt-info-row">
+      <span className="prt-info-label">{label}</span>
+      {readOnly ? (
+        value.trim() ? (
+          <span className="prt-info-value">{value}</span>
+        ) : (
+          <span className="prt-info-line" />
+        )
+      ) : (
+        <VisibleWidthInput
+          className="prt-info-input"
+          value={value}
+          onChange={(next) => onChange?.(next)}
+        />
+      )}
+    </div>
   );
 }
 
@@ -121,7 +150,6 @@ export function FormPrinterTestView({
   onChange?: (next: PrinterTestValue) => void;
 }) {
   const data = normalizePrinterTestValue(value);
-  const disabled = data.sectionNotApplicable;
 
   const emit = (next: PrinterTestValue) => onChange?.(next);
 
@@ -149,45 +177,23 @@ export function FormPrinterTestView({
         )}
       </div>
 
-      <div className={cn('prt-header-strip', disabled && 'prt-header-strip--disabled')}>
+      <div className="prt-header-strip">
         <div className="prt-ref-bar">{PRINTER_TEST_REF}</div>
-        <div className="prt-info-row">
-          <span className="prt-info-label">{PRINTER_TEST_LOCATION_LABEL}</span>
-          {readOnly || disabled ? (
-            data.fieldLocation.trim() ? (
-              <span className="prt-info-value">{data.fieldLocation}</span>
-            ) : (
-              <span className="prt-info-line" />
-            )
-          ) : (
-            <input
-              type="text"
-              className="prt-info-input"
-              value={data.fieldLocation}
-              onChange={(event) => emit(setPrinterTestFieldLocation(data, event.target.value))}
-            />
-          )}
-        </div>
-        <div className="prt-info-row">
-          <span className="prt-info-label">{PRINTER_TEST_IDENTIFICATION_LABEL}</span>
-          {readOnly || disabled ? (
-            data.identification.trim() ? (
-              <span className="prt-info-value">{data.identification}</span>
-            ) : (
-              <span className="prt-info-line" />
-            )
-          ) : (
-            <input
-              type="text"
-              className="prt-info-input"
-              value={data.identification}
-              onChange={(event) => emit(setPrinterTestIdentification(data, event.target.value))}
-            />
-          )}
-        </div>
+        <InfoRow
+          label={PRINTER_TEST_LOCATION_LABEL}
+          value={data.fieldLocation}
+          readOnly={readOnly}
+          onChange={(next) => emit(setPrinterTestFieldLocation(data, next))}
+        />
+        <InfoRow
+          label={PRINTER_TEST_IDENTIFICATION_LABEL}
+          value={data.identification}
+          readOnly={readOnly}
+          onChange={(next) => emit(setPrinterTestIdentification(data, next))}
+        />
       </div>
 
-      <div className={cn('prt-table-wrap', disabled && 'prt-table-wrap--disabled')}>
+      <div className="prt-table-wrap">
         <table className="prt-table">
           <thead>
             <tr>
@@ -211,7 +217,6 @@ export function FormPrinterTestView({
                     rowId={row.id}
                     rowValue={rowValue}
                     readOnly={readOnly}
-                    disabled={disabled}
                     onChoice={(choice) => emit(setPrinterTestChoice(data, row.id, choice))}
                   />
                 </tr>

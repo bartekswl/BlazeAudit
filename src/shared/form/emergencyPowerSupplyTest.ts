@@ -401,7 +401,7 @@ export function normalizeEmergencyPowerSupplyTestValue(
 export function setEmergencyPowerSupplyTestChoice(
   value: EmergencyPowerSupplyTestValue,
   rowId: string,
-  choice: EmergencyPowerSupplyTestChoice,
+  choice: EmergencyPowerSupplyTestChoice | null,
 ): EmergencyPowerSupplyTestValue {
   return {
     ...value,
@@ -507,7 +507,7 @@ export function setEmergencyPowerSupplyValueFill(
 export function setEmergencyPowerSupplyTestTypeChoice(
   value: EmergencyPowerSupplyTestValue,
   key: EmergencyPowerSupplyTestTypeKey,
-  choice: EmergencyPowerSupplyTestChoice,
+  choice: EmergencyPowerSupplyTestChoice | null,
 ): EmergencyPowerSupplyTestValue {
   return {
     ...value,

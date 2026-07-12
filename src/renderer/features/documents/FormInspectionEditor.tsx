@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FileDown } from 'lucide-react';
 import { CADENCE_PRESETS, type CadencePreset } from '../../../shared/cadence';
 import type { DocumentContext } from '../../../shared/document';
@@ -16,6 +16,7 @@ import { FormPageCanvas } from '../form/FormPageCanvas';
 import { FormPageViewport } from '../form/FormPageViewport';
 import { buildFormPrintHtml } from '../form/buildFormPrintHtml';
 import { collectLinedNotesVisibleLines } from '../form/collectLinedNotesVisibleLines';
+import { StartupLoader } from '../../components/StartupLoader';
 
 
 const compactInputCls = 'ba-input ba-input--compact';
@@ -71,9 +72,7 @@ function FormInspectionEditorInner({
   const outlineTitle = context?.template?.title || title;
 
   const handleOutlineNavigate = useCallback((sectionId: string, _targetPageIndex: number) => {
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => scrollToFormSection(sectionId));
-    });
+    window.requestAnimationFrame(() => scrollToFormSection(sectionId));
   }, []);
 
   useRegisterFormOutline(outlineTitle, formSections, handleOutlineNavigate);
@@ -108,23 +107,42 @@ function FormInspectionEditorInner({
     setSaveState((prev) => (prev === 'saved' || prev === 'error' ? 'idle' : prev));
   }, []);
 
-  const onValueChange = (elementId: string, value: unknown) => {
+  const markDirtyRef = useRef(markDirty);
+  markDirtyRef.current = markDirty;
+
+  const onValueChange = useCallback((elementId: string, value: unknown) => {
     setFormDoc((prev) => ({
       ...prev,
       values: setElementValue(prev.values, elementId, value),
     }));
-    markDirty();
-  };
+    markDirtyRef.current();
+  }, []);
 
-  const onInspectionDateChange = (nextDate: string) => {
+  const onInspectionDateChange = useCallback((nextDate: string) => {
     setInspectedAt(nextDate);
     setFormDoc((prev) => syncFormDocumentInspectionDate(prev, nextDate || null));
-    markDirty();
-  };
+    markDirtyRef.current();
+  }, []);
+
+  const editorTemplate = useMemo(
+    () =>
+      context?.template
+        ? {
+            code: context.template.code,
+            title: context.template.title,
+            name: context.template.name,
+          }
+        : undefined,
+    [context?.template?.code, context?.template?.title, context?.template?.name],
+  );
 
   const exportPdf = async () => {
     setExportingPdf(true);
     setPdfMessage(null);
+    // Let the loading overlay paint before blocking HTML/PDF work.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
     try {
       const linedNotesVisibleLines = collectLinedNotesVisibleLines();
       const printHtml = await buildFormPrintHtml({
@@ -158,7 +176,15 @@ function FormInspectionEditorInner({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2">
+    <div className="relative flex h-full min-h-0 flex-col gap-2">
+      {exportingPdf ? (
+        <div
+          className="absolute inset-0 z-50 flex flex-col bg-neutral-950/92 backdrop-blur-[2px]"
+          aria-busy="true"
+        >
+          <StartupLoader label="Exporting PDF…" />
+        </div>
+      ) : null}
       {error && <div className="ba-alert ba-alert--error shrink-0">{error}</div>}
       {pdfMessage && <div className="ba-alert ba-alert--success shrink-0">{pdfMessage}</div>}
 
@@ -253,15 +279,7 @@ function FormInspectionEditorInner({
                 form={formDoc.form}
                 page={p}
                 pageIndex={index}
-                template={
-                  context?.template
-                    ? {
-                        code: context.template.code,
-                        title: context.template.title,
-                        name: context.template.name,
-                      }
-                    : undefined
-                }
+                template={editorTemplate}
                 context={context}
                 values={formDoc.values}
                 onValueChange={onValueChange}

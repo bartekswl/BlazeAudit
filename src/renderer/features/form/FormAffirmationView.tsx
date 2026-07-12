@@ -19,6 +19,7 @@ import {
 } from '../../../shared/form/affirmation';
 import type { Inspector } from '../../../shared/profile';
 import { InspectionDateField } from '../../components/InspectionDateField';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function TextCell({
   text,
@@ -35,12 +36,11 @@ function TextCell({
     return <span className="aff-cell-value">{text.trim() || '\u00a0'}</span>;
   }
   return (
-    <input
-      type="text"
+    <VisibleWidthInput
       className="aff-cell-input"
       value={text}
       aria-label={ariaLabel}
-      onChange={(e) => onChange?.(e.target.value)}
+      onChange={(next) => onChange?.(next)}
     />
   );
 }
@@ -139,7 +139,9 @@ function TechnicianBlock({
           <span className="aff-cell-value">{displayIdentification || '\u00a0'}</span>
         </div>
         <div className="aff-cell aff-cell--date">
-          {readOnly ? (
+          {!tech.inspectorId ? (
+            <span className="aff-cell-value">{'\u00a0'}</span>
+          ) : readOnly ? (
             <span className="aff-cell-value">
               {tech.date ? formatInspectionDateLabel(tech.date) : '\u00a0'}
             </span>

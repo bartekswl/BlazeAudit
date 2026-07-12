@@ -4,9 +4,44 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BlazeAudit</title>
+    <style>
+      #app-boot-loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.875rem;
+        min-height: 100vh;
+        background: #09090b;
+        color: #a3a3a3;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      }
+      #app-boot-loader .boot-spinner {
+        width: 1.75rem;
+        height: 1.75rem;
+        border: 2px solid rgb(249 115 22 / 0.2);
+        border-top-color: #f97316;
+        border-radius: 9999px;
+        animation: boot-spin 0.75s linear infinite;
+      }
+      #app-boot-loader .boot-label {
+        font-size: 0.8125rem;
+        letter-spacing: 0.04em;
+      }
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body class="bg-neutral-950 text-neutral-200">
-    <div id="root"></div>
+    <div id="root">
+      <div id="app-boot-loader" aria-live="polite" aria-busy="true">
+        <div class="boot-spinner" aria-hidden="true"></div>
+        <span class="boot-label">BlazeAudit</span>
+      </div>
+    </div>
     <script type="module" src="/src/renderer/main.tsx"></script>
   </body>
 </html>

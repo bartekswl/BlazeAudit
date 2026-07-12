@@ -143,7 +143,7 @@ export function setAncillaryDeviceCircuitPoweredByOther(
 export function setAncillaryDeviceCircuitOperationConfirmed(
   value: AncillaryDeviceCircuitTestValue,
   rowIndex: number,
-  operationConfirmed: AncillaryDeviceCircuitOperationChoice,
+  operationConfirmed: AncillaryDeviceCircuitOperationChoice | null,
 ): AncillaryDeviceCircuitTestValue {
   return {
     rows: value.rows.map((row, index) =>

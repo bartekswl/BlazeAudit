@@ -12,6 +12,10 @@ const INPUT_CLIENT_WIDTH_CLAMP_SELECTOR = [
   '.epst-info-row',
   '.cut-info-row',
   '.psi-info-row',
+  '.artu-info-row',
+  '.asd-info-row',
+  '.rtsu-info-row',
+  '.prt-info-row',
   '.cut-version-field',
   '.aff-cell',
   '.epst-field-input',
@@ -20,6 +24,19 @@ const INPUT_CLIENT_WIDTH_CLAMP_SELECTOR = [
 
 function usesInputClientWidthClamp(input: HTMLInputElement): boolean {
   return Boolean(input.closest(INPUT_CLIENT_WIDTH_CLAMP_SELECTOR));
+}
+
+let measureCanvas: HTMLCanvasElement | null = null;
+
+/** Measure rendered text width — input.scrollWidth is not reliable for overflow. */
+function measureInputTextWidth(input: HTMLInputElement, text: string): number {
+  if (!text) return 0;
+  if (!measureCanvas) measureCanvas = document.createElement('canvas');
+  const ctx = measureCanvas.getContext('2d');
+  if (!ctx) return 0;
+  const style = getComputedStyle(input);
+  ctx.font = style.font;
+  return ctx.measureText(text).width;
 }
 
 /** Trim text until it fits the input element's rendered width (single line). */
@@ -35,10 +52,8 @@ function clampToInputClientWidth(input: HTMLInputElement, value: string): string
   if (maxWidth < 8) return value;
 
   let next = value;
-  input.value = next;
-  while (next.length > 0 && input.scrollWidth > maxWidth) {
+  while (next.length > 0 && measureInputTextWidth(input, next) > maxWidth) {
     next = next.slice(0, -1);
-    input.value = next;
   }
   return next;
 }

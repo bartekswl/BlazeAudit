@@ -38,7 +38,7 @@ export function normalizeYesNoSummaryValue(
 export function setYesNoSummaryChoice(
   value: YesNoSummaryValue,
   itemId: string,
-  choice: 'yes' | 'no',
+  choice: 'yes' | 'no' | null,
 ): YesNoSummaryValue {
   return {
     ...value,

@@ -39,6 +39,7 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
 function OliveChoiceBlock({
   variant,
@@ -112,12 +113,14 @@ function ChoiceCell({
   readOnly,
   variant,
   onSelect,
+  onClear,
 }: {
   choice: EmergencyPowerSupplyTestChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: EmergencyPowerSupplyTestChoice;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'epst-td',
@@ -144,8 +147,7 @@ function ChoiceCell({
           type="radio"
           className="epst-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -162,7 +164,7 @@ function ChoiceCells({
   rowId: string;
   choice: EmergencyPowerSupplyTestChoice | null;
   readOnly?: boolean;
-  onChoice: (choice: EmergencyPowerSupplyTestChoice) => void;
+  onChoice: (choice: EmergencyPowerSupplyTestChoice | null) => void;
 }) {
   return (
     <>
@@ -174,6 +176,7 @@ function ChoiceCells({
           readOnly={readOnly}
           variant={variant}
           onSelect={() => onChoice(variant)}
+        onClear={() => onChoice(null)}
         />
       ))}
     </>

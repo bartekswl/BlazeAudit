@@ -95,6 +95,7 @@ export function formPrototypeDefinition(): FormDefinition {
           },
           {
             id: 'section-testing-notes',
+            heading: "Technician's Testing Notes",
             elements: [
               {
                 kind: 'testingNotes',

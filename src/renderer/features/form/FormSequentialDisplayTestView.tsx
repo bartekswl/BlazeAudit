@@ -15,32 +15,33 @@ import {
 } from '../../../shared/form/sequentialDisplayTest';
 import { cn } from '../../lib/cn';
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function ChoiceCell({
   choice,
   groupName,
   readOnly,
   variant,
-  disabled,
   onSelect,
+  onClear,
 }: {
   choice: SequentialDisplayTestChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: SequentialDisplayTestChoice;
-  disabled?: boolean;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'asd-td',
     variant === 'yes' && 'asd-td--yes',
     variant === 'no' && 'asd-td--no',
     variant === 'na' && 'asd-td--na',
-    disabled && 'asd-td--disabled',
   );
   const label = variant === 'yes' ? 'Yes' : variant === 'no' ? 'No' : 'N/A';
 
-  if (readOnly || disabled) {
+  if (readOnly) {
     return (
       <td className={tdCls}>
         <span className="asd-check-cell asd-check-cell--readonly">
@@ -57,8 +58,7 @@ function ChoiceCell({
           type="radio"
           className="asd-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -70,14 +70,12 @@ function ChoiceCells({
   rowId,
   rowValue,
   readOnly,
-  disabled,
   onChoice,
 }: {
   rowId: string;
   rowValue: { choice: SequentialDisplayTestChoice | null };
   readOnly?: boolean;
-  disabled?: boolean;
-  onChoice: (choice: SequentialDisplayTestChoice) => void;
+  onChoice: (choice: SequentialDisplayTestChoice | null) => void;
 }) {
   const groupName = `asd-${rowId}`;
 
@@ -87,27 +85,58 @@ function ChoiceCells({
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="yes"
         onSelect={() => onChoice('yes')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="no"
         onSelect={() => onChoice('no')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
         groupName={groupName}
         readOnly={readOnly}
-        disabled={disabled}
         variant="na"
         onSelect={() => onChoice('na')}
+        onClear={() => onChoice(null)}
       />
     </>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  readOnly,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  readOnly?: boolean;
+  onChange?: (next: string) => void;
+}) {
+  return (
+    <div className="asd-info-row">
+      <span className="asd-info-label">{label}</span>
+      {readOnly ? (
+        value.trim() ? (
+          <span className="asd-info-value">{value}</span>
+        ) : (
+          <span className="asd-info-line" />
+        )
+      ) : (
+        <VisibleWidthInput
+          className="asd-info-input"
+          value={value}
+          onChange={(next) => onChange?.(next)}
+        />
+      )}
+    </div>
   );
 }
 
@@ -121,7 +150,6 @@ export function FormSequentialDisplayTestView({
   onChange?: (next: SequentialDisplayTestValue) => void;
 }) {
   const data = normalizeSequentialDisplayTestValue(value);
-  const disabled = data.sectionNotApplicable;
 
   const emit = (next: SequentialDisplayTestValue) => onChange?.(next);
 
@@ -149,7 +177,7 @@ export function FormSequentialDisplayTestView({
         )}
       </div>
 
-      <div className={cn('asd-header-strip', disabled && 'asd-header-strip--disabled')}>
+      <div className="asd-header-strip">
         <div className="asd-ref-bar">
           {SEQUENTIAL_DISPLAY_TEST_REF_LINES.map((line) => (
             <div key={line} className="asd-ref-line">
@@ -157,47 +185,21 @@ export function FormSequentialDisplayTestView({
             </div>
           ))}
         </div>
-        <div className="asd-info-row">
-          <span className="asd-info-label">{SEQUENTIAL_DISPLAY_TEST_LOCATION_LABEL}</span>
-          {readOnly || disabled ? (
-            data.fieldLocation.trim() ? (
-              <span className="asd-info-value">{data.fieldLocation}</span>
-            ) : (
-              <span className="asd-info-line" />
-            )
-          ) : (
-            <input
-              type="text"
-              className="asd-info-input"
-              value={data.fieldLocation}
-              onChange={(event) =>
-                emit(setSequentialDisplayTestFieldLocation(data, event.target.value))
-              }
-            />
-          )}
-        </div>
-        <div className="asd-info-row">
-          <span className="asd-info-label">{SEQUENTIAL_DISPLAY_TEST_IDENTIFICATION_LABEL}</span>
-          {readOnly || disabled ? (
-            data.identification.trim() ? (
-              <span className="asd-info-value">{data.identification}</span>
-            ) : (
-              <span className="asd-info-line" />
-            )
-          ) : (
-            <input
-              type="text"
-              className="asd-info-input"
-              value={data.identification}
-              onChange={(event) =>
-                emit(setSequentialDisplayTestIdentification(data, event.target.value))
-              }
-            />
-          )}
-        </div>
+        <InfoRow
+          label={SEQUENTIAL_DISPLAY_TEST_LOCATION_LABEL}
+          value={data.fieldLocation}
+          readOnly={readOnly}
+          onChange={(next) => emit(setSequentialDisplayTestFieldLocation(data, next))}
+        />
+        <InfoRow
+          label={SEQUENTIAL_DISPLAY_TEST_IDENTIFICATION_LABEL}
+          value={data.identification}
+          readOnly={readOnly}
+          onChange={(next) => emit(setSequentialDisplayTestIdentification(data, next))}
+        />
       </div>
 
-      <div className={cn('asd-table-wrap', disabled && 'asd-table-wrap--disabled')}>
+      <div className="asd-table-wrap">
         <table className="asd-table">
           <thead>
             <tr>
@@ -221,7 +223,6 @@ export function FormSequentialDisplayTestView({
                     rowId={row.id}
                     rowValue={rowValue}
                     readOnly={readOnly}
-                    disabled={disabled}
                     onChoice={(choice) =>
                       emit(setSequentialDisplayTestChoice(data, row.id, choice))
                     }

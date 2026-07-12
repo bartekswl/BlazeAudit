@@ -6,6 +6,7 @@ import {
 } from '../../../shared/form/yesNoSummary';
 
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
 function SummaryText({
   item,
@@ -53,12 +54,14 @@ function ChoiceCell({
   readOnly,
   variant,
   onSelect,
+  onClear,
 }: {
   choice: 'yes' | 'no' | null;
   groupName: string;
   readOnly?: boolean;
   variant: 'yes' | 'no';
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = variant === 'yes' ? 'yns-td yns-td--yes' : 'yns-td yns-td--no';
   const label = choice === 'yes' ? 'Yes' : 'No';
@@ -80,8 +83,7 @@ function ChoiceCell({
           type="radio"
           className="yns-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -125,6 +127,7 @@ export function FormYesNoSummaryView({
                   readOnly={readOnly}
                   variant="yes"
                   onSelect={() => onChange?.(setYesNoSummaryChoice(value, item.id, 'yes'))}
+                  onClear={() => onChange?.(setYesNoSummaryChoice(value, item.id, null))}
                 />
                 <ChoiceCell
                   choice={choice}
@@ -132,6 +135,7 @@ export function FormYesNoSummaryView({
                   readOnly={readOnly}
                   variant="no"
                   onSelect={() => onChange?.(setYesNoSummaryChoice(value, item.id, 'no'))}
+                  onClear={() => onChange?.(setYesNoSummaryChoice(value, item.id, null))}
                 />
                 <td className="yns-td yns-td--summary">
                   <SummaryText

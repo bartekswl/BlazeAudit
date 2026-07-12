@@ -17,6 +17,7 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
 function ChoiceCell({
   choice,
@@ -24,12 +25,14 @@ function ChoiceCell({
   readOnly,
   variant,
   onSelect,
+  onClear,
 }: {
   choice: VoiceCommunicationTestChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: VoiceCommunicationTestChoice;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'vct-td',
@@ -56,8 +59,7 @@ function ChoiceCell({
           type="radio"
           className="vct-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -74,7 +76,7 @@ function ChoiceCells({
   rowId: string;
   rowValue: { choice: VoiceCommunicationTestChoice | null };
   readOnly?: boolean;
-  onChoice: (choice: VoiceCommunicationTestChoice) => void;
+  onChoice: (choice: VoiceCommunicationTestChoice | null) => void;
 }) {
   const groupName = `vct-${rowId}`;
 
@@ -86,6 +88,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="yes"
         onSelect={() => onChoice('yes')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
@@ -93,6 +96,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="no"
         onSelect={() => onChoice('no')}
+        onClear={() => onChoice(null)}
       />
       <ChoiceCell
         choice={rowValue.choice}
@@ -100,6 +104,7 @@ function ChoiceCells({
         readOnly={readOnly}
         variant="na"
         onSelect={() => onChoice('na')}
+        onClear={() => onChoice(null)}
       />
     </>
   );

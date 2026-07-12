@@ -19,6 +19,7 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
 function ChoiceCell({
   choice,
@@ -26,12 +27,14 @@ function ChoiceCell({
   readOnly,
   variant,
   onSelect,
+  onClear,
 }: {
   choice: PowerSupplyInspectionChoice | null;
   groupName: string;
   readOnly?: boolean;
   variant: PowerSupplyInspectionChoice;
   onSelect: () => void;
+  onClear: () => void;
 }) {
   const tdCls = cn(
     'psi-td',
@@ -58,8 +61,7 @@ function ChoiceCell({
           type="radio"
           className="psi-check-input"
           name={groupName}
-          checked={choice === variant}
-          onChange={onSelect}
+          {...formToggleRadioInputProps({ choice, variant, onSelect, onClear })}
         />
         <span className="sr-only">{label}</span>
       </label>
@@ -167,6 +169,7 @@ export function FormPowerSupplyInspectionView({
                       readOnly={readOnly}
                       variant={variant}
                       onSelect={() => onChange?.(setPowerSupplyInspectionChoice(data, row.id, variant))}
+                      onClear={() => onChange?.(setPowerSupplyInspectionChoice(data, row.id, null))}
                     />
                   ))}
                 </tr>

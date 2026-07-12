@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import type { DocumentContext } from '../../../shared/document';
 import type {
   ChecklistElementValue,
@@ -5,7 +6,9 @@ import type {
   SignatureElementValue,
   TableElementValue,
 } from '../../../shared/form';
+import { LazyCommitInput } from '../../components/LazyCommitInput';
 import { cn } from '../../lib/cn';
+import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { FormAffirmationView } from './FormAffirmationView';
 import { FormAttendanceLogView } from './FormAttendanceLogView';
 import { FormControlUnitTestView } from './FormControlUnitTestView';
@@ -36,7 +39,7 @@ const tableHeadCls =
   'border border-[var(--ba-panel-border)] bg-[var(--ba-table-head-bg)] px-2 py-1 font-semibold text-[var(--ba-text-secondary)]';
 const tableCellCls = 'border border-[var(--ba-panel-border)] px-1 py-0.5';
 
-export function FormElementView({
+function FormElementViewInner({
   element,
   value,
   readOnly,
@@ -46,6 +49,7 @@ export function FormElementView({
   linedNotesVisibleLines,
   linedNotesRowHeights,
   onChange,
+  onElementValueChange,
 }: {
   element: FormElement;
   value: unknown;
@@ -56,7 +60,17 @@ export function FormElementView({
   linedNotesVisibleLines?: Record<string, number>;
   linedNotesRowHeights?: Record<string, number>;
   onChange?: (value: unknown) => void;
+  /** Stable dispatcher from FormPageCanvas — avoids per-element callback closures. */
+  onElementValueChange?: (elementId: string, value: unknown) => void;
 }) {
+  const publishChange = useCallback(
+    (next: unknown) => {
+      if (onElementValueChange) onElementValueChange(element.id, next);
+      else onChange?.(next);
+    },
+    [element.id, onElementValueChange, onChange],
+  );
+
   const flushFrame =
     element.kind === 'ulcSection1' ||
     element.kind === 'yesNoSummary' ||
@@ -106,7 +120,7 @@ export function FormElementView({
         totalPages={totalPages ?? 1}
         linedNotesVisibleLines={linedNotesVisibleLines}
         linedNotesRowHeights={linedNotesRowHeights}
-        onChange={onChange}
+        onChange={publishChange}
       />
     </div>
   );
@@ -154,18 +168,19 @@ function FormElementBody({
             <span className="mb-1 block font-medium text-[var(--ba-text-muted)]">{element.label}</span>
           )}
           {element.multiline ? (
-            <textarea
+            <LazyCommitInput
+              multiline
               className={cn(inputCls, 'min-h-16 resize-y')}
               value={text}
               placeholder={element.placeholder}
-              onChange={(e) => onChange?.(e.target.value)}
+              onCommit={(next) => onChange?.(next)}
             />
           ) : (
-            <input
+            <LazyCommitInput
               className={inputCls}
               value={text}
               placeholder={element.placeholder}
-              onChange={(e) => onChange?.(e.target.value)}
+              onCommit={(next) => onChange?.(next)}
             />
           )}
         </label>
@@ -269,8 +284,14 @@ function FormElementBody({
                           type="radio"
                           className="accent-[var(--ba-flame)]"
                           name={`checklist-${element.id}-${item.id}`}
-                          checked={checklistValue[item.id] === opt.id}
-                          onChange={() => onChange?.({ ...checklistValue, [item.id]: opt.id })}
+                          {...formToggleRadioInputProps({
+                            choice: checklistValue[item.id] ?? null,
+                            variant: opt.id,
+                            onSelect: () =>
+                              onChange?.({ ...checklistValue, [item.id]: opt.id }),
+                            onClear: () =>
+                              onChange?.({ ...checklistValue, [item.id]: null }),
+                          })}
                         />
                       )}
                     </td>
@@ -525,3 +546,20 @@ function FormElementBody({
       return null;
   }
 }
+
+const MemoFormElementView = memo(FormElementViewInner, (prev, next) => {
+  return (
+    prev.element === next.element &&
+    prev.value === next.value &&
+    prev.readOnly === next.readOnly &&
+    prev.bindingText === next.bindingText &&
+    prev.context === next.context &&
+    prev.totalPages === next.totalPages &&
+    prev.onChange === next.onChange &&
+    prev.onElementValueChange === next.onElementValueChange &&
+    prev.linedNotesVisibleLines === next.linedNotesVisibleLines &&
+    prev.linedNotesRowHeights === next.linedNotesRowHeights
+  );
+});
+
+export { MemoFormElementView as FormElementView };

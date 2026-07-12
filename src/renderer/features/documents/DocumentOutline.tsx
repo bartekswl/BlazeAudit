@@ -186,7 +186,7 @@ export function DocumentOutlineRail() {
     <aside
       className={cn(
         'relative h-full shrink-0 overflow-hidden border-l border-[var(--ba-chrome-border)] bg-[var(--ba-chrome-bg)]',
-        'transition-[width] duration-[400ms] ease-in-out',
+        'transition-[width] duration-[250ms] ease-in-out',
         expanded ? 'w-60' : 'w-10',
       )}
       aria-label="Document contents"
@@ -195,7 +195,7 @@ export function DocumentOutlineRail() {
       <div
         className={cn(
           'absolute inset-y-0 left-0 flex w-60 flex-col bg-[var(--ba-chrome-bg)]',
-          'transition-transform duration-[400ms] ease-in-out',
+          'transition-transform duration-[250ms] ease-in-out',
           expanded ? 'translate-x-0' : 'translate-x-[calc(100%-2.5rem)]',
         )}
       >
