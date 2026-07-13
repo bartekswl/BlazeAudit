@@ -2,6 +2,7 @@ import {
   Calendar,
   Database,
   FileText,
+  IdCard,
   LayoutDashboard,
   LayoutTemplate,
   Settings,
@@ -14,6 +15,7 @@ export type NavId =
   | 'dashboard'
   | 'customers'
   | 'documents'
+  | 'nameBadges'
   | 'builtinTemplates'
   | 'customTemplates'
   | 'calendar'
@@ -35,6 +37,7 @@ export const navItems: NavItem[] = [
   { id: 'builtinTemplates', label: 'Built-in Templates', icon: LayoutTemplate },
   { id: 'customTemplates', label: 'Custom Templates', icon: SquarePen },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
+  { id: 'nameBadges', label: 'Name Badges', icon: IdCard },
   { id: 'database', label: 'Database', icon: Database },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
