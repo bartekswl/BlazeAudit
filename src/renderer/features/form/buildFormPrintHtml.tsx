@@ -252,6 +252,15 @@ const PRINT_OVERRIDES = `
   .form-print-root .ln-body-stack--measured .ln-body {
     line-height: var(--ln-row-height) !important;
   }
+  .form-print-root .form-page-sheet--lined-notes .ln-body-stack--measured .ln-rows {
+    inset: 0 !important;
+    bottom: 0 !important;
+    height: 100% !important;
+  }
+  .form-print-root .form-page-sheet--lined-notes .ln-body-stack--measured .ln-row {
+    flex: 1 1 0 !important;
+    height: auto !important;
+  }
   .form-print-root .form-page-content--lined-notes {
     flex: 1 1 auto !important;
     min-height: 0 !important;

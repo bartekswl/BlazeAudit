@@ -1,16 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FileDown } from 'lucide-react';
+import { FileDown, TriangleAlert } from 'lucide-react';
 import { CADENCE_PRESETS, type CadencePreset } from '../../../shared/cadence';
 import type { DocumentContext } from '../../../shared/document';
 import {
+  addIndividualDeviceRecordPage,
   buildFormOutline,
+  individualDeviceRecordPageControls,
+  individualDeviceRecordPageHasContent,
   isFormInspectionDocument,
+  removeIndividualDeviceRecordPage,
   scrollToFormSection,
   setElementValue,
   syncFormDocumentInspectionDate,
   type FormInspectionDocument,
 } from '../../../shared/form';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useRegisterFormOutline } from './DocumentOutlineContext';
 import { FormPageCanvas } from '../form/FormPageCanvas';
 import { FormPageViewport } from '../form/FormPageViewport';
@@ -62,6 +67,12 @@ function FormInspectionEditorInner({
   const [pdfMessage, setPdfMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [idrRemoveConfirmPageIndex, setIdrRemoveConfirmPageIndex] = useState<number | null>(
+    null,
+  );
+
+  const formDocRef = useRef(formDoc);
+  formDocRef.current = formDoc;
 
   useEffect(() => {
     void window.blazeaudit.inspections.resolveContext(inspection.id).then(setContext);
@@ -117,6 +128,35 @@ function FormInspectionEditorInner({
     }));
     markDirtyRef.current();
   }, []);
+
+  const onAddIdrPage = useCallback((afterPageIndex: number) => {
+    setFormDoc((prev) => addIndividualDeviceRecordPage(prev, afterPageIndex));
+    markDirtyRef.current();
+  }, []);
+
+  const onRemoveIdrPage = useCallback((pageIndex: number) => {
+    setFormDoc((prev) => removeIndividualDeviceRecordPage(prev, pageIndex));
+    markDirtyRef.current();
+  }, []);
+
+  const requestRemoveIdrPage = useCallback((pageIndex: number) => {
+    if (individualDeviceRecordPageHasContent(formDocRef.current, pageIndex)) {
+      setIdrRemoveConfirmPageIndex(pageIndex);
+      return;
+    }
+    onRemoveIdrPage(pageIndex);
+  }, [onRemoveIdrPage]);
+
+  const confirmRemoveIdrPage = useCallback(() => {
+    if (idrRemoveConfirmPageIndex == null) return;
+    onRemoveIdrPage(idrRemoveConfirmPageIndex);
+    setIdrRemoveConfirmPageIndex(null);
+  }, [idrRemoveConfirmPageIndex, onRemoveIdrPage]);
+
+  const onAddIdrPageRef = useRef(onAddIdrPage);
+  onAddIdrPageRef.current = onAddIdrPage;
+  const onRemoveIdrPageRef = useRef(requestRemoveIdrPage);
+  onRemoveIdrPageRef.current = requestRemoveIdrPage;
 
   const onInspectionDateChange = useCallback((nextDate: string) => {
     setInspectedAt(nextDate);
@@ -184,6 +224,21 @@ function FormInspectionEditorInner({
         >
           <StartupLoader label="Exporting PDF…" />
         </div>
+      ) : null}
+      {idrRemoveConfirmPageIndex != null ? (
+        <ConfirmDialog
+          title="Remove 23.2 page?"
+          icon={TriangleAlert}
+          confirmLabel="Remove page"
+          onCancel={() => setIdrRemoveConfirmPageIndex(null)}
+          onConfirm={confirmRemoveIdrPage}
+        >
+          <p>
+            This Individual Device Record page has data entered in the table. Removing it will
+            permanently delete that data from this inspection.
+          </p>
+          <p>This cannot be undone unless you re-enter the information on another page.</p>
+        </ConfirmDialog>
       ) : null}
       {error && <div className="ba-alert ba-alert--error shrink-0">{error}</div>}
       {pdfMessage && <div className="ba-alert ba-alert--success shrink-0">{pdfMessage}</div>}
@@ -283,6 +338,9 @@ function FormInspectionEditorInner({
                 context={context}
                 values={formDoc.values}
                 onValueChange={onValueChange}
+                idrPageControls={individualDeviceRecordPageControls(formDoc.form, index)}
+                onAddIdrPage={() => onAddIdrPageRef.current(index)}
+                onRemoveIdrPage={() => onRemoveIdrPageRef.current(index)}
               />
             ))}
           </div>

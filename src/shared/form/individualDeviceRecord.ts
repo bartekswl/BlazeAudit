@@ -202,6 +202,20 @@ export function normalizeIndividualDeviceRecordValue(raw: unknown): IndividualDe
   };
 }
 
+/** True when any cell on the sheet has text or a Yes/No/N/A choice set. */
+export function individualDeviceRecordHasContent(raw: unknown): boolean {
+  const data = normalizeIndividualDeviceRecordValue(raw);
+  return data.rows.some((row) =>
+    INDIVIDUAL_DEVICE_RECORD_COLUMNS.some((col) => {
+      if (col.kind === 'choice') {
+        return row[col.key] !== null;
+      }
+      const text = row[col.key];
+      return typeof text === 'string' && text.trim().length > 0;
+    }),
+  );
+}
+
 export function setIndividualDeviceRecordText(
   value: IndividualDeviceRecordValue,
   rowIndex: number,

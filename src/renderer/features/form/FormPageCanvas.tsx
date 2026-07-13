@@ -11,9 +11,11 @@ import {
   type FormPage,
 } from '../../../shared/form';
 import { pageElementIds, pageValuesChanged } from '../../../shared/form/pageElementIds';
+import type { IndividualDeviceRecordPageControls } from '../../../shared/form/individualDeviceRecordPages';
 import { cn } from '../../lib/cn';
 import { FormPageMetaHeader } from './FormPageMetaHeader';
 import { FormElementView } from './FormElementView';
+import { IndividualDeviceRecordPageControlsBar } from './IndividualDeviceRecordPageControls';
 
 type FormPageCanvasProps = {
   form: FormDefinition;
@@ -30,6 +32,10 @@ type FormPageCanvasProps = {
   linedNotesVisibleLines?: Record<string, number>;
   /** PDF — pixel height per ruled row (measured from fixed A4 layout). */
   linedNotesRowHeights?: Record<string, number>;
+  /** Document editor — 23.2 page add/remove controls (template + read-only omit). */
+  idrPageControls?: IndividualDeviceRecordPageControls;
+  onAddIdrPage?: () => void;
+  onRemoveIdrPage?: () => void;
 };
 
 function FormPageCanvasInner({
@@ -44,6 +50,9 @@ function FormPageCanvasInner({
   fixedPageLayout = false,
   linedNotesVisibleLines,
   linedNotesRowHeights,
+  idrPageControls = 'none',
+  onAddIdrPage,
+  onRemoveIdrPage,
 }: FormPageCanvasProps) {
   const onValueChangeRef = useRef(onValueChange);
   onValueChangeRef.current = onValueChange;
@@ -142,8 +151,16 @@ function FormPageCanvasInner({
         hasCircuitFaultToleranceTestSheetPage &&
           'form-page-sheet--circuit-fault-tolerance-test-sheet',
         fixedPageLayout && 'form-page-sheet--fixed',
+        idrPageControls !== 'none' && 'form-page-sheet--idr-page-controls',
       )}
     >
+      {idrPageControls !== 'none' ? (
+        <IndividualDeviceRecordPageControlsBar
+          mode={idrPageControls}
+          onAdd={onAddIdrPage}
+          onRemove={onRemoveIdrPage}
+        />
+      ) : null}
       <div
         className="form-page-body"
         style={fixedPageLayout ? { minHeight: `${bodyPercent}%` } : undefined}
@@ -388,6 +405,9 @@ function formPageCanvasPropsEqual(prev: FormPageCanvasProps, next: FormPageCanva
   if (prev.onValueChange !== next.onValueChange) return false;
   if (prev.linedNotesVisibleLines !== next.linedNotesVisibleLines) return false;
   if (prev.linedNotesRowHeights !== next.linedNotesRowHeights) return false;
+  if (prev.idrPageControls !== next.idrPageControls) return false;
+  if (prev.onAddIdrPage !== next.onAddIdrPage) return false;
+  if (prev.onRemoveIdrPage !== next.onRemoveIdrPage) return false;
   return !pageValuesChanged(prev.values, next.values, cachedPageElementIds(prev.page));
 }
 

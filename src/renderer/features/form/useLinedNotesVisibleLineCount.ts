@@ -1,10 +1,18 @@
 import { useCallback, useEffect, useState, type RefObject } from 'react';
 import { visibleLineCountFromHeights } from '../../../shared/form/linedNotes';
 
+export type LinedNotesStackMeasure = {
+  lineCount: number;
+  stackHeightPx: number;
+};
+
 export function useLinedNotesVisibleLineCount(
   stackRef: RefObject<HTMLElement | null>,
-): number {
-  const [lineCount, setLineCount] = useState(1);
+): LinedNotesStackMeasure {
+  const [measure, setMeasure] = useState<LinedNotesStackMeasure>({
+    lineCount: 1,
+    stackHeightPx: 0,
+  });
 
   const update = useCallback(() => {
     const stack = stackRef.current;
@@ -14,7 +22,11 @@ export function useLinedNotesVisibleLineCount(
     if (!body) return;
 
     const lineHeight = parseFloat(getComputedStyle(body).lineHeight);
-    setLineCount(visibleLineCountFromHeights(stack.clientHeight, lineHeight));
+    const stackHeightPx = stack.clientHeight;
+    setMeasure({
+      lineCount: visibleLineCountFromHeights(stackHeightPx, lineHeight),
+      stackHeightPx,
+    });
   }, [stackRef]);
 
   useEffect(() => {
@@ -27,5 +39,5 @@ export function useLinedNotesVisibleLineCount(
     return () => observer.disconnect();
   }, [stackRef, update]);
 
-  return lineCount;
+  return measure;
 }

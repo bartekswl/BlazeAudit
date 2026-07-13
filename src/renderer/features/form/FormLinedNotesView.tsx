@@ -26,14 +26,20 @@ export function FormLinedNotesView({
 }) {
   const text = normalizeLinedNotesValue(rawValue);
   const stackRef = useRef<HTMLDivElement>(null);
-  const measuredLineCount = useLinedNotesVisibleLineCount(stackRef);
+  const { lineCount: measuredLineCount, stackHeightPx } = useLinedNotesVisibleLineCount(stackRef);
   const lineCount = visibleLineCount ?? measuredLineCount;
   const isPdfLayout = visibleLineCount != null;
-  const isMeasuredPdf = pdfRowHeightPx != null && pdfRowHeightPx > 0;
+  const editorRowHeightPx =
+    !isPdfLayout && stackHeightPx > 0 && measuredLineCount > 0
+      ? stackHeightPx / measuredLineCount
+      : undefined;
+  const rowHeightPx =
+    pdfRowHeightPx != null && pdfRowHeightPx > 0 ? pdfRowHeightPx : editorRowHeightPx;
+  const useMeasuredRows = rowHeightPx != null && rowHeightPx > 0;
 
   const stackStyle: CSSProperties = {
     ...(isPdfLayout ? { '--ln-visible-lines': String(visibleLineCount) } : {}),
-    ...(isMeasuredPdf ? { '--ln-row-height': `${pdfRowHeightPx}px` } : {}),
+    ...(useMeasuredRows ? { '--ln-row-height': `${rowHeightPx}px` } : {}),
   } as CSSProperties;
 
   return (
@@ -48,8 +54,8 @@ export function FormLinedNotesView({
         ref={stackRef}
         className={cn(
           'ln-body-stack',
-          isPdfLayout && 'ln-body-stack--fill',
-          isMeasuredPdf && 'ln-body-stack--measured',
+          isPdfLayout && !useMeasuredRows && 'ln-body-stack--fill',
+          useMeasuredRows && 'ln-body-stack--measured',
         )}
         data-lined-notes-stack={elementId}
         style={stackStyle}

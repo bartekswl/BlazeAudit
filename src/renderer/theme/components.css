@@ -2099,6 +2099,19 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   box-sizing: border-box;
 }
 
+/* Stretch ruled rows to the full stack so the last line is never clipped. */
+.form-page-sheet--lined-notes .ln-body-stack--measured .ln-rows {
+  inset: 0;
+  bottom: 0;
+  height: 100%;
+}
+
+.form-page-sheet--lined-notes .ln-body-stack--measured .ln-row {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 0;
+}
+
 .form-page-sheet .ln-panel,
 .form-page-sheet .ln-body {
   color: #171717;
@@ -5942,6 +5955,58 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
+}
+
+.form-page-sheet--idr-page-controls {
+  position: relative;
+}
+
+.idr-page-controls {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  pointer-events: auto;
+  overflow: visible;
+}
+
+.idr-page-control-wrap {
+  overflow: visible;
+}
+
+.idr-page-control-tooltip {
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  right: 0;
+  z-index: 6;
+  width: max-content;
+  max-width: 14rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--ba-panel-border);
+  background: var(--ba-panel-bg);
+  color: var(--ba-text-secondary);
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  text-align: left;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.12);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease, visibility 0.12s ease;
+}
+
+.idr-page-control-wrap:hover .idr-page-control-tooltip,
+.idr-page-control-wrap:focus-within .idr-page-control-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.form-page-sheet--fixed .idr-page-controls {
+  display: none;
 }
 
 .form-page-sheet--individual-device-record .form-page-body {
