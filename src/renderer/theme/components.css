@@ -5802,7 +5802,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 .idr-th--vertical {
   height: 7.5rem;
-  padding: 0.125rem 0.0625rem;
+  padding: 0.125rem 0;
 }
 
 .idr-th--vertical .idr-th-text {

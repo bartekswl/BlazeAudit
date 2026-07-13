@@ -7,6 +7,7 @@ import { registerDatabaseIpc } from './ipc/database';
 import { registerTemplatesIpc } from './ipc/templates';
 import { registerInspectionsIpc } from './ipc/inspections';
 import { registerProfileIpc } from './ipc/profile';
+import { registerNameBadgesIpc } from './ipc/nameBadges';
 import { registerAuthIpc } from './ipc/auth';
 import { closeDatabase } from './db';
 import { IpcChannels } from '../shared/ipc';
@@ -66,6 +67,7 @@ void app.whenReady().then(() => {
   registerTemplatesIpc();
   registerInspectionsIpc();
   registerProfileIpc();
+  registerNameBadgesIpc();
   createMainWindow();
 
   app.on('activate', () => {

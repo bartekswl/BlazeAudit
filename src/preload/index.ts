@@ -32,6 +32,7 @@ import type {
   Inspector,
   InspectorInput,
 } from '../shared/profile';
+import type { NameBadge, NameBadgeInput } from '../shared/nameBadges';
 import type { Client, ClientInput } from '../shared/types';
 
 const api = {
@@ -167,6 +168,25 @@ const api = {
       ipcRenderer.invoke(IpcChannels.profileUpdateInspector, id, input),
     deleteInspector: (id: string): Promise<void> =>
       ipcRenderer.invoke(IpcChannels.profileDeleteInspector, id),
+  },
+  nameBadges: {
+    list: (): Promise<NameBadge[]> => ipcRenderer.invoke(IpcChannels.nameBadgesList),
+    create: (input?: NameBadgeInput): Promise<NameBadge> =>
+      ipcRenderer.invoke(IpcChannels.nameBadgesCreate, input),
+    update: (id: string, input: NameBadgeInput): Promise<NameBadge> =>
+      ipcRenderer.invoke(IpcChannels.nameBadgesUpdate, id, input),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.nameBadgesDelete, id),
+    getPhoto: (id: string): Promise<string | null> =>
+      ipcRenderer.invoke(IpcChannels.nameBadgesGetPhoto, id),
+    pickPhoto: (id: string): Promise<NameBadge> =>
+      ipcRenderer.invoke(IpcChannels.nameBadgesPickPhoto, id),
+    removePhoto: (id: string): Promise<NameBadge> =>
+      ipcRenderer.invoke(IpcChannels.nameBadgesRemovePhoto, id),
+    exportPdf: (
+      html: string,
+      defaultFilename?: string,
+    ): Promise<{ saved: false } | { saved: true; filePath: string }> =>
+      ipcRenderer.invoke(IpcChannels.nameBadgesExportPdf, html, defaultFilename),
   },
 };
 

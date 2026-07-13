@@ -58,6 +58,14 @@ export const IpcChannels = {
   profileCreateInspector: 'profile:create-inspector',
   profileUpdateInspector: 'profile:update-inspector',
   profileDeleteInspector: 'profile:delete-inspector',
+  nameBadgesList: 'name-badges:list',
+  nameBadgesCreate: 'name-badges:create',
+  nameBadgesUpdate: 'name-badges:update',
+  nameBadgesDelete: 'name-badges:delete',
+  nameBadgesGetPhoto: 'name-badges:get-photo',
+  nameBadgesPickPhoto: 'name-badges:pick-photo',
+  nameBadgesRemovePhoto: 'name-badges:remove-photo',
+  nameBadgesExportPdf: 'name-badges:export-pdf',
 } as const;
 
 export type IpcChannel = (typeof IpcChannels)[keyof typeof IpcChannels];

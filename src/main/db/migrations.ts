@@ -271,6 +271,24 @@ const migrations: Migration[] = [
       `);
     },
   },
+  {
+    version: 11,
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE name_badges (
+          id          TEXT PRIMARY KEY,
+          name        TEXT NOT NULL DEFAULT '',
+          title       TEXT NOT NULL DEFAULT '',
+          photo_path  TEXT NOT NULL DEFAULT '',
+          sort_order  INTEGER NOT NULL DEFAULT 0,
+          created_at  TEXT NOT NULL,
+          updated_at  TEXT NOT NULL
+        );
+
+        CREATE INDEX idx_name_badges_sort ON name_badges (sort_order, created_at);
+      `);
+    },
+  },
 ];
 
 /** Applies any migrations newer than the database's current `user_version`. */

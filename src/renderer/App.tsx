@@ -30,6 +30,8 @@ import {
 
 } from './features/documents/DocumentsScreen';
 
+import { NameBadgesScreen } from './features/nameBadges/NameBadgesScreen';
+
 import { Placeholder } from './features/Placeholder';
 
 import { SettingsScreen, type SettingsScrollTarget } from './features/settings/SettingsScreen';
@@ -56,6 +58,7 @@ const screens: Record<
     | 'builtinTemplates'
     | 'customTemplates'
     | 'documents'
+    | 'nameBadges'
     | 'database'
     | 'settings'
   >,
@@ -458,6 +461,10 @@ export default function App() {
                 variant="custom"
                 onDetailChange={handleTemplateDetailChange}
               />
+
+            ) : activeId === 'nameBadges' ? (
+
+              <NameBadgesScreen />
 
             ) : activeId === 'database' ? (
 
