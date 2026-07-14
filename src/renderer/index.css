@@ -156,12 +156,30 @@ html[data-theme='light'] *::-webkit-scrollbar-thumb:hover {
 
 .boot-loader {
   display: flex;
-  flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.875rem;
   color: var(--ba-text-muted, #a3a3a3);
+}
+
+.boot-loader--fill {
+  flex: 1;
+}
+
+.ba-loading-overlay,
+.ba-inline-loader {
+  animation: loader-fade-in 0.28s ease-out forwards;
+}
+
+@keyframes loader-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .boot-loader-spinner {

@@ -57,6 +57,11 @@ import {
 } from './unlock';
 import { verifyActivationToken } from './token';
 import { createDevLicenseClient, generateKeyX } from '../license/devStub';
+import {
+  clearAuthStatusCache,
+  readCachedAuthStatus,
+  writeCachedAuthStatus,
+} from './statusCache';
 
 function bootstrapActiveAccount(): void {
   if (getActiveAccountId()) return;
@@ -89,6 +94,15 @@ function loginStatus(email: string): AuthStatus {
 }
 
 export function getAuthStatus(): AuthStatus {
+  const cached = readCachedAuthStatus();
+  if (cached) return cached;
+
+  const status = computeAuthStatus();
+  writeCachedAuthStatus(status);
+  return status;
+}
+
+function computeAuthStatus(): AuthStatus {
   if (!isAddingNewAccount()) {
     bootstrapActiveAccount();
   }
@@ -185,6 +199,7 @@ export async function activate(input: ActivateInput): Promise<{ email: string }>
   });
   storeActivationToken(token);
   storePendingKeyX(keyX);
+  clearAuthStatusCache();
 
   return { email };
 }

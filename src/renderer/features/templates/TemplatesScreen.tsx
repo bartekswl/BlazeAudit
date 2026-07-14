@@ -16,6 +16,7 @@ import type {
 } from '../../../shared/document';
 import type { BuiltinTemplate } from '../../../shared/form';
 import { cn } from '../../lib/cn';
+import { InlineLoader } from '../../components/LoadingOverlay';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { BuiltinTemplateViewer } from './BuiltinTemplateViewer';
 import { TemplateEditor } from './TemplateEditor';
@@ -158,7 +159,7 @@ export function TemplatesScreen({
 
   if (isCustom && editingId) {
     if (editingId !== 'new' && !editingTemplate) {
-      return <p className="text-sm text-neutral-500">Loading template…</p>;
+      return <InlineLoader label="Loading template…" />;
     }
     return (
       <TemplateEditor
@@ -177,7 +178,7 @@ export function TemplatesScreen({
 
   if (!isCustom && viewingId) {
     if (!viewingTemplate) {
-      return <p className="text-sm text-neutral-500">Loading template…</p>;
+      return <InlineLoader label="Loading template…" />;
     }
     return <BuiltinTemplateViewer template={viewingTemplate} />;
   }
@@ -236,7 +237,7 @@ export function TemplatesScreen({
       </div>
 
       {loading ? (
-        <p className="text-sm text-neutral-500">Loading templates…</p>
+        <InlineLoader label="Loading templates…" />
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-white/10 px-6 py-12 text-center">
           <LayoutTemplate className="mx-auto mb-3 size-8 text-neutral-600" />

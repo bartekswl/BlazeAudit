@@ -19,9 +19,8 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useRegisterFormOutline } from './DocumentOutlineContext';
 import { FormPageCanvas } from '../form/FormPageCanvas';
 import { FormPageViewport } from '../form/FormPageViewport';
-import { buildFormPrintHtml } from '../form/buildFormPrintHtml';
 import { collectLinedNotesVisibleLines } from '../form/collectLinedNotesVisibleLines';
-import { StartupLoader } from '../../components/StartupLoader';
+import { LoadingOverlay } from '../../components/LoadingOverlay';
 
 
 const compactInputCls = 'ba-input ba-input--compact';
@@ -185,6 +184,7 @@ function FormInspectionEditorInner({
     });
     try {
       const linedNotesVisibleLines = collectLinedNotesVisibleLines();
+      const { buildFormPrintHtml } = await import('../form/buildFormPrintHtml');
       const printHtml = await buildFormPrintHtml({
         form: formDoc.form,
         values: formDoc.values,
@@ -218,12 +218,7 @@ function FormInspectionEditorInner({
   return (
     <div className="relative flex h-full min-h-0 flex-col gap-2">
       {exportingPdf ? (
-        <div
-          className="absolute inset-0 z-50 flex flex-col bg-neutral-950/92 backdrop-blur-[2px]"
-          aria-busy="true"
-        >
-          <StartupLoader label="Exporting PDF…" />
-        </div>
+        <LoadingOverlay label="Exporting PDF…" position="absolute" />
       ) : null}
       {idrRemoveConfirmPageIndex != null ? (
         <ConfirmDialog

@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ComponentType, type ReactNode } from 'react';
 import type { AuthStatus } from '../../../shared/auth';
 import { cn } from '../../lib/cn';
-import { StartupLoader } from '../../components/StartupLoader';
+import { BootShell } from '../../components/BootShell';
 import { TitleBar } from '../../components/TitleBar';
 import { ActivationScreen } from './ActivationScreen';
 import { AuthRefreshContext } from './authContext';
@@ -17,8 +17,21 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
-export function AuthGate({ children }: { children: ReactNode }) {
+function AppFrame({ children, loading = false }: { children?: ReactNode; loading?: boolean }) {
+  return (
+    <div className="flex h-screen flex-col overflow-hidden bg-neutral-950">
+      <TitleBar />
+      <div className="relative min-h-0 flex-1">
+        <BootShell loading={loading}>{children}</BootShell>
+      </div>
+    </div>
+  );
+}
+
+export function AuthGate() {
   const [status, setStatus] = useState<AuthStatus | null>(null);
+  const [booting, setBooting] = useState(true);
+  const [AppComponent, setAppComponent] = useState<ComponentType | null>(null);
   const [appVisible, setAppVisible] = useState(false);
   const [authOverlay, setAuthOverlay] = useState(false);
   const [authLeaving, setAuthLeaving] = useState(false);
@@ -61,39 +74,53 @@ export function AuthGate({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
+    let cancelled = false;
+    const appPromise = import('../../App');
+
     void (async () => {
       const next = await window.blazeaudit.auth.getStatus();
+      if (cancelled) return;
+
       setStatus(next);
+
       if (next.phase === 'unlocked') {
+        const mod = await appPromise;
+        if (cancelled) return;
+        setAppComponent(() => mod.default);
         setAppVisible(true);
         setAuthOverlay(false);
         notifyAccountThemeSync();
       } else {
         setAuthOverlay(true);
       }
+
+      setBooting(false);
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const onAuthStepDone = useCallback(() => {
-    void refresh({ animateUnlock: true });
+    void (async () => {
+      const mod = await import('../../App');
+      setAppComponent(() => mod.default);
+      await refresh({ animateUnlock: true });
+    })();
   }, [refresh]);
 
   const onAuthFlowStep = useCallback(() => {
     void refresh();
   }, [refresh]);
 
-  if (!status) {
-    return (
-      <div className="flex h-screen flex-col bg-neutral-950">
-        <TitleBar />
-        <StartupLoader />
-      </div>
-    );
+  if (booting || !status) {
+    return <AppFrame loading />;
   }
 
-  return (
-    <div className="relative h-screen overflow-hidden bg-neutral-950">
-      {appVisible && (
+  if (status.phase === 'unlocked' && AppComponent && appVisible) {
+    return (
+      <AppFrame>
         <div
           className={cn(
             'app-reveal-host h-full',
@@ -102,11 +129,15 @@ export function AuthGate({ children }: { children: ReactNode }) {
           )}
         >
           <AuthRefreshContext.Provider value={() => refresh({ animateLock: true })}>
-            {children}
+            <AppComponent />
           </AuthRefreshContext.Provider>
         </div>
-      )}
+      </AppFrame>
+    );
+  }
 
+  return (
+    <AppFrame>
       {authOverlay && status.phase !== 'unlocked' && (
         <div
           className={cn(
@@ -141,6 +172,6 @@ export function AuthGate({ children }: { children: ReactNode }) {
           )}
         </div>
       )}
-    </div>
+    </AppFrame>
   );
 }

@@ -5,6 +5,7 @@ import { cadenceLabel, isOverdue } from '../../../shared/cadence';
 import type { InspectionSummary } from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
 import { cn } from '../../lib/cn';
+import { InlineLoader } from '../../components/LoadingOverlay';
 import { ListPagination } from '../../components/ListPagination';
 import { paginateItems } from '../../lib/pagination';
 
@@ -64,7 +65,7 @@ export function CustomerDetailScreen({
   );
 
   if (loading) {
-    return <p className="text-sm text-neutral-500">Loading…</p>;
+    return <InlineLoader />;
   }
 
   if (error || !client) {

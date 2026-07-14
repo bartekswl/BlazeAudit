@@ -73,9 +73,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
+  // Apply cached theme immediately; sync from account settings when AuthGate unlocks.
   useEffect(() => {
-    void loadAccountTheme();
-  }, [loadAccountTheme]);
+    const cached = readCachedTheme();
+    if (cached) applyTheme(cached);
+  }, [applyTheme]);
 
   const setTheme = useCallback(
     (next: ColorTheme) => {

@@ -3,9 +3,16 @@ import { getDatabase } from './connection';
 import * as builtin from './builtinTemplates';
 
 const SEED_META_KEY = 'templates_seeded_v1';
+/** Bump when built-in template seeds change so sync runs once after an app update. */
+const TEMPLATE_SEED_REVISION = '2026-07-14';
 
 export function seedDefaultTemplates(): void {
   const db = getDatabase();
+  const revision = db
+    .prepare(`SELECT value FROM app_meta WHERE key = ?`)
+    .get(SEED_META_KEY) as { value: string } | undefined;
+  if (revision?.value === TEMPLATE_SEED_REVISION) return;
+
   let inserted = 0;
   let synced = 0;
   let removed = 0;
@@ -38,7 +45,7 @@ export function seedDefaultTemplates(): void {
     db.prepare(
       `INSERT INTO app_meta (key, value) VALUES (@key, @value)
        ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
-    ).run({ key: SEED_META_KEY, value: 'true' });
+    ).run({ key: SEED_META_KEY, value: TEMPLATE_SEED_REVISION });
   });
 
   seed();

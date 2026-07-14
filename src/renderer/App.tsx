@@ -1,53 +1,46 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense, type ReactNode } from 'react';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-import { TitleBar } from './components/TitleBar';
 
 import { Sidebar } from './components/Sidebar';
 
 import { StatusBar } from './components/StatusBar';
 
-import { DashboardScreen } from './features/dashboard/DashboardScreen';
+import { InlineLoader } from './components/LoadingOverlay';
 
-import {
+import type { CustomerDetailBreadcrumb } from './features/customers/CustomersScreen';
 
-  CustomersScreen,
+import type { DocumentDetailBreadcrumb, DocumentsBootState } from './features/documents/DocumentsScreen';
 
-  type CustomerDetailBreadcrumb,
+import type { SettingsScrollTarget } from './features/settings/SettingsScreen';
 
-} from './features/customers/CustomersScreen';
-
-import { DatabaseScreen } from './features/database/DatabaseScreen';
-
-import {
-
-  DocumentsScreen,
-
-  type DocumentDetailBreadcrumb,
-
-  type DocumentsBootState,
-
-} from './features/documents/DocumentsScreen';
-
-import { CalendarScreen } from './features/calendar/CalendarScreen';
-
-import { NameBadgesScreen } from './features/nameBadges/NameBadgesScreen';
-
-import { SettingsScreen, type SettingsScrollTarget } from './features/settings/SettingsScreen';
-
-import {
-
-  TemplatesScreen,
-
-  type TemplateDetailBreadcrumb,
-
-} from './features/templates/TemplatesScreen';
+import type { TemplateDetailBreadcrumb } from './features/templates/TemplatesScreen';
 
 import { DocumentOutlineProvider } from './features/documents/DocumentOutlineContext';
 import { DocumentOutlineRail } from './features/documents/DocumentOutline';
 import { navItems, type NavId } from './navigation';
 import { cn } from './lib/cn';
+
+import { DashboardScreen } from './features/dashboard/DashboardScreen';
+import { CustomersScreen } from './features/customers/CustomersScreen';
+import { DocumentsScreen } from './features/documents/DocumentsScreen';
+import { TemplatesScreen } from './features/templates/TemplatesScreen';
+const CalendarScreen = lazy(() =>
+  import('./features/calendar/CalendarScreen').then((m) => ({ default: m.CalendarScreen })),
+);
+const NameBadgesScreen = lazy(() =>
+  import('./features/nameBadges/NameBadgesScreen').then((m) => ({ default: m.NameBadgesScreen })),
+);
+const DatabaseScreen = lazy(() =>
+  import('./features/database/DatabaseScreen').then((m) => ({ default: m.DatabaseScreen })),
+);
+const SettingsScreen = lazy(() =>
+  import('./features/settings/SettingsScreen').then((m) => ({ default: m.SettingsScreen })),
+);
+
+function ScreenLoader() {
+  return <InlineLoader />;
+}
 
 
 
@@ -206,11 +199,7 @@ export default function App() {
 
     <DocumentOutlineProvider>
 
-    <div className="ba-app-shell flex h-screen flex-col">
-
-      <TitleBar />
-
-
+    <div className="ba-app-shell flex h-full min-h-0 flex-col">
 
       <div className="flex min-h-0 flex-1">
 
@@ -219,8 +208,6 @@ export default function App() {
           onSelect={setActiveId}
           onOpenUserProfile={() => openSettings({ scrollTo: 'user-profile' })}
         />
-
-
 
         <main className="flex min-w-0 flex-1 flex-col">
 
@@ -401,7 +388,7 @@ export default function App() {
 
             className={
 
-              hasSubNav
+              hasSubNav || activeId === 'calendar'
 
                 ? 'flex min-h-0 flex-1 flex-col overflow-hidden px-6 pt-3 pb-6'
 
@@ -410,6 +397,8 @@ export default function App() {
             }
 
           >
+
+            <Suspense fallback={<ScreenLoader />}>
 
             {activeId === 'customers' ? (
 
@@ -478,11 +467,7 @@ export default function App() {
             ) : activeId === 'dashboard' ? (
 
               <DashboardScreen
-
-                onNewInspection={() => openDocuments({ openNew: true })}
-
                 onOpenInspection={(inspectionId) => openDocuments({ inspectionId })}
-
               />
 
             ) : (
@@ -490,6 +475,8 @@ export default function App() {
               screens[activeId]
 
             )}
+
+            </Suspense>
 
           </div>
 

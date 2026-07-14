@@ -11,6 +11,7 @@ import { FileText, Pencil, Plus, Search, Trash2, Users, X } from 'lucide-react';
 import { validateCountry, validatePhone, validatePostCode, validateProvince } from '../../../shared/address';
 import type { Client, ClientInput } from '../../../shared/types';
 import { cn } from '../../lib/cn';
+import { InlineLoader } from '../../components/LoadingOverlay';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ListPagination } from '../../components/ListPagination';
 import { paginateItems } from '../../lib/pagination';
@@ -237,7 +238,7 @@ export function CustomersScreen({
       )}
 
       {loading ? (
-        <p className="text-sm text-neutral-500">Loading…</p>
+        <InlineLoader />
       ) : clients.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
           <div className="grid size-14 place-items-center rounded-2xl bg-[var(--ba-flame-soft)] text-[var(--ba-flame)] shadow-md shadow-flame-500/15">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, CalendarClock, CalendarDays, CheckCircle2, ImagePlus, Plus, Users } from 'lucide-react';
+import { AlertTriangle, CalendarClock, CalendarDays, CheckCircle2, ImagePlus, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import type { DashboardStats } from '../../../shared/inspection';
@@ -43,10 +43,8 @@ function StatTile({
 }
 
 export function DashboardScreen({
-  onNewInspection,
   onOpenInspection,
 }: {
-  onNewInspection: () => void;
   onOpenInspection: (inspectionId: string) => void;
 }) {
   const now = useNow();
@@ -150,7 +148,7 @@ export function DashboardScreen({
         <div className="ba-panel p-4 lg:col-span-2">
           <h3 className="ba-section-title">Recently used</h3>
           {loading ? (
-            <p className="mt-2 text-sm text-[var(--ba-text-muted)]">Loading…</p>
+            <p className="mt-3 text-sm text-[var(--ba-text-muted)]">Loading…</p>
           ) : stats?.recentInspections.length ? (
             <ul className="mt-3 space-y-2">
               {stats.recentInspections.map((row) => (
@@ -186,7 +184,7 @@ export function DashboardScreen({
             )}
           </div>
           {loading ? (
-            <p className="mt-2 text-sm text-[var(--ba-text-muted)]">Loading…</p>
+            <p className="mt-3 text-sm text-[var(--ba-text-muted)]">Loading…</p>
           ) : stats?.dueReminders.length ? (
             <ul className="mt-3 space-y-2">
               {stats.dueReminders.map((row) => (
@@ -214,13 +212,6 @@ export function DashboardScreen({
           )}
         </div>
       </section>
-
-      <div className="flex justify-end">
-        <button type="button" onClick={onNewInspection} className="ba-btn-primary">
-          <Plus className="size-4" />
-          New Inspection
-        </button>
-      </div>
     </div>
   );
 }
