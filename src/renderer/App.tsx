@@ -30,9 +30,9 @@ import {
 
 } from './features/documents/DocumentsScreen';
 
-import { NameBadgesScreen } from './features/nameBadges/NameBadgesScreen';
+import { CalendarScreen } from './features/calendar/CalendarScreen';
 
-import { Placeholder } from './features/Placeholder';
+import { NameBadgesScreen } from './features/nameBadges/NameBadgesScreen';
 
 import { SettingsScreen, type SettingsScrollTarget } from './features/settings/SettingsScreen';
 
@@ -59,6 +59,7 @@ const screens: Record<
     | 'customTemplates'
     | 'documents'
     | 'nameBadges'
+    | 'calendar'
     | 'database'
     | 'settings'
   >,
@@ -66,20 +67,6 @@ const screens: Record<
 > = {
 
   dashboard: null,
-
-  calendar: (
-
-    <Placeholder
-
-      title="Calendar"
-
-      description="Upcoming and overdue inspections, driven by each document's cadence."
-
-      icon={navItems.find((i) => i.id === 'calendar')!.icon}
-
-    />
-
-  ),
 
 };
 
@@ -465,6 +452,10 @@ export default function App() {
             ) : activeId === 'nameBadges' ? (
 
               <NameBadgesScreen />
+
+            ) : activeId === 'calendar' ? (
+
+              <CalendarScreen />
 
             ) : activeId === 'database' ? (
 

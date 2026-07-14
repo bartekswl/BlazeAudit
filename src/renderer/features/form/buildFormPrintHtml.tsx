@@ -2367,6 +2367,105 @@ const PRINT_OVERRIDES = `
     border-right: none !important;
   }
 
+  /* 23.2 PDF column widths (screen/editor widths unchanged) */
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--deviceLocation,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--deviceLocation {
+    width: 26% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--annunciationLabel,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--annunciationLabel {
+    width: 10% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--deviceType,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--deviceType {
+    width: 6% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--requiresService,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--requiresService {
+    width: 6% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--circuitNumber,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--circuitNumber {
+    width: 10% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--fireZone,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--fireZone {
+    width: 6% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--correctlyInstalled,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--correctlyInstalled {
+    width: 4% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--measurements,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--measurements {
+    width: 5% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--alarmConfirmed,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--alarmConfirmed {
+    width: 3% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--annunciatorIndication,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--annunciatorIndication {
+    width: 4% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--supervisedCircuitTrouble,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--supervisedCircuitTrouble {
+    width: 7% !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--comments,
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--comments {
+    width: 13% !important;
+  }
+
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--requiresService.idr-th--vertical
+    .idr-th-text,
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--supervisedCircuitTrouble.idr-th--vertical
+    .idr-th-text {
+    font-size: 8pt !important;
+    line-height: 1.05 !important;
+  }
+
+  .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th:not(.idr-th--deviceLocation) {
+    text-align: center !important;
+  }
+
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--annunciationLabel.idr-th--horizontal
+    .idr-th-text,
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--comments.idr-th--horizontal
+    .idr-th-text {
+    text-align: center !important;
+  }
+
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-td--annunciationLabel
+    .idr-cell-value,
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-td--comments
+    .idr-cell-value {
+    text-align: center !important;
+  }
+
   .form-print-root .form-page-sheet--circuit-fault-tolerance-test-sheet.form-page-sheet--landscape .form-page-body,
   .form-print-root
     .form-page-sheet--circuit-fault-tolerance-test-sheet.form-page-sheet--landscape
