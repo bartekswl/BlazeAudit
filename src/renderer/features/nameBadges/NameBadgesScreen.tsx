@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FileDown, ImagePlus, Plus, Trash2, UserRound } from 'lucide-react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { StartupLoader } from '../../components/StartupLoader';
+import { InlineLoader, LoadingOverlay } from '../../components/LoadingOverlay';
 import { cn } from '../../lib/cn';
 import {
+  NAME_BADGE_MAX_EMPLOYEES,
   NAME_BADGE_PER_PAGE_OPTIONS,
   paginateNameBadgeSlots,
   type NameBadge,
@@ -32,8 +33,8 @@ function BadgeTile({
   canDelete: boolean;
 }) {
   return (
-    <article className="ba-panel flex aspect-square flex-col overflow-hidden p-3">
-      <div className="mb-3 flex items-start justify-between gap-2">
+    <article className="ba-panel flex min-h-[19rem] flex-col p-4">
+      <div className="mb-2 flex shrink-0 items-start justify-between gap-2">
         <div className="text-xs font-medium uppercase tracking-wide text-[var(--ba-text-faint)]">
           Employee
         </div>
@@ -49,51 +50,55 @@ function BadgeTile({
         )}
       </div>
 
-      <button
-        type="button"
-        onClick={onPickPhoto}
-        onContextMenu={(event) => {
-          event.preventDefault();
-          if (photoDataUrl) onRemovePhoto();
-        }}
-        className="group relative mx-auto mb-3 size-24 overflow-hidden rounded-2xl border border-dashed border-[var(--ba-border)] bg-[var(--ba-surface-elevated)] transition-colors hover:border-flame-500/40"
-        title={photoDataUrl ? 'Click to change photo · right-click to remove' : 'Add photo'}
-      >
-        {photoDataUrl ? (
-          <img src={photoDataUrl} alt="" className="size-full object-cover" />
-        ) : (
-          <div className="flex size-full flex-col items-center justify-center gap-1 text-[var(--ba-text-faint)]">
-            <ImagePlus className="size-6" />
-            <span className="text-[10px] font-medium">Photo</span>
-          </div>
-        )}
-      </button>
+      <div className="mb-3 flex shrink-0 justify-center">
+        <button
+          type="button"
+          onClick={onPickPhoto}
+          onContextMenu={(event) => {
+            event.preventDefault();
+            if (photoDataUrl) onRemovePhoto();
+          }}
+          className="group relative aspect-[5/7] w-[5.25rem] shrink-0 overflow-hidden rounded-md border border-dashed border-[var(--ba-border)] bg-[var(--ba-surface-elevated)] transition-colors hover:border-flame-500/40"
+          title={photoDataUrl ? 'Click to change photo · right-click to remove' : 'Add photo'}
+        >
+          {photoDataUrl ? (
+            <img src={photoDataUrl} alt="" className="size-full object-cover object-center" />
+          ) : (
+            <div className="flex size-full flex-col items-center justify-center gap-1 text-[var(--ba-text-faint)]">
+              <ImagePlus className="size-5" />
+              <span className="text-[10px] font-medium">Photo</span>
+            </div>
+          )}
+        </button>
+      </div>
 
-      <label className="mb-2 block">
-        <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-[var(--ba-text-faint)]">
-          Name
-        </span>
-        <input
-          type="text"
-          value={badge.name}
-          onChange={(event) => onChange({ name: event.target.value, title: badge.title })}
-          placeholder="Full name"
-          className="ba-input w-full text-sm"
-        />
-      </label>
+      <div className="mt-auto space-y-2">
+        <label className="block">
+          <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-[var(--ba-text-faint)]">
+            Name
+          </span>
+          <input
+            type="text"
+            value={badge.name}
+            onChange={(event) => onChange({ name: event.target.value, title: badge.title })}
+            placeholder="Full name"
+            className="ba-input w-full text-sm"
+          />
+        </label>
 
-      <label className="block">
-        <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-[var(--ba-text-faint)]">
-          Title
-        </span>
-        <input
-          type="text"
-          value={badge.title}
-          onChange={(event) => onChange({ name: badge.name, title: event.target.value })}
-          placeholder="Job title"
-          className="ba-input w-full text-sm"
-        />
-      </label>
+        <label className="block">
+          <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-[var(--ba-text-faint)]">
+            Title
+          </span>
+          <input
+            type="text"
+            value={badge.title}
+            onChange={(event) => onChange({ name: badge.name, title: event.target.value })}
+            placeholder="Job title"
+            className="ba-input w-full text-sm"
+          />
+        </label>
+      </div>
     </article>
   );
 }
@@ -105,6 +110,7 @@ export function NameBadgesScreen() {
   const [badgesPerPage, setBadgesPerPage] = useState<NameBadgePerPage>(4);
   const [exporting, setExporting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<NameBadge | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
   const [businessName, setBusinessName] = useState('');
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
 
@@ -144,10 +150,21 @@ export function NameBadgesScreen() {
   }, [loading, badges.length]);
 
   const handleAdd = async () => {
-    const created = await window.blazeaudit.nameBadges.create({ name: '', title: '' });
-    setBadges((current) => [...current, created]);
-    setPhotos((current) => ({ ...current, [created.id]: null }));
+    if (badges.length >= NAME_BADGE_MAX_EMPLOYEES) {
+      setAddError(`You can add up to ${NAME_BADGE_MAX_EMPLOYEES} employees.`);
+      return;
+    }
+    setAddError(null);
+    try {
+      const created = await window.blazeaudit.nameBadges.create({ name: '', title: '' });
+      setBadges((current) => [...current, created]);
+      setPhotos((current) => ({ ...current, [created.id]: null }));
+    } catch (error) {
+      setAddError(error instanceof Error ? error.message : 'Could not add employee.');
+    }
   };
+
+  const atEmployeeLimit = badges.length >= NAME_BADGE_MAX_EMPLOYEES;
 
   const displayBadges = badges.length > 0 ? badges : null;
 
@@ -221,23 +238,12 @@ export function NameBadgesScreen() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-[12rem] items-center justify-center text-sm text-[var(--ba-text-muted)]">
-        Loading name badges…
-      </div>
-    );
+    return <InlineLoader label="Loading name badges…" />;
   }
 
   return (
     <div className="space-y-5">
-      {exporting ? (
-        <div
-          className="fixed inset-0 z-50 flex flex-col bg-neutral-950/92 backdrop-blur-[2px]"
-          aria-busy="true"
-        >
-          <StartupLoader label="Generating PDF…" />
-        </div>
-      ) : null}
+      {exporting ? <LoadingOverlay label="Generating PDF…" /> : null}
       <section className="ba-panel flex flex-wrap items-center justify-between gap-4 p-4">
         <div>
           <h2 className="text-base font-semibold text-[var(--ba-text-primary)]">Print settings</h2>
@@ -279,22 +285,33 @@ export function NameBadgesScreen() {
       </section>
 
       <section>
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <UserRound className="size-4 text-flame-400" />
             <h2 className="text-base font-semibold text-[var(--ba-text-primary)]">Employees</h2>
+            <span className="text-xs text-[var(--ba-text-muted)]">
+              {badges.length}/{NAME_BADGE_MAX_EMPLOYEES}
+            </span>
           </div>
           <button
             type="button"
             onClick={() => void handleAdd()}
-            className="ba-btn ba-btn--secondary inline-flex items-center gap-2"
+            disabled={atEmployeeLimit}
+            className={cn(
+              'ba-btn ba-btn--secondary inline-flex items-center gap-2',
+              atEmployeeLimit && 'cursor-not-allowed opacity-50',
+            )}
           >
             <Plus className="size-4" />
             Add employee
           </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {addError ? (
+          <p className="mb-3 text-sm text-red-400">{addError}</p>
+        ) : null}
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(displayBadges ?? []).map((badge) => (
             <BadgeTile
               key={badge.id}

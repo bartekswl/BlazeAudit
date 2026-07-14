@@ -13,6 +13,7 @@ import { isFormInspectionDocument, isBlockDocument } from '../../../shared/form'
 import { BlockFillIn } from './BlockFillIn';
 import { FormInspectionEditor } from './FormInspectionEditor';
 import { useRegisterDocumentOutline } from './DocumentOutlineContext';
+import { LoadingOverlay } from '../../components/LoadingOverlay';
 
 const compactInputCls =
   'w-full min-w-0 rounded border border-white/10 bg-neutral-950 px-2 py-1 text-xs text-neutral-100 outline-none focus:border-flame-500';
@@ -296,6 +297,10 @@ function BlockInspectionEditorInner({
 
     setError(null);
 
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+
     try {
 
       const result = await window.blazeaudit.inspections.exportPdf(inspection.id);
@@ -322,7 +327,11 @@ function BlockInspectionEditorInner({
 
   return (
 
-    <div className="flex h-full min-h-0 flex-col gap-2">
+    <div className="relative flex h-full min-h-0 flex-col gap-2">
+
+      {exportingPdf ? (
+        <LoadingOverlay label="Exporting PDF…" position="absolute" />
+      ) : null}
 
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
 

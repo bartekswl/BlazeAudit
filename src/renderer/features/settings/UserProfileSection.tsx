@@ -10,6 +10,7 @@ import {
 } from '../../../shared/address';
 import { BUSINESS_PROFILE_LIMITS, type BusinessProfileInput, type Inspector } from '../../../shared/profile';
 import { inputCls } from '../templates/BlockList';
+import { InlineLoader } from '../../components/LoadingOverlay';
 
 const emptyBusiness = (): BusinessProfileInput => ({
   businessName: '',
@@ -220,7 +221,7 @@ export function UserProfileSection() {
   if (loading) {
     return (
       <section className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
-        <p className="text-sm text-neutral-500">Loading profile…</p>
+        <InlineLoader compact label="Loading profile…" />
       </section>
     );
   }

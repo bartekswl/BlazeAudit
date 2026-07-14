@@ -2,6 +2,8 @@
 export const NAME_BADGE_WIDTH_MM = 85.6;
 export const NAME_BADGE_HEIGHT_MM = 53.98;
 
+export const NAME_BADGE_MAX_EMPLOYEES = 8;
+
 export const NAME_BADGE_PER_PAGE_OPTIONS = [1, 2, 4, 6, 8, 10] as const;
 export type NameBadgePerPage = (typeof NAME_BADGE_PER_PAGE_OPTIONS)[number];
 

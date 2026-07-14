@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { dialog } from 'electron';
-import type { NameBadge, NameBadgeInput } from '../../shared/nameBadges';
+import { NAME_BADGE_MAX_EMPLOYEES, type NameBadge, type NameBadgeInput } from '../../shared/nameBadges';
 import { accountDir } from './paths';
 import { getDatabase } from './connection';
 
@@ -79,8 +79,15 @@ export function listNameBadges(): NameBadge[] {
 }
 
 export function createNameBadge(input: NameBadgeInput = { name: '', title: '' }): NameBadge {
-  const normalized = normalizeInput(input);
   const db = getDatabase();
+  const count = (
+    db.prepare(`SELECT COUNT(*) AS count FROM name_badges`).get() as { count: number }
+  ).count;
+  if (count >= NAME_BADGE_MAX_EMPLOYEES) {
+    throw new Error(`You can add up to ${NAME_BADGE_MAX_EMPLOYEES} employees.`);
+  }
+
+  const normalized = normalizeInput(input);
   const id = randomUUID();
   const createdAt = nowIso();
   const maxOrder =

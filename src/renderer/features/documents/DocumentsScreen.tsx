@@ -5,6 +5,7 @@ import type { Inspection, InspectionSummary } from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
 import type { TemplatePickerItem } from '../../../shared/document';
 import { cn } from '../../lib/cn';
+import { InlineLoader } from '../../components/LoadingOverlay';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ListPagination } from '../../components/ListPagination';
 import { paginateItems } from '../../lib/pagination';
@@ -147,7 +148,7 @@ export function DocumentsScreen({
 
   if (editingId) {
     if (!editingInspection) {
-      return <p className="text-sm text-neutral-500">Loading inspection…</p>;
+      return <InlineLoader label="Loading inspection…" />;
     }
     return (
       <InspectionEditor
@@ -203,7 +204,7 @@ export function DocumentsScreen({
       </div>
 
       {loading ? (
-        <p className="text-sm text-neutral-500">Loading documents…</p>
+        <InlineLoader label="Loading documents…" />
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-white/10 px-6 py-12 text-center">
           <FileText className="mx-auto mb-3 size-8 text-neutral-600" />

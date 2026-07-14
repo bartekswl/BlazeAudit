@@ -32,7 +32,7 @@ function createMainWindow(): BrowserWindow {
     minHeight: 640,
     frame: false,
     backgroundColor: '#0a0a0a',
-    show: false,
+    show: true,
     webPreferences: {
       preload: path.join(dirname, '../preload/index.cjs'),
       contextIsolation: true,
@@ -41,7 +41,10 @@ function createMainWindow(): BrowserWindow {
     },
   });
 
-  win.once('ready-to-show', () => win.show());
+  win.once('ready-to-show', () => {
+    if (!win.isVisible()) win.show();
+    win.focus();
+  });
 
   const emitMaximizeState = () => {
     win.webContents.send(IpcChannels.windowMaximizeChanged, win.isMaximized());
@@ -51,7 +54,9 @@ function createMainWindow(): BrowserWindow {
 
   if (devServerUrl) {
     void win.loadURL(devServerUrl);
-    win.webContents.openDevTools({ mode: 'detach' });
+    if (process.env.BLAZE_OPEN_DEVTOOLS === '1') {
+      win.webContents.openDevTools({ mode: 'detach' });
+    }
   } else {
     void win.loadFile(path.join(dirname, '../../dist/index.html'));
   }

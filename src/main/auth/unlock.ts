@@ -4,6 +4,7 @@ import { isPasswordRequired } from '../../shared/loginPolicy';
 import { getLoginPolicy, setLoginPolicy as persistLoginPolicy, getColorTheme, setColorTheme as persistColorTheme } from '../settings/store';
 import { assertKeyXMatchesManifest, manifestWithKeyXId } from './keyX';
 import { unlockDatabaseWithKey } from './session';
+import { clearAuthStatusCache } from './statusCache';
 import {
   bumpUnlockEpoch,
   clearDpapiKeyX,
@@ -76,6 +77,7 @@ export function completeUnlock(keyX: string, manifest: AuthManifest): void {
   }
   const withId = manifest.keyXId ? manifest : manifestWithKeyXId(manifest, keyX);
   completeUnlockTouch(withId);
+  clearAuthStatusCache();
 }
 
 export function setLoginPolicy(policy: LoginPolicy): LoginPolicy {
