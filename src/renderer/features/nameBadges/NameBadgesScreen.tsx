@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FileDown, ImagePlus, Plus, Trash2, UserRound } from 'lucide-react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { StartupLoader } from '../../components/StartupLoader';
 import { cn } from '../../lib/cn';
 import {
   NAME_BADGE_PER_PAGE_OPTIONS,
@@ -229,6 +230,14 @@ export function NameBadgesScreen() {
 
   return (
     <div className="space-y-5">
+      {exporting ? (
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-neutral-950/92 backdrop-blur-[2px]"
+          aria-busy="true"
+        >
+          <StartupLoader label="Generating PDF…" />
+        </div>
+      ) : null}
       <section className="ba-panel flex flex-wrap items-center justify-between gap-4 p-4">
         <div>
           <h2 className="text-base font-semibold text-[var(--ba-text-primary)]">Print settings</h2>
