@@ -49,6 +49,140 @@ const PRINT_OVERRIDES = `
     page-break-after: auto;
   }
 
+  .form-print-root .form-page-header-branding {
+    position: relative !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .form-print-root .form-page-header-branding-content {
+    position: relative !important;
+    z-index: 1 !important;
+    width: 100% !important;
+  }
+  .form-print-root .form-page-header-brand {
+    position: absolute !important;
+    top: 0 !important;
+    z-index: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
+  .form-print-root .form-page-header-brand--company {
+    left: 20pt !important;
+    width: 163pt !important;
+    height: 100% !important;
+    padding-top: 2pt !important;
+    padding-left: 1pt !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+  }
+  .form-print-root .form-page-header-brand--cfaa {
+    right: 20pt !important;
+    width: 145pt !important;
+    height: 100% !important;
+    padding-top: 2pt !important;
+    padding-right: 1pt !important;
+    align-items: flex-start !important;
+    justify-content: flex-end !important;
+  }
+  .form-print-root .form-page-header-brand--company .form-page-header-brand-img {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 163pt !important;
+    object-fit: contain !important;
+    object-position: top left !important;
+  }
+  .form-print-root .form-page-header-brand--cfaa .form-page-header-brand-img {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 145pt !important;
+    object-fit: contain !important;
+    object-position: top right !important;
+  }
+  .form-print-root .form-page-sheet--landscape .form-page-header-brand--company {
+    left: 14pt !important;
+    width: 161pt !important;
+  }
+  .form-print-root .form-page-sheet--landscape .form-page-header-brand--company .form-page-header-brand-img {
+    max-height: 161pt !important;
+  }
+  .form-print-root .form-page-sheet--landscape .form-page-header-brand--cfaa {
+    right: 14pt !important;
+    width: 144pt !important;
+  }
+  .form-print-root .form-page-sheet--landscape .form-page-header-brand--cfaa .form-page-header-brand-img {
+    max-height: 144pt !important;
+  }
+  .form-print-root .form-page-header-branding--page1 .form-page-header-brand--company {
+    left: 6pt !important;
+    width: auto !important;
+    max-width: calc(50% - 8pt) !important;
+    height: auto !important;
+    padding-top: 1pt !important;
+    padding-left: 0 !important;
+    align-items: flex-start !important;
+  }
+  .form-print-root .form-page-header-branding--page1 .form-page-header-brand--company .form-page-header-brand-img {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 34pt !important;
+    object-fit: contain !important;
+    object-position: top left !important;
+  }
+  .form-print-root .form-page-header-branding--page1 .form-page-header-brand--cfaa {
+    right: 6pt !important;
+    width: auto !important;
+    max-width: calc(50% - 8pt) !important;
+    height: auto !important;
+    padding-top: 1pt !important;
+    padding-right: 0 !important;
+    align-items: flex-start !important;
+  }
+  .form-print-root .form-page-header-branding--page1 .form-page-header-brand--cfaa .form-page-header-brand-img {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 40pt !important;
+    object-fit: contain !important;
+    object-position: top right !important;
+  }
+  .form-print-root .aff-cell--name {
+    justify-content: center !important;
+  }
+  .form-print-root .aff-cell--name .aff-cell-value,
+  .form-print-root .aff-cell--name .aff-cell-select {
+    text-align: center !important;
+    padding-left: 3pt !important;
+    padding-right: 3pt !important;
+  }
+  .form-print-root .aff-tech-grid > .aff-label:nth-child(4n + 1) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding-left: 3pt !important;
+    padding-right: 3pt !important;
+  }
+  .form-print-root .ulc-s1-company-name {
+    font-family: Georgia, 'Times New Roman', Times, serif !important;
+    font-size: calc(1em + 2pt) !important;
+    font-variant: small-caps !important;
+    letter-spacing: 0.08em !important;
+    border-bottom: 0.5px solid #64748b !important;
+    padding-bottom: 2pt !important;
+    margin-bottom: 3pt !important;
+  }
+  .form-print-root .form-page-header-brand-img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+  }
+
   /*
    * ULC PDF — full box on every grid cell (print only). Layout containers get no
    * partial edges; each cell carries its own complete border. Flex rules below
@@ -63,6 +197,21 @@ const PRINT_OVERRIDES = `
     print-color-adjust: exact !important;
   }
   .form-print-root .ulc-s1-company { flex: 0 0 42% !important; }
+  .form-print-root .ulc-s1-company-inner {
+    overflow: hidden !important;
+    justify-content: center !important;
+  }
+  .form-print-root .ulc-s1-company-text,
+  .form-print-root .ulc-s1-company-details {
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+  .form-print-root .ulc-s1-fax-disabled {
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
   .form-print-root .ulc-s1-bottom-row {
     grid-template-columns: 42% minmax(0, 1fr) minmax(0, 1fr) 8.775rem !important;
   }

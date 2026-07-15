@@ -47,15 +47,13 @@ function dateCell(
   return `<div class="ulc-s1-cell"><div class="ulc-s1-label">${escapeHtml(label)}</div><div class="ulc-s1-value">${dash(text)}</div></div>`;
 }
 
-function phoneFaxCell(
+function phoneDisabledCell(
   phoneKey: keyof UlcSection1Value,
-  faxKey: keyof UlcSection1Value,
   value: UlcSection1Value,
   context: DocumentContext,
 ): string {
   const phone = resolveUlcSection1Field(phoneKey, value, context);
-  const fax = resolveUlcSection1Field(faxKey, value, context);
-  return `<div class="ulc-s1-phone-fax"><div class="ulc-s1-cell"><div class="ulc-s1-label">Phone:</div><div class="ulc-s1-value">${dash(phone)}</div></div><div class="ulc-s1-cell"><div class="ulc-s1-label">Fax:</div><div class="ulc-s1-value">${dash(fax)}</div></div></div>`;
+  return `<div class="ulc-s1-phone-fax"><div class="ulc-s1-cell"><div class="ulc-s1-label">Phone:</div><div class="ulc-s1-value">${dash(phone)}</div></div><div class="ulc-s1-cell ulc-s1-fax-disabled" aria-hidden="true"></div></div>`;
 }
 
 function companyBlockHtml(context: DocumentContext): string {
@@ -83,17 +81,12 @@ function companyBlockHtml(context: DocumentContext): string {
 /** Read-only ULC section HTML — same structure/classes as FormUlcSection1View. */
 export function renderUlcSection1Html(valueRaw: unknown, context: DocumentContext): string {
   const value = normalizeUlcSection1Value(valueRaw);
-  const logoUrl = context.business.logoDataUrl;
-
-  const logoBlock = logoUrl
-    ? `<img src="${escapeHtml(logoUrl)}" alt="Company logo" class="ulc-s1-logo-img" />`
-    : '<span class="ulc-s1-logo-placeholder">Company Logo</span>';
 
   return [
     '<div class="ulc-s1-panel">',
     '<div class="ulc-s1-top">',
     '<div class="ulc-s1-company">',
-    `<div class="ulc-s1-company-inner"><div class="ulc-s1-logo">${logoBlock}</div><div class="ulc-s1-company-text">${companyBlockHtml(context)}</div></div>`,
+    `<div class="ulc-s1-company-inner"><div class="ulc-s1-company-text">${companyBlockHtml(context)}</div></div>`,
     '</div>',
     '<div class="ulc-s1-service">',
     `<div class="ulc-s1-service-row ulc-s1-service-row--header">${dateCell('dateOfService', 'Date of Service:', value, context)}${dateCell('lastServiceDate', 'Last Service Date:', value, context)}${fieldCell('workOrderNumber', 'Work Order Number:', value, context)}</div>`,
@@ -106,9 +99,9 @@ export function renderUlcSection1Html(valueRaw: unknown, context: DocumentContex
     '</div>',
     '</div>',
     '<div class="ulc-s1-bottom">',
-    `<div class="ulc-s1-bottom-row ulc-s1-bottom-row--3col">${fieldCell('buildingName', 'Building Name:', value, context, 'ulc-s1-cell--wide')}${fieldCell('contactPerson', 'Contact Person:', value, context, 'ulc-s1-cell--medium')}${phoneFaxCell('contactPhone', 'contactFax', value, context)}</div>`,
-    `<div class="ulc-s1-bottom-row ulc-s1-bottom-row--3col">${fieldCell('address', 'Address:', value, context, 'ulc-s1-cell--wide')}${fieldCell('ownerPropertyManager', 'Owner/Property Manager/Strata Number:', value, context, 'ulc-s1-cell--medium')}${phoneFaxCell('ownerPhone', 'ownerFax', value, context)}</div>`,
-    `<div class="ulc-s1-bottom-row ulc-s1-bottom-row--3col"><div class="ulc-s1-city-postal">${fieldCell('city', 'City:', value, context)}${fieldCell('postalCode', 'Postal Code:', value, context)}</div>${fieldCell('fireSignalCentre', 'Fire Signal Receiving Centre (Section 22.11):', value, context)}${phoneFaxCell('fireSignalPhone', 'fireSignalFax', value, context)}</div>`,
+    `<div class="ulc-s1-bottom-row ulc-s1-bottom-row--3col">${fieldCell('buildingName', 'Building Name:', value, context, 'ulc-s1-cell--wide')}${fieldCell('contactPerson', 'Contact Person:', value, context, 'ulc-s1-cell--medium')}${phoneDisabledCell('contactPhone', value, context)}</div>`,
+    `<div class="ulc-s1-bottom-row ulc-s1-bottom-row--3col">${fieldCell('address', 'Address:', value, context, 'ulc-s1-cell--wide')}${fieldCell('ownerPropertyManager', 'Owner / Property Manager:', value, context, 'ulc-s1-cell--medium')}${phoneDisabledCell('ownerPhone', value, context)}</div>`,
+    `<div class="ulc-s1-bottom-row ulc-s1-bottom-row--3col"><div class="ulc-s1-city-postal">${fieldCell('city', 'City:', value, context)}${fieldCell('postalCode', 'Postal Code:', value, context)}</div>${fieldCell('fireSignalCentre', 'Fire Signal Receiving Centre (Section 22.11):', value, context)}${phoneDisabledCell('fireSignalPhone', value, context)}</div>`,
     '</div>',
     '</div>',
   ].join('');
