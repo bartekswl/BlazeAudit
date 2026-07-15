@@ -1,5 +1,4 @@
 import { closeDatabase, openDatabase } from '../db/connection';
-import { seedDefaultTemplates } from '../db/seedTemplates';
 import { LATEST_SCHEMA_VERSION, runMigrations } from '../db/migrations';
 import { dbFilePath } from '../db/paths';
 import { clearAuthStatusCache } from './statusCache';
@@ -16,8 +15,9 @@ export function unlockDatabaseWithKey(keyX: string): void {
   runMigrations(db);
   unlocked = true;
   console.log(`[db] unlocked (schema v${LATEST_SCHEMA_VERSION}) → ${dbFilePath()}`);
-  setImmediate(() => {
+  setImmediate(async () => {
     try {
+      const { seedDefaultTemplates } = await import('../db/seedTemplates');
       seedDefaultTemplates();
     } catch (error) {
       console.error('[templates] deferred seed failed:', error);

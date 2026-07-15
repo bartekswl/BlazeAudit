@@ -1,41 +1,56 @@
-import { useCallback, useEffect, useState, type ComponentType, type ReactNode } from 'react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+  type ComponentType,
+} from 'react';
 import type { AuthStatus } from '../../../shared/auth';
 import { cn } from '../../lib/cn';
-import { BootShell } from '../../components/BootShell';
-import { TitleBar } from '../../components/TitleBar';
-import { ActivationScreen } from './ActivationScreen';
+import { AppFrame } from '../../components/AppFrame';
 import { AuthRefreshContext } from './authContext';
-import { notifyAccountThemeSync } from '../../theme/ThemeProvider';
-import { LoginScreen } from './LoginScreen';
-import { SetPasswordScreen } from './SetPasswordScreen';
+import { notifyAccountThemeSync, releaseBootTheme } from '../../theme/ThemeProvider';
 
-const UNLOCK_MS = 420;
-const APP_ENTER_MS = 420;
-const LOCK_MS = 480;
+const ActivationScreen = lazy(() =>
+  import('./ActivationScreen').then((module) => ({ default: module.ActivationScreen })),
+);
+const LoginScreen = lazy(() =>
+  import('./LoginScreen').then((module) => ({ default: module.LoginScreen })),
+);
+const SetPasswordScreen = lazy(() =>
+  import('./SetPasswordScreen').then((module) => ({ default: module.SetPasswordScreen })),
+);
+
+const UNLOCK_MS = 280;
+const APP_ENTER_MS = 280;
+const LOCK_MS = 320;
+const BOOT_FADE_MS = 120;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
-function AppFrame({ children, loading = false }: { children?: ReactNode; loading?: boolean }) {
-  return (
-    <div className="flex h-screen flex-col overflow-hidden bg-neutral-950">
-      <TitleBar />
-      <div className="relative min-h-0 flex-1">
-        <BootShell loading={loading}>{children}</BootShell>
-      </div>
-    </div>
-  );
-}
-
 export function AuthGate() {
   const [status, setStatus] = useState<AuthStatus | null>(null);
-  const [booting, setBooting] = useState(true);
+  const [bootOverlay, setBootOverlay] = useState<'visible' | 'hiding' | 'hidden'>('visible');
   const [AppComponent, setAppComponent] = useState<ComponentType | null>(null);
   const [appVisible, setAppVisible] = useState(false);
   const [authOverlay, setAuthOverlay] = useState(false);
   const [authLeaving, setAuthLeaving] = useState(false);
   const [appMotion, setAppMotion] = useState<'enter' | 'exit' | null>(null);
+
+  const finishBootReveal = useCallback(async () => {
+    releaseBootTheme();
+    notifyAccountThemeSync();
+    // One frame so theme paints under the dark overlay, then fade out.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
+    setBootOverlay('hiding');
+    await delay(BOOT_FADE_MS);
+    setBootOverlay('hidden');
+  }, []);
 
   const refresh = useCallback(
     async (options?: { animateUnlock?: boolean; animateLock?: boolean }) => {
@@ -75,32 +90,35 @@ export function AuthGate() {
 
   useEffect(() => {
     let cancelled = false;
-    const appPromise = import('../../App');
 
     void (async () => {
+      // Load auth state and the lightweight app shell concurrently. Unlocked
+      // startup needs both, so doing these sequentially only extends boot.
+      const appImport = import('../../App');
       const next = await window.blazeaudit.auth.getStatus();
       if (cancelled) return;
 
-      setStatus(next);
-
       if (next.phase === 'unlocked') {
-        const mod = await appPromise;
+        const mod = await appImport;
         if (cancelled) return;
         setAppComponent(() => mod.default);
         setAppVisible(true);
         setAuthOverlay(false);
-        notifyAccountThemeSync();
       } else {
+        // Keep warming App while the user is on login/activation.
+        void appImport;
         setAuthOverlay(true);
       }
 
-      setBooting(false);
+      setStatus(next);
+      if (cancelled) return;
+      await finishBootReveal();
     })();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [finishBootReveal]);
 
   const onAuthStepDone = useCallback(() => {
     void (async () => {
@@ -114,64 +132,63 @@ export function AuthGate() {
     void refresh();
   }, [refresh]);
 
-  if (booting || !status) {
-    return <AppFrame loading />;
-  }
-
-  if (status.phase === 'unlocked' && AppComponent && appVisible) {
-    return (
-      <AppFrame>
-        <div
-          className={cn(
-            'app-reveal-host h-full',
-            appMotion === 'enter' && 'app-enter',
-            appMotion === 'exit' && 'app-exit',
-          )}
-        >
-          <AuthRefreshContext.Provider value={() => refresh({ animateLock: true })}>
-            <AppComponent />
-          </AuthRefreshContext.Provider>
-        </div>
-      </AppFrame>
-    );
-  }
+  const showApp = Boolean(status?.phase === 'unlocked' && AppComponent && appVisible);
+  const showAuth = Boolean(status && authOverlay && status.phase !== 'unlocked');
 
   return (
-    <AppFrame>
-      {authOverlay && status.phase !== 'unlocked' && (
-        <div
-          className={cn(
-            'absolute inset-0 z-20 bg-neutral-950',
-            authLeaving ? 'auth-panel-exit' : 'auth-panel-enter',
-          )}
-        >
-          {status.phase === 'activation' && (
-            <ActivationScreen
-              hasExistingAccounts={status.hasExistingAccounts}
-              onDone={onAuthFlowStep}
-              onBack={
-                status.hasExistingAccounts
-                  ? () => {
-                      void window.blazeaudit.auth.returnToLogin().then(onAuthFlowStep);
-                    }
-                  : undefined
-              }
-            />
-          )}
-          {status.phase === 'set_password' && (
-            <SetPasswordScreen email={status.email} onDone={onAuthStepDone} />
-          )}
-          {status.phase === 'login' && (
-            <LoginScreen
-              email={status.email}
-              accountId={status.accountId}
-              accounts={status.accounts}
-              onDone={onAuthStepDone}
-              onFlowChange={onAuthFlowStep}
-            />
-          )}
-        </div>
-      )}
+    <AppFrame bootOverlay={bootOverlay}>
+      <div className="relative h-full">
+        {showApp && AppComponent ? (
+          <div
+            className={cn(
+              'app-reveal-host h-full',
+              appMotion === 'enter' && 'app-enter',
+              appMotion === 'exit' && 'app-exit',
+            )}
+          >
+            <AuthRefreshContext.Provider value={() => refresh({ animateLock: true })}>
+              <AppComponent />
+            </AuthRefreshContext.Provider>
+          </div>
+        ) : null}
+
+        {showAuth && status ? (
+          <div
+            className={cn(
+              'absolute inset-0 z-20 bg-neutral-950',
+              authLeaving ? 'auth-panel-exit' : undefined,
+            )}
+          >
+            <Suspense fallback={null}>
+              {status.phase === 'activation' && (
+                <ActivationScreen
+                  hasExistingAccounts={status.hasExistingAccounts}
+                  onDone={onAuthFlowStep}
+                  onBack={
+                    status.hasExistingAccounts
+                      ? () => {
+                          void window.blazeaudit.auth.returnToLogin().then(onAuthFlowStep);
+                        }
+                      : undefined
+                  }
+                />
+              )}
+              {status.phase === 'set_password' && (
+                <SetPasswordScreen email={status.email} onDone={onAuthStepDone} />
+              )}
+              {status.phase === 'login' && (
+                <LoginScreen
+                  email={status.email}
+                  accountId={status.accountId}
+                  accounts={status.accounts}
+                  onDone={onAuthStepDone}
+                  onFlowChange={onAuthFlowStep}
+                />
+              )}
+            </Suspense>
+          </div>
+        ) : null}
+      </div>
     </AppFrame>
   );
 }
