@@ -95,6 +95,8 @@ function FormPageCanvasInner({
   const hasEmergencyPowerSupplyTestPage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'emergencyPowerSupplyTest'),
   );
+  const hasPowerSuppliesPage =
+    hasPowerSupplyInspectionPage && hasEmergencyPowerSupplyTestPage;
   const hasEmergencyPowerSupplyTestOnlyPage =
     hasEmergencyPowerSupplyTestPage && !hasPowerSupplyInspectionPage;
   const hasAnnunciatorTestPage = page.sections.some((section) =>
@@ -143,6 +145,7 @@ function FormPageCanvasInner({
         hasControlUnitTest && 'form-page-sheet--control-unit-test',
         hasControlUnitRecord && 'form-page-sheet--control-unit-record',
         hasVoiceCommunicationTest && 'form-page-sheet--voice-communication-test',
+        hasPowerSuppliesPage && 'form-page-sheet--power-supplies',
         hasEmergencyPowerSupplyTestOnlyPage && 'form-page-sheet--emergency-power-supply-test',
         hasAnnunciatorTestPage && 'form-page-sheet--annunciator-device-test',
         hasRtsuPrinterTestPage && 'form-page-sheet--rtsu-printer-test',
@@ -229,6 +232,7 @@ function FormPageCanvasInner({
             hasControlUnitTest && 'form-page-content--control-unit-test',
             hasControlUnitRecord && 'form-page-content--control-unit-record',
             hasVoiceCommunicationTest && 'form-page-content--voice-communication-test',
+            hasPowerSuppliesPage && 'form-page-content--power-supplies',
             hasEmergencyPowerSupplyTestOnlyPage && 'form-page-content--emergency-power-supply-test',
             hasAnnunciatorTestPage && 'form-page-content--annunciator-device-test',
             hasAncillaryDeviceCircuitTestPage && 'form-page-content--ancillary-device-circuit-test',
@@ -296,7 +300,7 @@ function FormPageCanvasInner({
               (element) => element.kind === 'emergencyPowerSupplyTest',
             );
             const isEmergencyPowerSupplyTestOnlySection =
-              isEmergencyPowerSupplyTestSection && !isPowerSupplyInspectionSection;
+              isEmergencyPowerSupplyTestSection && hasEmergencyPowerSupplyTestOnlyPage;
             const isAnnunciatorDeviceTestSection = section.elements.some(
               (element) => element.kind === 'annunciatorDeviceTest',
             );
