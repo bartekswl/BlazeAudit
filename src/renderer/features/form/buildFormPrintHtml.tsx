@@ -69,57 +69,57 @@ const PRINT_OVERRIDES = `
     pointer-events: none !important;
   }
   .form-print-root .form-page-header-brand--company {
-    left: 20pt !important;
-    width: 42pt !important;
+    left: 2rem !important;
+    width: 4.4rem !important;
     height: auto !important;
-    padding-top: 2pt !important;
-    padding-left: 1pt !important;
+    padding-top: 0.25rem !important;
+    padding-left: 0.125rem !important;
     align-items: flex-start !important;
     justify-content: flex-start !important;
   }
   .form-print-root .form-page-header-brand--cfaa {
-    right: 20pt !important;
-    width: 34pt !important;
+    right: 2rem !important;
+    width: 3.6rem !important;
     height: auto !important;
-    padding-top: 2pt !important;
-    padding-right: 1pt !important;
+    padding-top: 0.25rem !important;
+    padding-right: 0.125rem !important;
     align-items: flex-start !important;
     justify-content: flex-end !important;
   }
   .form-print-root .form-page-header-brand--company .form-page-header-brand-img {
     width: 100% !important;
     height: auto !important;
-    max-height: 42pt !important;
+    max-height: 4.4rem !important;
     object-fit: contain !important;
     object-position: top left !important;
   }
   .form-print-root .form-page-header-brand--cfaa .form-page-header-brand-img {
     width: 100% !important;
     height: auto !important;
-    max-height: 34pt !important;
+    max-height: 3.6rem !important;
     object-fit: contain !important;
     object-position: top right !important;
   }
   .form-print-root .form-page-sheet--landscape .form-page-header-brand--company {
-    left: 14pt !important;
-    width: 42pt !important;
+    left: 1.375rem !important;
+    width: 4.4rem !important;
   }
   .form-print-root .form-page-sheet--landscape .form-page-header-brand--company .form-page-header-brand-img {
-    max-height: 42pt !important;
+    max-height: 4.4rem !important;
   }
   .form-print-root .form-page-sheet--landscape .form-page-header-brand--cfaa {
-    right: 14pt !important;
-    width: 34pt !important;
+    right: 1.375rem !important;
+    width: 3.6rem !important;
   }
   .form-print-root .form-page-sheet--landscape .form-page-header-brand--cfaa .form-page-header-brand-img {
-    max-height: 34pt !important;
+    max-height: 3.6rem !important;
   }
   .form-print-root .form-page-header-branding--page1 .form-page-header-brand--company {
-    left: 6pt !important;
+    left: 0.625rem !important;
     width: auto !important;
-    max-width: calc(50% - 8pt) !important;
+    max-width: calc(50% - 0.75rem) !important;
     height: auto !important;
-    padding-top: 1pt !important;
+    padding-top: 0.125rem !important;
     padding-left: 0 !important;
     align-items: flex-start !important;
   }
@@ -128,16 +128,16 @@ const PRINT_OVERRIDES = `
     width: auto !important;
     height: auto !important;
     max-width: 100% !important;
-    max-height: 34pt !important;
+    max-height: 3.6rem !important;
     object-fit: contain !important;
     object-position: top left !important;
   }
   .form-print-root .form-page-header-branding--page1 .form-page-header-brand--cfaa {
-    right: 6pt !important;
+    right: 0.625rem !important;
     width: auto !important;
-    max-width: calc(50% - 8pt) !important;
+    max-width: calc(50% - 0.75rem) !important;
     height: auto !important;
-    padding-top: 1pt !important;
+    padding-top: 0.125rem !important;
     padding-right: 0 !important;
     align-items: flex-start !important;
   }
@@ -146,9 +146,19 @@ const PRINT_OVERRIDES = `
     width: auto !important;
     height: auto !important;
     max-width: 100% !important;
-    max-height: 40pt !important;
+    max-height: 4.2rem !important;
     object-fit: contain !important;
     object-position: top right !important;
+  }
+  .form-print-root .form-page-sheet--landscape .form-page-header-branding--page1 .form-page-header-brand--company,
+  .form-print-root .form-page-sheet--landscape .form-page-header-branding--page1 .form-page-header-brand--cfaa {
+    max-width: calc(50% - 0.625rem) !important;
+  }
+  .form-print-root .form-page-sheet--landscape .form-page-header-branding--page1 .form-page-header-brand--company .form-page-header-brand-img {
+    max-height: 3.6rem !important;
+  }
+  .form-print-root .form-page-sheet--landscape .form-page-header-branding--page1 .form-page-header-brand--cfaa .form-page-header-brand-img {
+    max-height: 4.2rem !important;
   }
   .form-print-root .aff-cell--name {
     justify-content: center !important;
