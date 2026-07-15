@@ -628,8 +628,8 @@ const PRINT_OVERRIDES = `
     overflow: hidden !important;
     border-radius: 0.625rem !important;
     box-shadow: none !important;
-    font-size: 6pt !important;
-    line-height: 1.1 !important;
+    font-size: 7pt !important;
+    line-height: 1 !important;
   }
   .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-table-wrap {
     flex: 1 1 auto !important;
@@ -638,7 +638,7 @@ const PRINT_OVERRIDES = `
     width: 100% !important;
   }
   .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-table {
-    font-size: 6.25pt !important;
+    font-size: 7.25pt !important;
     table-layout: fixed !important;
     width: 100% !important;
     height: 100% !important;
@@ -673,8 +673,8 @@ const PRINT_OVERRIDES = `
     width: 24% !important;
   }
   .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-table thead .adc-th {
-    font-size: 7.25pt !important;
-    line-height: 1.12 !important;
+    font-size: 8pt !important;
+    line-height: 1 !important;
     min-height: 0 !important;
     height: auto !important;
     padding: 0.75pt 1pt !important;
@@ -731,8 +731,8 @@ const PRINT_OVERRIDES = `
     flex-shrink: 0 !important;
     border-top: 0.5px solid #64748b !important;
     padding: 1pt 2pt 1.5pt !important;
-    font-size: 7pt !important;
-    line-height: 1.2 !important;
+    font-size: 7.5pt !important;
+    line-height: 1.15 !important;
   }
   .form-print-root .form-page-sheet--ancillary-device-circuit-test .adc-footnote {
     font-size: inherit !important;
@@ -885,25 +885,25 @@ const PRINT_OVERRIDES = `
     margin-top: 0 !important;
     border-radius: 0.625rem !important;
     box-shadow: none !important;
-    font-size: 7pt !important;
-    line-height: 1.12 !important;
+    font-size: 7.75pt !important;
+    line-height: 1.15 !important;
   }
   .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-na-bar {
     background: #cfe2f3 !important;
     border-bottom: 0.5px solid #64748b !important;
-    padding: 1pt 3pt !important;
+    padding: 1.5pt 3pt !important;
   }
   .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-ref-bar {
     background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%) !important;
     color: #ffffff !important;
     border-bottom: 0.5px solid #64748b !important;
-    padding: 1pt 3pt !important;
+    padding: 1.5pt 3pt !important;
   }
   .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-info-row {
     background: #cfe2f3 !important;
     border-bottom: 0.5px solid #64748b !important;
     min-height: 0 !important;
-    padding: 0.5pt 2pt !important;
+    padding: 1pt 2.5pt !important;
   }
   .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-table-wrap {
     flex: 0 1 auto !important;
@@ -913,21 +913,21 @@ const PRINT_OVERRIDES = `
     width: 100% !important;
     height: auto !important;
     table-layout: fixed !important;
-    font-size: 7.25pt !important;
+    font-size: 8pt !important;
   }
   .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-th,
   .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-td {
     border-right: 0.5px solid #64748b !important;
-    padding: 0.5pt 1pt !important;
+    padding: 1pt 1.5pt !important;
     box-sizing: border-box !important;
   }
   .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-row .dclft-td {
-    padding-top: 2pt !important;
-    padding-bottom: 2pt !important;
-  }
-  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-td--desc {
     padding-top: 2.5pt !important;
     padding-bottom: 2.5pt !important;
+  }
+  .form-print-root .form-page-sheet--dcl-fault-tolerance .dclft-td--desc {
+    padding-top: 3pt !important;
+    padding-bottom: 3pt !important;
     padding-left: 1.5pt !important;
     padding-right: 1.5pt !important;
   }
@@ -1600,7 +1600,7 @@ const PRINT_OVERRIDES = `
     margin-top: 0 !important;
     border-radius: 0.625rem !important;
     box-shadow: none !important;
-    font-size: 6.5pt !important;
+    font-size: 7.25pt !important;
     line-height: 1.15 !important;
     color: #171717 !important;
     background: #ffffff !important;
@@ -1662,7 +1662,7 @@ const PRINT_OVERRIDES = `
   .form-print-root .vct-table {
     width: 100% !important;
     table-layout: fixed !important;
-    font-size: 7.5pt !important;
+    font-size: 8.25pt !important;
   }
 
   .form-print-root .form-page-section:has(.vct-panel) .form-element-frame--flush {
@@ -1704,20 +1704,20 @@ const PRINT_OVERRIDES = `
   }
   .form-print-root .form-page-sheet--voice-communication-test .vct-na-bar,
   .form-print-root .form-page-sheet--voice-communication-test .vct-ref-bar {
-    padding: 1pt 3pt !important;
-    line-height: 1.1 !important;
+    padding: 1.5pt 3pt !important;
+    line-height: 1.15 !important;
   }
   .form-print-root .form-page-sheet--voice-communication-test .vct-info-row {
     min-height: 0 !important;
-    padding: 0.5pt 2pt !important;
+    padding: 1pt 2.5pt !important;
   }
   .form-print-root .form-page-sheet--voice-communication-test .vct-th,
   .form-print-root .form-page-sheet--voice-communication-test .vct-td {
-    padding: 0.5pt 1pt !important;
+    padding: 1pt 1.5pt !important;
   }
   .form-print-root .form-page-sheet--voice-communication-test .vct-check-cell {
     min-height: 0 !important;
-    padding: 0.5pt !important;
+    padding: 1pt !important;
   }
   .form-print-root .form-page-sheet--voice-communication-test .vct-table-wrap {
     flex: 0 0 auto !important;
@@ -2035,7 +2035,7 @@ const PRINT_OVERRIDES = `
     margin-top: 0 !important;
     border-radius: 0.625rem !important;
     box-shadow: none !important;
-    font-size: 6.75pt !important;
+    font-size: 6.25pt !important;
     line-height: 1.1 !important;
     display: grid !important;
   }
@@ -2069,7 +2069,7 @@ const PRINT_OVERRIDES = `
     width: 100% !important;
     height: 100% !important;
     table-layout: fixed !important;
-    font-size: 7.25pt !important;
+    font-size: 6.5pt !important;
   }
   .form-print-root .form-page-sheet--annunciator-device-test .artu-table tbody tr,
   .form-print-root .form-page-sheet--annunciator-device-test .asd-table tbody tr {
