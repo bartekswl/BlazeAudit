@@ -70,8 +70,8 @@ const PRINT_OVERRIDES = `
   }
   .form-print-root .form-page-header-brand--company {
     left: 20pt !important;
-    width: 163pt !important;
-    height: 100% !important;
+    width: 42pt !important;
+    height: auto !important;
     padding-top: 2pt !important;
     padding-left: 1pt !important;
     align-items: flex-start !important;
@@ -79,8 +79,8 @@ const PRINT_OVERRIDES = `
   }
   .form-print-root .form-page-header-brand--cfaa {
     right: 20pt !important;
-    width: 145pt !important;
-    height: 100% !important;
+    width: 34pt !important;
+    height: auto !important;
     padding-top: 2pt !important;
     padding-right: 1pt !important;
     align-items: flex-start !important;
@@ -88,31 +88,31 @@ const PRINT_OVERRIDES = `
   }
   .form-print-root .form-page-header-brand--company .form-page-header-brand-img {
     width: 100% !important;
-    height: 100% !important;
-    max-height: 163pt !important;
+    height: auto !important;
+    max-height: 42pt !important;
     object-fit: contain !important;
     object-position: top left !important;
   }
   .form-print-root .form-page-header-brand--cfaa .form-page-header-brand-img {
     width: 100% !important;
-    height: 100% !important;
-    max-height: 145pt !important;
+    height: auto !important;
+    max-height: 34pt !important;
     object-fit: contain !important;
     object-position: top right !important;
   }
   .form-print-root .form-page-sheet--landscape .form-page-header-brand--company {
     left: 14pt !important;
-    width: 161pt !important;
+    width: 42pt !important;
   }
   .form-print-root .form-page-sheet--landscape .form-page-header-brand--company .form-page-header-brand-img {
-    max-height: 161pt !important;
+    max-height: 42pt !important;
   }
   .form-print-root .form-page-sheet--landscape .form-page-header-brand--cfaa {
     right: 14pt !important;
-    width: 144pt !important;
+    width: 34pt !important;
   }
   .form-print-root .form-page-sheet--landscape .form-page-header-brand--cfaa .form-page-header-brand-img {
-    max-height: 144pt !important;
+    max-height: 34pt !important;
   }
   .form-print-root .form-page-header-branding--page1 .form-page-header-brand--company {
     left: 6pt !important;
@@ -176,10 +176,6 @@ const PRINT_OVERRIDES = `
     margin-bottom: 3pt !important;
   }
   .form-print-root .form-page-header-brand-img {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
     object-fit: contain !important;
   }
 
