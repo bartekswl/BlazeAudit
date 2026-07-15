@@ -9,6 +9,7 @@ import { inspectionSnapshotFromTemplate, validateDocument } from '../../shared/d
 import {
   createFormInspectionDocument,
   isFormInspectionDocument,
+  migrateFormInspectionPowerSupplyLayout,
   validateFormInspectionDocument,
   type FormInspectionDocument,
 } from '../../shared/form';
@@ -59,7 +60,7 @@ function parseInspectionDocument(json: string, requireClient = true): Inspection
     if (requireClient && !result.document.clientId) {
       throw new Error('Inspection document must reference a client.');
     }
-    return result.document;
+    return migrateFormInspectionPowerSupplyLayout(result.document);
   }
   const result = validateDocument(parsed);
   if (!result.ok) throw new Error(result.errors.join(' '));

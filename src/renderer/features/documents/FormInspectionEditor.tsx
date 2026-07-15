@@ -12,6 +12,7 @@ import {
   scrollToFormSection,
   setElementValue,
   syncFormDocumentInspectionDate,
+  migrateFormInspectionPowerSupplyLayout,
   type FormInspectionDocument,
 } from '../../../shared/form';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
@@ -58,14 +59,20 @@ function FormInspectionEditorInner({
       : 'annual') as CadencePreset,
   );
   const [formDoc, setFormDoc] = useState<FormInspectionDocument>(() =>
-    syncFormDocumentInspectionDate(formDocInitial, inspection.inspectedAt ?? null),
+    syncFormDocumentInspectionDate(
+      migrateFormInspectionPowerSupplyLayout(formDocInitial),
+      inspection.inspectedAt ?? null,
+    ),
   );
   const [context, setContext] = useState<DocumentContext | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [exportingPdf, setExportingPdf] = useState(false);
   const [pdfMessage, setPdfMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isDirty, setIsDirty] = useState(false);
+  const [isDirty, setIsDirty] = useState(() => {
+    const migrated = migrateFormInspectionPowerSupplyLayout(formDocInitial);
+    return migrated !== formDocInitial;
+  });
   const [idrRemoveConfirmPageIndex, setIdrRemoveConfirmPageIndex] = useState<number | null>(
     null,
   );

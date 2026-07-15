@@ -589,7 +589,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-scale-inner .form-page-sheet--voice-communication-test .form-page-content--voice-communication-test {
-  flex: 1 1 auto !important;
+  flex: 0 1 auto !important;
   min-height: 0 !important;
 }
 
@@ -651,11 +651,13 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
+  padding: 0.75rem 1rem 0 !important;
 }
 
 .form-page-scale-inner .form-page-sheet--power-supplies .form-page-content--power-supplies {
   flex: 1 1 auto !important;
   min-height: 0 !important;
+  overflow: hidden !important;
 }
 
 .form-page-scale-inner .form-page-sheet--power-supply-inspection .form-page-body {
@@ -7159,172 +7161,95 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-content--voice-communication-test {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: column;
   gap: 0.375rem;
   margin-top: 0.25rem;
 }
 
-.form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel),
-.form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) {
+/* 22.3 alone — content-hug; do not stretch into empty page space */
+.form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel) {
   display: flex;
   flex-direction: column;
+  flex: 0 0 auto;
+  height: auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel) > div,
-.form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) > div,
-.form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel) .form-element-frame--flush,
-.form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) .form-element-frame--flush {
+.form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel) .form-element-frame--flush {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   flex-direction: column;
   min-height: 0;
-  height: 100%;
+  height: auto;
 }
 
-.form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel) .vct-panel,
-.form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) .psi-panel {
-  flex: 1 1 auto;
+.form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel) .vct-panel {
+  flex: 0 0 auto;
   min-height: 0;
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr);
+  height: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.form-page-sheet--voice-communication-test .vct-panel {
-  grid-template-rows: auto auto auto minmax(0, 1fr);
-}
-
-.form-page-sheet--voice-communication-test .psi-panel {
-  grid-template-rows: auto auto auto;
-}
-
-.form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel) .form-page-section-title,
-.form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) .form-page-section-title {
+.form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel) .form-page-section-title {
   margin-bottom: 0.25rem;
 }
 
 .form-page-sheet--voice-communication-test .vct-na-bar,
-.form-page-sheet--voice-communication-test .vct-ref-bar,
-.form-page-sheet--voice-communication-test .psi-banner {
+.form-page-sheet--voice-communication-test .vct-ref-bar {
   padding: 0.0625rem 0.375rem;
   line-height: 1.15;
 }
 
-.form-page-sheet--voice-communication-test .vct-info-row,
-.form-page-sheet--voice-communication-test .psi-info-row {
+.form-page-sheet--voice-communication-test .vct-info-row {
   min-height: 0;
   padding: 0.03125rem 0.25rem;
 }
 
 .form-page-sheet--voice-communication-test .vct-info-input,
-.form-page-sheet--voice-communication-test .vct-info-value,
-.form-page-sheet--voice-communication-test .psi-info-input,
-.form-page-sheet--voice-communication-test .psi-info-value {
+.form-page-sheet--voice-communication-test .vct-info-value {
   min-height: 0.75rem;
 }
 
 .form-page-sheet--voice-communication-test .vct-th,
-.form-page-sheet--voice-communication-test .vct-td,
-.form-page-sheet--voice-communication-test .psi-th,
-.form-page-sheet--voice-communication-test .psi-td {
+.form-page-sheet--voice-communication-test .vct-td {
   padding: 0.03125rem 0.125rem;
 }
 
-.form-page-sheet--voice-communication-test .vct-check-cell,
-.form-page-sheet--voice-communication-test .psi-check-cell {
+.form-page-sheet--voice-communication-test .vct-check-cell {
   min-height: 0;
   padding: 0.03125rem;
 }
 
-.form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) {
-  flex: 0 0 auto;
-  height: auto;
-  min-height: 0;
-  overflow: visible;
-}
-
-.form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) > div,
-.form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) .form-element-frame--flush {
-  flex: 0 0 auto;
-  height: auto;
-}
-
-.form-page-sheet--voice-communication-test .form-page-section:has(.psi-panel) .psi-panel {
-  height: auto;
-  grid-template-rows: auto auto auto;
-  flex: 0 0 auto;
-}
-
-.form-page-sheet--voice-communication-test .psi-table-wrap {
-  overflow: visible;
-  flex: 0 0 auto;
-  min-height: 0;
-}
-
-.form-page-sheet--voice-communication-test .psi-table {
-  height: auto;
-  table-layout: fixed;
-}
-
-.form-page-sheet--voice-communication-test .psi-table thead {
-  height: auto;
-}
-
-.form-page-sheet--voice-communication-test .psi-table tbody {
-  height: auto;
-}
-
-.form-page-sheet--voice-communication-test .psi-table tbody tr {
-  height: auto;
-}
-
 .form-page-sheet--voice-communication-test .vct-table-wrap {
-  overflow: hidden;
-  flex: 1 1 auto;
+  overflow: visible;
+  flex: 0 0 auto;
   min-height: 0;
 }
 
 .form-page-sheet--voice-communication-test .vct-table {
-  height: 100%;
-  table-layout: fixed;
-}
-
-.form-page-sheet--voice-communication-test .psi-table {
   height: auto;
   table-layout: fixed;
 }
 
 .form-page-sheet--voice-communication-test .vct-table thead {
-  height: 1rem;
-}
-
-.form-page-sheet--voice-communication-test .psi-table thead {
   height: auto;
 }
 
 .form-page-sheet--voice-communication-test .vct-table tbody {
-  height: calc(100% - 1rem);
-}
-
-.form-page-sheet--voice-communication-test .psi-table tbody {
   height: auto;
 }
 
 .form-page-sheet--voice-communication-test .vct-table tbody tr {
-  height: calc(100% / 17);
-}
-
-.form-page-sheet--voice-communication-test .psi-table tbody tr {
   height: auto;
 }
 
-.form-page-sheet--voice-communication-test .vct-desc-text,
-.form-page-sheet--voice-communication-test .psi-desc-text {
+.form-page-sheet--voice-communication-test .vct-desc-text {
   line-height: 1.08;
 }
 
@@ -8341,24 +8266,29 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   flex-shrink: 0;
 }
 
-/* Page 9 — dual power-supply panels (legacy) */
+/* Page 9 — 22.4 + 22.5 stacked; every checklist row must remain visible */
 .form-page-sheet--power-supplies {
   display: flex;
   flex-direction: column;
+  --form-check-mark-size: 0.75rem;
+  --form-check-input-size: 0.75rem;
 }
 
 .form-page-sheet--power-supplies .form-page-body {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+  padding: 0.75rem 1rem 0;
 }
 
 .form-page-content--power-supplies {
   flex: 1 1 auto;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 0.28fr) minmax(0, 0.72fr);
+  gap: 0.15rem;
+  margin-top: 0.125rem;
+  overflow: hidden;
 }
 
 .form-page-sheet--power-supplies .form-page-section:has(.psi-panel),
@@ -8366,193 +8296,258 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   display: flex;
   flex-direction: column;
   min-height: 0;
+  max-height: none;
+  height: auto;
+  overflow: hidden;
+  flex-shrink: 1;
 }
 
-.form-page-sheet--power-supplies .form-page-section:has(.psi-panel) {
-  flex: 0 0 32%;
-  height: 32%;
-  max-height: 32%;
-  overflow: hidden;
-}
-
-.form-page-section--emergency-power-supply-test,
-.form-page-sheet--power-supplies .form-page-section:has(.epst-panel) {
-  flex: 0 0 63%;
-  height: 63%;
-  max-height: 63%;
-  min-height: 0;
-  overflow: hidden;
+.form-page-sheet--power-supplies .form-page-section:has(.psi-panel) .form-page-section-title,
+.form-page-sheet--power-supplies .form-page-section:has(.epst-panel) .form-page-section-title {
+  flex: 0 0 auto;
+  margin-bottom: 0.0625rem;
+  margin-top: 0;
+  padding-bottom: 0;
+  line-height: 1.1;
+  font-size: calc(0.875rem + 1pt);
 }
 
 .form-page-sheet--power-supplies .form-page-section--emergency-power-supply-test > div,
 .form-page-sheet--power-supplies .form-page-section:has(.epst-panel) > div,
 .form-page-sheet--power-supplies .form-page-section--emergency-power-supply-test .form-element-frame--flush,
-.form-page-sheet--power-supplies .form-page-section:has(.epst-panel) .form-element-frame--flush {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
-}
-
+.form-page-sheet--power-supplies .form-page-section:has(.epst-panel) .form-element-frame--flush,
 .form-page-sheet--power-supplies .form-page-section:has(.psi-panel) > div,
 .form-page-sheet--power-supplies .form-page-section:has(.psi-panel) .form-element-frame--flush {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
-  height: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
 }
 
 .form-page-sheet--power-supplies .psi-panel {
   container-type: size;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
-  height: 100%;
+  flex: 1 1 auto;
+  height: auto;
   max-height: 100%;
+  min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
-  padding-bottom: 0.125rem;
-  font-size: clamp(0.3375rem, 3.85cqh, 0.5875rem);
-  line-height: 1.08;
-}
-
-.form-page-sheet--power-supplies .psi-title {
-  padding: 0.03125rem 0.25rem;
+  padding-bottom: 0;
+  font-size: calc(clamp(0.35rem, 3.2cqh, 0.525rem) + 1.5pt);
+  line-height: 1;
 }
 
 .form-page-sheet--power-supplies .psi-banner {
-  padding: 0.03125rem 0.25rem;
-  line-height: 1.1;
+  padding: 0 0.15rem;
+  line-height: 1;
+}
+
+.form-page-sheet--power-supplies .psi-banner-line + .psi-banner-line {
+  margin-top: 0;
 }
 
 .form-page-sheet--power-supplies .psi-info-row {
-  min-height: 0;
-  padding: 0.015625rem 0.25rem;
+  min-height: 0 !important;
+  height: auto;
+  gap: 0.125rem;
+  padding: 0 0.15rem;
 }
 
 .form-page-sheet--power-supplies .psi-info-input,
 .form-page-sheet--power-supplies .psi-info-value {
-  min-height: 0.625rem;
+  min-height: 0 !important;
+  padding: 0 0.1rem;
+  line-height: 1;
 }
 
 .form-page-sheet--power-supplies .psi-th,
 .form-page-sheet--power-supplies .psi-td {
-  padding: 0.015625rem 0.125rem;
+  padding: 0 0.05rem !important;
+  line-height: 1 !important;
 }
 
-.form-page-sheet--power-supplies .psi-check-cell {
-  min-height: 0;
-  padding: 0.015625rem;
+.form-page-sheet--power-supplies .psi-desc-text {
+  line-height: 1;
+}
+
+.form-page-sheet--power-supplies .psi-check-cell,
+.form-page-sheet--power-supplies .epst-check-cell {
+  min-height: 0 !important;
+  height: 100%;
+  max-height: 100%;
+  padding: 0 !important;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .form-page-sheet--power-supplies .psi-table-wrap {
+  display: flex;
+  flex-direction: column;
   min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
 }
 
 .form-page-sheet--power-supplies .psi-table {
+  flex: 1 1 auto;
+  width: 100%;
   height: 100%;
   table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 1em;
 }
 
 .form-page-sheet--power-supplies .psi-table thead {
-  height: 1.125rem;
+  height: auto;
 }
 
-.form-page-sheet--power-supplies .psi-table tbody {
-  height: calc(100% - 1.125rem);
+.form-page-sheet--power-supplies .psi-table thead th {
+  padding: 0 0.05rem !important;
+  line-height: 1 !important;
 }
 
 .form-page-sheet--power-supplies .psi-table tbody tr {
+  /* Equal-share trick: zero height lets the table distribute remaining space */
+  height: 0;
+}
+
+.form-page-sheet--power-supplies .psi-table tbody td {
   height: 12.5%;
+  overflow: hidden;
+  vertical-align: middle;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .form-page-sheet--power-supplies .epst-panel {
   container-type: size;
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr) auto;
-  height: 100%;
+  flex: 1 1 auto;
+  height: auto;
   max-height: 100%;
+  min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
-  padding-bottom: 0.125rem;
-  font-size: clamp(0.3rem, 2.05cqh, 0.5625rem);
-  line-height: 1.06;
-}
-
-.form-page-sheet--power-supplies .epst-title {
-  padding: 0.03125rem 0.25rem;
+  padding-bottom: 0;
+  font-size: calc(clamp(0.375rem, 2.35cqh, 0.6rem) + 1pt);
+  line-height: 1;
 }
 
 .form-page-sheet--power-supplies .epst-banner {
   padding: 0.03125rem 0.25rem;
-  line-height: 1.1;
+  line-height: 1.05;
 }
 
-.form-page-sheet--power-supplies .epst-info-row {
-  min-height: 0;
-  padding: 0.015625rem 0.25rem;
+.form-page-sheet--power-supplies .epst-banner-line + .epst-banner-line {
+  margin-top: 0;
+}
+
+.form-page-sheet--power-supplies .epst-info-row,
+.form-page-sheet--power-supplies .epst-spec-row {
+  min-height: 0 !important;
+  height: auto;
+  gap: 0.2rem;
+  padding: 0 0.15rem;
 }
 
 .form-page-sheet--power-supplies .epst-info-input,
-.form-page-sheet--power-supplies .epst-info-value {
-  min-height: 0.5625rem;
-}
-
-.form-page-sheet--power-supplies .epst-spec-row {
-  min-height: 0;
-  padding: 0.015625rem 0.25rem;
+.form-page-sheet--power-supplies .epst-info-value,
+.form-page-sheet--power-supplies .epst-field-input,
+.form-page-sheet--power-supplies .epst-field-value {
+  min-height: 0 !important;
+  padding: 0 0.1rem;
+  line-height: 1;
 }
 
 .form-page-sheet--power-supplies .epst-th,
-.form-page-sheet--power-supplies .epst-td {
-  padding: 0.015625rem 0.125rem;
+.form-page-sheet--power-supplies .epst-td,
+.form-page-sheet--power-supplies .epst-td--measure {
+  padding: 0 0.05rem !important;
+  line-height: 1 !important;
 }
 
-.form-page-sheet--power-supplies .epst-check-cell {
-  min-height: 0;
-  padding: 0.015625rem;
+.form-page-sheet--power-supplies .epst-desc-line {
+  column-gap: 0.15rem;
+  line-height: 1;
+}
+
+.form-page-sheet--power-supplies .epst-desc-text {
+  line-height: 1;
 }
 
 .form-page-sheet--power-supplies .epst-table-wrap {
+  display: flex;
+  flex-direction: column;
   min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
 }
 
 .form-page-sheet--power-supplies .epst-table-wrap > .epst-table {
+  flex: 1 1 auto;
+  width: 100%;
   height: 100%;
+  max-height: 100%;
   table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 1em;
 }
 
-.form-page-sheet--power-supplies .epst-table-wrap > .epst-table thead {
-  height: 1rem;
-}
-
-.form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody {
-  height: calc(100% - 1rem);
+.form-page-sheet--power-supplies .epst-table-wrap > .epst-table thead th {
+  padding: 0 0.05rem !important;
+  line-height: 1 !important;
 }
 
 .form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody tr {
-  height: 4%;
+  height: 0;
 }
 
-.form-page-sheet--power-supplies .epst-desc-text {
-  line-height: 1.05;
+.form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody td {
+  height: calc(100% / 25);
+  overflow: hidden;
+  vertical-align: middle;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .form-page-sheet--power-supplies .epst-generator {
   flex-shrink: 0;
+  margin-top: 0;
 }
 
 .form-page-sheet--power-supplies .epst-generator-title {
-  padding: 0.03125rem 0.25rem;
+  padding: 0.015625rem 0.2rem 0.1875rem;
+  font-size: 0.95em;
+  line-height: 1.05;
+}
+
+.form-page-sheet--power-supplies .epst-table--generator {
+  height: auto;
+  font-size: 1em;
 }
 
 .form-page-sheet--power-supplies .epst-table--generator tbody tr {
   height: auto;
+}
+
+.form-page-sheet--power-supplies .epst-table--generator tbody td {
+  height: auto;
+  padding: 0 0.05rem !important;
+  line-height: 1 !important;
+}
+
+.form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-td--yes,
+.form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-td--no,
+.form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-td--na,
+.form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-check-cell {
+  padding-top: 0.1875rem !important;
+  padding-bottom: 0.1875rem !important;
 }
 
 .form-page-sheet .psi-panel,

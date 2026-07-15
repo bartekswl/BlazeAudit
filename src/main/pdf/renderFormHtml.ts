@@ -287,11 +287,11 @@ function renderPageHtml(
       const isEmergencyPowerSupplyTestSection = section.elements.some(
         (element) => element.kind === 'emergencyPowerSupplyTest',
       );
-      const isPowerSupplyInspectionSection = section.elements.some(
-        (element) => element.kind === 'powerSupplyInspection',
-      );
       const isEmergencyPowerSupplyTestOnlySection =
-        isEmergencyPowerSupplyTestSection && !isPowerSupplyInspectionSection;
+        isEmergencyPowerSupplyTestSection &&
+        !page.sections.some((s) =>
+          s.elements.some((element) => element.kind === 'powerSupplyInspection'),
+        );
       const elements = section.elements
         .map((el) => renderElementHtml(el, values[el.id], context, totalPages))
         .join('');
@@ -337,13 +337,16 @@ function renderPageHtml(
   const hasVoiceCommunicationTest = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'voiceCommunicationTest'),
   );
+  const hasPowerSupplyInspectionPage = page.sections.some((section) =>
+    section.elements.some((element) => element.kind === 'powerSupplyInspection'),
+  );
   const hasEmergencyPowerSupplyTestPage = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'emergencyPowerSupplyTest'),
   );
+  const hasPowerSuppliesPage =
+    hasPowerSupplyInspectionPage && hasEmergencyPowerSupplyTestPage;
   const hasEmergencyPowerSupplyTestOnlyPage =
-    hasEmergencyPowerSupplyTestPage && !page.sections.some((section) =>
-      section.elements.some((element) => element.kind === 'powerSupplyInspection'),
-    );
+    hasEmergencyPowerSupplyTestPage && !hasPowerSupplyInspectionPage;
   const hasAnnunciatorTestPage = page.sections.some((section) =>
     section.elements.some(
       (element) =>
@@ -380,6 +383,7 @@ function renderPageHtml(
     'form-page-sheet--fixed',
     page.orientation === 'landscape' ? 'form-page-sheet--landscape' : '',
     hasVoiceCommunicationTest ? 'form-page-sheet--voice-communication-test' : '',
+    hasPowerSuppliesPage ? 'form-page-sheet--power-supplies' : '',
     hasEmergencyPowerSupplyTestOnlyPage ? 'form-page-sheet--emergency-power-supply-test' : '',
     hasAnnunciatorTestPage ? 'form-page-sheet--annunciator-device-test' : '',
     hasRtsuPrinterTestPage ? 'form-page-sheet--rtsu-printer-test' : '',
@@ -399,6 +403,7 @@ function renderPageHtml(
   const contentClasses = [
     'form-page-content',
     hasVoiceCommunicationTest ? 'form-page-content--voice-communication-test' : '',
+    hasPowerSuppliesPage ? 'form-page-content--power-supplies' : '',
     hasEmergencyPowerSupplyTestOnlyPage ? 'form-page-content--emergency-power-supply-test' : '',
     hasAnnunciatorTestPage ? 'form-page-content--annunciator-device-test' : '',
     hasAncillaryDeviceCircuitTestPage ? 'form-page-content--ancillary-device-circuit-test' : '',

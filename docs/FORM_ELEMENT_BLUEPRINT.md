@@ -415,7 +415,6 @@ Page 7 portrait — **22.2 Control Unit or Transponder Record** (`controlUnitRec
 ### Voice communication test (`.vct-*`) — defaults
 
 Page 8 portrait — **22.3 Voice Communication Test** (`voiceCommunicationTest`).
-
 | Area | Rule |
 |------|------|
 | Outer frame | **`--form-panel-frame`** on `.vct-panel` |
@@ -425,13 +424,13 @@ Page 8 portrait — **22.3 Voice Communication Test** (`voiceCommunicationTest`)
 | Info rows | Olive-green strip — Location + Identification fill-ins (`VisibleWidthInput`) |
 | Table | Rows A–Q with Yes / No / N/A; light-green row tint |
 | Section N/A | When checked, sets **every checklist row to N/A** (no grey-out / disable); unchecking clears all row choices; editing any row unchecks section N/A |
-| Page tile | **Always A4 portrait** (`aspect-ratio: 210/297`) |
+| Page tile | **Always A4 portrait** (`aspect-ratio: 210/297`); **content-hug** panel — do **not** stretch 22.3 into empty page space after 22.4 moved |
 | Table font | Checklist table — see [Checklist table typography](#checklist-table-typography) |
 | Value shape | `{ sectionNotApplicable, fieldLocation, identification, checklist }` |
 
 ### Power supply inspection (`.psi-*`) — defaults
 
-Page 8 portrait — **22.4 Power Supply Inspection** (`powerSupplyInspection`), stacked below 22.3.
+Page 9 portrait — **22.4 Power Supply Inspection** (`powerSupplyInspection`), stacked above 22.5 on `.form-page-sheet--power-supplies`.
 
 | Area | Rule |
 |------|------|
@@ -440,14 +439,13 @@ Page 8 portrait — **22.4 Power Supply Inspection** (`powerSupplyInspection`), 
 | Banner | Black — `(Reference 9.1) Complete section for each power supply` |
 | Info rows | Olive-gold strip — field location + identification (`VisibleWidthInput` with **`--form-field-frame`**) |
 | Table | Rows A–H with Yes / No / N/A; olive/tan alternating rows |
-| Layout | Section **`height: auto`** — table ends at row H (no stretch filler below) |
-| PDF colors | **From `components.css` only** — do **not** add global `.form-print-root .psi-*` background rules in `PRINT_OVERRIDES` (breaks other pages / prints wrong reds) |
-| PDF layout | **Scoped** to `.form-page-sheet--voice-communication-test` only — `height: auto`, no stretch below row H |
+| Layout | Shared page with 22.5 — content grid **0.34fr / 0.66fr**; zero cell padding; equal-share table rows (`tr { height: 0 }`) so **all** A–H rows stay visible |
+| PDF layout | **Scoped** to `.form-page-sheet--power-supplies` — same grid + equal-share rows |
 | PDF frame | Include `.psi-panel` in **`2pt` border** + **`overflow: hidden`** lists in `buildFormPrintHtml.tsx` |
 
 ### Emergency power supply test (`.epst-*`) — defaults
 
-Page 9 portrait — **22.5 Emergency Power Supply Test and Inspection** (`emergencyPowerSupplyTest`).
+Page 9 portrait — **22.5 Emergency Power Supply Test and Inspection** (`emergencyPowerSupplyTest`), stacked below 22.4 on `.form-page-sheet--power-supplies`.
 
 | Area | Rule |
 |------|------|
@@ -458,10 +456,10 @@ Page 9 portrait — **22.5 Emergency Power Supply Test and Inspection** (`emerge
 | Measure rows C–E | Label + **8ch** field + unit (VDC / mA / A) in one desc cell; **`display: grid`** columns `1fr 8ch 2.25rem` so VDC/mA/A align; olive merged block for Yes/No/N/A |
 | Rows M, P, Q, S | Inline fill + unit in desc cell; olive block (no checkboxes) |
 | Row R | Normal Yes / No / N/A |
-| Section height | **`minHeight` only** (no `maxHeight`) on page 9 — all rows A–S + generator A–C must render |
+| Section height | Shared page with 22.4 — content grid **0.34fr / 0.66fr**; main table **25 equal rows**; compact chrome so A–S + generator all stay visible |
 | PDF colors | **From `components.css` only** — same as screen; never duplicate cell backgrounds in global `PRINT_OVERRIDES` |
-| PDF layout | **Scoped** to `.form-page-sheet--emergency-power-supply-test` — `height: auto`, `overflow: visible` on section |
-| PDF frame | Include `.epst-panel` in PDF border/overflow lists; **layout-only** print rules (e.g. `epst-desc-line` grid) scoped to page 9 sheet class |
+| PDF layout | **Scoped** to `.form-page-sheet--power-supplies` — same grid + equal-share rows; layout-only print rules (e.g. `epst-desc-line` grid) |
+| PDF frame | Include `.epst-panel` in PDF border/overflow lists |
 | Value shape | See `emergencyPowerSupplyTest.ts` |
 
 ### Annunciator device test (`.artu-*`) — defaults
@@ -691,7 +689,7 @@ Use this list every time. Check off in the PR / session notes.
   - Chromium border dropout (solid lines, `print-color-adjust: exact`)
   - Section stacking / gap if PDF still overlaps
   - Bold outer frame (`2pt`) if panel border prints too light
-  - **22.4 / 22.5:** layout only, **scoped** to `.form-page-sheet--voice-communication-test` / `--emergency-power-supply-test` — **never** global `.form-print-root .psi-*` / `.epst-*` cell background colors (live CSS owns colors)
+  - **22.4 / 22.5:** layout only, **scoped** to `.form-page-sheet--power-supplies` — **never** global `.form-print-root .psi-*` / `.epst-*` cell background colors (live CSS owns colors)
 - [ ] Optional fallback: `src/shared/form/<name>Html.ts` + case in `src/main/pdf/renderFormHtml.ts`
 
 ### 5. Seed & sync
