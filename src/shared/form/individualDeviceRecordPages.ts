@@ -3,13 +3,21 @@ import {
   emptyIndividualDeviceRecordValue,
   individualDeviceRecordHasContent,
 } from './individualDeviceRecord';
+import {
+  elementIdsOnPage,
+  pageIndicesWhere,
+  renumberFormPageLabels,
+  resolveExtraPageControls,
+  sequenceIndexInRun,
+  type FormExtraPageControls,
+} from './formExtraPages';
 import { setElementValue } from './values';
 import type { FormDefinition, FormInspectionDocument, FormPage } from './types';
 
 /** Minimum 23.2 Individual Device Record pages in a document inspection. */
 export const INDIVIDUAL_DEVICE_RECORD_MIN_PAGES = 3;
 
-export type IndividualDeviceRecordPageControls = 'none' | 'add-only' | 'add-remove';
+export type IndividualDeviceRecordPageControls = FormExtraPageControls;
 
 export function pageHasIndividualDeviceRecord(page: FormPage): boolean {
   return page.sections.some((section) =>
@@ -18,9 +26,7 @@ export function pageHasIndividualDeviceRecord(page: FormPage): boolean {
 }
 
 export function getIndividualDeviceRecordPageIndices(form: FormDefinition): number[] {
-  return form.pages
-    .map((page, index) => (pageHasIndividualDeviceRecord(page) ? index : -1))
-    .filter((index) => index >= 0);
+  return pageIndicesWhere(form, pageHasIndividualDeviceRecord);
 }
 
 /** 0-based index within the consecutive 23.2 page run, or null if not an IDR page. */
@@ -28,29 +34,17 @@ export function individualDeviceRecordSequenceIndex(
   form: FormDefinition,
   pageIndex: number,
 ): number | null {
-  const indices = getIndividualDeviceRecordPageIndices(form);
-  const sequenceIndex = indices.indexOf(pageIndex);
-  return sequenceIndex === -1 ? null : sequenceIndex;
+  return sequenceIndexInRun(form, pageIndex, pageHasIndividualDeviceRecord);
 }
 
 export function individualDeviceRecordPageControls(
   form: FormDefinition,
   pageIndex: number,
 ): IndividualDeviceRecordPageControls {
-  const sequenceIndex = individualDeviceRecordSequenceIndex(form, pageIndex);
-  if (sequenceIndex == null || sequenceIndex < 2) return 'none';
-  if (sequenceIndex === 2) return 'add-only';
-  return 'add-remove';
-}
-
-export function renumberFormPageLabels(form: FormDefinition): FormDefinition {
-  return {
-    ...form,
-    pages: form.pages.map((page, index) => ({
-      ...page,
-      label: `Page ${index + 1}`,
-    })),
-  };
+  return resolveExtraPageControls(
+    individualDeviceRecordSequenceIndex(form, pageIndex),
+    INDIVIDUAL_DEVICE_RECORD_MIN_PAGES,
+  );
 }
 
 function collectIndividualDeviceRecordElementIds(form: FormDefinition): Set<string> {
@@ -107,10 +101,6 @@ export function createIndividualDeviceRecordPage(form: FormDefinition): FormPage
       },
     ],
   };
-}
-
-function elementIdsOnPage(page: FormPage): string[] {
-  return page.sections.flatMap((section) => section.elements.map((element) => element.id));
 }
 
 export function getIndividualDeviceRecordElementId(page: FormPage): string | null {

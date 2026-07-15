@@ -11,12 +11,21 @@ import {
   type FormPage,
 } from '../../../shared/form';
 import { pageElementIds, pageValuesChanged } from '../../../shared/form/pageElementIds';
-import type { IndividualDeviceRecordPageControls } from '../../../shared/form/individualDeviceRecordPages';
+import type { FormExtraPageControls } from '../../../shared/form/formExtraPages';
 import { cn } from '../../lib/cn';
 import { FormPageMetaHeader } from './FormPageMetaHeader';
 import { FormPageHeaderBranding } from './FormPageHeaderBranding';
 import { FormElementView } from './FormElementView';
-import { IndividualDeviceRecordPageControlsBar } from './IndividualDeviceRecordPageControls';
+import { FormExtraPageControlsBar } from './IndividualDeviceRecordPageControls';
+
+export type FormPageExtraControlsConfig = {
+  mode: FormExtraPageControls;
+  ariaLabel: string;
+  addTooltip: string;
+  removeTooltip: string;
+  onAdd?: () => void;
+  onRemove?: () => void;
+};
 
 type FormPageCanvasProps = {
   form: FormDefinition;
@@ -33,10 +42,8 @@ type FormPageCanvasProps = {
   linedNotesVisibleLines?: Record<string, number>;
   /** PDF — pixel height per ruled row (measured from fixed A4 layout). */
   linedNotesRowHeights?: Record<string, number>;
-  /** Document editor — 23.2 page add/remove controls (template + read-only omit). */
-  idrPageControls?: IndividualDeviceRecordPageControls;
-  onAddIdrPage?: () => void;
-  onRemoveIdrPage?: () => void;
+  /** Document editor — repeatable page add/remove controls (template + read-only omit). */
+  pageExtraControls?: FormPageExtraControlsConfig | null;
 };
 
 function FormPageCanvasInner({
@@ -51,9 +58,7 @@ function FormPageCanvasInner({
   fixedPageLayout = false,
   linedNotesVisibleLines,
   linedNotesRowHeights,
-  idrPageControls = 'none',
-  onAddIdrPage,
-  onRemoveIdrPage,
+  pageExtraControls = null,
 }: FormPageCanvasProps) {
   const onValueChangeRef = useRef(onValueChange);
   onValueChangeRef.current = onValueChange;
@@ -158,14 +163,19 @@ function FormPageCanvasInner({
         hasCircuitFaultToleranceTestSheetPage &&
           'form-page-sheet--circuit-fault-tolerance-test-sheet',
         fixedPageLayout && 'form-page-sheet--fixed',
-        idrPageControls !== 'none' && 'form-page-sheet--idr-page-controls',
+        pageExtraControls &&
+          pageExtraControls.mode !== 'none' &&
+          'form-page-sheet--idr-page-controls',
       )}
     >
-      {idrPageControls !== 'none' ? (
-        <IndividualDeviceRecordPageControlsBar
-          mode={idrPageControls}
-          onAdd={onAddIdrPage}
-          onRemove={onRemoveIdrPage}
+      {pageExtraControls && pageExtraControls.mode !== 'none' ? (
+        <FormExtraPageControlsBar
+          mode={pageExtraControls.mode}
+          ariaLabel={pageExtraControls.ariaLabel}
+          addTooltip={pageExtraControls.addTooltip}
+          removeTooltip={pageExtraControls.removeTooltip}
+          onAdd={pageExtraControls.onAdd}
+          onRemove={pageExtraControls.onRemove}
         />
       ) : null}
       <div
@@ -428,9 +438,12 @@ function formPageCanvasPropsEqual(prev: FormPageCanvasProps, next: FormPageCanva
   if (prev.onValueChange !== next.onValueChange) return false;
   if (prev.linedNotesVisibleLines !== next.linedNotesVisibleLines) return false;
   if (prev.linedNotesRowHeights !== next.linedNotesRowHeights) return false;
-  if (prev.idrPageControls !== next.idrPageControls) return false;
-  if (prev.onAddIdrPage !== next.onAddIdrPage) return false;
-  if (prev.onRemoveIdrPage !== next.onRemoveIdrPage) return false;
+  const prevControls = prev.pageExtraControls;
+  const nextControls = next.pageExtraControls;
+  if (prevControls?.mode !== nextControls?.mode) return false;
+  if (prevControls?.addTooltip !== nextControls?.addTooltip) return false;
+  if (prevControls?.removeTooltip !== nextControls?.removeTooltip) return false;
+  if (prevControls?.ariaLabel !== nextControls?.ariaLabel) return false;
   return !pageValuesChanged(prev.values, next.values, cachedPageElementIds(prev.page));
 }
 
