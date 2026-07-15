@@ -593,6 +593,9 @@ Reference implementations: `.cut-info-input`, `.cut-version-input`, `.cur-info-i
 | Area | Rule |
 |------|------|
 | Outer frame | **`--form-panel-frame`** — black edge; inner cells use `--ulc-line` only |
+| Page branding | Every ULC 536 page header shows the live company logo on the left and bundled CFAA Member logo on the right |
+| Company details | Page 1 service-company details fill their original cell and are vertically/horizontally centered; the company logo no longer lives inside this cell |
+| Former Fax cells | Keep the lower half of each Phone/Fax stack as an empty white cell with no Fax label/input; the Phone label and value cell remain above it |
 
 ### Yes / No / Summary table (`.yns-*`) — defaults
 

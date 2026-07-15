@@ -37,6 +37,7 @@ import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
 import { renderUlcSection1Html } from '../../shared/form/ulcSection1Html';
 import { renderYesNoSummaryHtml } from '../../shared/form/yesNoSummaryHtml';
+import { CFAA_MEMBER_LOGO_DATA_URL } from '../../shared/form/cfaaHeaderAsset';
 
 function escapeHtml(value: string): string {
   return value
@@ -54,6 +55,16 @@ function fieldValue(value: string | null | undefined): string {
 function headerValue(value: string | null | undefined): string {
   const trimmed = value?.trim();
   return trimmed ? escapeHtml(trimmed) : '';
+}
+
+function brandedHeaderHtml(inner: string, context: DocumentContext, page1 = false): string {
+  const companyLogo = context.business.logoDataUrl
+    ? `<img src="${escapeHtml(context.business.logoDataUrl)}" alt="Company logo" class="form-page-header-brand-img" />`
+    : '';
+  const brandingClass = page1
+    ? 'form-page-header-branding form-page-header-branding--page1'
+    : 'form-page-header-branding';
+  return `<div class="${brandingClass}"><div class="form-page-header-brand form-page-header-brand--company">${companyLogo}</div><div class="form-page-header-branding-content">${inner}</div><div class="form-page-header-brand form-page-header-brand--cfaa"><img src="${escapeHtml(CFAA_MEMBER_LOGO_DATA_URL)}" alt="Canadian Fire Alarm Association member" class="form-page-header-brand-img" /></div></div>`;
 }
 
 function framed(inner: string, flush = false): string {
@@ -212,11 +223,11 @@ function renderPageHtml(
   const totalPages = form.pages.length;
 
   const meta = resolveFormPageMetaHeader(context);
+  const isUlc536 = /ULC\s*536/i.test(context.template?.code ?? '');
 
-  const metaHeaderHtml =
+  const metaHeaderInner =
     page.header === 'codeNameMeta'
-      ? `<div class="form-page-header form-page-header--meta">
-          <div class="form-page-meta-code">${headerValue(meta.codeName)}</div>
+      ? `<div class="form-page-meta-code">${headerValue(meta.codeName)}</div>
           <table class="form-page-meta-table">
             <tbody>
               <tr>
@@ -232,8 +243,11 @@ function renderPageHtml(
                 <td class="form-page-meta-value">${headerValue(meta.city)}</td>
               </tr>
             </tbody>
-          </table>
-        </div>`
+          </table>`
+      : '';
+  const metaHeaderHtml =
+    page.header === 'codeNameMeta'
+      ? `<div class="form-page-header form-page-header--meta">${isUlc536 ? brandedHeaderHtml(metaHeaderInner, context) : metaHeaderInner}</div>`
       : '';
 
   const headerInner = page.regions
@@ -253,7 +267,7 @@ function renderPageHtml(
     page.header === 'codeNameMeta'
       ? metaHeaderHtml
       : page.regions.length > 0
-        ? `<div class="form-page-header">${headerInner}</div>`
+        ? `<div class="form-page-header">${isUlc536 ? brandedHeaderHtml(headerInner, context, true) : headerInner}</div>`
         : '';
 
   const hasFieldDeviceLegendPage = page.sections.some((section) =>

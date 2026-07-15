@@ -57,5 +57,10 @@ export function formSectionHeading(section: FormSection): string | null {
   if (heading) return heading;
   const title = section.title?.trim();
   if (title) return `${section.number ?? ''}. ${title}`.replace(/^\.\s*/, '');
+
+  const kinds = new Set(section.elements.map((element) => element.kind));
+  if (kinds.has('testingNotes')) return "Technician's Testing Notes";
+  if (kinds.has('recommendations')) return '20.3 Recommendations';
+
   return null;
 }

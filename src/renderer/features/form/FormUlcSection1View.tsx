@@ -123,23 +123,20 @@ function DateField({
   );
 }
 
-function PhoneFaxStack({
+function PhoneDisabledStack({
   phoneKey,
-  faxKey,
   value,
   context,
   readOnly,
   onChange,
 }: {
   phoneKey: keyof UlcSection1Value;
-  faxKey: keyof UlcSection1Value;
   value: UlcSection1Value;
   context: DocumentContext | null;
   readOnly?: boolean;
   onChange?: (next: UlcSection1Value) => void;
 }) {
   const phoneDisplay = effectiveFieldText(phoneKey, value, context);
-  const faxDisplay = effectiveFieldText(faxKey, value, context);
   return (
     <div className="ulc-s1-phone-fax">
       <div className={cellCls}>
@@ -154,18 +151,7 @@ function PhoneFaxStack({
           />
         )}
       </div>
-      <div className={cellCls}>
-        <div className={labelCls}>Fax:</div>
-        {readOnly ? (
-          <div className="ulc-s1-value">{faxDisplay || '\u00a0'}</div>
-        ) : (
-          <input
-            className={inputCls}
-            value={faxDisplay}
-            onChange={(e) => onChange?.(updateField(value, faxKey, e.target.value))}
-          />
-        )}
-      </div>
+      <div className="ulc-s1-cell ulc-s1-fax-disabled" aria-hidden="true" />
     </div>
   );
 }
@@ -233,20 +219,12 @@ export function FormUlcSection1View({
   onChange?: (value: UlcSection1Value) => void;
 }) {
   const value = normalizeUlcSection1Value(rawValue);
-  const logoUrl = context?.business.logoDataUrl ?? null;
 
   return (
     <div className="ulc-s1-panel">
       <div className="ulc-s1-top">
         <div className="ulc-s1-company">
           <div className="ulc-s1-company-inner">
-            <div className="ulc-s1-logo">
-              {logoUrl ? (
-                <img src={logoUrl} alt="Company logo" className="ulc-s1-logo-img" />
-              ) : (
-                <span className="ulc-s1-logo-placeholder">Company Logo</span>
-              )}
-            </div>
             <div className="ulc-s1-company-text">{companyBlock(context)}</div>
           </div>
         </div>
@@ -431,9 +409,8 @@ export function FormUlcSection1View({
             onChange={onChange}
             className="ulc-s1-cell--medium"
           />
-          <PhoneFaxStack
+          <PhoneDisabledStack
             phoneKey="contactPhone"
-            faxKey="contactFax"
             value={value}
             context={context}
             readOnly={readOnly}
@@ -451,7 +428,7 @@ export function FormUlcSection1View({
             className="ulc-s1-cell--wide"
           />
           <TextField
-            label="Owner/Property Manager/Strata Number:"
+            label="Owner / Property Manager:"
             fieldKey="ownerPropertyManager"
             value={value}
             context={context}
@@ -459,9 +436,8 @@ export function FormUlcSection1View({
             onChange={onChange}
             className="ulc-s1-cell--medium"
           />
-          <PhoneFaxStack
+          <PhoneDisabledStack
             phoneKey="ownerPhone"
-            faxKey="ownerFax"
             value={value}
             context={context}
             readOnly={readOnly}
@@ -495,9 +471,8 @@ export function FormUlcSection1View({
             readOnly={readOnly}
             onChange={onChange}
           />
-          <PhoneFaxStack
+          <PhoneDisabledStack
             phoneKey="fireSignalPhone"
-            faxKey="fireSignalFax"
             value={value}
             context={context}
             readOnly={readOnly}

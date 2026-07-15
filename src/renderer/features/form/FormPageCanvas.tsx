@@ -14,6 +14,7 @@ import { pageElementIds, pageValuesChanged } from '../../../shared/form/pageElem
 import type { IndividualDeviceRecordPageControls } from '../../../shared/form/individualDeviceRecordPages';
 import { cn } from '../../lib/cn';
 import { FormPageMetaHeader } from './FormPageMetaHeader';
+import { FormPageHeaderBranding } from './FormPageHeaderBranding';
 import { FormElementView } from './FormElementView';
 import { IndividualDeviceRecordPageControlsBar } from './IndividualDeviceRecordPageControls';
 
@@ -65,6 +66,9 @@ function FormPageCanvasInner({
   const totalPages = form.pages.length;
   const isLandscape = page.orientation === 'landscape';
   const useMetaHeader = page.header === 'codeNameMeta';
+  const isUlc536 =
+    /ULC\s*536/i.test(template?.code ?? '') ||
+    /ULC\s*536/i.test(context?.template?.code ?? '');
   const hasLinedNotes = page.sections.some((section) =>
     section.elements.some(
       (element) => element.kind === 'recommendations' || element.kind === 'testingNotes',
@@ -166,36 +170,51 @@ function FormPageCanvasInner({
         style={fixedPageLayout ? { minHeight: `${bodyPercent}%` } : undefined}
       >
         {useMetaHeader ? (
-          <FormPageMetaHeader context={context} template={template} />
+          <FormPageMetaHeader context={context} template={template} branded={isUlc536} />
         ) : (
           page.regions.length > 0 && (
             <div className="form-page-header">
-              {page.regions.map((region) => {
-                if (region.content.kind === 'spacer') {
+              {(() => {
+                const content = page.regions.map((region) => {
+                  if (region.content.kind === 'spacer') {
+                    return (
+                      <div
+                        key={region.id}
+                        className="shrink-0"
+                        style={{ height: `${region.heightPercent}%` }}
+                      />
+                    );
+                  }
+                  const text = resolveFormBinding(
+                    region.content.binding,
+                    context ?? null,
+                    template,
+                  );
                   return (
                     <div
                       key={region.id}
-                      className="shrink-0"
-                      style={{ height: `${region.heightPercent}%` }}
-                    />
+                      className={cn(
+                        'form-page-header-line font-semibold text-[var(--ba-text-primary)]',
+                        region.content.align === 'center' && 'text-center',
+                        region.content.align === 'right' && 'text-right',
+                      )}
+                    >
+                      {text || (
+                        <span className="text-[var(--ba-text-muted)]">
+                          {region.content.binding}
+                        </span>
+                      )}
+                    </div>
                   );
-                }
-                const text = resolveFormBinding(region.content.binding, context ?? null, template);
-                return (
-                  <div
-                    key={region.id}
-                    className={cn(
-                      'form-page-header-line font-semibold text-[var(--ba-text-primary)]',
-                      region.content.align === 'center' && 'text-center',
-                      region.content.align === 'right' && 'text-right',
-                    )}
-                  >
-                    {text || (
-                      <span className="text-[var(--ba-text-muted)]">{region.content.binding}</span>
-                    )}
-                  </div>
+                });
+                return isUlc536 ? (
+                  <FormPageHeaderBranding context={context} page1>
+                    {content}
+                  </FormPageHeaderBranding>
+                ) : (
+                  content
                 );
-              })}
+              })()}
             </div>
           )
         )}

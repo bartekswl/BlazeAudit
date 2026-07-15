@@ -1,6 +1,7 @@
 import type { DocumentContext } from '../../../shared/document';
 import { resolveFormPageMetaHeader, type BuiltinTemplate } from '../../../shared/form';
 import { cn } from '../../lib/cn';
+import { FormPageHeaderBranding } from './FormPageHeaderBranding';
 
 const LONG_VALUE_CHARS = 22;
 
@@ -14,9 +15,11 @@ function metaValueClass(value: string): string {
 export function FormPageMetaHeader({
   context,
   template,
+  branded = false,
 }: {
   context?: DocumentContext | null;
   template?: Pick<BuiltinTemplate, 'code' | 'title' | 'name'>;
+  branded?: boolean;
 }) {
   const meta = resolveFormPageMetaHeader(context ?? null);
   const codeName =
@@ -24,8 +27,8 @@ export function FormPageMetaHeader({
     [template?.code, template?.title].filter(Boolean).join(' - ') ||
     '';
 
-  return (
-    <div className="form-page-header form-page-header--meta">
+  const content = (
+    <>
       <div className="form-page-meta-code">{codeName || '\u00a0'}</div>
       <table className="form-page-meta-table">
         <tbody>
@@ -43,6 +46,12 @@ export function FormPageMetaHeader({
           </tr>
         </tbody>
       </table>
+    </>
+  );
+
+  return (
+    <div className="form-page-header form-page-header--meta">
+      {branded ? <FormPageHeaderBranding context={context}>{content}</FormPageHeaderBranding> : content}
     </div>
   );
 }
