@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { FileText, Plus, Search, Trash2 } from 'lucide-react';
 import { cadenceLabel, isOverdue } from '../../../shared/cadence';
 import type { Inspection, InspectionSummary } from '../../../shared/inspection';
@@ -9,8 +9,13 @@ import { InlineLoader } from '../../components/LoadingOverlay';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ListPagination } from '../../components/ListPagination';
 import { paginateItems } from '../../lib/pagination';
-import { InspectionEditor } from './InspectionEditor';
-import { NewInspectionDialog } from './NewInspectionDialog';
+
+const InspectionEditor = lazy(() =>
+  import('./InspectionEditor').then((module) => ({ default: module.InspectionEditor })),
+);
+const NewInspectionDialog = lazy(() =>
+  import('./NewInspectionDialog').then((module) => ({ default: module.NewInspectionDialog })),
+);
 
 export type DocumentDetailBreadcrumb = {
   documentTitle: string;
@@ -151,14 +156,16 @@ export function DocumentsScreen({
       return <InlineLoader label="Loading inspection…" />;
     }
     return (
-      <InspectionEditor
-        inspection={editingInspection}
-        onBack={goBackToList}
-        onSaved={(saved) => {
-          setEditingInspection(saved);
-          void refresh();
-        }}
-      />
+      <Suspense fallback={<InlineLoader label="Loading inspection editor…" />}>
+        <InspectionEditor
+          inspection={editingInspection}
+          onBack={goBackToList}
+          onSaved={(saved) => {
+            setEditingInspection(saved);
+            void refresh();
+          }}
+        />
+      </Suspense>
     );
   }
 
@@ -269,13 +276,15 @@ export function DocumentsScreen({
       )}
 
       {showNew && (
-        <NewInspectionDialog
-          clients={clients}
-          templates={templates}
-          initialClientId={newClientId}
-          onClose={() => setShowNew(false)}
-          onCreate={createInspection}
-        />
+        <Suspense fallback={<InlineLoader label="Preparing new inspection…" />}>
+          <NewInspectionDialog
+            clients={clients}
+            templates={templates}
+            initialClientId={newClientId}
+            onClose={() => setShowNew(false)}
+            onCreate={createInspection}
+          />
+        </Suspense>
       )}
 
       {pendingDelete && (

@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 
 import { StatusBar } from './components/StatusBar';
-
 import { InlineLoader } from './components/LoadingOverlay';
 
 import type { CustomerDetailBreadcrumb } from './features/customers/CustomersScreen';
@@ -17,32 +16,70 @@ import type { SettingsScrollTarget } from './features/settings/SettingsScreen';
 import type { TemplateDetailBreadcrumb } from './features/templates/TemplatesScreen';
 
 import { DocumentOutlineProvider } from './features/documents/DocumentOutlineContext';
-import { DocumentOutlineRail } from './features/documents/DocumentOutline';
 import { navItems, type NavId } from './navigation';
 import { cn } from './lib/cn';
 
 import { DashboardScreen } from './features/dashboard/DashboardScreen';
-import { CustomersScreen } from './features/customers/CustomersScreen';
-import { DocumentsScreen } from './features/documents/DocumentsScreen';
-import { TemplatesScreen } from './features/templates/TemplatesScreen';
+
+// Dashboard is the only screen eager-loaded, since it's what renders first.
+// Everything else — especially Documents/Templates, which drag in the whole
+// form-editor stack — is split into separate chunks.
+const loadCustomersScreen = () => import('./features/customers/CustomersScreen');
+const loadDocumentsScreen = () => import('./features/documents/DocumentsScreen');
+const loadTemplatesScreen = () => import('./features/templates/TemplatesScreen');
+const loadCalendarScreen = () => import('./features/calendar/CalendarScreen');
+const loadNameBadgesScreen = () => import('./features/nameBadges/NameBadgesScreen');
+const loadDatabaseScreen = () => import('./features/database/DatabaseScreen');
+const loadSettingsScreen = () => import('./features/settings/SettingsScreen');
+
+const CustomersScreen = lazy(() =>
+  loadCustomersScreen().then((m) => ({ default: m.CustomersScreen })),
+);
+const DocumentsScreen = lazy(() =>
+  loadDocumentsScreen().then((m) => ({ default: m.DocumentsScreen })),
+);
+const DocumentOutlineRail = lazy(() =>
+  import('./features/documents/DocumentOutline').then((m) => ({
+    default: m.DocumentOutlineRail,
+  })),
+);
+const TemplatesScreen = lazy(() =>
+  loadTemplatesScreen().then((m) => ({ default: m.TemplatesScreen })),
+);
 const CalendarScreen = lazy(() =>
-  import('./features/calendar/CalendarScreen').then((m) => ({ default: m.CalendarScreen })),
+  loadCalendarScreen().then((m) => ({ default: m.CalendarScreen })),
 );
 const NameBadgesScreen = lazy(() =>
-  import('./features/nameBadges/NameBadgesScreen').then((m) => ({ default: m.NameBadgesScreen })),
+  loadNameBadgesScreen().then((m) => ({ default: m.NameBadgesScreen })),
 );
 const DatabaseScreen = lazy(() =>
-  import('./features/database/DatabaseScreen').then((m) => ({ default: m.DatabaseScreen })),
+  loadDatabaseScreen().then((m) => ({ default: m.DatabaseScreen })),
 );
 const SettingsScreen = lazy(() =>
-  import('./features/settings/SettingsScreen').then((m) => ({ default: m.SettingsScreen })),
+  loadSettingsScreen().then((m) => ({ default: m.SettingsScreen })),
 );
 
-function ScreenLoader() {
-  return <InlineLoader />;
+const backgroundLoaders = [
+  loadDocumentsScreen,
+  loadCustomersScreen,
+  loadCalendarScreen,
+  loadNameBadgesScreen,
+  loadDatabaseScreen,
+  loadSettingsScreen,
+  () => import('./features/documents/NewInspectionDialog'),
+  loadTemplatesScreen,
+  () => import('./features/documents/InspectionEditor'),
+];
+
+function waitForIdle(): Promise<void> {
+  return new Promise((resolve) => {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => resolve(), { timeout: 1_000 });
+    } else {
+      globalThis.setTimeout(resolve, 100);
+    }
+  });
 }
-
-
 
 const screens: Record<
   Exclude<
@@ -58,9 +95,7 @@ const screens: Record<
   >,
   ReactNode
 > = {
-
   dashboard: null,
-
 };
 
 
@@ -68,10 +103,33 @@ const screens: Record<
 const headerBackBtnCls =
   'inline-flex shrink-0 items-center gap-1 rounded-md border border-flame-500/30 bg-flame-500/10 px-2 py-1 text-xs text-flame-300 transition-colors hover:bg-flame-500/20';
 
+const screenModuleFallback = <InlineLoader label="Loading screen…" />;
 
 
 export default function App() {
   const [activeId, setActiveId] = useState<NavId>('dashboard');
+
+  useEffect(() => {
+    let cancelled = false;
+    const start = window.setTimeout(() => {
+      void (async () => {
+        for (const load of backgroundLoaders) {
+          await waitForIdle();
+          if (cancelled) return;
+          try {
+            await load();
+          } catch {
+            // A selected screen can retry its own dynamic import.
+          }
+        }
+      })();
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(start);
+    };
+  }, []);
 
   const activeItem = navItems.find((item) => item.id === activeId)!;
 
@@ -398,71 +456,77 @@ export default function App() {
 
           >
 
-            <Suspense fallback={<ScreenLoader />}>
-
             {activeId === 'customers' ? (
 
-              <CustomersScreen
-
-                onDetailChange={handleCustomerDetailChange}
-
-                onNewInspection={(clientId) => openDocuments({ openNew: true, clientId })}
-
-                onOpenInspection={(inspectionId) => openDocuments({ inspectionId })}
-
-              />
+              <Suspense fallback={screenModuleFallback}>
+                <CustomersScreen
+                  onDetailChange={handleCustomerDetailChange}
+                  onNewInspection={(clientId) => openDocuments({ openNew: true, clientId })}
+                  onOpenInspection={(inspectionId) => openDocuments({ inspectionId })}
+                />
+              </Suspense>
 
             ) : activeId === 'documents' ? (
 
-              <DocumentsScreen
-
-                boot={documentsBoot}
-
-                onBootConsumed={() => setDocumentsBoot(null)}
-
-                onDetailChange={handleDocumentDetailChange}
-
-              />
+              <Suspense fallback={screenModuleFallback}>
+                <DocumentsScreen
+                  boot={documentsBoot}
+                  onBootConsumed={() => setDocumentsBoot(null)}
+                  onDetailChange={handleDocumentDetailChange}
+                />
+              </Suspense>
 
             ) : activeId === 'builtinTemplates' ? (
 
-              <TemplatesScreen
-                variant="built-in"
-                onDetailChange={handleTemplateDetailChange}
-              />
+              <Suspense fallback={screenModuleFallback}>
+                <TemplatesScreen
+                  variant="built-in"
+                  onDetailChange={handleTemplateDetailChange}
+                />
+              </Suspense>
 
             ) : activeId === 'customTemplates' ? (
 
-              <TemplatesScreen
-                variant="custom"
-                onDetailChange={handleTemplateDetailChange}
-              />
+              <Suspense fallback={screenModuleFallback}>
+                <TemplatesScreen
+                  variant="custom"
+                  onDetailChange={handleTemplateDetailChange}
+                />
+              </Suspense>
 
             ) : activeId === 'nameBadges' ? (
 
-              <NameBadgesScreen />
+              <Suspense fallback={screenModuleFallback}>
+                <NameBadgesScreen />
+              </Suspense>
 
             ) : activeId === 'calendar' ? (
 
-              <CalendarScreen />
+              <Suspense fallback={screenModuleFallback}>
+                <CalendarScreen />
+              </Suspense>
 
             ) : activeId === 'database' ? (
 
-              <DatabaseScreen
+              <Suspense fallback={screenModuleFallback}>
+                <DatabaseScreen
 
-                onInspectionImported={(inspectionId) => openDocuments({ inspectionId })}
+                  onInspectionImported={(inspectionId) => openDocuments({ inspectionId })}
 
-              />
+                />
+              </Suspense>
 
             ) : activeId === 'settings' ? (
 
-              <SettingsScreen
+              <Suspense fallback={screenModuleFallback}>
+                <SettingsScreen
 
-                scrollTo={settingsBoot?.scrollTo ?? null}
+                  scrollTo={settingsBoot?.scrollTo ?? null}
 
-                onScrollConsumed={() => setSettingsBoot(null)}
+                  onScrollConsumed={() => setSettingsBoot(null)}
 
-              />
+                />
+              </Suspense>
 
             ) : activeId === 'dashboard' ? (
 
@@ -476,13 +540,15 @@ export default function App() {
 
             )}
 
-            </Suspense>
-
           </div>
 
         </main>
 
-        <DocumentOutlineRail />
+        {activeId === 'documents' ? (
+          <Suspense fallback={null}>
+            <DocumentOutlineRail />
+          </Suspense>
+        ) : null}
 
       </div>
 

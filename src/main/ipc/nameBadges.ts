@@ -2,7 +2,6 @@ import { ipcMain } from 'electron';
 import { IpcChannels } from '../../shared/ipc';
 import type { NameBadgeInput } from '../../shared/nameBadges';
 import * as nameBadges from '../db/nameBadges';
-import { exportNameBadgesPdf } from '../pdf/exportNameBadgesPdf';
 
 export function registerNameBadgesIpc(): void {
   ipcMain.handle(IpcChannels.nameBadgesList, () => nameBadges.listNameBadges());
@@ -33,6 +32,9 @@ export function registerNameBadgesIpc(): void {
 
   ipcMain.handle(
     IpcChannels.nameBadgesExportPdf,
-    (_event, html: string, defaultFilename?: string) => exportNameBadgesPdf(html, defaultFilename),
+    async (_event, html: string, defaultFilename?: string) => {
+      const { exportNameBadgesPdf } = await import('../pdf/exportNameBadgesPdf');
+      return exportNameBadgesPdf(html, defaultFilename);
+    },
   );
 }

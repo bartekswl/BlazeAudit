@@ -38,7 +38,7 @@ export function InlineLoader({
   return (
     <div
       className={cn(
-        'ba-inline-loader ba-loader-enter flex flex-1 items-center justify-center',
+        'ba-inline-loader flex flex-1 items-center justify-center',
         compact ? 'min-h-[4rem] py-4' : 'min-h-[12rem]',
       )}
     >

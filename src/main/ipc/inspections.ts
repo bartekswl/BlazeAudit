@@ -2,8 +2,6 @@ import { ipcMain } from 'electron';
 import { IpcChannels } from '../../shared/ipc';
 import type { CreateInspectionInput, InspectionInput } from '../../shared/inspection';
 import { inspections, resolveDocumentContext } from '../db';
-import { exportInspectionPdf } from '../pdf/exportInspectionPdf';
-import { importInspectionPdf } from '../pdf/importInspectionPdf';
 
 export function registerInspectionsIpc(): void {
   ipcMain.handle(IpcChannels.inspectionsList, (_event, options?: { clientId?: string }) =>
@@ -30,11 +28,15 @@ export function registerInspectionsIpc(): void {
     inspections.getClientInspectionStats(clientId),
   );
 
-  ipcMain.handle(IpcChannels.inspectionsExportPdf, (_event, id: string, html?: string) =>
-    exportInspectionPdf(id, html),
-  );
+  ipcMain.handle(IpcChannels.inspectionsExportPdf, async (_event, id: string, html?: string) => {
+    const { exportInspectionPdf } = await import('../pdf/exportInspectionPdf');
+    return exportInspectionPdf(id, html);
+  });
 
-  ipcMain.handle(IpcChannels.inspectionsImportPdf, () => importInspectionPdf());
+  ipcMain.handle(IpcChannels.inspectionsImportPdf, async () => {
+    const { importInspectionPdf } = await import('../pdf/importInspectionPdf');
+    return importInspectionPdf();
+  });
 
   ipcMain.handle(IpcChannels.inspectionsResolveContext, (_event, id: string) => {
     const inspection = inspections.getInspection(id);

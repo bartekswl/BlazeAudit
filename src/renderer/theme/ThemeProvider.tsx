@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -20,6 +21,11 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+/** While true, UI stays dark so boot never flashes light theme. */
+let bootThemeHeld = true;
+let pendingTheme: ColorTheme | null = null;
+const bootThemeListeners = new Set<() => void>();
 
 function cacheKey(accountId: string): string {
   return `${COLOR_THEME_STORAGE_KEY}:${accountId}`;
@@ -44,14 +50,32 @@ function writeCachedTheme(theme: ColorTheme, accountId?: string): void {
   }
 }
 
+function paintTheme(theme: ColorTheme): void {
+  document.documentElement.dataset.theme = theme;
+}
+
+/** Call after boot overlay is fully opaque / ready to reveal. */
+export function releaseBootTheme(): void {
+  bootThemeHeld = false;
+  if (pendingTheme) {
+    paintTheme(pendingTheme);
+  }
+  for (const listener of bootThemeListeners) listener();
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ColorTheme>(() => readCachedTheme() ?? DEFAULT_COLOR_THEME);
+  // Always start dark for boot — never paint cached light until releaseBootTheme().
+  const [theme, setThemeState] = useState<ColorTheme>(DEFAULT_COLOR_THEME);
   const [accountId, setAccountId] = useState<string | null>(null);
+  const released = useRef(false);
 
   const applyTheme = useCallback((next: ColorTheme, activeAccountId?: string | null) => {
     setThemeState(next);
     writeCachedTheme(next, activeAccountId ?? undefined);
-    document.documentElement.dataset.theme = next;
+    pendingTheme = next;
+    if (!bootThemeHeld) {
+      paintTheme(next);
+    }
   }, []);
 
   const loadAccountTheme = useCallback(async () => {
@@ -70,14 +94,33 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [applyTheme]);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
+    paintTheme('dark');
+  }, []);
+
+  useEffect(() => {
+    const onRelease = () => {
+      if (released.current) return;
+      released.current = true;
+      const next = pendingTheme ?? theme;
+      paintTheme(next);
+      setThemeState(next);
+    };
+    bootThemeListeners.add(onRelease);
+    if (!bootThemeHeld) onRelease();
+    return () => {
+      bootThemeListeners.delete(onRelease);
+    };
   }, [theme]);
 
-  // Apply cached theme immediately; sync from account settings when AuthGate unlocks.
+  // Prefetch preferred theme into state/cache only — do not paint while boot held.
   useEffect(() => {
     const cached = readCachedTheme();
-    if (cached) applyTheme(cached);
-  }, [applyTheme]);
+    if (cached) {
+      pendingTheme = cached;
+      setThemeState(cached);
+      writeCachedTheme(cached);
+    }
+  }, []);
 
   const setTheme = useCallback(
     (next: ColorTheme) => {
@@ -107,7 +150,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** Reload theme when the signed-in account changes or the app unlocks. */
 function ThemeAccountSync({ onSync }: { onSync: () => Promise<void> }) {
   useEffect(() => {
     const sync = () => void onSync();

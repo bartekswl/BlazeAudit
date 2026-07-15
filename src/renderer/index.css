@@ -22,12 +22,14 @@ body {
   font-family:
     'Segoe UI', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-color: var(--ba-app-bg);
+  -webkit-app-region: no-drag;
+  background-color: #0a0a0a;
   color: var(--ba-text-primary);
 }
 
 #root {
-  background: transparent;
+  background: #0a0a0a;
+  -webkit-app-region: no-drag;
 }
 
 /* Pointer cursor on interactive controls (link-like affordance). */
@@ -154,6 +156,16 @@ html[data-theme='light'] *::-webkit-scrollbar-thumb:hover {
   animation: flame-reveal 0.55s ease-out forwards;
 }
 
+.app-boot-overlay {
+  opacity: 1;
+}
+
+.app-boot-overlay--hide {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease-out;
+}
+
 .boot-loader {
   display: flex;
   flex-direction: column;
@@ -167,19 +179,8 @@ html[data-theme='light'] *::-webkit-scrollbar-thumb:hover {
   flex: 1;
 }
 
-.ba-loading-overlay,
 .ba-inline-loader {
-  animation: loader-fade-in 0.28s ease-out forwards;
-}
-
-@keyframes loader-fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  /* No fade-in — avoids flicker when switching screens */
 }
 
 .boot-loader-spinner {
