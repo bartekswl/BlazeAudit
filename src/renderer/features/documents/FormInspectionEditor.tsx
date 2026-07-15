@@ -4,25 +4,35 @@ import { CADENCE_PRESETS, type CadencePreset } from '../../../shared/cadence';
 import type { DocumentContext } from '../../../shared/document';
 import {
   addIndividualDeviceRecordPage,
+  addRepeatableFormPage,
   buildFormOutline,
   individualDeviceRecordPageControls,
   individualDeviceRecordPageHasContent,
   isFormInspectionDocument,
   removeIndividualDeviceRecordPage,
+  removeRepeatableFormPage,
+  REPEATABLE_PAGE_LABELS,
+  resolveRepeatableFormPageKind,
+  repeatablePageControlsForIndex,
+  repeatablePageHasContent,
   scrollToFormSection,
   setElementValue,
   syncFormDocumentInspectionDate,
   migrateFormInspectionPowerSupplyLayout,
   type FormInspectionDocument,
+  type RepeatableFormPageKind,
 } from '../../../shared/form';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useRegisterFormOutline } from './DocumentOutlineContext';
-import { FormPageCanvas } from '../form/FormPageCanvas';
+import { FormPageCanvas, type FormPageExtraControlsConfig } from '../form/FormPageCanvas';
 import { FormPageViewport } from '../form/FormPageViewport';
 import { collectLinedNotesVisibleLines } from '../form/collectLinedNotesVisibleLines';
 import { LoadingOverlay } from '../../components/LoadingOverlay';
 
+type PendingPageRemove =
+  | { kind: 'idr'; pageIndex: number }
+  | { kind: 'repeatable'; pageKind: RepeatableFormPageKind; pageIndex: number };
 
 const compactInputCls = 'ba-input ba-input--compact';
 const compactFieldCls = `${compactInputCls} !py-1`;
@@ -73,9 +83,7 @@ function FormInspectionEditorInner({
     const migrated = migrateFormInspectionPowerSupplyLayout(formDocInitial);
     return migrated !== formDocInitial;
   });
-  const [idrRemoveConfirmPageIndex, setIdrRemoveConfirmPageIndex] = useState<number | null>(
-    null,
-  );
+  const [pendingPageRemove, setPendingPageRemove] = useState<PendingPageRemove | null>(null);
 
   const formDocRef = useRef(formDoc);
   formDocRef.current = formDoc;
@@ -145,24 +153,92 @@ function FormInspectionEditorInner({
     markDirtyRef.current();
   }, []);
 
-  const requestRemoveIdrPage = useCallback((pageIndex: number) => {
-    if (individualDeviceRecordPageHasContent(formDocRef.current, pageIndex)) {
-      setIdrRemoveConfirmPageIndex(pageIndex);
-      return;
-    }
-    onRemoveIdrPage(pageIndex);
-  }, [onRemoveIdrPage]);
+  const onAddRepeatablePage = useCallback((afterPageIndex: number) => {
+    setFormDoc((prev) => addRepeatableFormPage(prev, afterPageIndex));
+    markDirtyRef.current();
+  }, []);
 
-  const confirmRemoveIdrPage = useCallback(() => {
-    if (idrRemoveConfirmPageIndex == null) return;
-    onRemoveIdrPage(idrRemoveConfirmPageIndex);
-    setIdrRemoveConfirmPageIndex(null);
-  }, [idrRemoveConfirmPageIndex, onRemoveIdrPage]);
+  const onRemoveRepeatablePage = useCallback((pageIndex: number) => {
+    setFormDoc((prev) => removeRepeatableFormPage(prev, pageIndex));
+    markDirtyRef.current();
+  }, []);
+
+  const requestRemoveIdrPage = useCallback(
+    (pageIndex: number) => {
+      if (individualDeviceRecordPageHasContent(formDocRef.current, pageIndex)) {
+        setPendingPageRemove({ kind: 'idr', pageIndex });
+        return;
+      }
+      onRemoveIdrPage(pageIndex);
+    },
+    [onRemoveIdrPage],
+  );
+
+  const requestRemoveRepeatablePage = useCallback(
+    (pageIndex: number) => {
+      const pageKind = resolveRepeatableFormPageKind(formDocRef.current.form, pageIndex);
+      if (!pageKind) return;
+      if (repeatablePageHasContent(formDocRef.current, pageIndex)) {
+        setPendingPageRemove({ kind: 'repeatable', pageKind, pageIndex });
+        return;
+      }
+      onRemoveRepeatablePage(pageIndex);
+    },
+    [onRemoveRepeatablePage],
+  );
+
+  const confirmPendingPageRemove = useCallback(() => {
+    if (!pendingPageRemove) return;
+    if (pendingPageRemove.kind === 'idr') {
+      onRemoveIdrPage(pendingPageRemove.pageIndex);
+    } else {
+      onRemoveRepeatablePage(pendingPageRemove.pageIndex);
+    }
+    setPendingPageRemove(null);
+  }, [pendingPageRemove, onRemoveIdrPage, onRemoveRepeatablePage]);
 
   const onAddIdrPageRef = useRef(onAddIdrPage);
   onAddIdrPageRef.current = onAddIdrPage;
   const onRemoveIdrPageRef = useRef(requestRemoveIdrPage);
   onRemoveIdrPageRef.current = requestRemoveIdrPage;
+  const onAddRepeatablePageRef = useRef(onAddRepeatablePage);
+  onAddRepeatablePageRef.current = onAddRepeatablePage;
+  const onRemoveRepeatablePageRef = useRef(requestRemoveRepeatablePage);
+  onRemoveRepeatablePageRef.current = requestRemoveRepeatablePage;
+
+  const pageExtraControlsFor = useCallback(
+    (index: number): FormPageExtraControlsConfig | null => {
+      const form = formDoc.form;
+      const idrMode = individualDeviceRecordPageControls(form, index);
+      if (idrMode !== 'none') {
+        return {
+          mode: idrMode,
+          ariaLabel: 'Individual Device Record page controls',
+          addTooltip:
+            'Add another 23.2 Individual Device Record page after this one. The new page starts empty.',
+          removeTooltip:
+            'Remove this 23.2 page from the inspection. At least three Individual Device Record pages must remain.',
+          onAdd: () => onAddIdrPageRef.current(index),
+          onRemove: () => onRemoveIdrPageRef.current(index),
+        };
+      }
+
+      const repeatableKind = resolveRepeatableFormPageKind(form, index);
+      if (!repeatableKind) return null;
+      const mode = repeatablePageControlsForIndex(form, index);
+      if (mode === 'none') return null;
+      const labels = REPEATABLE_PAGE_LABELS[repeatableKind];
+      return {
+        mode,
+        ariaLabel: `${labels.short} page controls`,
+        addTooltip: labels.addTooltip,
+        removeTooltip: labels.removeTooltip,
+        onAdd: () => onAddRepeatablePageRef.current(index),
+        onRemove: () => onRemoveRepeatablePageRef.current(index),
+      };
+    },
+    [formDoc.form],
+  );
 
   const onInspectionDateChange = useCallback((nextDate: string) => {
     setInspectedAt(nextDate);
@@ -227,17 +303,22 @@ function FormInspectionEditorInner({
       {exportingPdf ? (
         <LoadingOverlay label="Exporting PDF…" position="absolute" />
       ) : null}
-      {idrRemoveConfirmPageIndex != null ? (
+      {pendingPageRemove != null ? (
         <ConfirmDialog
-          title="Remove 23.2 page?"
+          title={
+            pendingPageRemove.kind === 'idr'
+              ? 'Remove 23.2 page?'
+              : REPEATABLE_PAGE_LABELS[pendingPageRemove.pageKind].removeTitle
+          }
           icon={TriangleAlert}
           confirmLabel="Remove page"
-          onCancel={() => setIdrRemoveConfirmPageIndex(null)}
-          onConfirm={confirmRemoveIdrPage}
+          onCancel={() => setPendingPageRemove(null)}
+          onConfirm={confirmPendingPageRemove}
         >
           <p>
-            This Individual Device Record page has data entered in the table. Removing it will
-            permanently delete that data from this inspection.
+            {pendingPageRemove.kind === 'idr'
+              ? 'This Individual Device Record page has data entered in the table. Removing it will permanently delete that data from this inspection.'
+              : `This ${REPEATABLE_PAGE_LABELS[pendingPageRemove.pageKind].short} page has data entered. Removing it will permanently delete that data from this inspection.`}
           </p>
           <p>This cannot be undone unless you re-enter the information on another page.</p>
         </ConfirmDialog>
@@ -340,9 +421,7 @@ function FormInspectionEditorInner({
                 context={context}
                 values={formDoc.values}
                 onValueChange={onValueChange}
-                idrPageControls={individualDeviceRecordPageControls(formDoc.form, index)}
-                onAddIdrPage={() => onAddIdrPageRef.current(index)}
-                onRemoveIdrPage={() => onRemoveIdrPageRef.current(index)}
+                pageExtraControls={pageExtraControlsFor(index)}
               />
             ))}
           </div>

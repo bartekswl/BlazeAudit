@@ -95,36 +95,42 @@ function formatOutlinePageLabel(startPageIndex: number, endPageIndex: number): s
   return start === end ? `Page ${start}` : `Page ${start}-${end}`;
 }
 
-/** Collapse consecutive duplicate sections (same label + presentation) into one row with a page range. */
-function mergeConsecutiveOutlineSections(sections: FormOutlineSection[]): FormOutlineSection[] {
+function outlineMergeKey(section: FormOutlineSection): string {
+  return `${section.label}\0${section.subdued ? '1' : '0'}\0${section.indentExtra}`;
+}
+
+/**
+ * Collapse duplicate Contents rows (same label + presentation) into one entry.
+ * Keeps first occurrence for navigation; page label spans first→last page index.
+ * Handles interleaved repeats (e.g. 22.6 / 22.7 / 22.6 / 22.7 → one row each with Page x-y).
+ */
+function mergeDuplicateOutlineSections(sections: FormOutlineSection[]): FormOutlineSection[] {
   if (sections.length === 0) return sections;
 
   const merged: FormOutlineSection[] = [];
-  let runStart = 0;
+  const indexByKey = new Map<string, number>();
+  const rangeByKey = new Map<string, { start: number; end: number }>();
 
-  const flushRun = (runEnd: number) => {
-    const first = sections[runStart];
-    const last = sections[runEnd];
-    merged.push({
-      ...first,
-      pageLabel: formatOutlinePageLabel(first.pageIndex, last.pageIndex),
-    });
-  };
-
-  for (let i = 1; i <= sections.length; i += 1) {
-    const prev = sections[i - 1];
-    const next = sections[i];
-    const continuesRun =
-      next != null &&
-      next.label === prev.label &&
-      next.subdued === prev.subdued &&
-      next.indentExtra === prev.indentExtra &&
-      next.pageIndex === prev.pageIndex + 1;
-
-    if (!continuesRun) {
-      flushRun(i - 1);
-      runStart = i;
+  for (const section of sections) {
+    const key = outlineMergeKey(section);
+    const existingIndex = indexByKey.get(key);
+    if (existingIndex == null) {
+      indexByKey.set(key, merged.length);
+      rangeByKey.set(key, { start: section.pageIndex, end: section.pageIndex });
+      merged.push({
+        ...section,
+        pageLabel: formatOutlinePageLabel(section.pageIndex, section.pageIndex),
+      });
+      continue;
     }
+
+    const range = rangeByKey.get(key)!;
+    range.start = Math.min(range.start, section.pageIndex);
+    range.end = Math.max(range.end, section.pageIndex);
+    merged[existingIndex] = {
+      ...merged[existingIndex],
+      pageLabel: formatOutlinePageLabel(range.start, range.end),
+    };
   }
 
   return merged;
@@ -165,5 +171,5 @@ export function buildFormOutline(form: FormDefinition): FormOutlineSection[] {
       });
     }
   }
-  return mergeConsecutiveOutlineSections(sections);
+  return mergeDuplicateOutlineSections(sections);
 }
