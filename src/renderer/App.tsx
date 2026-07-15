@@ -544,7 +544,9 @@ export default function App() {
 
         </main>
 
-        {activeId === 'documents' ? (
+        {activeId === 'documents' ||
+        activeId === 'builtinTemplates' ||
+        activeId === 'customTemplates' ? (
           <Suspense fallback={null}>
             <DocumentOutlineRail />
           </Suspense>

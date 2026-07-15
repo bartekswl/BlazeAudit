@@ -3802,7 +3802,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   margin-top: 0;
   border-radius: 0.625rem;
   background: var(--ba-input-bg, #ffffff);
-  font-size: calc(0.5625rem + 0.5pt);
+  font-size: calc(0.625rem + 1pt);
   line-height: 1.15;
   color: var(--ba-text-primary);
 }
@@ -4243,7 +4243,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: calc(1em + 1pt);
+  font-size: 1em;
 }
 
 .artu-th {
@@ -4535,7 +4535,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: calc(1em + 1pt);
+  font-size: 1em;
 }
 
 .asd-th {
@@ -5309,8 +5309,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   border-radius: 0.625rem;
   box-sizing: border-box;
   background: var(--ba-input-bg, #ffffff);
-  font-size: calc(0.5625rem + 1pt);
-  line-height: 1.12;
+  font-size: calc(0.625rem + 1pt);
+  line-height: 1.15;
   color: var(--ba-text-primary);
 }
 
@@ -5321,7 +5321,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   align-items: center;
   justify-content: center;
   gap: 0.375rem 0.5rem;
-  padding: 0.125rem 0.5rem;
+  padding: 0.1875rem 0.5rem;
   text-align: center;
   background: #cfe2f3;
   border-bottom: var(--dclft-line);
@@ -5361,21 +5361,21 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .dclft-ref-bar {
-  padding: 0.125rem 0.5rem;
+  padding: 0.1875rem 0.5rem;
   text-align: center;
   font-weight: 700;
   color: #ffffff;
   background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%);
   border-bottom: var(--dclft-line);
-  line-height: 1.12;
+  line-height: 1.15;
 }
 
 .dclft-info-row {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  min-height: 1.25rem;
-  padding: 0.0625rem 0.375rem;
+  min-height: 1.375rem;
+  padding: 0.125rem 0.375rem;
   background: #cfe2f3;
   border-bottom: var(--dclft-line);
 }
@@ -5442,7 +5442,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .dclft-th {
-  padding: 0.0625rem 0.1875rem;
+  padding: 0.125rem 0.25rem;
   font-weight: 700;
   text-align: center;
   vertical-align: middle;
@@ -5489,7 +5489,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .dclft-td {
-  padding: 0.0625rem 0.1875rem;
+  padding: 0.125rem 0.25rem;
   vertical-align: middle;
   border: none;
   border-right: var(--dclft-line);
@@ -5544,7 +5544,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 1rem;
+  min-height: 1.125rem;
   padding: 0.0625rem;
   cursor: pointer;
   user-select: none;
@@ -6910,8 +6910,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   border-radius: 0.625rem;
   box-sizing: border-box;
   background: var(--ba-input-bg, #ffffff);
-  font-size: calc(0.5625rem + 0.5pt);
-  line-height: 1.15;
+  font-size: calc(0.625rem + 1pt);
+  line-height: 1;
   color: var(--ba-text-primary);
 }
 
@@ -6955,14 +6955,14 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .adc-th {
-  padding: 0.1875rem 0.25rem;
+  padding: 0.125rem 0.25rem;
   font-weight: 700;
   text-align: center;
   vertical-align: middle;
   border: none;
   border-right: var(--adc-line);
   border-bottom: var(--adc-line);
-  line-height: 1.15;
+  line-height: 1;
   min-height: 1.125rem;
   height: auto;
   font-size: inherit;
@@ -7061,11 +7061,11 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   width: 100%;
   min-width: 0;
   min-height: 100%;
-  padding: 0.0625rem 0.25rem;
+  padding: 0 0.25rem;
   border: none;
   background: transparent;
   font: inherit;
-  line-height: 1.15;
+  line-height: 1;
   color: inherit;
   text-align: left;
   box-sizing: border-box;
@@ -7080,11 +7080,11 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   min-width: 0;
   height: 100%;
   min-height: 0;
-  padding: 0.0625rem 0.25rem;
+  padding: 0 0.25rem;
   border: var(--form-field-frame);
   background: #ffffff;
   font: inherit;
-  line-height: 1.15;
+  line-height: 1;
   color: inherit;
   text-align: left;
   box-sizing: border-box;
@@ -7202,28 +7202,28 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 .form-page-sheet--voice-communication-test .vct-na-bar,
 .form-page-sheet--voice-communication-test .vct-ref-bar {
-  padding: 0.0625rem 0.375rem;
+  padding: 0.125rem 0.5rem;
   line-height: 1.15;
 }
 
 .form-page-sheet--voice-communication-test .vct-info-row {
-  min-height: 0;
-  padding: 0.03125rem 0.25rem;
+  min-height: 1.125rem;
+  padding: 0.0625rem 0.375rem;
 }
 
 .form-page-sheet--voice-communication-test .vct-info-input,
 .form-page-sheet--voice-communication-test .vct-info-value {
-  min-height: 0.75rem;
+  min-height: 0.875rem;
 }
 
 .form-page-sheet--voice-communication-test .vct-th,
 .form-page-sheet--voice-communication-test .vct-td {
-  padding: 0.03125rem 0.125rem;
+  padding: 0.0625rem 0.1875rem;
 }
 
 .form-page-sheet--voice-communication-test .vct-check-cell {
-  min-height: 0;
-  padding: 0.03125rem;
+  min-height: 1rem;
+  padding: 0.0625rem;
 }
 
 .form-page-sheet--voice-communication-test .vct-table-wrap {
@@ -9343,7 +9343,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 .form-page-sheet--annunciator-device-test .artu-table,
 .form-page-sheet--annunciator-device-test .asd-table {
-  font-size: calc(1em + 1.5pt);
+  font-size: 1em;
 }
 
 .form-page-sheet--annunciator-device-test .artu-th,
