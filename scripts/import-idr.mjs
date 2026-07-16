@@ -28,7 +28,7 @@ const Database = require('better-sqlite3-multiple-ciphers');
 // ---------------------------------------------------------------------------
 // Constants (must mirror src/shared/form/individualDeviceRecord.ts)
 // ---------------------------------------------------------------------------
-const ROW_COUNT = 19;
+const ROW_COUNT = 22;
 
 // ---------------------------------------------------------------------------
 // Row data helper
@@ -429,7 +429,7 @@ function addIdrPage(pages, afterIndex) {
   return { pages: renumberLabels(updated), elementId: ids.elementId };
 }
 
-/** Build a full 19-row IDR value object from a slice of data rows. */
+/** Build a full IDR value object from a slice of data rows (ROW_COUNT rows). */
 function buildIdrValue(dataRows) {
   const rows = Array.from({ length: ROW_COUNT }, (_, i) => dataRows[i] ?? emptyRow());
   return { rows };

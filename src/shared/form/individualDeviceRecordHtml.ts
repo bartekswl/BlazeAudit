@@ -38,7 +38,8 @@ export function renderIndividualDeviceRecordHtml(value: unknown): string {
 
   const header = INDIVIDUAL_DEVICE_RECORD_COLUMNS.map((col) => {
     const vertical = col.orientation === 'vertical' ? ' idr-th--vertical' : ' idr-th--horizontal';
-    return `<th class="idr-th${vertical} idr-th--${col.key}" style="width:${col.widthPercent}%"><span class="idr-th-text">${escapeHtml(col.title)}</span></th>`;
+    const titleHtml = escapeHtml(col.title).replace(/\n/g, '<br />');
+    return `<th class="idr-th${vertical} idr-th--${col.key}" style="width:${col.widthPercent}%"><span class="idr-th-text">${titleHtml}</span></th>`;
   }).join('');
 
   const body = data.rows
