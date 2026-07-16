@@ -14,7 +14,7 @@
   "scripts": {
     "dev": "vite",
     "sync:form-print-css": "node scripts/sync-form-print-css.mjs",
-    "build": "node scripts/sync-form-print-css.mjs && tsc --noEmit && vite build",
+    "build": "node scripts/sync-local-activation-key.mjs && node scripts/sync-form-print-css.mjs && tsc --noEmit && vite build",
     "preview": "electron .",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -24,7 +24,8 @@
     "pack:dir": "npm run build && electron-builder --dir",
     "dist": "npm run build && electron-builder --publish never",
     "seed:demo": "npx electron scripts/build-demo-seed.mjs",
-    "dist:demo": "npm run build && npm run seed:demo && electron-builder --config electron-builder.demo.yml --publish never",
+    "dist:demo": "npm run build && npm run seed:demo && electron-builder --config electron-builder.demo.yml --publish never && node scripts/trim-demo-release.mjs",
+    "release:update": "node scripts/release-update.mjs",
     "release": "npm run build && electron-builder --publish always",
     "postinstall": "node scripts/rebuild-native.mjs"
   },

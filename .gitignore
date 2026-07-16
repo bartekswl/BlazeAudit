@@ -45,8 +45,11 @@ Thumbs.db
 *.njsproj
 *.sln
 
-# Cursor / AI tooling local artifacts
-.cursor/cache/
+# Cursor local tooling (never commit)
+.cursor/
+
+# Local-only activation key for packaged installs you build (not CI / public releases)
+resources/local-activation-key.txt
 
 # Test / coverage
 coverage/
