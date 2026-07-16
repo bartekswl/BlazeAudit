@@ -13,6 +13,7 @@ export type UpdateStatus =
       bytesPerSecond: number;
     }
   | { phase: 'downloaded'; version: string; notes: string | null }
+  | { phase: 'installing'; version: string }
   | { phase: 'error'; message: string };
 
 export type UpdatePhase = UpdateStatus['phase'];

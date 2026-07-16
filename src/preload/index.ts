@@ -51,6 +51,7 @@ const api = {
   },
   app: {
     getVersion: (): Promise<string> => ipcRenderer.invoke(IpcChannels.appVersion),
+    getIconUrl: (): Promise<string | null> => ipcRenderer.invoke(IpcChannels.appIconUrl),
   },
   update: {
     check: (): Promise<void> => ipcRenderer.invoke(IpcChannels.updateCheck),
