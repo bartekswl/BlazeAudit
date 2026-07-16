@@ -1,6 +1,6 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import type { IpcMainEvent, IpcMainInvokeEvent } from 'electron';
-import { resolveAppIconUrl } from '../appIcon';
+import { resolveAppIconUrl, resolveTitleBarIconUrl } from '../appIcon';
 import { IpcChannels } from '../../shared/ipc';
 
 const windowFrom = (event: IpcMainEvent | IpcMainInvokeEvent): BrowserWindow | null =>
@@ -23,4 +23,13 @@ export function registerWindowIpc(): void {
   ipcMain.handle(IpcChannels.appVersion, () => app.getVersion());
 
   ipcMain.handle(IpcChannels.appIconUrl, () => resolveAppIconUrl());
+
+  ipcMain.handle(IpcChannels.appTitleBarIconUrl, () => resolveTitleBarIconUrl());
+
+  ipcMain.handle(IpcChannels.appOpenExternal, async (_event, url: string) => {
+    if (typeof url !== 'string' || !/^(https?:|mailto:)/.test(url)) {
+      throw new Error('Invalid URL.');
+    }
+    await shell.openExternal(url);
+  });
 }

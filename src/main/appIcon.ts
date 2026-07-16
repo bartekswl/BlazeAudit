@@ -5,12 +5,11 @@ import { app } from 'electron';
 
 const mainDir = path.dirname(fileURLToPath(import.meta.url));
 
-/** PNG used for the OS window/taskbar and the in-app title bar. */
-export function resolveAppIconPath(): string | undefined {
+function resolveResourcePng(fileName: string): string | undefined {
   const candidates = [
-    path.join(process.cwd(), 'resources', 'app-icon.png'),
-    path.join(mainDir, '../../resources/app-icon.png'),
-    path.join(process.resourcesPath, 'app-icon.png'),
+    path.join(process.cwd(), 'resources', fileName),
+    path.join(mainDir, '../../resources', fileName),
+    path.join(process.resourcesPath, fileName),
   ];
   for (const candidate of candidates) {
     if (fs.existsSync(candidate)) return candidate;
@@ -18,8 +17,25 @@ export function resolveAppIconPath(): string | undefined {
   return undefined;
 }
 
-export function resolveAppIconUrl(): string | null {
-  const iconPath = resolveAppIconPath();
+/** PNG for the OS window / taskbar (rounded, full icon). */
+export function resolveAppIconPath(): string | undefined {
+  return resolveResourcePng('app-icon.png');
+}
+
+/** PNG for the in-app title bar (transparent, tight flame + shield crop). */
+export function resolveTitleBarIconPath(): string | undefined {
+  return resolveResourcePng('titlebar-icon.png');
+}
+
+function iconUrl(iconPath: string | undefined): string | null {
   if (!iconPath) return null;
   return `${pathToFileURL(iconPath).href}?v=${app.getVersion()}`;
+}
+
+export function resolveAppIconUrl(): string | null {
+  return iconUrl(resolveAppIconPath());
+}
+
+export function resolveTitleBarIconUrl(): string | null {
+  return iconUrl(resolveTitleBarIconPath() ?? resolveAppIconPath());
 }
