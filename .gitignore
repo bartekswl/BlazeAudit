@@ -58,6 +58,9 @@ sandbox/
 # Branding assets kept local only (logos, colors, mockups, source files).
 branding/
 
+# Demo seed bundle (built locally from dev data — never commit)
+resources/demo/
+
 # Local-only agent context file (not shared/uploaded).
 AGENTS.md
 

@@ -10,6 +10,7 @@ import { registerInspectionsIpc } from './ipc/inspections';
 import { registerProfileIpc } from './ipc/profile';
 import { registerNameBadgesIpc } from './ipc/nameBadges';
 import { registerAuthIpc } from './ipc/auth';
+import { provisionDemoIfNeeded } from './demo/provisionDemo';
 import { registerUpdateIpc } from './update/updater';
 import { closeDatabase } from './db/connection';
 import { IpcChannels } from '../shared/ipc';
@@ -135,7 +136,9 @@ function createMainWindow(): BrowserWindow {
   return win;
 }
 
-void app.whenReady().then(() => {
+void app.whenReady().then(async () => {
+  await provisionDemoIfNeeded();
+
   registerWindowIpc();
   registerAuthIpc();
   registerClientsIpc();
