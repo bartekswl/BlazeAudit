@@ -3,12 +3,12 @@ import electronUpdater, { type UpdateInfo } from 'electron-updater';
 import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { IpcChannels } from '../../shared/ipc';
-import type { UpdateStatus } from '../../shared/update';
+import type { RollbackInfo, UpdateStatus } from '../../shared/update';
+import { downloadRollbackInstaller, spawnSilentInstall } from './rollback';
+import { readUpdateState, syncUpdateStateOnStartup } from './updateState';
 
-// electron-updater ships CommonJS; grab the singleton via the default export.
 const { autoUpdater } = electronUpdater;
 
-/** Matches `updaterCacheDirName` embedded in app-update.yml at build time. */
 const UPDATER_CACHE_DIR_NAME = 'blazeaudit-updater';
 
 function updaterCacheDir(): string {
@@ -16,7 +16,6 @@ function updaterCacheDir(): string {
   return path.join(base, UPDATER_CACHE_DIR_NAME);
 }
 
-/** Remove leftover installer downloads from a previous update (frees disk space). */
 function cleanUpdaterCache(): void {
   const dir = updaterCacheDir();
   if (!existsSync(dir)) return;
@@ -26,6 +25,19 @@ function cleanUpdaterCache(): void {
   } catch (error) {
     console.warn('[update] Could not clear updater cache:', error);
   }
+}
+
+function isNewerVersion(current: string, other: string): boolean {
+  const parse = (v: string) => v.split('.').map((part) => Number.parseInt(part, 10) || 0);
+  const a = parse(current);
+  const b = parse(other);
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const av = a[i] ?? 0;
+    const bv = b[i] ?? 0;
+    if (av > bv) return true;
+    if (av < bv) return false;
+  }
+  return false;
 }
 
 function releaseNotesToText(notes: UpdateInfo['releaseNotes']): string | null {
@@ -56,11 +68,16 @@ function showUpdatingToast(): void {
   }
 }
 
-function installDownloadedUpdate(version: string): void {
+function installAndQuit(version: string, installerPath?: string): void {
   if (installScheduled) return;
   installScheduled = true;
   broadcast({ phase: 'installing', version });
   showUpdatingToast();
+  if (installerPath) {
+    spawnSilentInstall(installerPath);
+    setImmediate(() => app.quit());
+    return;
+  }
   setImmediate(() => autoUpdater.quitAndInstall(true, true));
 }
 
@@ -94,20 +111,38 @@ function wireAutoUpdaterEvents(): void {
       version: info.version,
       notes: releaseNotesToText(info.releaseNotes),
     });
-    setTimeout(() => installDownloadedUpdate(info.version), 400);
+    setTimeout(() => installAndQuit(info.version), 400);
   });
   autoUpdater.on('error', (err) =>
     broadcast({ phase: 'error', message: err?.message ?? 'Update failed.' }),
   );
 }
 
+function rollbackInfo(): RollbackInfo {
+  const state = readUpdateState();
+  const canRollback =
+    Boolean(state.previousVersion) &&
+    isNewerVersion(state.currentVersion, state.previousVersion!);
+  return {
+    currentVersion: state.currentVersion,
+    previousVersion: canRollback ? state.previousVersion : null,
+  };
+}
+
 export function registerUpdateIpc(): void {
   if (app.isPackaged) {
-    // Previous session's downloaded installer is no longer needed after restart.
+    syncUpdateStateOnStartup();
     cleanUpdaterCache();
   }
 
   wireAutoUpdaterEvents();
+
+  ipcMain.handle(IpcChannels.updateGetRollbackInfo, () => {
+    if (!app.isPackaged) {
+      return { currentVersion: app.getVersion(), previousVersion: null } satisfies RollbackInfo;
+    }
+    return rollbackInfo();
+  });
 
   ipcMain.handle(IpcChannels.updateCheck, async () => {
     if (!app.isPackaged) {
@@ -133,7 +168,36 @@ export function registerUpdateIpc(): void {
   });
 
   ipcMain.handle(IpcChannels.updateInstall, () => {
-    const version = autoUpdater.currentVersion?.version ?? '';
-    installDownloadedUpdate(version);
+    const version = autoUpdater.currentVersion?.version ?? app.getVersion();
+    installAndQuit(version);
+  });
+
+  ipcMain.handle(IpcChannels.updateRollback, async () => {
+    if (!app.isPackaged) {
+      broadcast({
+        phase: 'error',
+        message: 'Rollback is only available in the installed app, not in development.',
+      });
+      return;
+    }
+
+    const info = rollbackInfo();
+    if (!info.previousVersion) {
+      broadcast({ phase: 'error', message: 'No previous version is available to install.' });
+      return;
+    }
+
+    installScheduled = false;
+    const version = info.previousVersion;
+
+    try {
+      const installerPath = await downloadRollbackInstaller(version, updaterCacheDir(), (status) =>
+        broadcast(status),
+      );
+      broadcast({ phase: 'downloaded', version, notes: null });
+      setTimeout(() => installAndQuit(version, installerPath), 400);
+    } catch (err) {
+      broadcast({ phase: 'error', message: err instanceof Error ? err.message : 'Rollback failed.' });
+    }
   });
 }

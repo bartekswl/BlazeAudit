@@ -33,7 +33,7 @@ import type {
   InspectorInput,
 } from '../shared/profile';
 import type { NameBadge, NameBadgeInput } from '../shared/nameBadges';
-import type { UpdateStatus } from '../shared/update';
+import type { RollbackInfo, UpdateStatus } from '../shared/update';
 import type { Client, ClientInput } from '../shared/types';
 
 const api = {
@@ -61,6 +61,8 @@ const api = {
     check: (): Promise<void> => ipcRenderer.invoke(IpcChannels.updateCheck),
     download: (): Promise<void> => ipcRenderer.invoke(IpcChannels.updateDownload),
     install: (): Promise<void> => ipcRenderer.invoke(IpcChannels.updateInstall),
+    rollback: (): Promise<void> => ipcRenderer.invoke(IpcChannels.updateRollback),
+    getRollbackInfo: (): Promise<RollbackInfo> => ipcRenderer.invoke(IpcChannels.updateGetRollbackInfo),
     /** Subscribe to update lifecycle status. Returns an unsubscribe function. */
     onStatus: (callback: (status: UpdateStatus) => void): (() => void) => {
       const listener = (_event: unknown, status: UpdateStatus) => callback(status);

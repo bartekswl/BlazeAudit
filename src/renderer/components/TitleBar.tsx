@@ -50,7 +50,7 @@ export function TitleBar() {
           <img
             src={iconUrl}
             alt=""
-            className="size-[1.125rem] shrink-0 object-contain"
+            className="size-[1.125rem] shrink-0 rounded-[0.2rem] object-contain"
             draggable={false}
           />
         ) : (

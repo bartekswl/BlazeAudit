@@ -3,11 +3,12 @@ import {
   AlertTriangle,
   CheckCircle2,
   Download,
+  History,
   RefreshCw,
   ShieldCheck,
 } from 'lucide-react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
-import type { UpdateStatus } from '../../../shared/update';
+import type { RollbackInfo, UpdateStatus } from '../../../shared/update';
 
 function notesToLines(notes: string | null): string[] {
   if (!notes) return [];
@@ -21,9 +22,12 @@ export function UpdateScreen() {
   const [currentVersion, setCurrentVersion] = useState('');
   const [status, setStatus] = useState<UpdateStatus>({ phase: 'idle' });
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [rollbackConfirmOpen, setRollbackConfirmOpen] = useState(false);
+  const [rollbackInfo, setRollbackInfo] = useState<RollbackInfo | null>(null);
 
   useEffect(() => {
     void window.blazeaudit.app.getVersion().then(setCurrentVersion);
+    void window.blazeaudit.update.getRollbackInfo().then(setRollbackInfo);
     const unsubscribe = window.blazeaudit.update.onStatus(setStatus);
     return unsubscribe;
   }, []);
@@ -46,6 +50,20 @@ export function UpdateScreen() {
     });
     void window.blazeaudit.update.download();
   }, [status]);
+
+  const rollback = useCallback(() => {
+    setRollbackConfirmOpen(false);
+    const version = rollbackInfo?.previousVersion ?? '';
+    setStatus({
+      phase: 'downloading',
+      version,
+      percent: 0,
+      transferred: 0,
+      total: 0,
+      bytesPerSecond: 0,
+    });
+    void window.blazeaudit.update.rollback();
+  }, [rollbackInfo?.previousVersion]);
 
   const phase = status.phase;
   const busy =
@@ -186,6 +204,32 @@ export function UpdateScreen() {
         )}
       </section>
 
+      {rollbackInfo?.previousVersion && !showProgress && (
+        <section className="ba-panel p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="ba-section-title">Install previous version</h3>
+              <p className="mt-1 text-sm text-[var(--ba-text-muted)]">
+                If the latest update caused problems, reinstall{' '}
+                <span className="font-mono text-[var(--ba-text-secondary)]">
+                  v{rollbackInfo.previousVersion}
+                </span>{' '}
+                — same silent install as a normal update. Your data is kept.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="ba-btn-ghost shrink-0 border border-[var(--ba-panel-border)] px-3 py-2"
+              onClick={() => setRollbackConfirmOpen(true)}
+              disabled={busy}
+            >
+              <History className="size-4" />
+              Install previous version
+            </button>
+          </div>
+        </section>
+      )}
+
       <section className="ba-panel p-5">
         <h3 className="ba-section-title">How updating works</h3>
         <ol className="mt-3 space-y-3 text-sm text-[var(--ba-text-muted)]">
@@ -241,6 +285,26 @@ export function UpdateScreen() {
               v{availableVersion}
             </span>
             , then restarts BlazeAudit.
+          </p>
+          <p>Your accounts, documents, and settings are kept exactly as they are.</p>
+        </ConfirmDialog>
+      )}
+
+      {rollbackConfirmOpen && rollbackInfo?.previousVersion && (
+        <ConfirmDialog
+          title="Install previous version?"
+          icon={History}
+          confirmLabel="Download & install"
+          cancelLabel="Not now"
+          onCancel={() => setRollbackConfirmOpen(false)}
+          onConfirm={rollback}
+        >
+          <p>
+            This downloads and installs{' '}
+            <span className="font-semibold text-[var(--ba-text-secondary)]">
+              v{rollbackInfo.previousVersion}
+            </span>
+            , then restarts BlazeAudit — the same flow as a normal update.
           </p>
           <p>Your accounts, documents, and settings are kept exactly as they are.</p>
         </ConfirmDialog>
