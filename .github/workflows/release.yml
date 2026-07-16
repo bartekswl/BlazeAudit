@@ -3,6 +3,10 @@ name: Release
 # Build the Windows installer and publish it (with latest.yml + blockmap for
 # electron-updater) to a GitHub Release whenever a v* tag is pushed.
 #   git tag v0.1.1 && git push origin v0.1.1
+#
+# Building and publishing are decoupled: electron-builder produces the artifacts
+# locally (--publish never), then a dedicated release action uploads them. This
+# is more reliable than electron-builder's own uploader for large installers.
 
 on:
   push:
@@ -28,7 +32,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build and publish
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run release
+      - name: Build installer
+        run: npm run dist
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.exe
+            release/*.exe.blockmap
+            release/latest.yml
+          fail_on_unmatched_files: true
