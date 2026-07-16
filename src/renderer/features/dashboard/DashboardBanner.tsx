@@ -20,7 +20,7 @@ export function DashboardBanner() {
       <div className="relative flex items-center gap-4">
         <div className="grid size-12 shrink-0 place-items-center rounded-xl border border-flame-500/20 bg-flame-500/[0.08] sm:size-14">
           {iconUrl ? (
-            <img src={iconUrl} alt="" className="size-8 object-contain sm:size-9" draggable={false} />
+            <img src={iconUrl} alt="" className="size-8 rounded-[0.35rem] object-contain sm:size-9" draggable={false} />
           ) : (
             <div className="size-8 rounded-md bg-flame-500/30 sm:size-9" />
           )}

@@ -17,3 +17,9 @@ export type UpdateStatus =
   | { phase: 'error'; message: string };
 
 export type UpdatePhase = UpdateStatus['phase'];
+
+export type RollbackInfo = {
+  currentVersion: string;
+  /** Version before the last upgrade — only set when current is newer. */
+  previousVersion: string | null;
+};
