@@ -1,3 +1,4 @@
+import { app } from 'electron';
 import { randomBytes } from 'node:crypto';
 import { issueDevActivationToken } from '../auth/token';
 import type { ActivateRequest, ActivateResponse, LicenseClient, ValidateRequest, ValidateResponse } from './types';
@@ -6,14 +7,26 @@ const DEV_KEYS = new Set(['DEV-TEST-KEY']);
 
 function isDevActivationKey(key: string): boolean {
   const trimmed = key.trim();
-  return DEV_KEYS.has(trimmed) || trimmed.startsWith('BLZ-');
+
+  // Unpackaged dev: test keys for local workflow.
+  if (!app.isPackaged) {
+    return DEV_KEYS.has(trimmed) || trimmed.startsWith('BLZ-');
+  }
+
+  // Packaged installs: only the gitignored key embedded at build time (empty on CI).
+  const localKey = typeof __LOCAL_ACTIVATION_KEY__ === 'string' ? __LOCAL_ACTIVATION_KEY__ : '';
+  return Boolean(localKey) && trimmed === localKey;
 }
 
 export function createDevLicenseClient(resolveKeyX: () => string): LicenseClient {
   return {
     async activate(request: ActivateRequest): Promise<ActivateResponse> {
       if (!isDevActivationKey(request.activationKey)) {
-        throw new Error('Invalid activation key. Use DEV-TEST-KEY or a BLZ- prefixed key in development.');
+        throw new Error(
+          app.isPackaged
+            ? 'Invalid activation key.'
+            : 'Invalid activation key. Use DEV-TEST-KEY or a BLZ- prefixed key in development.',
+        );
       }
 
       const email = request.email.trim().toLowerCase();

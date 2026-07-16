@@ -1,0 +1,8 @@
+# Copy this file to resources/local-activation-key.txt (gitignored).
+# Put ONE line: your private activation key for packaged installs you build locally.
+#
+# - npm run dev still accepts DEV-TEST-KEY (unpackaged only).
+# - GitHub Release builds do NOT read this file → public downloads cannot activate.
+# - BlazeAudit Demo installer auto-provisions the tester account (no key needed).
+
+BLZ-LOCAL-replace-with-your-secret

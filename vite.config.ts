@@ -1,11 +1,18 @@
 import { defineConfig } from 'vite';
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import electron from 'vite-plugin-electron';
 
 const preloadOutput = path.resolve('dist-electron/preload/index.cjs');
+
+function readLocalActivationKey(): string {
+  const keyFile = path.resolve('resources/local-activation-key.txt');
+  if (!existsSync(keyFile)) return '';
+  const line = readFileSync(keyFile, 'utf8').trim().split(/\r?\n/)[0]?.trim() ?? '';
+  return line;
+}
 
 // Electron main runs as ESM (package.json "type": "module").
 // The preload must be CommonJS because the renderer uses `sandbox: true`,
@@ -15,6 +22,9 @@ export default defineConfig(({ command }) => {
   if (command === 'serve') rmSync(preloadOutput, { force: true });
 
   return {
+  define: {
+    __BLAZEAUDIT_DEV_ACTIVATION__: JSON.stringify(command === 'serve'),
+  },
   server: {
     // Transform the first-render graph while Electron's main/preload bundles
     // are starting. This avoids a second multi-second cold compile only after
@@ -47,6 +57,9 @@ export default defineConfig(({ command }) => {
           await startup();
         },
         vite: {
+          define: {
+            __LOCAL_ACTIVATION_KEY__: JSON.stringify(readLocalActivationKey()),
+          },
           build: {
             outDir: 'dist-electron/main',
             rollupOptions: {

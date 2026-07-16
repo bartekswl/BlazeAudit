@@ -1,6 +1,6 @@
 # Form element blueprint — template · document · PDF
 
-**Point the agent here** whenever we add or change a built-in form page element (ULC-style panels, summary tables, similar composite blocks).
+**Start here** when adding or changing a built-in form page element (ULC-style panels, summary tables, similar composite blocks).
 
 Goal: **one look, one layout, three surfaces** — built-in template viewer, inspection document editor, and PDF export must always match.
 
@@ -748,12 +748,12 @@ Use this list every time. Check off in the PR / session notes.
 
 ---
 
-## Agent prompt (paste at start of session)
+## Session checklist
 
 ```
 Read docs/FORM_ELEMENT_BLUEPRINT.md and docs/BUILTIN_TEMPLATE_BUILD.md.
 
-We are adding/changing a built-in form element. Follow the blueprint:
+Adding/changing a built-in form element — follow the blueprint:
 - One React view for template, document, and PDF (via buildFormPrintHtml).
 - CSS in components.css with dark theme.
 - Match existing panel style (rounded frame, slate borders, no shadow between panels).

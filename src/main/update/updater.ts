@@ -1,10 +1,32 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import electronUpdater, { type UpdateInfo } from 'electron-updater';
+import { existsSync, rmSync } from 'node:fs';
+import path from 'node:path';
 import { IpcChannels } from '../../shared/ipc';
 import type { UpdateStatus } from '../../shared/update';
 
 // electron-updater ships CommonJS; grab the singleton via the default export.
 const { autoUpdater } = electronUpdater;
+
+/** Matches `updaterCacheDirName` embedded in app-update.yml at build time. */
+const UPDATER_CACHE_DIR_NAME = 'blazeaudit-updater';
+
+function updaterCacheDir(): string {
+  const base = process.env.LOCALAPPDATA ?? app.getPath('temp');
+  return path.join(base, UPDATER_CACHE_DIR_NAME);
+}
+
+/** Remove leftover installer downloads from a previous update (frees disk space). */
+function cleanUpdaterCache(): void {
+  const dir = updaterCacheDir();
+  if (!existsSync(dir)) return;
+  try {
+    rmSync(dir, { recursive: true, force: true });
+    console.log(`[update] Cleared updater cache → ${dir}`);
+  } catch (error) {
+    console.warn('[update] Could not clear updater cache:', error);
+  }
+}
 
 function releaseNotesToText(notes: UpdateInfo['releaseNotes']): string | null {
   if (!notes) return null;
@@ -57,6 +79,11 @@ function wireAutoUpdaterEvents(): void {
 }
 
 export function registerUpdateIpc(): void {
+  if (app.isPackaged) {
+    // Previous session's downloaded installer is no longer needed after restart.
+    cleanUpdaterCache();
+  }
+
   wireAutoUpdaterEvents();
 
   ipcMain.handle(IpcChannels.updateCheck, async () => {

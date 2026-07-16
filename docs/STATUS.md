@@ -13,10 +13,10 @@
 
 ## How to use this file
 
-This is the **onboarding extract for a new chat/agent**. Read this first, then the
+This is the **onboarding extract for new contributors**. Read this first, then the
 linked docs as needed. Suggested kickoff:
 
-> Read `docs/STATUS.md` and `AGENTS.md`. For form/page work also read
+> Read `docs/STATUS.md`. For form/page work also read
 > `docs/FORM_ELEMENT_BLUEPRINT.md`. Phases 0–6 are done; active work is the
 > CAN/ULC-S536 built-in form. Formal roadmap next is Phase 7 (backups).
 
@@ -78,6 +78,8 @@ Do not bump Electron without a matching ABI prebuild.
 | [`SECURITY.md`](SECURITY.md) | Activation, key model, login |
 | [`TEMPLATES.md`](TEMPLATES.md) | Block template authoring / portability |
 | [`FORM_ELEMENT_BLUEPRINT.md`](FORM_ELEMENT_BLUEPRINT.md) | **Required** for ULC form element work |
+| [`UPDATE_RELEASE_BLUEPRINT.md`](UPDATE_RELEASE_BLUEPRINT.md) | **Update Release** — automated ship for demo testers |
+| [`DEMO_UPDATE.md`](DEMO_UPDATE.md) | Demo installer + Update tab (tester-facing) |
 | [`BUILTIN_TEMPLATE_BUILD.md`](BUILTIN_TEMPLATE_BUILD.md) | Built-in template build notes |
 | [`UX.md`](UX.md) | Window chrome, navigation |
 | [`ROADMAP.md`](ROADMAP.md) | Phases 0–10 |
@@ -158,6 +160,9 @@ Controls on `FormPageCanvas` (`pageExtraControls`); add/remove in document edito
 
 **Dev paths:** DB/auth → `<project>/data/`; Electron userData → `.electron-dev/`.
 Fresh test: delete `data/`, `npm run dev`, activate with `DEV-TEST-KEY`.
+Packaged **GitHub Release** builds embed **no** activation key (public downloads
+cannot activate). Local `npm run dist` reads `resources/local-activation-key.txt`
+(gitignored). **Demo** installer auto-provisions the tester account.
 
 **IPC areas:** `auth.*`, `clients.*`, `templates.*`, `inspections.*`, `pdf` /
 form print, `nameBadges.*`, settings/business profile, etc.
@@ -172,4 +177,4 @@ When touching 23.2 / repeatable pages, preserve compaction + min-page rules abov
 - Docs are living drafts; significant decisions → **ADRs**.
 - Keep this file current at the end of a work session.
 - `branding/` and `sandbox/` are **gitignored** — never commit.
-- Learning course (optional, local): `sandbox/learning/` — see `AGENTS.md`.
+- Learning course (optional, local): `sandbox/learning/` (gitignored).

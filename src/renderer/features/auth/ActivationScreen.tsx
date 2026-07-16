@@ -1,6 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { AuthError, AuthShell, AuthSubmit, authInputCls } from './AuthShell';
 
+declare const __BLAZEAUDIT_DEV_ACTIVATION__: boolean;
+
+const devActivation = typeof __BLAZEAUDIT_DEV_ACTIVATION__ !== 'undefined' && __BLAZEAUDIT_DEV_ACTIVATION__;
+
 export function ActivationScreen({
   onDone,
   hasExistingAccounts,
@@ -11,7 +15,7 @@ export function ActivationScreen({
   onBack?: () => void;
 }) {
   const [email, setEmail] = useState('');
-  const [activationKey, setActivationKey] = useState('DEV-TEST-KEY');
+  const [activationKey, setActivationKey] = useState(devActivation ? 'DEV-TEST-KEY' : '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +35,11 @@ export function ActivationScreen({
   return (
     <AuthShell
       title={hasExistingAccounts ? 'Activate another account' : 'Activate BlazeAudit'}
-      subtitle="One-time online activation. Use DEV-TEST-KEY or any BLZ- key in development."
+      subtitle={
+        devActivation
+          ? 'One-time online activation. Use DEV-TEST-KEY or any BLZ- key in development.'
+          : 'One-time online activation. Enter the activation key issued for this install.'
+      }
     >
       {hasExistingAccounts && onBack && (
         <button
