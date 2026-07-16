@@ -19,6 +19,7 @@ import {
   setElementValue,
   syncFormDocumentInspectionDate,
   migrateFormInspectionPowerSupplyLayout,
+  migrateFormInspectionIdrRowGaps,
   type FormInspectionDocument,
   type RepeatableFormPageKind,
 } from '../../../shared/form';
@@ -70,7 +71,7 @@ function FormInspectionEditorInner({
   );
   const [formDoc, setFormDoc] = useState<FormInspectionDocument>(() =>
     syncFormDocumentInspectionDate(
-      migrateFormInspectionPowerSupplyLayout(formDocInitial),
+      migrateFormInspectionIdrRowGaps(migrateFormInspectionPowerSupplyLayout(formDocInitial)),
       inspection.inspectedAt ?? null,
     ),
   );
@@ -80,7 +81,9 @@ function FormInspectionEditorInner({
   const [pdfMessage, setPdfMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(() => {
-    const migrated = migrateFormInspectionPowerSupplyLayout(formDocInitial);
+    const migrated = migrateFormInspectionIdrRowGaps(
+      migrateFormInspectionPowerSupplyLayout(formDocInitial),
+    );
     return migrated !== formDocInitial;
   });
   const [pendingPageRemove, setPendingPageRemove] = useState<PendingPageRemove | null>(null);

@@ -5993,6 +5993,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   box-sizing: border-box;
 }
 
+.idr-th--alarmConfirmed.idr-th--vertical,
+.idr-th--annunciatorIndication.idr-th--vertical,
 .idr-th--supervisedCircuitTrouble.idr-th--vertical {
   padding-left: 0.2rem;
   padding-right: 0.2rem;
@@ -6004,6 +6006,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   max-width: 100%;
 }
 
+.idr-td--alarmConfirmed,
+.idr-td--annunciatorIndication,
 .idr-td--supervisedCircuitTrouble {
   padding-left: 0.0625rem;
   padding-right: 0.0625rem;

@@ -81,7 +81,7 @@ export const INDIVIDUAL_DEVICE_RECORD_COLUMNS: readonly IndividualDeviceRecordCo
   },
   {
     key: 'measurements',
-    title: 'Measurements',
+    title: 'Measurement',
     widthPercent: 8,
     orientation: 'vertical',
     kind: 'text',
