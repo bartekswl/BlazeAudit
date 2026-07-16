@@ -7,6 +7,7 @@ export const IpcChannels = {
   windowIsMaximized: 'window:is-maximized',
   windowMaximizeChanged: 'window:maximize-changed',
   appVersion: 'app:version',
+  appIconUrl: 'app:icon-url',
   updateCheck: 'update:check',
   updateDownload: 'update:download',
   updateInstall: 'update:install',

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Notification } from 'electron';
 import electronUpdater, { type UpdateInfo } from 'electron-updater';
 import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
@@ -45,6 +45,24 @@ function broadcast(status: UpdateStatus): void {
 }
 
 let wired = false;
+let installScheduled = false;
+
+function showUpdatingToast(): void {
+  if (!Notification.isSupported()) return;
+  try {
+    new Notification({ title: 'Updating BlazeAudit' }).show();
+  } catch (error) {
+    console.warn('[update] Could not show update notification:', error);
+  }
+}
+
+function installDownloadedUpdate(version: string): void {
+  if (installScheduled) return;
+  installScheduled = true;
+  broadcast({ phase: 'installing', version });
+  showUpdatingToast();
+  setImmediate(() => autoUpdater.quitAndInstall(true, true));
+}
 
 function wireAutoUpdaterEvents(): void {
   if (wired) return;
@@ -70,9 +88,14 @@ function wireAutoUpdaterEvents(): void {
       bytesPerSecond: progress.bytesPerSecond,
     }),
   );
-  autoUpdater.on('update-downloaded', (info) =>
-    broadcast({ phase: 'downloaded', version: info.version, notes: releaseNotesToText(info.releaseNotes) }),
-  );
+  autoUpdater.on('update-downloaded', (info) => {
+    broadcast({
+      phase: 'downloaded',
+      version: info.version,
+      notes: releaseNotesToText(info.releaseNotes),
+    });
+    setTimeout(() => installDownloadedUpdate(info.version), 400);
+  });
   autoUpdater.on('error', (err) =>
     broadcast({ phase: 'error', message: err?.message ?? 'Update failed.' }),
   );
@@ -110,7 +133,7 @@ export function registerUpdateIpc(): void {
   });
 
   ipcMain.handle(IpcChannels.updateInstall, () => {
-    // Closes the app, installs the update in place, and relaunches.
-    setImmediate(() => autoUpdater.quitAndInstall());
+    const version = autoUpdater.currentVersion?.version ?? '';
+    installDownloadedUpdate(version);
   });
 }

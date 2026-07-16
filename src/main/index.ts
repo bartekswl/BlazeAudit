@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveAppIconPath } from './appIcon';
 import { registerWindowIpc } from './ipc/window';
 import { registerClientsIpc } from './ipc/clients';
 import { registerDatabaseIpc } from './ipc/database';
@@ -28,18 +28,6 @@ if (process.platform === 'win32') {
 }
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
-
-function resolveAppIconPath(): string | undefined {
-  const candidates = [
-    path.join(process.cwd(), 'resources', 'app-icon.png'),
-    path.join(dirname, '../../resources/app-icon.png'),
-    path.join(process.resourcesPath, 'app-icon.png'),
-  ];
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) return candidate;
-  }
-  return undefined;
-}
 
 // Set by vite-plugin-electron during `vite` dev; undefined in a packaged build.
 const devServerUrl = process.env.VITE_DEV_SERVER_URL;

@@ -32,6 +32,7 @@ const loadNameBadgesScreen = () => import('./features/nameBadges/NameBadgesScree
 const loadDatabaseScreen = () => import('./features/database/DatabaseScreen');
 const loadUpdateScreen = () => import('./features/update/UpdateScreen');
 const loadSettingsScreen = () => import('./features/settings/SettingsScreen');
+const loadSupportScreen = () => import('./features/support/SupportScreen');
 
 const CustomersScreen = lazy(() =>
   loadCustomersScreen().then((m) => ({ default: m.CustomersScreen })),
@@ -62,6 +63,9 @@ const UpdateScreen = lazy(() =>
 const SettingsScreen = lazy(() =>
   loadSettingsScreen().then((m) => ({ default: m.SettingsScreen })),
 );
+const SupportScreen = lazy(() =>
+  loadSupportScreen().then((m) => ({ default: m.SupportScreen })),
+);
 
 const backgroundLoaders = [
   loadDocumentsScreen,
@@ -71,6 +75,7 @@ const backgroundLoaders = [
   loadDatabaseScreen,
   loadUpdateScreen,
   loadSettingsScreen,
+  loadSupportScreen,
   () => import('./features/documents/NewInspectionDialog'),
   loadTemplatesScreen,
   () => import('./features/documents/InspectionEditor'),
@@ -98,6 +103,7 @@ const screens: Record<
     | 'database'
     | 'update'
     | 'settings'
+    | 'support'
   >,
   ReactNode
 > = {
@@ -538,6 +544,12 @@ export default function App() {
                   onScrollConsumed={() => setSettingsBoot(null)}
 
                 />
+              </Suspense>
+
+            ) : activeId === 'support' ? (
+
+              <Suspense fallback={screenModuleFallback}>
+                <SupportScreen />
               </Suspense>
 
             ) : activeId === 'dashboard' ? (

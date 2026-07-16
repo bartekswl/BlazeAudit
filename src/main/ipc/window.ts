@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import type { IpcMainEvent, IpcMainInvokeEvent } from 'electron';
+import { resolveAppIconUrl } from '../appIcon';
 import { IpcChannels } from '../../shared/ipc';
 
 const windowFrom = (event: IpcMainEvent | IpcMainInvokeEvent): BrowserWindow | null =>
@@ -20,4 +21,6 @@ export function registerWindowIpc(): void {
   ipcMain.handle(IpcChannels.windowIsMaximized, (event) => windowFrom(event)?.isMaximized() ?? false);
 
   ipcMain.handle(IpcChannels.appVersion, () => app.getVersion());
+
+  ipcMain.handle(IpcChannels.appIconUrl, () => resolveAppIconUrl());
 }

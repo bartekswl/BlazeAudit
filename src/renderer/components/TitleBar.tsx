@@ -32,16 +32,25 @@ function ControlButton({
 
 export function TitleBar() {
   const [isMaximized, setIsMaximized] = useState(false);
+  const [iconUrl, setIconUrl] = useState<string | null>(null);
 
   useEffect(() => {
     void window.blazeaudit.window.isMaximized().then(setIsMaximized);
     return window.blazeaudit.window.onMaximizeChange(setIsMaximized);
   }, []);
 
+  useEffect(() => {
+    void window.blazeaudit.app.getIconUrl().then(setIconUrl);
+  }, []);
+
   return (
     <header className="ba-titlebar flex h-10 shrink-0 items-center justify-between [-webkit-app-region:drag]">
       <div className="flex items-center gap-2 px-3">
-        <Flame className="size-4 text-flame-500" />
+        {iconUrl ? (
+          <img src={iconUrl} alt="" className="size-4 shrink-0 rounded-sm object-contain" draggable={false} />
+        ) : (
+          <Flame className="size-4 text-flame-500" />
+        )}
         <span className="text-sm font-semibold tracking-wide text-[var(--ba-text-primary)]">
           BlazeAudit
         </span>
