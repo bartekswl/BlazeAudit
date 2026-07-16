@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -8,98 +8,56 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import type { UpdateStatus } from '../../../shared/update';
 
-/**
- * Update centre.
- *
- * NOTE: This screen is currently front-end only. The `simulate*` helpers below
- * stand in for the real `electron-updater` flow (check → download → install).
- * When the updater IPC lands, replace the bodies of `runCheck`, `runDownload`,
- * and `restartAndInstall` with the real calls — the phase state machine and the
- * entire UI stay exactly the same.
- */
-
-type Phase =
-  | 'idle'
-  | 'checking'
-  | 'up-to-date'
-  | 'available'
-  | 'downloading'
-  | 'ready'
-  | 'error';
-
-// --- Simulation stand-ins (remove once the updater IPC is wired) -------------
-const SIMULATED_LATEST_VERSION = '0.1.0';
-const SIMULATED_RELEASE_NOTES = [
-  'Project Number field on documents and the ULC form',
-  'Compact customer detail panel with document search and date filters',
-  'Faster startup and various fixes',
-];
-
-function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function notesToLines(notes: string | null): string[] {
+  if (!notes) return [];
+  return notes
+    .split('\n')
+    .map((line) => line.replace(/^[-*]\s*/, '').trim())
+    .filter(Boolean);
 }
-// ----------------------------------------------------------------------------
 
 export function UpdateScreen() {
-  const [currentVersion, setCurrentVersion] = useState<string>('');
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [currentVersion, setCurrentVersion] = useState('');
+  const [status, setStatus] = useState<UpdateStatus>({ phase: 'idle' });
   const [confirmOpen, setConfirmOpen] = useState(false);
-
-  const cancelled = useRef(false);
 
   useEffect(() => {
     void window.blazeaudit.app.getVersion().then(setCurrentVersion);
-    return () => {
-      cancelled.current = true;
-    };
+    const unsubscribe = window.blazeaudit.update.onStatus(setStatus);
+    return unsubscribe;
   }, []);
 
-  const runCheck = useCallback(async () => {
-    setError(null);
-    setProgress(0);
-    setPhase('checking');
-    try {
-      // TODO(updater): replace with window.blazeaudit.update.check()
-      await wait(1200);
-      if (cancelled.current) return;
-      // Simulation always reports an available update so the flow is visible.
-      setPhase('available');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not check for updates.');
-      setPhase('error');
-    }
+  const check = useCallback(() => {
+    setStatus({ phase: 'checking' });
+    void window.blazeaudit.update.check();
   }, []);
 
-  const runDownload = useCallback(async () => {
+  const download = useCallback(() => {
     setConfirmOpen(false);
-    setError(null);
-    setProgress(0);
-    setPhase('downloading');
-    try {
-      // TODO(updater): replace with window.blazeaudit.update.download() and
-      // subscribe to download-progress events instead of this loop.
-      for (let pct = 0; pct <= 100; pct += 10) {
-        if (cancelled.current) return;
-        setProgress(pct);
-        await wait(220);
-      }
-      setPhase('ready');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Download failed.');
-      setPhase('error');
-    }
+    const version = status.phase === 'available' ? status.version : '';
+    setStatus({
+      phase: 'downloading',
+      version,
+      percent: 0,
+      transferred: 0,
+      total: 0,
+      bytesPerSecond: 0,
+    });
+    void window.blazeaudit.update.download();
+  }, [status]);
+
+  const install = useCallback(() => {
+    void window.blazeaudit.update.install();
   }, []);
 
-  const restartAndInstall = useCallback(() => {
-    // TODO(updater): replace with window.blazeaudit.update.install() which calls
-    // autoUpdater.quitAndInstall() in the main process.
-    // Simulation: nothing to do yet.
-  }, []);
-
+  const phase = status.phase;
   const busy = phase === 'checking' || phase === 'downloading';
+  const availableVersion =
+    status.phase === 'available' || status.phase === 'downloaded' || status.phase === 'downloading'
+      ? status.version
+      : '';
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -110,9 +68,7 @@ export function UpdateScreen() {
             <RefreshCw className="size-7" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold text-[var(--ba-text-primary)]">
-              Updates
-            </h2>
+            <h2 className="text-lg font-semibold text-[var(--ba-text-primary)]">Updates</h2>
             <p className="mt-1 text-sm leading-relaxed text-[var(--ba-text-muted)]">
               Keep BlazeAudit current with the latest features and fixes. Updates install in
               place and restart the app — your accounts, documents, and settings are never
@@ -131,90 +87,91 @@ export function UpdateScreen() {
               BlazeAudit {currentVersion ? `v${currentVersion}` : '—'}
             </p>
           </div>
-          {(phase === 'idle' || phase === 'up-to-date' || phase === 'error') && (
-            <button
-              type="button"
-              className="ba-btn-primary"
-              onClick={() => void runCheck()}
-              disabled={busy}
-            >
-              <RefreshCw className="size-4" />
-              Check for updates
-            </button>
-          )}
-          {phase === 'checking' && (
+          {phase === 'checking' ? (
             <button type="button" className="ba-btn-primary" disabled>
               <RefreshCw className="size-4 animate-spin" />
               Checking…
             </button>
+          ) : (
+            phase !== 'downloading' &&
+            phase !== 'downloaded' && (
+              <button
+                type="button"
+                className="ba-btn-primary"
+                onClick={check}
+                disabled={busy}
+              >
+                <RefreshCw className="size-4" />
+                Check for updates
+              </button>
+            )
           )}
         </div>
 
-        {/* Status area */}
-        {phase === 'up-to-date' && (
+        {phase === 'not-available' && (
           <div className="mt-4 flex items-center gap-2 rounded-lg border border-[var(--ba-panel-border)] bg-white/5 px-3 py-2.5 text-sm text-[var(--ba-text-secondary)]">
             <CheckCircle2 className="size-4 text-emerald-400" />
             You&apos;re on the latest version.
           </div>
         )}
 
-        {phase === 'available' && (
+        {status.phase === 'available' && (
           <div className="mt-4 rounded-lg border border-[var(--ba-panel-border)] bg-white/5 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-[var(--ba-text-primary)]">
-                  Update available — v{SIMULATED_LATEST_VERSION}
+                  Update available — v{status.version}
                 </p>
                 <p className="mt-0.5 text-xs text-[var(--ba-text-muted)]">
                   Download size is small — only the changed parts are fetched.
                 </p>
               </div>
-              <button
-                type="button"
-                className="ba-btn-primary"
-                onClick={() => setConfirmOpen(true)}
-              >
+              <button type="button" className="ba-btn-primary" onClick={() => setConfirmOpen(true)}>
                 <Download className="size-4" />
                 Update
               </button>
             </div>
-            <ul className="mt-3 space-y-1.5 border-t border-[var(--ba-panel-border)] pt-3 text-xs text-[var(--ba-text-muted)]">
-              {SIMULATED_RELEASE_NOTES.map((note) => (
-                <li key={note} className="flex gap-2">
-                  <span className="mt-1 size-1 shrink-0 rounded-full bg-[var(--ba-flame)]" />
-                  <span>{note}</span>
-                </li>
-              ))}
-            </ul>
+            {notesToLines(status.notes).length > 0 && (
+              <ul className="mt-3 space-y-1.5 border-t border-[var(--ba-panel-border)] pt-3 text-xs text-[var(--ba-text-muted)]">
+                {notesToLines(status.notes).map((note) => (
+                  <li key={note} className="flex gap-2">
+                    <span className="mt-1 size-1 shrink-0 rounded-full bg-[var(--ba-flame)]" />
+                    <span>{note}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
-        {phase === 'downloading' && (
+        {status.phase === 'downloading' && (
           <div className="mt-4 rounded-lg border border-[var(--ba-panel-border)] bg-white/5 p-4">
             <div className="flex items-center justify-between text-sm text-[var(--ba-text-secondary)]">
               <span className="flex items-center gap-2">
                 <Download className="size-4" />
-                Downloading v{SIMULATED_LATEST_VERSION}…
+                Downloading{status.version ? ` v${status.version}` : ''}…
               </span>
-              <span className="font-mono text-xs text-[var(--ba-text-muted)]">{progress}%</span>
+              <span className="font-mono text-xs text-[var(--ba-text-muted)]">
+                {status.percent}%
+              </span>
             </div>
             <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10">
               <div
                 className="h-full rounded-full bg-[linear-gradient(135deg,#fb923c_0%,#ea580c_100%)] transition-[width] duration-200 ease-out"
-                style={{ width: `${progress}%` }}
+                style={{ width: `${status.percent}%` }}
               />
             </div>
           </div>
         )}
 
-        {phase === 'ready' && (
+        {status.phase === 'downloaded' && (
           <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-sm text-[var(--ba-text-primary)]">
                 <CheckCircle2 className="size-4 text-emerald-400" />
-                v{SIMULATED_LATEST_VERSION} is ready to install.
+                v{status.version} is ready to install.
               </div>
-              <button type="button" className="ba-btn-primary" onClick={restartAndInstall}>
+              <button type="button" className="ba-btn-primary" onClick={install}>
                 <RotateCw className="size-4" />
                 Restart &amp; install
               </button>
@@ -226,10 +183,10 @@ export function UpdateScreen() {
           </div>
         )}
 
-        {phase === 'error' && error && (
+        {status.phase === 'error' && (
           <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-200">
             <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-            <span>{error}</span>
+            <span>{status.message}</span>
           </div>
         )}
       </section>
@@ -283,12 +240,12 @@ export function UpdateScreen() {
           confirmLabel="Download & update"
           cancelLabel="Not now"
           onCancel={() => setConfirmOpen(false)}
-          onConfirm={() => void runDownload()}
+          onConfirm={download}
         >
           <p>
             This downloads and installs{' '}
             <span className="font-semibold text-[var(--ba-text-secondary)]">
-              v{SIMULATED_LATEST_VERSION}
+              v{availableVersion}
             </span>
             , then restarts BlazeAudit.
           </p>

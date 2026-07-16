@@ -52,7 +52,7 @@ export default defineConfig(({ command }) => {
             rollupOptions: {
               // Native module can't be bundled — keep it external so it's
               // require()'d from node_modules at runtime.
-              external: ['better-sqlite3-multiple-ciphers', '@node-rs/argon2'],
+              external: ['better-sqlite3-multiple-ciphers', '@node-rs/argon2', 'electron-updater'],
               output: { format: 'es', entryFileNames: 'index.js' },
             },
           },
