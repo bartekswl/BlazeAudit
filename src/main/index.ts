@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { registerWindowIpc } from './ipc/window';
@@ -19,7 +20,24 @@ if (!app.isPackaged) {
   app.setPath('userData', path.join(process.cwd(), '.electron-dev'));
 }
 
+// Windows taskbar grouping / identity (keeps the window icon tied to BlazeAudit).
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.subralab.blazeaudit');
+}
+
 const dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function resolveAppIconPath(): string | undefined {
+  const candidates = [
+    path.join(process.cwd(), 'resources', 'app-icon.png'),
+    path.join(dirname, '../../resources/app-icon.png'),
+    path.join(process.resourcesPath, 'app-icon.png'),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return undefined;
+}
 
 // Set by vite-plugin-electron during `vite` dev; undefined in a packaged build.
 const devServerUrl = process.env.VITE_DEV_SERVER_URL;
@@ -62,6 +80,7 @@ const BOOT_SPLASH_HTML = `<!doctype html>
 const BOOT_SPLASH_URL = `data:text/html;charset=UTF-8,${encodeURIComponent(BOOT_SPLASH_HTML)}`;
 
 function createMainWindow(): BrowserWindow {
+  const icon = resolveAppIconPath();
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -70,6 +89,7 @@ function createMainWindow(): BrowserWindow {
     frame: false,
     backgroundColor: '#0a0a0a',
     show: false,
+    ...(icon ? { icon } : {}),
     webPreferences: {
       preload: path.join(dirname, '../preload/index.cjs'),
       contextIsolation: true,

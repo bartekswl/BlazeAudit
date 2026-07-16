@@ -1489,12 +1489,28 @@ const PRINT_OVERRIDES = `
     text-align: center !important;
   }
 
-  /* Control unit record — 22.2 */
+  /* Control unit record — 22.2 (PDF: stretch table + font to fill A4 page) */
+  .form-print-root .form-page-sheet--control-unit-record.form-page-sheet--fixed .form-page-body,
+  .form-print-root .form-page-sheet--control-unit-record.form-page-sheet--fixed .form-page-content--control-unit-record,
+  .form-print-root .form-page-sheet--control-unit-record.form-page-sheet--fixed .form-page-section:has(.cur-panel),
+  .form-print-root .form-page-sheet--control-unit-record.form-page-sheet--fixed .form-page-section:has(.cur-panel) > div,
+  .form-print-root .form-page-sheet--control-unit-record.form-page-sheet--fixed .form-page-section:has(.cur-panel) .form-element-frame--flush {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  .form-print-root .form-page-sheet--control-unit-record.form-page-sheet--fixed .form-page-section:has(.cur-panel) .form-page-section-title {
+    flex-shrink: 0 !important;
+    margin-bottom: 2pt !important;
+  }
   .form-print-root .cur-panel {
     --cur-line: 0.5px solid #64748b !important;
-    flex: 0 0 auto !important;
-    min-height: auto !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     max-height: none !important;
+    height: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
@@ -1502,29 +1518,37 @@ const PRINT_OVERRIDES = `
     border-radius: 0.625rem !important;
     border: 2pt solid #000000 !important;
     box-shadow: none !important;
-    font-size: 6.5pt !important;
-    line-height: 1.15 !important;
+    font-size: 7.75pt !important;
+    line-height: 1.12 !important;
     color: #171717 !important;
     background: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
   .form-print-root .cur-title-bar,
   .form-print-root .cur-ref-bar {
     background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%) !important;
     color: #ffffff !important;
     border-bottom: 0.5px solid #64748b !important;
+    flex-shrink: 0 !important;
+    padding: 1.5pt 3pt !important;
   }
   .form-print-root .cur-info-row {
     background: linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%) !important;
     border-bottom: 0.5px solid #64748b !important;
+    flex-shrink: 0 !important;
+    min-height: 0 !important;
+    padding: 1pt 3pt !important;
   }
   .form-print-root .cur-info-input,
   .form-print-root .cur-info-value {
     background: #ffffff !important;
+    min-height: 0 !important;
   }
   .form-print-root .cur-th,
   .form-print-root .cur-td {
     border-right: 0.5px solid #64748b !important;
-    padding: 0.5pt 1.5pt !important;
+    padding: 1pt 2pt !important;
   }
   .form-print-root .cur-row:not(:last-child) .cur-td,
   .form-print-root .cur-th {
@@ -1564,17 +1588,30 @@ const PRINT_OVERRIDES = `
     background: #ffffff !important;
   }
   .form-print-root .cur-table-wrap {
-    flex: 0 0 auto !important;
-    overflow: visible !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
   .form-print-root .cur-table {
     width: 100% !important;
+    height: 100% !important;
     table-layout: fixed !important;
-    font-size: 7.5pt !important;
+    font-size: 8.5pt !important;
+    border-collapse: collapse !important;
+  }
+  .form-print-root .cur-table tbody tr {
+    height: 1% !important;
+  }
+  .form-print-root .cur-td {
+    height: 1% !important;
+    vertical-align: middle !important;
   }
   .form-print-root .cur-footer-note {
+    flex-shrink: 0 !important;
     border-top: 0.5px solid #64748b !important;
     color: #475569 !important;
+    padding: 1.5pt 3pt !important;
+    font-size: 7pt !important;
   }
   .form-print-root .form-page-section:has(.cur-panel) .form-element-frame--flush {
     margin-top: 0 !important;
@@ -2300,10 +2337,10 @@ const PRINT_OVERRIDES = `
     flex-direction: column !important;
   }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.cur-panel) {
-    flex: 0 1 auto !important;
-    flex-shrink: 0 !important;
-    min-height: auto !important;
-    overflow: visible !important;
+    flex: 1 1 auto !important;
+    flex-shrink: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
   }
@@ -2335,9 +2372,9 @@ const PRINT_OVERRIDES = `
     flex-direction: column !important;
   }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.cur-panel) > div {
-    flex: 0 1 auto !important;
-    min-height: auto !important;
-    overflow: visible !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
   }
@@ -2357,8 +2394,8 @@ const PRINT_OVERRIDES = `
     min-height: auto !important;
   }
   .form-print-root .form-page-sheet--fixed:not(.form-page-sheet--landscape) .form-page-section:has(.cur-panel) .form-element-frame--flush {
-    flex: 0 1 auto !important;
-    min-height: auto !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
   }
   .form-print-root .form-page-sheet--fixed .form-element-frame--flush {
     flex: 1 1 auto !important;
@@ -2601,12 +2638,12 @@ const PRINT_OVERRIDES = `
     --idr-line: 0.5px solid #64748b;
     overflow: hidden !important;
     box-sizing: border-box !important;
-    font-size: 9pt !important;
+    font-size: 8.5pt !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-table {
     height: 100% !important;
-    font-size: 9pt !important;
+    font-size: 8.5pt !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-table thead {
@@ -2617,29 +2654,29 @@ const PRINT_OVERRIDES = `
     background: #b6d7a8 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    font-size: 9pt !important;
-    padding: 2pt 3pt !important;
+    font-size: 8.5pt !important;
+    padding: 2.5pt 2pt 1pt !important;
     vertical-align: bottom !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--horizontal {
     vertical-align: middle !important;
-    padding: 2pt 3pt !important;
+    padding: 2.5pt 2pt 1pt !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--horizontal .idr-th-text {
-    line-height: 1.15 !important;
+    line-height: 1.05 !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--vertical {
-    height: 26mm !important;
-    padding: 2pt 3pt !important;
+    height: 20mm !important;
+    padding: 2.5pt 1.5pt 1pt !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--vertical .idr-th-text {
-    max-height: 25mm !important;
-    font-size: 9pt !important;
-    line-height: 1.1 !important;
+    max-height: 18.5mm !important;
+    font-size: 8.5pt !important;
+    line-height: 1.05 !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-table tbody tr {
@@ -2650,7 +2687,7 @@ const PRINT_OVERRIDES = `
     height: 1% !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    padding: 1pt 3pt !important;
+    padding: 0 1.5pt !important;
     vertical-align: middle !important;
   }
 
@@ -2660,9 +2697,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-choice-value {
     min-height: 0 !important;
     height: 100% !important;
-    font-size: 9pt !important;
-    line-height: 1.1 !important;
-    padding: 0 !important;
+    font-size: 8.5pt !important;
+    line-height: 1.05 !important;
+    padding: 0 1pt !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-choice-cell,
@@ -2674,6 +2711,7 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-td--deviceLocation .idr-cell-value,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-td--deviceLocation .idr-cell-input {
     text-align: left !important;
+    justify-content: flex-start !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-td:not(.idr-td--deviceLocation) {
@@ -2683,6 +2721,7 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-td:not(.idr-td--deviceLocation) .idr-cell-value,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-td:not(.idr-td--deviceLocation) .idr-cell-input {
     text-align: center !important;
+    justify-content: center !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-row--alt .idr-td {
@@ -2711,7 +2750,7 @@ const PRINT_OVERRIDES = `
     border-right: none !important;
   }
 
-  /* 23.2 PDF column widths (screen/editor widths unchanged) */
+  /* 23.2 PDF column widths — keep Requires Service / Supervised Circuit readable */
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--deviceLocation,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--deviceLocation {
     width: 26% !important;
@@ -2724,12 +2763,12 @@ const PRINT_OVERRIDES = `
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--deviceType,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--deviceType {
-    width: 6% !important;
+    width: 5% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--requiresService,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--requiresService {
-    width: 6% !important;
+    width: 7% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--circuitNumber,
@@ -2744,32 +2783,47 @@ const PRINT_OVERRIDES = `
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--correctlyInstalled,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--correctlyInstalled {
-    width: 4% !important;
+    width: 3% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--measurements,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--measurements {
-    width: 5% !important;
+    width: 8% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--alarmConfirmed,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--alarmConfirmed {
-    width: 3% !important;
+    width: 4% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--annunciatorIndication,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--annunciatorIndication {
-    width: 4% !important;
+    width: 3% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--supervisedCircuitTrouble,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--supervisedCircuitTrouble {
-    width: 7% !important;
+    width: 5% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--comments,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--comments {
     width: 13% !important;
+  }
+
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--alarmConfirmed.idr-th--vertical
+    .idr-th-text {
+    white-space: pre-line !important;
+    line-height: 1.12 !important;
+  }
+
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--supervisedCircuitTrouble.idr-th--vertical {
+    padding-left: 2pt !important;
+    padding-right: 2pt !important;
   }
 
   .form-print-root
@@ -2850,8 +2904,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--circuit-fault-tolerance-test-sheet.form-page-sheet--landscape .cfts-th--banner {
     background: #1b6b2f !important;
     color: #ffffff !important;
-    font-size: 7.75pt !important;
-    padding: 1.5pt 3pt !important;
+    font-size: 9pt !important;
+    padding: 2pt 3pt !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -2859,8 +2913,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--circuit-fault-tolerance-test-sheet.form-page-sheet--landscape .cfts-th--sub {
     background: #b6d7a8 !important;
     color: #171717 !important;
-    font-size: 6.25pt !important;
-    padding: 1pt 3pt !important;
+    font-size: 7.75pt !important;
+    padding: 1.5pt 3pt !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }

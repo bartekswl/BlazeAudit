@@ -1,6 +1,6 @@
-export const INDIVIDUAL_DEVICE_RECORD_ROW_COUNT = 19;
+export const INDIVIDUAL_DEVICE_RECORD_ROW_COUNT = 22;
 
-export const INDIVIDUAL_DEVICE_RECORD_BODY_ROW_HEIGHT = '1rem';
+export const INDIVIDUAL_DEVICE_RECORD_BODY_ROW_HEIGHT = '0.8125rem';
 
 export type IndividualDeviceRecordChoice = 'yes' | 'no' | 'na';
 
@@ -33,14 +33,14 @@ export const INDIVIDUAL_DEVICE_RECORD_COLUMNS: readonly IndividualDeviceRecordCo
   {
     key: 'deviceLocation',
     title: 'Device Location',
-    widthPercent: 32,
+    widthPercent: 26,
     orientation: 'horizontal',
     kind: 'text',
   },
   {
     key: 'annunciationLabel',
     title: 'Annunciation Label or LCD Text Displayed (if applicable)',
-    widthPercent: 9,
+    widthPercent: 10,
     orientation: 'horizontal',
     kind: 'text',
   },
@@ -54,21 +54,21 @@ export const INDIVIDUAL_DEVICE_RECORD_COLUMNS: readonly IndividualDeviceRecordCo
   {
     key: 'requiresService',
     title: 'Requires Service, Repairs, Cleaning or Missing',
-    widthPercent: 3,
+    widthPercent: 7,
     orientation: 'vertical',
     kind: 'choice',
   },
   {
     key: 'circuitNumber',
     title: 'Circuit Number or Address',
-    widthPercent: 9,
+    widthPercent: 10,
     orientation: 'vertical',
     kind: 'text',
   },
   {
     key: 'fireZone',
     title: 'Annunciated FIRE ZONE',
-    widthPercent: 5,
+    widthPercent: 6,
     orientation: 'vertical',
     kind: 'text',
   },
@@ -88,8 +88,8 @@ export const INDIVIDUAL_DEVICE_RECORD_COLUMNS: readonly IndividualDeviceRecordCo
   },
   {
     key: 'alarmConfirmed',
-    title: 'Alarm/Activation Confirmed',
-    widthPercent: 3,
+    title: 'Alarm /\nActivation\nConfirmed',
+    widthPercent: 4,
     orientation: 'vertical',
     kind: 'choice',
   },
@@ -103,14 +103,14 @@ export const INDIVIDUAL_DEVICE_RECORD_COLUMNS: readonly IndividualDeviceRecordCo
   {
     key: 'supervisedCircuitTrouble',
     title: 'Supervised Circuit Trouble Signal',
-    widthPercent: 3,
+    widthPercent: 5,
     orientation: 'vertical',
     kind: 'choice',
   },
   {
     key: 'comments',
     title: 'Comments',
-    widthPercent: 17,
+    widthPercent: 13,
     orientation: 'horizontal',
     kind: 'text',
   },
