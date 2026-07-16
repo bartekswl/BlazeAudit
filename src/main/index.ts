@@ -10,6 +10,7 @@ import { registerInspectionsIpc } from './ipc/inspections';
 import { registerProfileIpc } from './ipc/profile';
 import { registerNameBadgesIpc } from './ipc/nameBadges';
 import { registerAuthIpc } from './ipc/auth';
+import { registerUpdateIpc } from './update/updater';
 import { closeDatabase } from './db/connection';
 import { IpcChannels } from '../shared/ipc';
 
@@ -143,6 +144,7 @@ void app.whenReady().then(() => {
   registerInspectionsIpc();
   registerProfileIpc();
   registerNameBadgesIpc();
+  registerUpdateIpc();
   createMainWindow();
 
   app.on('activate', () => {

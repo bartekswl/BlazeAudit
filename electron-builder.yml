@@ -1,0 +1,50 @@
+appId: com.subralab.blazeaudit
+productName: BlazeAudit
+copyright: Copyright © SubraLab
+
+directories:
+  output: release
+  buildResources: build
+
+# App source that goes inside the asar. Production node_modules (including the
+# native better-sqlite3-multiple-ciphers / @node-rs/argon2 prebuilds) are added
+# automatically by electron-builder from package.json "dependencies".
+files:
+  - dist/**
+  - dist-electron/**
+  - package.json
+  - '!**/*.map'
+
+# Native modules must live on disk (not inside the asar) so they can be loaded.
+asarUnpack:
+  - '**/node_modules/better-sqlite3-multiple-ciphers/**'
+  - '**/node_modules/@node-rs/argon2/**'
+  - '**/node_modules/@node-rs/argon2-*/**'
+
+# Keep the runtime window icon available at process.resourcesPath/app-icon.png
+# (see resolveAppIconPath in src/main/index.ts).
+extraResources:
+  - from: resources/app-icon.png
+    to: app-icon.png
+
+win:
+  target:
+    - nsis
+  icon: resources/app-icon.png
+  # Unsigned for now — SmartScreen may warn until a code-signing cert is added.
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  artifactName: ${productName}-Setup-${version}.${ext}
+  shortcutName: BlazeAudit
+
+# electron-updater reads releases from this public GitHub repo.
+publish:
+  provider: github
+  owner: bartekswl
+  repo: BlazeAudit
+  releaseType: release

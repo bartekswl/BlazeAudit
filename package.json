@@ -1,7 +1,7 @@
 {
   "name": "blazeaudit",
   "productName": "BlazeAudit",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Offline fire-inspection documentation desktop app by SubraLab.",
   "author": "SubraLab",
   "license": "SEE LICENSE IN README.md",
@@ -21,11 +21,15 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "rebuild:native": "node scripts/rebuild-native.mjs",
+    "pack:dir": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder --publish never",
+    "release": "npm run build && electron-builder --publish always",
     "postinstall": "node scripts/rebuild-native.mjs"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.0.2",
     "better-sqlite3-multiple-ciphers": "^12.10.0",
+    "electron-updater": "^6.8.9",
     "lucide-react": "^1.17.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
@@ -40,6 +44,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
     "electron": "^41.7.1",
+    "electron-builder": "^26.15.3",
     "eslint": "^9.0.0",
     "prettier": "^3.3.0",
     "tailwindcss": "^4.3.0",

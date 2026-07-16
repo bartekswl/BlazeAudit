@@ -33,6 +33,7 @@ import type {
   InspectorInput,
 } from '../shared/profile';
 import type { NameBadge, NameBadgeInput } from '../shared/nameBadges';
+import type { UpdateStatus } from '../shared/update';
 import type { Client, ClientInput } from '../shared/types';
 
 const api = {
@@ -50,6 +51,17 @@ const api = {
   },
   app: {
     getVersion: (): Promise<string> => ipcRenderer.invoke(IpcChannels.appVersion),
+  },
+  update: {
+    check: (): Promise<void> => ipcRenderer.invoke(IpcChannels.updateCheck),
+    download: (): Promise<void> => ipcRenderer.invoke(IpcChannels.updateDownload),
+    install: (): Promise<void> => ipcRenderer.invoke(IpcChannels.updateInstall),
+    /** Subscribe to update lifecycle status. Returns an unsubscribe function. */
+    onStatus: (callback: (status: UpdateStatus) => void): (() => void) => {
+      const listener = (_event: unknown, status: UpdateStatus) => callback(status);
+      ipcRenderer.on(IpcChannels.updateStatus, listener);
+      return () => ipcRenderer.removeListener(IpcChannels.updateStatus, listener);
+    },
   },
   clients: {
     list: (): Promise<Client[]> => ipcRenderer.invoke(IpcChannels.clientsList),
