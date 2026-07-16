@@ -73,6 +73,8 @@ function BlockInspectionEditorInner({
 
   const [inspectedAt, setInspectedAt] = useState(inspection.inspectedAt ?? '');
 
+  const [projectNumber, setProjectNumber] = useState(inspection.projectNumber ?? '');
+
   const [cadence, setCadence] = useState(
 
     (CADENCE_PRESETS.some((p) => p.id === inspection.cadence)
@@ -115,6 +117,8 @@ function BlockInspectionEditorInner({
 
     setInspectedAt(inspection.inspectedAt ?? '');
 
+    setProjectNumber(inspection.projectNumber ?? '');
+
     setCadence(
 
       (CADENCE_PRESETS.some((p) => p.id === inspection.cadence)
@@ -127,7 +131,7 @@ function BlockInspectionEditorInner({
 
     setDocument(blockDocument);
 
-  }, [inspection.id, inspection.updatedAt, blockDocument, inspection.title, inspection.status, inspection.inspector, inspection.inspectedAt, inspection.cadence]);
+  }, [inspection.id, inspection.updatedAt, blockDocument, inspection.title, inspection.status, inspection.inspector, inspection.inspectedAt, inspection.projectNumber, inspection.cadence]);
 
 
 
@@ -169,13 +173,15 @@ function BlockInspectionEditorInner({
 
         inspectedAt: inspectedAt || null,
 
+        projectNumber: projectNumber.trim(),
+
         cadence,
 
       };
 
     },
 
-    [title, status, inspector, inspectedAt, cadence, document, inspection.clientId],
+    [title, status, inspector, inspectedAt, projectNumber, cadence, document, inspection.clientId],
 
   );
 
@@ -214,6 +220,8 @@ function BlockInspectionEditorInner({
           document: payload.document,
 
           inspectedAt: payload.inspectedAt,
+
+          projectNumber: payload.projectNumber,
 
           cadence: payload.cadence,
 
@@ -550,6 +558,30 @@ function BlockInspectionEditorInner({
                 markDirty();
 
               }}
+
+            />
+
+          </HeaderField>
+
+          <HeaderField label="Project Number">
+
+            <input
+
+              className={compactInputCls}
+
+              type="text"
+
+              value={projectNumber}
+
+              onChange={(e) => {
+
+                setProjectNumber(e.target.value);
+
+                markDirty();
+
+              }}
+
+              placeholder="—"
 
             />
 

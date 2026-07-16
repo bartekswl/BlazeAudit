@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FileText, Pencil, Plus } from 'lucide-react';
+import { ArrowDownUp, FileText, Pencil, Plus, Search, X } from 'lucide-react';
 import { formatAddress } from '../../../shared/address';
 import { cadenceLabel, isOverdue } from '../../../shared/cadence';
-import type { InspectionSummary } from '../../../shared/inspection';
+import { sortInspectionsByDate, type InspectionSummary } from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
 import { cn } from '../../lib/cn';
 import { InlineLoader } from '../../components/LoadingOverlay';
 import { ListPagination } from '../../components/ListPagination';
 import { paginateItems } from '../../lib/pagination';
+
+const filterInputCls =
+  'rounded-md border border-white/10 bg-neutral-950/60 text-[11px] text-neutral-300 placeholder:text-neutral-600 focus:border-flame-500/40 focus:outline-none';
 
 export function CustomerDetailScreen({
   clientId,
@@ -30,6 +33,10 @@ export function CustomerDetailScreen({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [listPage, setListPage] = useState(1);
+  const [dateSort, setDateSort] = useState<'newest' | 'oldest'>('newest');
+  const [docSearch, setDocSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -57,11 +64,32 @@ export function CustomerDetailScreen({
 
   useEffect(() => {
     setListPage(1);
-  }, [clientId]);
+  }, [clientId, dateSort, docSearch, dateFrom, dateTo]);
+
+  const filteredInspections = useMemo(() => {
+    const q = docSearch.trim().toLowerCase();
+    return inspections.filter((row) => {
+      if (q) {
+        const matches =
+          row.title.toLowerCase().includes(q) || row.projectNumber.toLowerCase().includes(q);
+        if (!matches) return false;
+      }
+      if (dateFrom && (!row.inspectedAt || row.inspectedAt < dateFrom)) return false;
+      if (dateTo && (!row.inspectedAt || row.inspectedAt > dateTo)) return false;
+      return true;
+    });
+  }, [inspections, docSearch, dateFrom, dateTo]);
+
+  const hasActiveFilters = Boolean(docSearch || dateFrom || dateTo);
+
+  const sortedInspections = useMemo(
+    () => sortInspectionsByDate(filteredInspections, dateSort),
+    [filteredInspections, dateSort],
+  );
 
   const pagedInspections = useMemo(
-    () => paginateItems(inspections, listPage),
-    [inspections, listPage],
+    () => paginateItems(sortedInspections, listPage),
+    [sortedInspections, listPage],
   );
 
   if (loading) {
@@ -75,15 +103,15 @@ export function CustomerDetailScreen({
   const fullAddress = formatAddress(client);
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
-      <section className="shrink-0 rounded-lg border border-white/5 bg-white/[0.02] px-4 py-3">
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <section className="shrink-0 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="min-w-0 truncate text-base font-semibold text-neutral-100">{client.name}</h2>
-          <div className="flex shrink-0 gap-2">
+          <h2 className="min-w-0 truncate text-sm font-semibold text-neutral-100">{client.name}</h2>
+          <div className="flex shrink-0 gap-1.5">
             <button
               type="button"
               onClick={() => onNewInspection(clientId)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-flame-500/30 bg-flame-500/10 px-2.5 py-1.5 text-xs text-flame-300 transition-colors hover:bg-flame-500/20"
+              className="inline-flex items-center gap-1 rounded-md border border-flame-500/30 bg-flame-500/10 px-2 py-1 text-xs text-flame-300 transition-colors hover:bg-flame-500/20"
             >
               <Plus className="size-3.5" />
               New inspection
@@ -91,7 +119,7 @@ export function CustomerDetailScreen({
             <button
               type="button"
               onClick={() => onEdit(client)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-2.5 py-1.5 text-xs text-neutral-300 transition-colors hover:bg-white/5 hover:text-neutral-100"
+              className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-xs text-neutral-300 transition-colors hover:bg-white/5 hover:text-neutral-100"
             >
               <Pencil className="size-3.5" />
               Edit
@@ -99,32 +127,27 @@ export function CustomerDetailScreen({
           </div>
         </div>
 
-        <dl className="mt-2.5 grid grid-cols-2 gap-x-6 gap-y-2">
+        <dl className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-3 lg:grid-cols-4">
           <DetailField label="Contact" value={client.contactName} />
           <DetailField label="Phone" value={client.phone} />
           <DetailField label="Email" value={client.email} />
           <DetailField label="Address" value={fullAddress} />
           <DetailField label="Owner / manager" value={client.ownerManagerName} />
           <DetailField label="Owner / manager phone" value={client.ownerManagerPhone} />
-          <DetailField label="Signal receiving center" value={client.signalReceivingCenterName} />
-          <DetailField
-            label="Signal receiving center phone"
-            value={client.signalReceivingCenterPhone}
-          />
         </dl>
 
         {client.notes.trim() && (
-          <p className="mt-2 border-t border-white/5 pt-2 text-xs text-neutral-500">
+          <p className="mt-1.5 border-t border-white/5 pt-1.5 text-[11px] text-neutral-500">
             <span className="font-medium text-neutral-400">Notes · </span>
             {client.notes.trim()}
           </p>
         )}
 
-        <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-white/5 pt-2.5 text-[11px] text-neutral-500">
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 border-t border-white/5 pt-1.5 text-[11px] text-neutral-500">
           <Stat label="Documents" value={String(stats?.documentCount ?? 0)} />
-          <Stat label="Last document date" value={stats?.lastDocumentDate ?? '—'} />
+          <Stat label="Last document" value={stats?.lastDocumentDate ?? '—'} />
           <Stat
-            label="Next inspection due"
+            label="Next due"
             value={
               stats?.nextInspectionDue
                 ? `${stats.nextInspectionDue}${isOverdue(stats.nextInspectionDue) ? ' (overdue)' : ''}`
@@ -135,9 +158,68 @@ export function CustomerDetailScreen({
       </section>
 
       <section className="flex min-h-0 flex-1 flex-col">
-        <h3 className="mb-2 shrink-0 text-xs font-medium uppercase tracking-wide text-neutral-500">
-          Documents
-        </h3>
+        <div className="mb-1.5 flex shrink-0 flex-wrap items-center justify-between gap-2">
+          <h3 className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+            Documents
+          </h3>
+          {inspections.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <div className="relative w-36">
+                <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-neutral-500" />
+                <input
+                  type="text"
+                  value={docSearch}
+                  onChange={(e) => setDocSearch(e.target.value)}
+                  placeholder="Name or Project #"
+                  className={cn(filterInputCls, 'w-full py-1 pl-6 pr-2')}
+                />
+              </div>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                title="From date"
+                className={cn(filterInputCls, 'w-[6.25rem] px-1.5 py-1')}
+              />
+              <span className="text-[10px] text-neutral-600">–</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                title="To date"
+                className={cn(filterInputCls, 'w-[6.25rem] px-1.5 py-1')}
+              />
+              {hasActiveFilters ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDocSearch('');
+                    setDateFrom('');
+                    setDateTo('');
+                  }}
+                  aria-label="Clear document filters"
+                  title="Clear filters"
+                  className="rounded-md p-1 text-neutral-500 transition-colors hover:bg-white/5 hover:text-neutral-200"
+                >
+                  <X className="size-3.5" />
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setDateSort((prev) => (prev === 'newest' ? 'oldest' : 'newest'))}
+                className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[11px] text-neutral-400 transition-colors hover:bg-white/5 hover:text-neutral-200"
+                title={
+                  dateSort === 'newest'
+                    ? 'Showing newest first — click for oldest first'
+                    : 'Showing oldest first — click for newest first'
+                }
+              >
+                <ArrowDownUp className="size-3.5" />
+                {dateSort === 'newest' ? 'Newest first' : 'Oldest first'}
+              </button>
+            </div>
+          ) : null}
+        </div>
         {inspections.length === 0 ? (
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-white/10 text-center">
             <div className="grid size-10 place-items-center rounded-lg bg-white/5 text-neutral-500">
@@ -152,44 +234,64 @@ export function CustomerDetailScreen({
               Create first inspection
             </button>
           </div>
+        ) : sortedInspections.length === 0 ? (
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-white/10 text-center">
+            <div className="grid size-10 place-items-center rounded-lg bg-white/5 text-neutral-500">
+              <FileText className="size-5" />
+            </div>
+            <p className="text-sm text-neutral-400">No documents match your filters.</p>
+          </div>
         ) : (
           <>
-            <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+            <div className="mb-1 grid shrink-0 grid-cols-[minmax(0,1fr)_6.5rem_7rem_auto] gap-2 px-3 text-[10px] font-medium uppercase tracking-wide text-neutral-600">
+              <span>Name</span>
+              <span>Date</span>
+              <span>Project #</span>
+              <span className="w-16 text-right">Status</span>
+            </div>
+            <ul className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
               {pagedInspections.items.map((row) => (
-              <li key={row.id}>
-                <button
-                  type="button"
-                  onClick={() => onOpenInspection(row.id)}
-                  className="flex w-full items-center gap-3 rounded-lg border border-white/5 bg-neutral-950/40 px-3 py-2.5 text-left transition-colors hover:border-white/10 hover:bg-white/[0.03]"
-                >
-                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-white/5 text-neutral-500">
-                    <FileText className="size-4" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-neutral-100">
-                      {row.title}
-                    </span>
-                    <span className="block truncate text-xs text-neutral-500">
-                      {row.status}
-                      {row.inspectedAt ? ` · ${row.inspectedAt}` : ''}
-                      {row.cadence ? ` · ${cadenceLabel(row.cadence)}` : ''}
-                      {row.nextDueAt
-                        ? ` · due ${row.nextDueAt}${isOverdue(row.nextDueAt) ? ' (overdue)' : ''}`
-                        : ''}
-                    </span>
-                  </span>
-                  <span
-                    className={cn(
-                      'shrink-0 rounded-full px-2 py-0.5 text-[10px]',
-                      row.status === 'complete'
-                        ? 'border border-emerald-500/30 text-emerald-300'
-                        : 'border border-amber-500/30 text-amber-300',
-                    )}
+                <li key={row.id}>
+                  <button
+                    type="button"
+                    onClick={() => onOpenInspection(row.id)}
+                    className="grid w-full grid-cols-[minmax(0,1fr)_6.5rem_7rem_auto] items-center gap-2 rounded-lg border border-white/5 bg-neutral-950/40 px-3 py-2 text-left transition-colors hover:border-white/10 hover:bg-white/[0.03]"
                   >
-                    {row.status}
-                  </span>
-                </button>
-              </li>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-neutral-100">
+                        {row.title}
+                      </span>
+                      <span className="block truncate text-[11px] text-neutral-500">
+                        {row.cadence ? cadenceLabel(row.cadence) : ''}
+                        {row.nextDueAt
+                          ? ` · due ${row.nextDueAt}${isOverdue(row.nextDueAt) ? ' (overdue)' : ''}`
+                          : ''}
+                      </span>
+                    </span>
+                    <span className="truncate text-xs text-neutral-400">
+                      {row.inspectedAt || '—'}
+                    </span>
+                    <span
+                      className={cn(
+                        'truncate text-xs',
+                        row.projectNumber.trim() ? 'text-neutral-300' : 'text-neutral-600',
+                      )}
+                      title={row.projectNumber.trim() || undefined}
+                    >
+                      {row.projectNumber.trim() || '—'}
+                    </span>
+                    <span
+                      className={cn(
+                        'w-16 shrink-0 rounded-full px-2 py-0.5 text-center text-[10px]',
+                        row.status === 'complete'
+                          ? 'border border-emerald-500/30 text-emerald-300'
+                          : 'border border-amber-500/30 text-amber-300',
+                      )}
+                    >
+                      {row.status}
+                    </span>
+                  </button>
+                </li>
               ))}
             </ul>
             <ListPagination

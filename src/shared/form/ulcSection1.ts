@@ -48,7 +48,7 @@ export function formatBusinessCompanyDisplay(
 export interface UlcSection1Value {
   dateOfService: string;
   lastServiceDate: string;
-  workOrderNumber: string;
+  projectNumber: string;
   stageSingle: boolean;
   stageTwo: boolean;
   stageOther: boolean;
@@ -82,7 +82,7 @@ export function emptyUlcSection1Value(): UlcSection1Value {
   return {
     dateOfService: '',
     lastServiceDate: '',
-    workOrderNumber: '',
+    projectNumber: '',
     stageSingle: false,
     stageTwo: false,
     stageOther: false,
@@ -150,6 +150,10 @@ export function normalizeUlcSection1Value(value: unknown): UlcSection1Value {
     } else if (typeof incoming === 'string') {
       base[key] = incoming as never;
     }
+  }
+  // Legacy field rename: Work Order Number → Project Number
+  if (!base.projectNumber.trim() && typeof record.workOrderNumber === 'string') {
+    base.projectNumber = record.workOrderNumber;
   }
   return base;
 }

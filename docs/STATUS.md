@@ -7,7 +7,7 @@
 | **Status** | Living snapshot — update as the project evolves |
 | **Last updated** | 2026-07-16 |
 | **HEAD** | `4519740` on `main` (`github.com/bartekswl/BlazeAudit`) |
-| **Schema** | SQLite `user_version` **11** (`LATEST_SCHEMA_VERSION`) |
+| **Schema** | SQLite `user_version` **12** (`LATEST_SCHEMA_VERSION`) |
 | **Current focus** | ULC S536 built-in form polish (template · document · PDF parity) |
 | **Roadmap next** | Phase 7 (encrypted backups) — not started; form work is active ahead of it |
 
@@ -74,7 +74,7 @@ Do not bump Electron without a matching ABI prebuild.
 | --- | --- |
 | [`PRD.md`](PRD.md) | Product requirements |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Process model, modules |
-| [`DATA_MODEL.md`](DATA_MODEL.md) | SQLite / document sketches (may lag schema v11) |
+| [`DATA_MODEL.md`](DATA_MODEL.md) | SQLite / document sketches (may lag schema v12) |
 | [`SECURITY.md`](SECURITY.md) | Activation, key model, login |
 | [`TEMPLATES.md`](TEMPLATES.md) | Block template authoring / portability |
 | [`FORM_ELEMENT_BLUEPRINT.md`](FORM_ELEMENT_BLUEPRINT.md) | **Required** for ULC form element work |
@@ -128,6 +128,9 @@ Controls on `FormPageCanvas` (`pageExtraControls`); add/remove in document edito
 - **Calendar** — month grid (`features/calendar/`).
 - **Name Badges** — CRUD + PDF sheet (`features/nameBadges/`, schema v11
   `name_badges` table).
+- **Project number** (schema v12) — `inspections.project_number`; entered on create,
+  editable in document top tile; syncs to ULC §1 **Project Number** (renamed from
+  Work Order Number). Document lists sort by date (newest first, toggle).
 - **Startup** — auth shell first; lazy `App` + per-screen lazy imports; avoid
   heavy form/PDF modules until needed.
 - **App icon** — `resources/app-icon.png`; set on `BrowserWindow` +

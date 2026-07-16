@@ -18,8 +18,11 @@ import {
   scrollToFormSection,
   setElementValue,
   syncFormDocumentInspectionDate,
+  syncFormDocumentProjectNumber,
+  extractFormDocumentProjectNumber,
   migrateFormInspectionPowerSupplyLayout,
   migrateFormInspectionIdrRowGaps,
+  normalizeUlcSection1Value,
   type FormInspectionDocument,
   type RepeatableFormPageKind,
 } from '../../../shared/form';
@@ -64,17 +67,25 @@ function FormInspectionEditorInner({
   const [title] = useState(inspection.title);
   const [status, setStatus] = useState<InspectionStatus>(inspection.status);
   const [inspectedAt, setInspectedAt] = useState(inspection.inspectedAt ?? '');
+  const [projectNumber, setProjectNumber] = useState(() => {
+    const fromDb = inspection.projectNumber?.trim() ?? '';
+    if (fromDb) return fromDb;
+    return extractFormDocumentProjectNumber(formDocInitial);
+  });
   const [cadence, setCadence] = useState(
     (CADENCE_PRESETS.some((p) => p.id === inspection.cadence)
       ? inspection.cadence
       : 'annual') as CadencePreset,
   );
-  const [formDoc, setFormDoc] = useState<FormInspectionDocument>(() =>
-    syncFormDocumentInspectionDate(
-      migrateFormInspectionIdrRowGaps(migrateFormInspectionPowerSupplyLayout(formDocInitial)),
-      inspection.inspectedAt ?? null,
-    ),
-  );
+  const [formDoc, setFormDoc] = useState<FormInspectionDocument>(() => {
+    const migrated = migrateFormInspectionIdrRowGaps(
+      migrateFormInspectionPowerSupplyLayout(formDocInitial),
+    );
+    const withDate = syncFormDocumentInspectionDate(migrated, inspection.inspectedAt ?? null);
+    const initialProject =
+      inspection.projectNumber?.trim() || extractFormDocumentProjectNumber(withDate);
+    return syncFormDocumentProjectNumber(withDate, initialProject);
+  });
   const [context, setContext] = useState<DocumentContext | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -84,7 +95,11 @@ function FormInspectionEditorInner({
     const migrated = migrateFormInspectionIdrRowGaps(
       migrateFormInspectionPowerSupplyLayout(formDocInitial),
     );
-    return migrated !== formDocInitial;
+    const withDate = syncFormDocumentInspectionDate(migrated, inspection.inspectedAt ?? null);
+    const initialProject =
+      inspection.projectNumber?.trim() || extractFormDocumentProjectNumber(withDate);
+    const synced = syncFormDocumentProjectNumber(withDate, initialProject);
+    return synced !== formDocInitial;
   });
   const [pendingPageRemove, setPendingPageRemove] = useState<PendingPageRemove | null>(null);
 
@@ -108,7 +123,9 @@ function FormInspectionEditorInner({
   const save = useCallback(async () => {
     setSaveState('saving');
     setError(null);
-    const documentToSave = syncFormDocumentInspectionDate(formDoc, inspectedAt || null);
+    const trimmedProject = projectNumber.trim();
+    let documentToSave = syncFormDocumentInspectionDate(formDoc, inspectedAt || null);
+    documentToSave = syncFormDocumentProjectNumber(documentToSave, trimmedProject);
     if (documentToSave !== formDoc) {
       setFormDoc(documentToSave);
     }
@@ -119,6 +136,7 @@ function FormInspectionEditorInner({
         inspector: '',
         document: documentToSave,
         inspectedAt: inspectedAt || null,
+        projectNumber: trimmedProject,
         cadence,
       });
       onSaved(saved);
@@ -128,7 +146,7 @@ function FormInspectionEditorInner({
       setError(e instanceof Error ? e.message : 'Save failed.');
       setSaveState('error');
     }
-  }, [inspection.id, title, status, formDoc, inspectedAt, cadence, onSaved]);
+  }, [inspection.id, title, status, formDoc, inspectedAt, projectNumber, cadence, onSaved]);
 
   const markDirty = useCallback(() => {
     setIsDirty(true);
@@ -139,6 +157,13 @@ function FormInspectionEditorInner({
   markDirtyRef.current = markDirty;
 
   const onValueChange = useCallback((elementId: string, value: unknown) => {
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      ('projectNumber' in value || 'workOrderNumber' in value)
+    ) {
+      setProjectNumber(normalizeUlcSection1Value(value).projectNumber);
+    }
     setFormDoc((prev) => ({
       ...prev,
       values: setElementValue(prev.values, elementId, value),
@@ -249,6 +274,12 @@ function FormInspectionEditorInner({
     markDirtyRef.current();
   }, []);
 
+  const onProjectNumberChange = useCallback((next: string) => {
+    setProjectNumber(next);
+    setFormDoc((prev) => syncFormDocumentProjectNumber(prev, next));
+    markDirtyRef.current();
+  }, []);
+
   const editorTemplate = useMemo(
     () =>
       context?.template
@@ -330,13 +361,25 @@ function FormInspectionEditorInner({
       {pdfMessage && <div className="ba-alert ba-alert--success shrink-0">{pdfMessage}</div>}
 
       <div className="shrink-0 rounded-lg border border-[var(--ba-panel-border)] bg-[var(--ba-panel-bg)] p-2">
-        <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 gap-y-1.5">
+        <div className="grid grid-cols-[minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 gap-y-1.5">
           <div className="min-w-0">
             <span className="mb-0.5 block text-[10px] text-[var(--ba-text-muted)]">Title</span>
             <p className={`${compactFieldCls} truncate font-medium text-[var(--ba-text-primary)]`}>
               {title}
             </p>
           </div>
+          <label className="block min-w-0">
+            <span className="mb-0.5 block text-[10px] text-[var(--ba-text-muted)]">
+              Project Number
+            </span>
+            <input
+              type="text"
+              className={compactFieldCls}
+              value={projectNumber}
+              onChange={(e) => onProjectNumberChange(e.target.value)}
+              placeholder="—"
+            />
+          </label>
           <label className="block min-w-0">
             <span className="mb-0.5 block text-[10px] text-[var(--ba-text-muted)]">Date</span>
             <input

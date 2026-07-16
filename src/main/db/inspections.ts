@@ -11,6 +11,7 @@ import {
   isFormInspectionDocument,
   migrateFormInspectionIdrRowGaps,
   migrateFormInspectionPowerSupplyLayout,
+  syncFormDocumentProjectNumber,
   validateFormInspectionDocument,
   type FormInspectionDocument,
 } from '../../shared/form';
@@ -40,6 +41,7 @@ interface InspectionRow {
   inspector: string;
   document: string;
   inspected_at: string | null;
+  project_number: string;
   cadence: string;
   next_due_at: string | null;
   created_at: string;
@@ -90,6 +92,7 @@ function toInspection(row: InspectionRow): Inspection {
     inspector: row.inspector,
     document: parseInspectionDocument(row.document),
     inspectedAt: row.inspected_at,
+    projectNumber: row.project_number ?? '',
     cadence: row.cadence,
     nextDueAt: row.next_due_at,
     createdAt: row.created_at,
@@ -106,6 +109,7 @@ function toSummary(row: InspectionRow): InspectionSummary {
     status: row.status as InspectionSummary['status'],
     inspector: row.inspector,
     inspectedAt: row.inspected_at,
+    projectNumber: row.project_number ?? '',
     cadence: row.cadence,
     nextDueAt: row.next_due_at,
     updatedAt: row.updated_at,
@@ -132,6 +136,7 @@ function normalizeInput(input: InspectionInput, existingClientId?: string) {
   if (!title) throw new Error('Inspection title is required.');
 
   const inspectedAt = input.inspectedAt?.trim() || null;
+  const projectNumber = input.projectNumber?.trim() ?? '';
   const cadence = (input.cadence?.trim() || 'annual') as Cadence;
   const nextDueAt =
     input.status === 'complete' ? computeNextDueAt(inspectedAt, cadence) : null;
@@ -141,16 +146,20 @@ function normalizeInput(input: InspectionInput, existingClientId?: string) {
     if (!result.ok) throw new Error(result.errors.join(' '));
     const clientId = existingClientId ?? result.document.clientId;
     if (!clientId) throw new Error('Inspection must be linked to a client.');
-    const document: FormInspectionDocument = {
-      ...result.document,
-      clientId,
-    };
+    const document: FormInspectionDocument = syncFormDocumentProjectNumber(
+      {
+        ...result.document,
+        clientId,
+      },
+      projectNumber,
+    );
     return {
       title,
       status: input.status,
       inspector: input.inspector?.trim() ?? '',
       document,
       inspectedAt,
+      projectNumber,
       cadence,
       nextDueAt,
     };
@@ -178,22 +187,23 @@ function normalizeInput(input: InspectionInput, existingClientId?: string) {
     inspector: input.inspector?.trim() ?? '',
     document,
     inspectedAt,
+    projectNumber,
     cadence,
     nextDueAt,
   };
 }
 
+const listOrderBy = `ORDER BY (i.inspected_at IS NULL OR i.inspected_at = ''), i.inspected_at DESC, i.updated_at DESC`;
+
 export function listInspections(options?: { clientId?: string }): InspectionSummary[] {
   const db = getDatabase();
   if (options?.clientId) {
     const rows = db
-      .prepare(`${summarySelect} WHERE i.client_id = ? ORDER BY i.updated_at DESC`)
+      .prepare(`${summarySelect} WHERE i.client_id = ? ${listOrderBy}`)
       .all(options.clientId) as InspectionRow[];
     return rows.map(toSummary);
   }
-  const rows = db
-    .prepare(`${summarySelect} ORDER BY i.updated_at DESC`)
-    .all() as InspectionRow[];
+  const rows = db.prepare(`${summarySelect} ${listOrderBy}`).all() as InspectionRow[];
   return rows.map(toSummary);
 }
 
@@ -216,10 +226,15 @@ export function createInspectionFromTemplate(input: CreateInspectionInput): Insp
   let document: InspectionDocument;
   let defaultTitle: string;
 
+  const projectNumber = input.projectNumber?.trim() ?? '';
+
   if (input.templateKind === 'builtin') {
     const builtin = builtinTemplates.getBuiltinTemplate(input.templateId);
     if (!builtin) throw new Error(`Template not found: builtin:${input.templateId}`);
-    document = createFormInspectionDocument(builtin.form, input.clientId);
+    document = syncFormDocumentProjectNumber(
+      createFormInspectionDocument(builtin.form, input.clientId),
+      projectNumber,
+    );
     defaultTitle = `${builtin.name} — ${client.name}`;
   } else {
     const template = templateRegistry.getTemplate(input.templateId, input.templateKind);
@@ -240,10 +255,10 @@ export function createInspectionFromTemplate(input: CreateInspectionInput): Insp
     .prepare(
       `INSERT INTO inspections (
          id, client_id, template_kind, template_id, title, status, inspector, document,
-         inspected_at, cadence, next_due_at, created_at, updated_at
+         inspected_at, project_number, cadence, next_due_at, created_at, updated_at
        ) VALUES (
          @id, @clientId, @templateKind, @templateId, @title, 'draft', @inspector, @document,
-         @inspectedAt, @cadence, NULL, @createdAt, @updatedAt
+         @inspectedAt, @projectNumber, @cadence, NULL, @createdAt, @updatedAt
        )`,
     )
     .run({
@@ -255,6 +270,7 @@ export function createInspectionFromTemplate(input: CreateInspectionInput): Insp
       inspector: input.inspector?.trim() ?? '',
       document: JSON.stringify(document),
       inspectedAt,
+      projectNumber,
       cadence,
       createdAt: now,
       updatedAt: now,
@@ -297,10 +313,10 @@ export function createInspectionFromPdfExport(payload: PdfInspectionExport): Ins
     .prepare(
       `INSERT INTO inspections (
          id, client_id, template_kind, template_id, title, status, inspector, document,
-         inspected_at, cadence, next_due_at, created_at, updated_at
+         inspected_at, project_number, cadence, next_due_at, created_at, updated_at
        ) VALUES (
          @id, @clientId, @templateKind, @templateId, @title, @status, @inspector, @document,
-         @inspectedAt, @cadence, @nextDueAt, @createdAt, @updatedAt
+         @inspectedAt, @projectNumber, @cadence, @nextDueAt, @createdAt, @updatedAt
        )`,
     )
     .run({
@@ -313,6 +329,7 @@ export function createInspectionFromPdfExport(payload: PdfInspectionExport): Ins
       inspector: src.inspector?.trim() ?? '',
       document: JSON.stringify(document),
       inspectedAt,
+      projectNumber: '',
       cadence,
       nextDueAt,
       createdAt: now,
@@ -334,6 +351,7 @@ export function updateInspection(id: string, input: InspectionInput): Inspection
       `UPDATE inspections
          SET title = @title, status = @status, inspector = @inspector,
              document = @document, inspected_at = @inspectedAt,
+             project_number = @projectNumber,
              cadence = @cadence, next_due_at = @nextDueAt, updated_at = @updatedAt
        WHERE id = @id`,
     )
@@ -344,6 +362,7 @@ export function updateInspection(id: string, input: InspectionInput): Inspection
       inspector: fields.inspector,
       document: JSON.stringify(fields.document),
       inspectedAt: fields.inspectedAt,
+      projectNumber: fields.projectNumber,
       cadence: fields.cadence,
       nextDueAt: fields.nextDueAt,
       updatedAt: now,

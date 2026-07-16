@@ -170,3 +170,37 @@ export function syncFormDocumentInspectionDate(
   if (nextValues === document.values) return document;
   return { ...document, values: nextValues };
 }
+
+/** Push project number into ULC Project Number (formerly Work Order Number). */
+export function syncFormDocumentProjectNumber(
+  document: FormInspectionDocument,
+  projectNumber: string,
+): FormInspectionDocument {
+  const next = projectNumber.trim();
+  let nextValues = document.values;
+  let changed = false;
+
+  walkFormElements(document.form, (element) => {
+    if (element.kind !== 'ulcSection1') return;
+    const current = normalizeUlcSection1Value(nextValues[element.id]);
+    if (current.projectNumber === next) return;
+    nextValues = setElementValue(nextValues, element.id, {
+      ...current,
+      projectNumber: next,
+    });
+    changed = true;
+  });
+
+  if (!changed) return document;
+  return { ...document, values: nextValues };
+}
+
+/** Read project number from the first ULC section-1 element in a form document. */
+export function extractFormDocumentProjectNumber(document: FormInspectionDocument): string {
+  let found = '';
+  walkFormElements(document.form, (element) => {
+    if (element.kind !== 'ulcSection1' || found) return;
+    found = normalizeUlcSection1Value(document.values[element.id]).projectNumber.trim();
+  });
+  return found;
+}
