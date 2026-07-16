@@ -5,17 +5,20 @@
 | | |
 | --- | --- |
 | **Status** | Living snapshot — update as the project evolves |
-| **Last updated** | 2026-06-06 |
-| **Current phase** | Phase 6 complete; next is Phase 7 (backups) |
+| **Last updated** | 2026-07-16 |
+| **HEAD** | `4519740` on `main` (`github.com/bartekswl/BlazeAudit`) |
+| **Schema** | SQLite `user_version` **11** (`LATEST_SCHEMA_VERSION`) |
+| **Current focus** | ULC S536 built-in form polish (template · document · PDF parity) |
+| **Roadmap next** | Phase 7 (encrypted backups) — not started; form work is active ahead of it |
 
 ## How to use this file
 
-This is the **onboarding extract for a new chat/agent**. Read this first, then read
-the linked docs as needed. Suggested kickoff prompt for a fresh chat:
+This is the **onboarding extract for a new chat/agent**. Read this first, then the
+linked docs as needed. Suggested kickoff:
 
-> Read `docs/STATUS.md`, then the docs it links (PRD, ARCHITECTURE, DATA_MODEL,
-> SECURITY, TEMPLATES, UX, ROADMAP, and the ADRs). Phases 0–3 are done; continue
-> with Phase 4 (document model & templates) from the roadmap.
+> Read `docs/STATUS.md` and `AGENTS.md`. For form/page work also read
+> `docs/FORM_ELEMENT_BLUEPRINT.md`. Phases 0–6 are done; active work is the
+> CAN/ULC-S536 built-in form. Formal roadmap next is Phase 7 (backups).
 
 ## What BlazeAudit is
 
@@ -27,138 +30,143 @@ Inspired by fire-forms.com but a focused local tool, not a cloud SaaS. A compani
 
 ## Snapshot
 
-- **Done:** Phases 0–6. Through inspections + **PDF export/import**: branded A4 reports
-  (title, client, inspector, body blocks) with embedded JSON for lossless BlazeAudit
-  PDF re-import; everything through Phase 5.
-- **Next:** Phase 7 — encrypted backup file + restore.
-- **Not started:** license server (Phase 8), packaging.
+- **Done (roadmap):** Phases 0–6 — app shell, encrypted DB, accounts/login, custom
+  block templates, inspections, PDF export/import with embedded JSON.
+- **Done (beyond roadmap phases):** Built-in **CAN/ULC-S536** page-based form
+  (sections through **23.3**), Contents outline rail, Calendar, Name Badges + PDF,
+  startup lazy-load, window/app icon, repeatable extra form pages, 23.2 IDR
+  cross-page row compaction.
+- **Active:** Keep ULC form **template / document editor / PDF** consistent; density
+  and layout polish on later pages (esp. 22.x / 23.x).
+- **Next (roadmap):** Phase 7 — encrypted backup file + restore.
+- **Not started:** license server (Phase 8), full packaging pipeline (Phase 9;
+  icon asset exists), marketing site (Phase 10).
 
 ## Tech stack (ADR-0001)
 
-Electron + React + TypeScript + Tailwind + Vite + electron-builder; local storage
-in **encrypted SQLite (SQLCipher)**; PDF via `@react-pdf/renderer` (Chromium
-print-to-PDF fallback). Windows-only for v1. Proprietary (all rights reserved).
+Electron **v41** (pinned — native SQLCipher prebuild) + React + TypeScript +
+Tailwind + Vite + electron-builder; **encrypted SQLite** via
+`better-sqlite3-multiple-ciphers`; form PDF primarily via Chromium print-to-PDF
+from shared React markup (`buildFormPrintHtml`); block-template PDF path also
+exists. Windows-only for v1. Proprietary.
+
+**Native module:** after `npm install`, `postinstall` → `scripts/rebuild-native.mjs`.
+Do not bump Electron without a matching ABI prebuild.
 
 ## Key decisions (condensed)
 
 - **Accounts & licensing** (ADR-0002, [`SECURITY.md`](SECURITY.md)): email accounts;
-  single-use admin-issued activation keys bound to one instance; one active instance
-  per account; one-time online activation; per-account encryption "key X" escrowed
-  server-side; local password login; SQLCipher + Windows DPAPI; single-file local
-  backups + offsite by user; recovery by reissuing the key; monthly opportunistic
-  check with **fail-open** remote deactivation; license transport kept pluggable.
-- **Document model & portability** (ADR-0003, [`TEMPLATES.md`](TEMPLATES.md)):
-  templates/inspections are JSON block-trees in the DB; fixed header (title, client
-  relation, date, inspection type) + customizable body; blocks include a generalized
-  `table` (add/remove rows AND columns) and a `lines` block; default templates seeded
-  on first run; JSON file export/import; a **JSON Schema export kit** for external AI
-  migration; **embedded-JSON PDF round-trip**; inspection **cadence + due reminders**.
-- **UI/UX** ([`UX.md`](UX.md)): frameless window + custom title/status bar; entry flow
-  activation -> login -> dashboard; left sidebar (Dashboard, Customers, Documents,
-  Templates, Calendar, Database, Settings); **Documents** holds all inspections.
+  activation keys; key X + DPAPI; SQLCipher; fail-open monthly check (stub client
+  until Phase 8).
+- **Document models** (ADR-0003 + form track):
+  - **Custom templates:** JSON **block trees** (`src/shared/document/`).
+  - **Built-in forms:** page/section/element model (`src/shared/form/`) — ULC S536.
+    Template viewer, inspection editor, and PDF share one React path
+    (`FormPageCanvas` → `FormElementView`). See
+    [`FORM_ELEMENT_BLUEPRINT.md`](FORM_ELEMENT_BLUEPRINT.md).
+- **UI/UX** ([`UX.md`](UX.md)): frameless chrome; sidebar includes Dashboard,
+  Customers, Documents, Templates, **Calendar**, **Name Badges**, Database,
+  Settings; Contents is a global right-edge rail for form outlines.
 
 ## Document map
 
 | Doc | What it covers |
 | --- | --- |
-| [`PRD.md`](PRD.md) | Product requirements, scope, goals, success criteria |
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Process model, modules, security posture, layout |
-| [`DATA_MODEL.md`](DATA_MODEL.md) | SQLite schema, document/block model, server-side sketch |
-| [`SECURITY.md`](SECURITY.md) | Activation, key model, login, backup, recovery, enforcement |
-| [`TEMPLATES.md`](TEMPLATES.md) | Document/template authoring, portability, scheduling |
-| [`UX.md`](UX.md) | Window chrome, navigation, dashboard layout |
-| [`ROADMAP.md`](ROADMAP.md) | Phased delivery plan (Phases 0–10) |
-| [`adr/`](adr/) | Decision records: 0001 stack, 0002 accounts/security, 0003 document model |
+| [`PRD.md`](PRD.md) | Product requirements |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Process model, modules |
+| [`DATA_MODEL.md`](DATA_MODEL.md) | SQLite / document sketches (may lag schema v11) |
+| [`SECURITY.md`](SECURITY.md) | Activation, key model, login |
+| [`TEMPLATES.md`](TEMPLATES.md) | Block template authoring / portability |
+| [`FORM_ELEMENT_BLUEPRINT.md`](FORM_ELEMENT_BLUEPRINT.md) | **Required** for ULC form element work |
+| [`BUILTIN_TEMPLATE_BUILD.md`](BUILTIN_TEMPLATE_BUILD.md) | Built-in template build notes |
+| [`UX.md`](UX.md) | Window chrome, navigation |
+| [`ROADMAP.md`](ROADMAP.md) | Phases 0–10 |
+| [`adr/`](adr/) | ADRs 0001–0003 |
 
-## Phase 3 notes (as built)
+## Active work notes (2026-07) — ULC form & modules
 
-- **Entry flow:** `AuthGate` wraps the app — **Activate** → **Set password** → **Log in**
-  → main shell. Screens in `src/renderer/features/auth/`.
-- **License client:** pluggable contract in `src/main/license/`; **dev stub** accepts
-  `DEV-TEST-KEY` or any `BLZ-…` key (no real server until Phase 8).
-- **Multi-account (one install):** several email + key X pairs on the same Windows profile;
-  each gets `accounts/<sha256(email)>/` (opaque id — email never in paths), own
-  `blazeaudit.db`, auth files, clients, and settings.   `registry.json` lists accounts; login panel shows activated accounts, switch, and add-account.
-  **Log out** closes the app and requires password next launch.
-- **Key X:** unique per account (not per install). Each `accounts/<id>/auth/` holds its
-  own wrap, DPAPI cache, and token; manifest stores a `keyXId` fingerprint so unlock
-  rejects a mismatched key. Every new account gets a fresh random key X.
-- **DB unlock:** `openDatabase(keyX)` only after login/set-password; `getDatabase()` throws
-  when locked. Startup no longer auto-opens the DB.
-- **Settings:** per account at `accounts/<id>/settings.bin` (zlib + HMAC; login policy today).
-  Manifest/registry/wrap use signed `.bin` (HMAC key in DPAPI — edits outside the app are rejected).
-- **DPAPI cache:** `{ keyX, epoch }` paired with `unlockEpoch` in manifest; epoch bumps on
-  log out and “every launch” policy change. Stale DPAPI paste fails without password.
-- **Per-account isolation:** each `accounts/<opaque-id>/` has its own signed `settings.bin`,
-  `manifest.bin`, `records.mac.dpapi`, and DB — switching users on the login panel loads that
-  folder only. “Every launch” never stores DPAPI; old `keyx.dpapi` cannot skip password.
-- **IPC:** `window.blazeaudit.auth.*` — `getStatus`, `activate`, `setPassword`, `login`,
-  `logOut`, `getSecuritySettings`, `setLoginPolicy`. Normal close respects login policy;
-  **log out** sets `requirePasswordOnLaunch` and quits.
-- **Login policy:** Settings (and set-password step) — require password every launch,
-  week, month, year, or never. Auto-unlock uses DPAPI key X only while the policy
-  allows skip; DPAPI is cleared on log out, every-launch policy, and when an interval
-  expires (JSON tamper alone cannot auto-unlock without password).
-- **Paths:** dev → `<project>/data/`; packaged → per-profile AppData. Under that:
-  `registry.bin` + `accounts/<opaque-id>/` (signed settings, auth, DB per account).
-- **Deferred:** real license server + monthly validate (Phase 8); server escrow of key X;
-  backup/restore (Phase 7).
+### Built-in form (CAN/ULC-S536)
 
-## Phase 2 notes (as built)
+- Seeded as a **builtin** template; fill-in via `FormInspectionEditor`.
+- Surfaces: `BuiltinFormViewer` / `FormInspectionEditor` / `buildFormPrintHtml.tsx`
+  all go through `FormPageCanvas`.
+- Shared logic under `src/shared/form/`; UI under `src/renderer/features/form/`;
+  CSS mostly `src/renderer/theme/components.css` (print overrides in
+  `buildFormPrintHtml.tsx`).
+- Page meta headers: CFAA / branding logos with rem sizing aligned editor ↔ PDF.
+- **Contents rail:** outline for Built-in + Custom Templates and Documents; duplicate
+  repeatable labels merge to ranges (e.g. `Page x–y`) via `outline.ts`.
 
-- **Engine:** `better-sqlite3-multiple-ciphers` (SQLCipher). Schema **v2** (structured addresses).
-- **Customers + Database UI** — see git history / prior STATUS sections; still valid.
-- **Dev paths:** DB + auth → `<project>/data/`; Electron runtime → `.electron-dev/`.
+### Repeatable / extra pages (documents)
 
-## Phase 4 notes (as built)
+| Kind | Pages | Module |
+| --- | --- | --- |
+| Individual Device Record | **23.2** (min **3** pages) | `individualDeviceRecordPages.ts` |
+| Power supply pair | **22.4 + 22.5** | `repeatableFormPages.ts` (`powerSupplies`) |
+| Annunciator pair | **22.6 + 22.7** | `annunciatorPair` |
+| Deficiencies | **20.2** | `deficiencies` |
+| Ancillary device circuit | **22.10** | `ancillaryDeviceCircuitTest` |
 
-- **Schema v3:** `templates` table (`id`, optional `seed_id`, `name`, `description`,
-  `document` JSON, `version`, timestamps). Seeding tracked in `app_meta.templates_seeded_v1`.
-- **Document model:** `src/shared/document/` — types, validation, tree mutations, factory,
-  bundled defaults, JSON Schema (`schema.json`), schema-kit README.
-- **Default templates** (seeded once per account DB): Annual Sprinkler, Fire Extinguisher
-  Survey, General Fire Safety Walkthrough.
-- **Main:** `src/main/db/templates.ts`, `seedTemplates.ts` (runs after migrations on unlock),
-  `src/main/ipc/templates.ts`.
-- **IPC:** `window.blazeaudit.templates.*` — list, get, create, update, remove, duplicate,
-  exportJson, importJson, exportSchemaKit. Database screen also exposes schema kit + JSON import.
-- **UI:** `src/renderer/features/templates/` — list, editor with block tree, per-type settings,
-  reorder, add/remove blocks. Templates nav uses breadcrumb when editing (like Customers).
+Controls on `FormPageCanvas` (`pageExtraControls`); add/remove in document editor only
+(MIN pages enforced).
 
-## Phase 5 notes (as built)
+### 23.2 Individual Device Record (hot)
 
-- **Schema v4:** `inspections` table — client/template FKs, title, status (`draft`|`complete`),
-  inspector, document JSON snapshot, `inspected_at`, `cadence`, `next_due_at`, timestamps.
-- **Create flow:** pick client + template → snapshot template blocks with empty fill-in values.
-- **Fill-in editor:** `Documents` nav — text fields, checklist pass/fail/na, table cells,
-  optional sections; autosave ~900ms debounce; mark complete computes `next_due_at`.
-- **Cadence:** monthly, quarterly, annual, none (+ ISO duration helper for custom later).
-- **Dashboard:** live stats, recent inspections, due/overdue reminders list.
-- **Customers:** detail page shows inspection history, stats, new/open inspection shortcuts.
-- **IPC:** `window.blazeaudit.inspections.*` — list, get, create, update, remove,
-  getDashboard, getClientStats.
+- **`INDIVIDUAL_DEVICE_RECORD_ROW_COUNT = 22`** (was 19); shared constant for
+  template / editor / PDF.
+- Column/header polish: Measurement (singular), Alarm title wrapping, L/R padding on
+  Alarm / Annunciator / Supervised; PDF extra top pad on Measurement header.
+- **Cross-page row migration** (`migrateIndividualDeviceRecordRows.ts`):
+  - Runs on document **open** (editor) and **load** (`inspections.ts` parse path).
+  - Flattens all IDR pages → compact stream (max **1** blank between filled rows) →
+    refill pages of 22 → **drop trailing empty IDR pages** above `MIN_PAGES` (3).
+  - Idempotent; marks editor dirty when it changes so Save persists.
+- Import helper: `scripts/import-idr.mjs` (app must be stopped).
 
-## Phase 6 notes (as built)
+### Other recent modules
 
-- **Export:** `Save as PDF` on inspection editor → A4 report via Chromium print-to-PDF.
-- **Layout:** BlazeAudit header, title, client + inspection info cards, full body
-  (tables, checklists, lines, signatures, sections).
-- **Embed:** `%BLAZEAUDIT_JSON_V1%` + base64 payload appended to PDF bytes (lossless round-trip).
-- **Import:** Database → **Import from BlazeAudit PDF** (or `inspections.importPdf` IPC);
-  restores document snapshot as a new inspection when client exists in DB.
-- **Code:** `src/main/pdf/` (`renderInspectionHtml`, `exportInspectionPdf`, `embed`,
-  `importInspectionPdf`), `src/shared/pdf.ts`.
+- **Calendar** — month grid (`features/calendar/`).
+- **Name Badges** — CRUD + PDF sheet (`features/nameBadges/`, schema v11
+  `name_badges` table).
+- **Startup** — auth shell first; lazy `App` + per-screen lazy imports; avoid
+  heavy form/PDF modules until needed.
+- **App icon** — `resources/app-icon.png`; set on `BrowserWindow` +
+  `app.setAppUserModelId` in `src/main/index.ts`.
+
+### Form conventions (do not break)
+
+1. Read **`docs/FORM_ELEMENT_BLUEPRINT.md`** before adding/changing page elements.
+2. Prefer one view component + shared CSS; avoid a parallel PDF-only layout.
+3. Dev data only under project: `data/`, `.electron-dev/` (never user AppData in dev).
+4. PowerShell: do not chain with `&&`.
+5. Commit / push only when the user asks.
+
+## Phase notes (as built) — short
+
+| Phase | Status | Notes |
+| --- | --- | --- |
+| 0–1 | ✅ | Shell, frameless chrome, sidebar |
+| 2 | ✅ | SQLCipher; clients; structured addresses |
+| 3 | ✅ | Activate → password → login; multi-account; DPAPI; Settings login policy |
+| 4 | ✅ | Block templates; builtin vs custom tables; seed lifecycle |
+| 5 | ✅ | Inspections, cadence, dashboard reminders |
+| 6 | ✅ | PDF export + embedded JSON re-import |
+| 7+ | ❌ | Backups, license server, packaging, marketing |
+
+**Dev paths:** DB/auth → `<project>/data/`; Electron userData → `.electron-dev/`.
+Fresh test: delete `data/`, `npm run dev`, activate with `DEV-TEST-KEY`.
+
+**IPC areas:** `auth.*`, `clients.*`, `templates.*`, `inspections.*`, `pdf` /
+form print, `nameBadges.*`, settings/business profile, etc.
 
 ## Immediate next step
 
-**Phase 7 — backups & recovery.** Single encrypted backup file, restore on fresh install.
-See [`ROADMAP.md`](ROADMAP.md).
+Continue **ULC form polish** unless the user switches to **Phase 7 backups**.
+When touching 23.2 / repeatable pages, preserve compaction + min-page rules above.
 
-## Conventions / notes
+## Conventions
 
-- Docs are **living drafts**; significant decisions are recorded as **ADRs**.
-- Commits are made only when the user asks; default branch is `main` on
-  `github.com/bartekswl/BlazeAudit` (public, proprietary).
-- **Dev stays in the repo** — never write test/app data under the user's AppData during
-  development. See `AGENTS.md` (local-only).
-- **Fresh test:** delete `<project>/data/` and run `npm run dev`; activate with `DEV-TEST-KEY`.
+- Docs are living drafts; significant decisions → **ADRs**.
+- Keep this file current at the end of a work session.
+- `branding/` and `sandbox/` are **gitignored** — never commit.
+- Learning course (optional, local): `sandbox/learning/` — see `AGENTS.md`.

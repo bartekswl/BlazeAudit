@@ -5,11 +5,14 @@
 | | |
 | --- | --- |
 | **Status** | Living draft — phases & scope will shift |
-| **Last updated** | 2026-06-05 |
+| **Last updated** | 2026-07-16 |
 
 A phased delivery plan. Phases are sequential but boundaries are flexible.
+**As of 2026-07:** Phases **0–6 are complete**. Parallel product work (ULC S536
+built-in form, Calendar, Name Badges) continues; see [`STATUS.md`](STATUS.md).
+Next roadmap phase: **7 — backups**.
 
-## Phase 0 — Project setup & documentation ✅ (current)
+## Phase 0 — Project setup & documentation ✅
 
 - Git initialization and hygiene (`.gitignore`, `.gitattributes`, `.editorconfig`).
 - Core docs (README, CONTRIBUTING, CHANGELOG); no license granted (all rights reserved).
@@ -19,7 +22,7 @@ A phased delivery plan. Phases are sequential but boundaries are flexible.
 
 **Exit criteria:** repo initialized, documented, and ready for development.
 
-## Phase 1 — App shell ("hello window")
+## Phase 1 — App shell ("hello window") ✅
 
 - Install dependencies (Electron, Vite, React, TypeScript, Tailwind).
 - Boot a secure Electron window rendering a React app.
@@ -37,7 +40,7 @@ frameless chrome and sidebar shell in place.
 > Inspection) fills in as the underlying data lands (Phases 2/5); the shell and
 > layout come first here.
 
-## Phase 2 — Data layer (encrypted)
+## Phase 2 — Data layer (encrypted) ✅
 
 - Integrate **encrypted SQLite** (SQLCipher / encryption-capable `better-sqlite3`
   build), schema, and migrations.
@@ -47,7 +50,7 @@ frameless chrome and sidebar shell in place.
 **Exit criteria:** clients can be created, edited, and persisted offline in an
 encrypted database.
 
-## Phase 3 — Accounts, local security & login
+## Phase 3 — Accounts, local security & login ✅
 
 - Local **password login** (Argon2id) and **key-X** management (Windows DPAPI via
   `safeStorage`, password wrapping) to unlock the encrypted DB.
@@ -58,7 +61,7 @@ encrypted database.
 **Exit criteria:** the app activates once online, then an offline local login
 unlocks the encrypted database.
 
-## Phase 4 — Document model & template builder
+## Phase 4 — Document model & template builder ✅
 
 - Implement the block/document model and validation, including the fixed
   **document header** (title, client relation, date, inspection type).
@@ -72,7 +75,7 @@ unlocks the encrypted database.
 **Exit criteria:** a user can build, save, export/import, and seed default
 templates visually.
 
-## Phase 5 — Inspections
+## Phase 5 — Inspections ✅
 
 - Create inspections from templates, attached to clients.
 - Fill-in editor with autosave; draft vs. complete status.
@@ -82,7 +85,7 @@ templates visually.
 **Exit criteria:** a full inspection can be created, edited, saved, and surfaces
 when the next one is due.
 
-## Phase 6 — PDF export
+## Phase 6 — PDF export ✅
 
 - Render an inspection's document tree to a branded PDF.
 - Tables, checklists, signatures, and metadata in output.
@@ -91,7 +94,7 @@ when the next one is due.
 **Exit criteria:** a completed inspection exports to a clean PDF, and a
 BlazeAudit-exported PDF can be re-imported losslessly.
 
-## Phase 7 — Backups & recovery
+## Phase 7 — Backups & recovery ← next
 
 - Produce a **single encrypted backup file**: scheduled (every few weeks),
   on-demand, and automatically before any lockout.
