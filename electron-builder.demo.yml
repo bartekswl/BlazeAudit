@@ -1,0 +1,19 @@
+extends: electron-builder.yml
+
+productName: BlazeAudit Demo
+
+extraResources:
+  - from: resources/demo
+    to: demo
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  artifactName: ${productName}-Setup-${version}.${ext}
+  shortcutName: BlazeAudit Demo
+
+# Inherits GitHub publish from electron-builder.yml so app-update.yml is
+# embedded — demo builds check the same release feed for testing updates.
