@@ -5,4 +5,4 @@
 # - GitHub Release builds do NOT read this file → public downloads cannot activate.
 # - BlazeAudit Demo installer auto-provisions the tester account (no key needed).
 
-BLZ-LOCAL-replace-with-your-secret
+BLZ-cedar-lamp
