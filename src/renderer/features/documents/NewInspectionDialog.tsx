@@ -36,6 +36,7 @@ export function NewInspectionDialog({
     templateKind: TemplateKind;
     templateId: string;
     inspectedAt: string;
+    projectNumber: string;
   }) => Promise<void>;
 }) {
   const [clientId, setClientId] = useState(initialClientId ?? clients[0]?.id ?? '');
@@ -43,6 +44,7 @@ export function NewInspectionDialog({
     templates[0] ? templatePickerKey(templates[0].kind, templates[0].id) : '',
   );
   const [inspectedAt, setInspectedAt] = useState(todayLocalIsoDate);
+  const [projectNumber, setProjectNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,6 +91,7 @@ export function NewInspectionDialog({
         templateKind: selectedTemplateRef.kind,
         templateId: selectedTemplateRef.id,
         inspectedAt,
+        projectNumber: projectNumber.trim(),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create inspection.');
@@ -161,6 +164,18 @@ export function NewInspectionDialog({
                 <InspectionDateField value={inspectedAt} onChange={setInspectedAt} />
               </label>
             </div>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-neutral-400">
+                Project Number
+              </span>
+              <input
+                type="text"
+                className="ba-input"
+                value={projectNumber}
+                onChange={(e) => setProjectNumber(e.target.value)}
+                placeholder="Optional"
+              />
+            </label>
             <button
               type="submit"
               disabled={loading || !canCreate}

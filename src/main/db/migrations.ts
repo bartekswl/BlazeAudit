@@ -289,6 +289,14 @@ const migrations: Migration[] = [
       `);
     },
   },
+  {
+    version: 12,
+    up: (db) => {
+      db.exec(`
+        ALTER TABLE inspections ADD COLUMN project_number TEXT NOT NULL DEFAULT '';
+      `);
+    },
+  },
 ];
 
 /** Applies any migrations newer than the database's current `user_version`. */

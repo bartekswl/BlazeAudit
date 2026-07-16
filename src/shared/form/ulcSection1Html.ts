@@ -89,7 +89,7 @@ export function renderUlcSection1Html(valueRaw: unknown, context: DocumentContex
     `<div class="ulc-s1-company-inner"><div class="ulc-s1-company-text">${companyBlockHtml(context)}</div></div>`,
     '</div>',
     '<div class="ulc-s1-service">',
-    `<div class="ulc-s1-service-row ulc-s1-service-row--header">${dateCell('dateOfService', 'Date of Service:', value, context)}${dateCell('lastServiceDate', 'Last Service Date:', value, context)}${fieldCell('workOrderNumber', 'Work Order Number:', value, context)}</div>`,
+    `<div class="ulc-s1-service-row ulc-s1-service-row--header">${dateCell('dateOfService', 'Date of Service:', value, context)}${dateCell('lastServiceDate', 'Last Service Date:', value, context)}${fieldCell('projectNumber', 'Project Number:', value, context)}</div>`,
     `<div class="ulc-s1-service-row ulc-s1-service-row--stage"><span class="ulc-s1-check">${renderCheckGlyphHtml('ulc-s1-check-box', value.stageSingle)}<span>Single Stage</span></span><span class="ulc-s1-check">${renderCheckGlyphHtml('ulc-s1-check-box', value.stageTwo)}<span>Two Stage</span></span><span class="ulc-s1-check ulc-s1-check--other">${renderCheckGlyphHtml('ulc-s1-check-box', value.stageOther)}<span>Other:</span><span class="ulc-s1-value ulc-s1-value--inline">${dash(value.stageOtherText)}</span></span></div>`,
     '<div class="ulc-s1-system-block">',
     `<div class="ulc-s1-system-types"><div class="ulc-s1-system-row">${systemCheck('Addressable', value.systemAddressable)}${systemCheck('Conventional', value.systemConventional)}</div><div class="ulc-s1-system-row ulc-s1-system-row--alt">${systemCheck('Wireless', value.systemWireless)}${systemCheck('Hybrid', value.systemHybrid)}</div></div>`,

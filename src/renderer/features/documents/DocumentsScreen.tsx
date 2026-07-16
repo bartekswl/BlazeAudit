@@ -1,7 +1,11 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { FileText, Plus, Search, Trash2 } from 'lucide-react';
+import { ArrowDownUp, FileText, Plus, Search, Trash2 } from 'lucide-react';
 import { cadenceLabel, isOverdue } from '../../../shared/cadence';
-import type { Inspection, InspectionSummary } from '../../../shared/inspection';
+import {
+  sortInspectionsByDate,
+  type Inspection,
+  type InspectionSummary,
+} from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
 import type { TemplatePickerItem } from '../../../shared/document';
 import { cn } from '../../lib/cn';
@@ -44,6 +48,7 @@ export function DocumentsScreen({
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'complete'>('all');
+  const [dateSort, setDateSort] = useState<'newest' | 'oldest'>('newest');
   const [listPage, setListPage] = useState(1);
   const [showNew, setShowNew] = useState(false);
   const [newClientId, setNewClientId] = useState<string | undefined>();
@@ -107,31 +112,31 @@ export function DocumentsScreen({
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return inspections.filter((row) => {
+    const rows = inspections.filter((row) => {
       if (statusFilter !== 'all' && row.status !== statusFilter) return false;
       if (!q) return true;
       return (
         row.title.toLowerCase().includes(q) ||
         row.clientName.toLowerCase().includes(q) ||
-        row.inspector.toLowerCase().includes(q)
+        row.inspector.toLowerCase().includes(q) ||
+        row.projectNumber.toLowerCase().includes(q)
       );
     });
-  }, [inspections, search, statusFilter]);
+    return sortInspectionsByDate(rows, dateSort);
+  }, [inspections, search, statusFilter, dateSort]);
 
   useEffect(() => {
     setListPage(1);
-  }, [search, statusFilter]);
+  }, [search, statusFilter, dateSort]);
 
-  const paged = useMemo(
-    () => paginateItems(filtered, listPage),
-    [filtered, listPage],
-  );
+  const paged = useMemo(() => paginateItems(filtered, listPage), [filtered, listPage]);
 
   const createInspection = async (input: {
     clientId: string;
     templateKind: 'builtin' | 'custom';
     templateId: string;
     inspectedAt: string;
+    projectNumber: string;
   }) => {
     const created = await window.blazeaudit.inspections.create({
       ...input,
@@ -202,6 +207,22 @@ export function DocumentsScreen({
         </select>
         <button
           type="button"
+          onClick={() => setDateSort((prev) => (prev === 'newest' ? 'oldest' : 'newest'))}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-sm text-neutral-300 hover:bg-white/5"
+          title={
+            dateSort === 'newest'
+              ? 'Showing newest first — click for oldest first'
+              : 'Showing oldest first — click for newest first'
+          }
+        >
+          <ArrowDownUp className="size-4" />
+          {dateSort === 'newest' ? 'Newest first' : 'Oldest first'}
+        </button>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          type="button"
           onClick={() => setShowNew(true)}
           className="inline-flex items-center gap-2 rounded-lg bg-flame-500 px-3 py-2 text-sm font-semibold text-white hover:bg-flame-600"
         >
@@ -221,47 +242,71 @@ export function DocumentsScreen({
         </div>
       ) : (
         <div className="space-y-3">
+          <div className="grid grid-cols-[minmax(0,1fr)_7rem_7rem_auto_auto] gap-3 px-4 text-[10px] font-medium uppercase tracking-wide text-neutral-600">
+            <span>Name</span>
+            <span>Date</span>
+            <span>Project #</span>
+            <span className="w-20 text-center">Status</span>
+            <span className="w-9" aria-hidden="true" />
+          </div>
           <ul className="space-y-2">
             {paged.items.map((row) => (
-            <li
-              key={row.id}
-              className="flex flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3"
-            >
-              <button
-                type="button"
-                onClick={() => setEditingId(row.id)}
-                className="min-w-0 flex-1 text-left"
+              <li
+                key={row.id}
+                className="grid grid-cols-[minmax(0,1fr)_7rem_7rem_auto_auto] items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3"
               >
-                <p className="truncate font-medium text-neutral-100">{row.title}</p>
-                <p className="truncate text-xs text-neutral-500">
-                  {row.clientName}
-                  {row.inspectedAt ? ` · ${row.inspectedAt}` : ''}
-                  {row.inspector ? ` · ${row.inspector}` : ''}
-                  {row.nextDueAt
-                    ? ` · Next due ${row.nextDueAt}${isOverdue(row.nextDueAt) ? ' (overdue)' : ''}`
-                    : ''}
-                  {row.cadence ? ` · ${cadenceLabel(row.cadence)}` : ''}
-                </p>
-              </button>
-              <span
-                className={cn(
-                  'rounded-full px-2 py-0.5 text-xs',
-                  row.status === 'complete'
-                    ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                    : 'border border-amber-500/30 bg-amber-500/10 text-amber-300',
-                )}
-              >
-                {row.status}
-              </span>
-              <button
-                type="button"
-                aria-label={`Delete ${row.title}`}
-                onClick={() => setPendingDelete(row)}
-                className="rounded-lg border border-white/10 p-2 text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
-              >
-                <Trash2 className="size-4" />
-              </button>
-            </li>
+                <button
+                  type="button"
+                  onClick={() => setEditingId(row.id)}
+                  className="min-w-0 text-left"
+                >
+                  <p className="truncate font-medium text-neutral-100">{row.title}</p>
+                  <p className="truncate text-xs text-neutral-500">
+                    {row.clientName}
+                    {row.inspector ? ` · ${row.inspector}` : ''}
+                    {row.nextDueAt
+                      ? ` · Next due ${row.nextDueAt}${isOverdue(row.nextDueAt) ? ' (overdue)' : ''}`
+                      : ''}
+                    {row.cadence ? ` · ${cadenceLabel(row.cadence)}` : ''}
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingId(row.id)}
+                  className="truncate text-left text-sm text-neutral-400"
+                >
+                  {row.inspectedAt || '—'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingId(row.id)}
+                  className={cn(
+                    'truncate text-left text-sm',
+                    row.projectNumber.trim() ? 'text-neutral-300' : 'text-neutral-600',
+                  )}
+                  title={row.projectNumber.trim() || undefined}
+                >
+                  {row.projectNumber.trim() || '—'}
+                </button>
+                <span
+                  className={cn(
+                    'w-20 rounded-full px-2 py-0.5 text-center text-xs',
+                    row.status === 'complete'
+                      ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                      : 'border border-amber-500/30 bg-amber-500/10 text-amber-300',
+                  )}
+                >
+                  {row.status}
+                </span>
+                <button
+                  type="button"
+                  aria-label={`Delete ${row.title}`}
+                  onClick={() => setPendingDelete(row)}
+                  className="rounded-lg border border-white/10 p-2 text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              </li>
             ))}
           </ul>
           <ListPagination

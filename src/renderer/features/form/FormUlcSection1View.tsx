@@ -248,8 +248,8 @@ export function FormUlcSection1View({
               onChange={onChange}
             />
             <TextField
-              label="Work Order Number:"
-              fieldKey="workOrderNumber"
+              label="Project Number:"
+              fieldKey="projectNumber"
               value={value}
               context={context}
               readOnly={readOnly}
