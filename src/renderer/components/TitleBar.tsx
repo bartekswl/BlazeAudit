@@ -40,14 +40,19 @@ export function TitleBar() {
   }, []);
 
   useEffect(() => {
-    void window.blazeaudit.app.getIconUrl().then(setIconUrl);
+    void window.blazeaudit.app.getTitleBarIconUrl().then(setIconUrl);
   }, []);
 
   return (
     <header className="ba-titlebar flex h-10 shrink-0 items-center justify-between [-webkit-app-region:drag]">
       <div className="flex items-center gap-2 px-3">
         {iconUrl ? (
-          <img src={iconUrl} alt="" className="size-4 shrink-0 rounded-sm object-contain" draggable={false} />
+          <img
+            src={iconUrl}
+            alt=""
+            className="size-[1.125rem] shrink-0 object-contain"
+            draggable={false}
+          />
         ) : (
           <Flame className="size-4 text-flame-500" />
         )}

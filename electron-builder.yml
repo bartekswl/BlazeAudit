@@ -26,6 +26,8 @@ asarUnpack:
 extraResources:
   - from: resources/app-icon.png
     to: app-icon.png
+  - from: resources/titlebar-icon.png
+    to: titlebar-icon.png
 
 win:
   target:

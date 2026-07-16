@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import type { DashboardStats } from '../../../shared/inspection';
 import type { BusinessProfile } from '../../../shared/profile';
+import { DashboardBanner } from './DashboardBanner';
 
 function useNow(): Date {
   const [now, setNow] = useState(() => new Date());
@@ -85,6 +86,8 @@ export function DashboardScreen({
 
   return (
     <div className="space-y-4">
+      <DashboardBanner />
+
       <section className="ba-panel-hero flex items-center justify-between gap-4 px-4 py-3">
         <div className="min-w-0">
           <div className="text-2xl font-semibold tabular-nums tracking-tight text-[var(--ba-text-primary)]">
