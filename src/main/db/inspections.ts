@@ -9,6 +9,7 @@ import { inspectionSnapshotFromTemplate, validateDocument } from '../../shared/d
 import {
   createFormInspectionDocument,
   isFormInspectionDocument,
+  migrateFormInspectionIdrRowGaps,
   migrateFormInspectionPowerSupplyLayout,
   validateFormInspectionDocument,
   type FormInspectionDocument,
@@ -60,7 +61,9 @@ function parseInspectionDocument(json: string, requireClient = true): Inspection
     if (requireClient && !result.document.clientId) {
       throw new Error('Inspection document must reference a client.');
     }
-    return migrateFormInspectionPowerSupplyLayout(result.document);
+    return migrateFormInspectionIdrRowGaps(
+      migrateFormInspectionPowerSupplyLayout(result.document),
+    );
   }
   const result = validateDocument(parsed);
   if (!result.ok) throw new Error(result.errors.join(' '));

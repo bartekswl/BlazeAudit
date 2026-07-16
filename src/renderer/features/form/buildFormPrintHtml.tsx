@@ -2791,6 +2791,12 @@ const PRINT_OVERRIDES = `
     width: 8% !important;
   }
 
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--measurements.idr-th--vertical {
+    padding-top: 4pt !important;
+  }
+
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--alarmConfirmed,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--alarmConfirmed {
     width: 4% !important;
@@ -2819,6 +2825,12 @@ const PRINT_OVERRIDES = `
     line-height: 1.12 !important;
   }
 
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--alarmConfirmed.idr-th--vertical,
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--annunciatorIndication.idr-th--vertical,
   .form-print-root
     .form-page-sheet--individual-device-record.form-page-sheet--landscape
     .idr-th--supervisedCircuitTrouble.idr-th--vertical {
