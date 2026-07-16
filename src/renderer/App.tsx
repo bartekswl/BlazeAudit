@@ -30,6 +30,7 @@ const loadTemplatesScreen = () => import('./features/templates/TemplatesScreen')
 const loadCalendarScreen = () => import('./features/calendar/CalendarScreen');
 const loadNameBadgesScreen = () => import('./features/nameBadges/NameBadgesScreen');
 const loadDatabaseScreen = () => import('./features/database/DatabaseScreen');
+const loadUpdateScreen = () => import('./features/update/UpdateScreen');
 const loadSettingsScreen = () => import('./features/settings/SettingsScreen');
 
 const CustomersScreen = lazy(() =>
@@ -55,6 +56,9 @@ const NameBadgesScreen = lazy(() =>
 const DatabaseScreen = lazy(() =>
   loadDatabaseScreen().then((m) => ({ default: m.DatabaseScreen })),
 );
+const UpdateScreen = lazy(() =>
+  loadUpdateScreen().then((m) => ({ default: m.UpdateScreen })),
+);
 const SettingsScreen = lazy(() =>
   loadSettingsScreen().then((m) => ({ default: m.SettingsScreen })),
 );
@@ -65,6 +69,7 @@ const backgroundLoaders = [
   loadCalendarScreen,
   loadNameBadgesScreen,
   loadDatabaseScreen,
+  loadUpdateScreen,
   loadSettingsScreen,
   () => import('./features/documents/NewInspectionDialog'),
   loadTemplatesScreen,
@@ -91,6 +96,7 @@ const screens: Record<
     | 'nameBadges'
     | 'calendar'
     | 'database'
+    | 'update'
     | 'settings'
   >,
   ReactNode
@@ -514,6 +520,12 @@ export default function App() {
                   onInspectionImported={(inspectionId) => openDocuments({ inspectionId })}
 
                 />
+              </Suspense>
+
+            ) : activeId === 'update' ? (
+
+              <Suspense fallback={screenModuleFallback}>
+                <UpdateScreen />
               </Suspense>
 
             ) : activeId === 'settings' ? (

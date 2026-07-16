@@ -5,6 +5,7 @@ import {
   IdCard,
   LayoutDashboard,
   LayoutTemplate,
+  RefreshCw,
   Settings,
   SquarePen,
   Users,
@@ -20,6 +21,7 @@ export type NavId =
   | 'customTemplates'
   | 'calendar'
   | 'database'
+  | 'update'
   | 'settings';
 
 export interface NavItem {
@@ -39,5 +41,6 @@ export const navItems: NavItem[] = [
   { id: 'calendar', label: 'Calendar', icon: Calendar },
   { id: 'nameBadges', label: 'Name Badges', icon: IdCard },
   { id: 'database', label: 'Database', icon: Database },
+  { id: 'update', label: 'Update', icon: RefreshCw },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
