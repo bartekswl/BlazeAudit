@@ -9,6 +9,7 @@ import {
 import { InspectionDateField } from '../../components/InspectionDateField';
 import { cn } from '../../lib/cn';
 import { FormCheckGlyph } from './FormCheckGlyph';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 const inputCls = 'ulc-s1-input';
 const labelCls = 'ulc-s1-label';
@@ -76,10 +77,10 @@ function TextField({
       {readOnly ? (
         <div className="ulc-s1-value">{shown || '\u00a0'}</div>
       ) : (
-        <input
+        <VisibleWidthInput
           className={inputCls}
           value={shown}
-          onChange={(e) => onChange?.(updateField(value, fieldKey, e.target.value))}
+          onChange={(v) => onChange?.(updateField(value, fieldKey, v))}
         />
       )}
     </div>
@@ -144,10 +145,10 @@ function PhoneDisabledStack({
         {readOnly ? (
           <div className="ulc-s1-value">{phoneDisplay || '\u00a0'}</div>
         ) : (
-          <input
+          <VisibleWidthInput
             className={inputCls}
             value={phoneDisplay}
-            onChange={(e) => onChange?.(updateField(value, phoneKey, e.target.value))}
+            onChange={(v) => onChange?.(updateField(value, phoneKey, v))}
           />
         )}
       </div>
@@ -287,10 +288,10 @@ export function FormUlcSection1View({
               {readOnly ? (
                 <span className="ulc-s1-value ulc-s1-value--inline">{value.stageOtherText || '\u00a0'}</span>
               ) : (
-                <input
+                <VisibleWidthInput
                   className={cn(inputCls, 'ulc-s1-input--inline')}
                   value={value.stageOtherText}
-                  onChange={(e) => onChange?.(updateField(value, 'stageOtherText', e.target.value))}
+                  onChange={(v) => onChange?.(updateField(value, 'stageOtherText', v))}
                 />
               )}
             </label>

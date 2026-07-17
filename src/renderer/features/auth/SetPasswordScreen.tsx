@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from 'react';
 import { DEFAULT_LOGIN_POLICY, type LoginPolicy } from '../../../shared/loginPolicy';
 import { LoginPolicySelect } from '../../components/LoginPolicySelect';
-import { AuthError, AuthShell, AuthSubmit, authInputCls } from './AuthShell';
+import { AuthError, AuthShell, AuthSubmit, authInputCls, formatAuthError } from './AuthShell';
 
 export function SetPasswordScreen({ email, onDone }: { email: string; onDone: () => void }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loginPolicy, setLoginPolicy] = useState<LoginPolicy>(DEFAULT_LOGIN_POLICY);  const [loading, setLoading] = useState(false);
+  const [loginPolicy, setLoginPolicy] = useState<LoginPolicy>(DEFAULT_LOGIN_POLICY);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const submit = async (e: FormEvent) => {
@@ -14,9 +15,10 @@ export function SetPasswordScreen({ email, onDone }: { email: string; onDone: ()
     setLoading(true);
     setError(null);
     try {
-      await window.blazeaudit.auth.setPassword({ password, confirmPassword, loginPolicy });      onDone();
+      await window.blazeaudit.auth.setPassword({ password, confirmPassword, loginPolicy });
+      onDone();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not set password.');
+      setError(formatAuthError(err, 'Could not set password.'));
       setLoading(false);
     }
   };

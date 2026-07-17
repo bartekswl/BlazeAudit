@@ -1,4 +1,4 @@
-import { BookOpen, Bug, ExternalLink, LifeBuoy, Mail } from 'lucide-react';
+import { BookOpen, Bug, ExternalLink, LifeBuoy, Lightbulb, Mail, Sparkles } from 'lucide-react';
 import { SUPPORT } from '../../../shared/support';
 
 function SupportLink({
@@ -16,9 +16,9 @@ function SupportLink({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-start gap-3 rounded-lg border border-[var(--ba-panel-border)] bg-white/[0.03] px-4 py-3 text-left transition-colors hover:border-flame-500/30 hover:bg-flame-500/[0.06]"
+      className="flex w-full items-start gap-3 rounded-lg border border-[var(--ba-panel-border)] bg-[var(--ba-hover-bg)] px-4 py-3 text-left transition-colors hover:border-flame-500/35 hover:bg-flame-500/[0.08]"
     >
-      <div className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg border border-[var(--ba-panel-border)] bg-white/5 text-flame-400">
+      <div className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg border border-[var(--ba-panel-border)] bg-[var(--ba-input-bg)] text-flame-500">
         <Icon className="size-4" />
       </div>
       <div className="min-w-0 flex-1">
@@ -49,7 +49,7 @@ export function SupportScreen() {
           <div className="min-w-0">
             <h2 className="text-lg font-semibold text-[var(--ba-text-primary)]">Support</h2>
             <p className="mt-1 text-sm leading-relaxed text-[var(--ba-text-muted)]">
-              Contact SubraLab, report issues, or read the documentation.
+              Contact SubraLab, request features, report issues, or read the documentation.
             </p>
           </div>
         </div>
@@ -73,7 +73,7 @@ export function SupportScreen() {
               <input
                 readOnly
                 value={SUPPORT.contactEmail}
-                className="min-w-0 flex-1 rounded-lg border border-[var(--ba-panel-border)] bg-white/[0.03] px-3 py-2 text-sm text-[var(--ba-text-secondary)]"
+                className="min-w-0 flex-1 rounded-lg border border-[var(--ba-panel-border)] bg-[var(--ba-input-bg)] px-3 py-2 text-sm text-[var(--ba-text-secondary)]"
               />
               <button
                 type="button"
@@ -101,6 +101,35 @@ export function SupportScreen() {
             label="Documentation"
             description="Project overview, setup, and docs on GitHub."
             onClick={() => open(SUPPORT.docsUrl)}
+          />
+        </div>
+      </section>
+
+      <section className="ba-panel p-5">
+        <div className="flex items-start gap-3">
+          <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-flame-500/25 bg-flame-500/10 text-flame-500">
+            <Sparkles className="size-5" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="ba-section-title">Request a feature</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--ba-text-muted)]">
+              SubraLab can build <span className="font-medium text-[var(--ba-text-secondary)]">custom features</span>{' '}
+              for your workflow — forms, reports, integrations, branding, and more. Tell us what
+              you need; we&apos;ll confirm scope, timeline, and details upon request.
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--ba-text-muted)]">
+              Whether it&apos;s a small improvement or a larger custom module, reach out and we&apos;ll
+              follow up with options that fit your team.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <SupportLink
+            icon={Lightbulb}
+            label="Request a feature"
+            description="Email SubraLab with your idea — custom work and details available on request."
+            onClick={() => open(SUPPORT.featureRequestMailto)}
           />
         </div>
       </section>

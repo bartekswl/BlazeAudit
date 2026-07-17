@@ -19,6 +19,13 @@ const INPUT_CLIENT_WIDTH_CLAMP_SELECTOR = [
   '.cut-version-field',
   '.aff-cell',
   '.epst-field-input',
+  '.def-grid',
+  '.def-compliance-field',
+  '.att-table',
+  '.yns-table-wrap',
+  '.doc-table-wrap',
+  '.ulc-s1-panel',
+  '.adc-table',
   '[data-visible-width-fill]',
 ].join(', ');
 

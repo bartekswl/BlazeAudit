@@ -4,4 +4,6 @@ export const SUPPORT = {
   contactEmail: 'support@subralab.com',
   docsUrl: 'https://github.com/bartekswl/BlazeAudit#documentation',
   reportBugUrl: 'https://github.com/bartekswl/BlazeAudit/issues/new',
+  /** Prefills a feature-request email to SubraLab. */
+  featureRequestMailto: `mailto:support@subralab.com?subject=${encodeURIComponent('BlazeAudit feature request')}`,
 } as const;

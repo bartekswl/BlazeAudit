@@ -7,6 +7,7 @@ import {
   type DeficiencyRepairFields,
 } from '../../../shared/form/deficiencies';
 import { cn } from '../../lib/cn';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function CellInput({
   value,
@@ -23,11 +24,10 @@ function CellInput({
     return <span className={cn('def-cell-value', className)}>{value || '\u00a0'}</span>;
   }
   return (
-    <input
-      type="text"
+    <VisibleWidthInput
       className={cn('def-cell-input', className)}
       value={value}
-      onChange={(e) => onChange?.(e.target.value)}
+      onChange={(v) => onChange?.(v)}
     />
   );
 }
@@ -247,11 +247,10 @@ export function FormDeficienciesView({
             {readOnly ? (
               <span className="def-compliance-value">{value.compliancePrintedName || '\u00a0'}</span>
             ) : (
-              <input
-                type="text"
+              <VisibleWidthInput
                 className="def-compliance-input"
                 value={value.compliancePrintedName}
-                onChange={(e) => onChange?.({ ...value, compliancePrintedName: e.target.value })}
+                onChange={(v) => onChange?.({ ...value, compliancePrintedName: v })}
               />
             )}
           </label>
@@ -260,11 +259,10 @@ export function FormDeficienciesView({
             {readOnly ? (
               <span className="def-compliance-value">{value.complianceSignature || '\u00a0'}</span>
             ) : (
-              <input
-                type="text"
+              <VisibleWidthInput
                 className="def-compliance-input"
                 value={value.complianceSignature}
-                onChange={(e) => onChange?.({ ...value, complianceSignature: e.target.value })}
+                onChange={(v) => onChange?.({ ...value, complianceSignature: v })}
               />
             )}
           </label>

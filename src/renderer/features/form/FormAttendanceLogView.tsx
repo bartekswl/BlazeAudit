@@ -9,6 +9,7 @@ import {
 } from '../../../shared/form/attendanceLog';
 import { cn } from '../../lib/cn';
 import { handleFixedRowGridTextInputKeyDown } from './formGridTableKeyboard';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function AttendanceCell({
   value,
@@ -23,11 +24,10 @@ function AttendanceCell({
     return <span className="att-cell-value">{value || '\u00a0'}</span>;
   }
   return (
-    <input
-      type="text"
+    <VisibleWidthInput
       className="att-cell-input"
       value={value}
-      onChange={(e) => onChange?.(e.target.value)}
+      onChange={(next) => onChange?.(next)}
       onKeyDown={handleFixedRowGridTextInputKeyDown}
     />
   );

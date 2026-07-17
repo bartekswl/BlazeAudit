@@ -24,6 +24,7 @@ import { cn } from '../../lib/cn';
 
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function ChoiceCell({
   choice,
@@ -149,11 +150,10 @@ function DescriptionCell({
               <span className="doc-fill-line" />
             )
           ) : (
-            <input
-              type="text"
+            <VisibleWidthInput
               className="doc-fill-input"
               value={rowValue?.measure ?? ''}
-              onChange={(e) => onMeasure?.(e.target.value)}
+              onChange={(v) => onMeasure?.(v)}
               aria-label="Smoke control measure"
             />
           )}
