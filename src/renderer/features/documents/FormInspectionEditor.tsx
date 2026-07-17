@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FileDown, TriangleAlert } from 'lucide-react';
+import { FileDown, TriangleAlert, Undo2 } from 'lucide-react';
 import { CADENCE_PRESETS, type CadencePreset } from '../../../shared/cadence';
 import type { DocumentContext } from '../../../shared/document';
 import {
@@ -29,6 +29,8 @@ import {
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useRegisterFormOutline } from './DocumentOutlineContext';
+import { useDocumentAutosave } from './useDocumentAutosave';
+import { useDocumentUndoHotkey, useDocumentUndoStack } from './useDocumentUndoStack';
 import { FormPageCanvas, type FormPageExtraControlsConfig } from '../form/FormPageCanvas';
 import { FormPageViewport } from '../form/FormPageViewport';
 import { collectLinedNotesVisibleLines } from '../form/collectLinedNotesVisibleLines';
@@ -37,6 +39,14 @@ import { LoadingOverlay } from '../../components/LoadingOverlay';
 type PendingPageRemove =
   | { kind: 'idr'; pageIndex: number }
   | { kind: 'repeatable'; pageKind: RepeatableFormPageKind; pageIndex: number };
+
+type FormEditorSnapshot = {
+  formDoc: FormInspectionDocument;
+  status: InspectionStatus;
+  inspectedAt: string;
+  projectNumber: string;
+  cadence: CadencePreset;
+};
 
 const compactInputCls = 'ba-input ba-input--compact';
 const compactFieldCls = `${compactInputCls} !py-1`;
@@ -106,6 +116,38 @@ function FormInspectionEditorInner({
   const formDocRef = useRef(formDoc);
   formDocRef.current = formDoc;
 
+  const snapshotRef = useRef<FormEditorSnapshot>({
+    formDoc,
+    status,
+    inspectedAt,
+    projectNumber,
+    cadence,
+  });
+  snapshotRef.current = { formDoc, status, inspectedAt, projectNumber, cadence };
+
+  const { canUndo, push: pushUndo, undo: popUndo } = useDocumentUndoStack<FormEditorSnapshot>();
+
+  const recordUndo = useCallback(
+    (coalesceKey?: string) => {
+      pushUndo(snapshotRef.current, coalesceKey);
+    },
+    [pushUndo],
+  );
+
+  const applyUndo = useCallback(() => {
+    const prev = popUndo();
+    if (!prev) return;
+    setFormDoc(prev.formDoc);
+    setStatus(prev.status);
+    setInspectedAt(prev.inspectedAt);
+    setProjectNumber(prev.projectNumber);
+    setCadence(prev.cadence);
+    setIsDirty(true);
+    setSaveState((s) => (s === 'saved' || s === 'error' ? 'idle' : s));
+  }, [popUndo]);
+
+  useDocumentUndoHotkey(canUndo, applyUndo);
+
   useEffect(() => {
     void window.blazeaudit.inspections.resolveContext(inspection.id).then(setContext);
   }, [inspection.id]);
@@ -148,6 +190,8 @@ function FormInspectionEditorInner({
     }
   }, [inspection.id, title, status, formDoc, inspectedAt, projectNumber, cadence, onSaved]);
 
+  useDocumentAutosave(save, isDirty, saveState === 'saving', inspection.id);
+
   const markDirty = useCallback(() => {
     setIsDirty(true);
     setSaveState((prev) => (prev === 'saved' || prev === 'error' ? 'idle' : prev));
@@ -157,6 +201,7 @@ function FormInspectionEditorInner({
   markDirtyRef.current = markDirty;
 
   const onValueChange = useCallback((elementId: string, value: unknown) => {
+    recordUndo(`value:${elementId}`);
     if (
       typeof value === 'object' &&
       value !== null &&
@@ -169,27 +214,31 @@ function FormInspectionEditorInner({
       values: setElementValue(prev.values, elementId, value),
     }));
     markDirtyRef.current();
-  }, []);
+  }, [recordUndo]);
 
   const onAddIdrPage = useCallback((afterPageIndex: number) => {
+    recordUndo();
     setFormDoc((prev) => addIndividualDeviceRecordPage(prev, afterPageIndex));
     markDirtyRef.current();
-  }, []);
+  }, [recordUndo]);
 
   const onRemoveIdrPage = useCallback((pageIndex: number) => {
+    recordUndo();
     setFormDoc((prev) => removeIndividualDeviceRecordPage(prev, pageIndex));
     markDirtyRef.current();
-  }, []);
+  }, [recordUndo]);
 
   const onAddRepeatablePage = useCallback((afterPageIndex: number) => {
+    recordUndo();
     setFormDoc((prev) => addRepeatableFormPage(prev, afterPageIndex));
     markDirtyRef.current();
-  }, []);
+  }, [recordUndo]);
 
   const onRemoveRepeatablePage = useCallback((pageIndex: number) => {
+    recordUndo();
     setFormDoc((prev) => removeRepeatableFormPage(prev, pageIndex));
     markDirtyRef.current();
-  }, []);
+  }, [recordUndo]);
 
   const requestRemoveIdrPage = useCallback(
     (pageIndex: number) => {
@@ -269,16 +318,18 @@ function FormInspectionEditorInner({
   );
 
   const onInspectionDateChange = useCallback((nextDate: string) => {
+    recordUndo('meta:inspectedAt');
     setInspectedAt(nextDate);
     setFormDoc((prev) => syncFormDocumentInspectionDate(prev, nextDate || null));
     markDirtyRef.current();
-  }, []);
+  }, [recordUndo]);
 
   const onProjectNumberChange = useCallback((next: string) => {
+    recordUndo('meta:projectNumber');
     setProjectNumber(next);
     setFormDoc((prev) => syncFormDocumentProjectNumber(prev, next));
     markDirtyRef.current();
-  }, []);
+  }, [recordUndo]);
 
   const editorTemplate = useMemo(
     () =>
@@ -395,6 +446,7 @@ function FormInspectionEditorInner({
               className={`${compactFieldCls} ba-select`}
               value={status}
               onChange={(e) => {
+                recordUndo('meta:status');
                 setStatus(e.target.value as InspectionStatus);
                 markDirty();
               }}
@@ -416,6 +468,7 @@ function FormInspectionEditorInner({
             className={`${compactFieldCls} ba-select`}
             value={cadence}
             onChange={(e) => {
+              recordUndo('meta:cadence');
               setCadence(e.target.value as CadencePreset);
               markDirty();
             }}
@@ -433,6 +486,16 @@ function FormInspectionEditorInner({
             {inspection.clientName}
           </p>
           <div className="flex items-center justify-end gap-2 pr-2">
+            <button
+              type="button"
+              disabled={!canUndo}
+              onClick={applyUndo}
+              className={toolbarBtnCls}
+              title="Undo last change (Ctrl+Z)"
+            >
+              <Undo2 className="size-3.5" />
+              Undo
+            </button>
             <button
               type="button"
               disabled={saveState === 'saving'}

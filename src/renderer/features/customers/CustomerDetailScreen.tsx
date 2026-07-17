@@ -35,6 +35,7 @@ export function CustomerDetailScreen({
   const [listPage, setListPage] = useState(1);
   const [dateSort, setDateSort] = useState<'newest' | 'oldest'>('newest');
   const [docSearch, setDocSearch] = useState('');
+  const [yearFilter, setYearFilter] = useState<'all' | string>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
@@ -63,8 +64,27 @@ export function CustomerDetailScreen({
   }, [load]);
 
   useEffect(() => {
+    setDocSearch('');
+    setYearFilter('all');
+    setDateFrom('');
+    setDateTo('');
     setListPage(1);
-  }, [clientId, dateSort, docSearch, dateFrom, dateTo]);
+  }, [clientId]);
+
+  useEffect(() => {
+    setListPage(1);
+  }, [dateSort, docSearch, yearFilter, dateFrom, dateTo]);
+
+  const yearOptions = useMemo(() => {
+    const years = new Set<number>();
+    const current = new Date().getFullYear();
+    years.add(current);
+    for (const row of inspections) {
+      const y = Number(row.inspectedAt?.slice(0, 4));
+      if (!Number.isNaN(y) && y >= 1990 && y <= current + 1) years.add(y);
+    }
+    return [...years].sort((a, b) => b - a);
+  }, [inspections]);
 
   const filteredInspections = useMemo(() => {
     const q = docSearch.trim().toLowerCase();
@@ -74,13 +94,16 @@ export function CustomerDetailScreen({
           row.title.toLowerCase().includes(q) || row.projectNumber.toLowerCase().includes(q);
         if (!matches) return false;
       }
+      if (yearFilter !== 'all') {
+        if (!row.inspectedAt?.startsWith(yearFilter)) return false;
+      }
       if (dateFrom && (!row.inspectedAt || row.inspectedAt < dateFrom)) return false;
       if (dateTo && (!row.inspectedAt || row.inspectedAt > dateTo)) return false;
       return true;
     });
-  }, [inspections, docSearch, dateFrom, dateTo]);
+  }, [inspections, docSearch, yearFilter, dateFrom, dateTo]);
 
-  const hasActiveFilters = Boolean(docSearch || dateFrom || dateTo);
+  const hasActiveFilters = Boolean(docSearch || yearFilter !== 'all' || dateFrom || dateTo);
 
   const sortedInspections = useMemo(
     () => sortInspectionsByDate(filteredInspections, dateSort),
@@ -174,6 +197,20 @@ export function CustomerDetailScreen({
                   className={cn(filterInputCls, 'w-full py-1 pl-6 pr-2')}
                 />
               </div>
+              <select
+                value={yearFilter}
+                onChange={(e) => setYearFilter(e.target.value)}
+                title="Inspection year"
+                aria-label="Filter by year"
+                className={cn(filterInputCls, 'px-1.5 py-1')}
+              >
+                <option value="all">All years</option>
+                {yearOptions.map((year) => (
+                  <option key={year} value={String(year)}>
+                    {year}
+                  </option>
+                ))}
+              </select>
               <input
                 type="date"
                 value={dateFrom}
@@ -194,6 +231,7 @@ export function CustomerDetailScreen({
                   type="button"
                   onClick={() => {
                     setDocSearch('');
+                    setYearFilter('all');
                     setDateFrom('');
                     setDateTo('');
                   }}

@@ -308,7 +308,7 @@ export default function App() {
 
                     type="button"
 
-                    onClick={() => customerBackRef.current?.()}
+                    onClick={() => customerBreadcrumb.onBackToList()}
 
                     className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
 
@@ -320,11 +320,43 @@ export default function App() {
 
                   <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
 
-                  <span className="truncate font-semibold text-[var(--ba-text-primary)]">
+                  {customerBreadcrumb.documentTitle ? (
 
-                    {customerBreadcrumb.clientName}
+                    <>
 
-                  </span>
+                      <button
+
+                        type="button"
+
+                        onClick={() => customerBreadcrumb.onBackToClient?.()}
+
+                        className="max-w-[10rem] truncate font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)] sm:max-w-[14rem]"
+
+                      >
+
+                        {customerBreadcrumb.clientName}
+
+                      </button>
+
+                      <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
+
+                      <span className="truncate font-semibold text-[var(--ba-text-primary)]">
+
+                        {customerBreadcrumb.documentTitle}
+
+                      </span>
+
+                    </>
+
+                  ) : (
+
+                    <span className="truncate font-semibold text-[var(--ba-text-primary)]">
+
+                      {customerBreadcrumb.clientName}
+
+                    </span>
+
+                  )}
 
                 </nav>
 
@@ -459,7 +491,6 @@ export default function App() {
                 <CustomersScreen
                   onDetailChange={handleCustomerDetailChange}
                   onNewInspection={(clientId) => openDocuments({ openNew: true, clientId })}
-                  onOpenInspection={(inspectionId) => openDocuments({ inspectionId })}
                 />
               </Suspense>
 
@@ -541,6 +572,7 @@ export default function App() {
 
               <DashboardScreen
                 onOpenInspection={(inspectionId) => openDocuments({ inspectionId })}
+                onOpenCalendar={() => setActiveId('calendar')}
               />
 
             ) : (
@@ -555,7 +587,8 @@ export default function App() {
 
         {activeId === 'documents' ||
         activeId === 'builtinTemplates' ||
-        activeId === 'customTemplates' ? (
+        activeId === 'customTemplates' ||
+        (activeId === 'customers' && Boolean(customerBreadcrumb?.documentTitle)) ? (
           <Suspense fallback={null}>
             <DocumentOutlineRail />
           </Suspense>

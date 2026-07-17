@@ -593,7 +593,8 @@ Reference implementations: `.cut-info-input`, `.cut-version-input`, `.cur-info-i
 | Outer frame | **`--form-panel-frame`** — black edge; inner cells use `--ulc-line` only |
 | Page branding | Every ULC 536 page header shows the live company logo on the left and bundled CFAA Member logo on the right |
 | Company details | Page 1 service-company details fill their original cell and are vertically/horizontally centered; the company logo no longer lives inside this cell |
-| Former Fax cells | Keep the lower half of each Phone/Fax stack as an empty white cell with no Fax label/input; the Phone label and value cell remain above it |
+| Former Fax cells | Keep the lower half of each Phone/Fax stack as an empty **blocked blue** cell (`#cfe2f3`, same as FSRC N/A blocked) with no Fax label/input; the Phone label and editable value cell remain above it |
+| Phone fields | Prefill from client bindings; stay **editable** in document mode (plain `<input>`, not `VisibleWidthInput` — narrow column clamping broke typing). After first edit, empty values no longer fall back to client |
 
 ### Yes / No / Summary table (`.yns-*`) — defaults
 

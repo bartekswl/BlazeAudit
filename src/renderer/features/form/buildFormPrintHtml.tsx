@@ -214,7 +214,7 @@ const PRINT_OVERRIDES = `
     text-align: center !important;
   }
   .form-print-root .ulc-s1-fax-disabled {
-    background: #ffffff !important;
+    background: #cfe2f3 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -2136,12 +2136,14 @@ const PRINT_OVERRIDES = `
     margin: 0 0 1pt !important;
     padding: 0 !important;
     line-height: 1.1 !important;
-    font-size: 8.5pt !important;
+    font-size: 10pt !important;
   }
   .form-print-root .form-page-sheet--annunciator-device-test .artu-panel,
   .form-print-root .form-page-sheet--annunciator-device-test .asd-panel {
     --artu-line: 0.5px solid #64748b !important;
     --asd-line: 0.5px solid #64748b !important;
+    --form-check-mark-size: 10.5pt !important;
+    --form-check-input-size: 10.5pt !important;
     flex: 1 1 auto !important;
     min-height: 0 !important;
     max-height: none !important;
@@ -2152,8 +2154,8 @@ const PRINT_OVERRIDES = `
     margin-top: 0 !important;
     border-radius: 0.625rem !important;
     box-shadow: none !important;
-    font-size: 6.25pt !important;
-    line-height: 1.1 !important;
+    font-size: 8.25pt !important;
+    line-height: 1.12 !important;
     display: grid !important;
   }
   .form-print-root .form-page-sheet--annunciator-device-test .artu-panel {
@@ -2186,7 +2188,7 @@ const PRINT_OVERRIDES = `
     width: 100% !important;
     height: 100% !important;
     table-layout: fixed !important;
-    font-size: 6.5pt !important;
+    font-size: 8.5pt !important;
   }
   .form-print-root .form-page-sheet--annunciator-device-test .artu-table tbody tr,
   .form-print-root .form-page-sheet--annunciator-device-test .asd-table tbody tr {

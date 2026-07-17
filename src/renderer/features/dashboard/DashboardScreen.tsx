@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, CalendarClock, CalendarDays, CheckCircle2, ImagePlus, Users } from 'lucide-react';
+import { CalendarClock, CalendarDays, CheckCircle2, ImagePlus, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import {
+  compareCalendarTasks,
+  formatTaskTimeLabel,
+  type CalendarTask,
+} from '../../../shared/calendarTasks';
+import { formatIsoDateLocal, todayLocalIsoDate } from '../../../shared/dates';
 import type { DashboardStats } from '../../../shared/inspection';
 import type { BusinessProfile } from '../../../shared/profile';
 import { DashboardBanner } from './DashboardBanner';
@@ -43,14 +49,28 @@ function StatTile({
   );
 }
 
+function formatUpcomingDateLabel(isoDate: string): string {
+  const [y, m, d] = isoDate.split('-').map(Number);
+  if (!y || !m || !d) return isoDate;
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 export function DashboardScreen({
   onOpenInspection,
+  onOpenCalendar,
 }: {
   onOpenInspection: (inspectionId: string) => void;
+  onOpenCalendar?: () => void;
 }) {
   const now = useNow();
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [upcomingTasks, setUpcomingTasks] = useState<CalendarTask[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tasksLoading, setTasksLoading] = useState(true);
   const [business, setBusiness] = useState<BusinessProfile | null>(null);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
 
@@ -59,6 +79,25 @@ export function DashboardScreen({
       .getDashboard()
       .then(setStats)
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const from = todayLocalIsoDate();
+    const end = new Date();
+    end.setDate(end.getDate() + 90);
+    const to = formatIsoDateLocal(end);
+    void window.blazeaudit.calendarTasks
+      .listInRange(from, to)
+      .then((rows) => {
+        const sorted = [...rows].sort((a, b) => {
+          const byDate = a.taskDate.localeCompare(b.taskDate);
+          if (byDate !== 0) return byDate;
+          return compareCalendarTasks(a, b);
+        });
+        setUpcomingTasks(sorted.slice(0, 12));
+      })
+      .catch(() => setUpcomingTasks([]))
+      .finally(() => setTasksLoading(false));
   }, []);
 
   useEffect(() => {
@@ -177,41 +216,30 @@ export function DashboardScreen({
           )}
         </div>
         <div className="ba-panel p-4">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="ba-section-title">Due reminders</h3>
-            {!loading && stats && stats.overdueCount > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] text-red-400">
-                <AlertTriangle className="size-3" />
-                {stats.overdueCount} overdue
-              </span>
-            )}
-          </div>
-          {loading ? (
+          <h3 className="ba-section-title">Upcoming Tasks</h3>
+          {tasksLoading ? (
             <p className="mt-3 text-sm text-[var(--ba-text-muted)]">Loading…</p>
-          ) : stats?.dueReminders.length ? (
+          ) : upcomingTasks.length > 0 ? (
             <ul className="mt-3 space-y-2">
-              {stats.dueReminders.map((row) => (
-                <li key={row.id}>
+              {upcomingTasks.map((task) => (
+                <li key={task.id}>
                   <button
                     type="button"
-                    onClick={() => onOpenInspection(row.id)}
+                    onClick={() => onOpenCalendar?.()}
                     className="ba-list-item w-full px-3 py-2 text-left"
                   >
                     <span className="block truncate text-sm font-medium text-[var(--ba-text-primary)]">
-                      {row.clientName}
+                      {task.title}
                     </span>
-                    <span
-                      className={`block truncate text-xs ${row.overdue ? 'text-red-400' : 'text-[var(--ba-text-muted)]'}`}
-                    >
-                      {row.title} · due {row.nextDueAt}
-                      {row.overdue ? ' · overdue' : ''}
+                    <span className="block truncate text-xs text-[var(--ba-text-muted)]">
+                      {formatUpcomingDateLabel(task.taskDate)} · {formatTaskTimeLabel(task.startTime)}
                     </span>
                   </button>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-sm text-[var(--ba-text-muted)]">No due or overdue inspections.</p>
+            <p className="mt-2 text-sm text-[var(--ba-text-muted)]">No upcoming tasks.</p>
           )}
         </div>
       </section>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { FileDown } from 'lucide-react';
+import { FileDown, Undo2 } from 'lucide-react';
 
 import { CADENCE_PRESETS, cadenceLabel, type CadencePreset } from '../../../shared/cadence';
 
@@ -13,10 +13,22 @@ import { isFormInspectionDocument, isBlockDocument } from '../../../shared/form'
 import { BlockFillIn } from './BlockFillIn';
 import { FormInspectionEditor } from './FormInspectionEditor';
 import { useRegisterDocumentOutline } from './DocumentOutlineContext';
+import { useDocumentAutosave } from './useDocumentAutosave';
+import { useDocumentUndoHotkey, useDocumentUndoStack } from './useDocumentUndoStack';
 import { LoadingOverlay } from '../../components/LoadingOverlay';
 
 const compactInputCls =
   'w-full min-w-0 rounded border border-white/10 bg-neutral-950 px-2 py-1 text-xs text-neutral-100 outline-none focus:border-flame-500';
+
+type BlockEditorSnapshot = {
+  title: string;
+  status: InspectionStatus;
+  inspector: string;
+  inspectedAt: string;
+  projectNumber: string;
+  cadence: CadencePreset;
+  document: Document;
+};
 
 
 
@@ -99,7 +111,50 @@ function BlockInspectionEditorInner({
 
   const inspectionIdRef = useRef(inspection.id);
 
+  const snapshotRef = useRef<BlockEditorSnapshot>({
+    title,
+    status,
+    inspector,
+    inspectedAt,
+    projectNumber,
+    cadence,
+    document,
+  });
+  snapshotRef.current = {
+    title,
+    status,
+    inspector,
+    inspectedAt,
+    projectNumber,
+    cadence,
+    document,
+  };
 
+  const { canUndo, push: pushUndo, undo: popUndo, clear: clearUndo } =
+    useDocumentUndoStack<BlockEditorSnapshot>();
+
+  const recordUndo = useCallback(
+    (coalesceKey?: string) => {
+      pushUndo(snapshotRef.current, coalesceKey);
+    },
+    [pushUndo],
+  );
+
+  const applyUndo = useCallback(() => {
+    const prev = popUndo();
+    if (!prev) return;
+    setTitle(prev.title);
+    setStatus(prev.status);
+    setInspector(prev.inspector);
+    setInspectedAt(prev.inspectedAt);
+    setProjectNumber(prev.projectNumber);
+    setCadence(prev.cadence);
+    setDocument(prev.document);
+    setIsDirty(true);
+    setSaveState((s) => (s === 'saved' || s === 'error' ? 'idle' : s));
+  }, [popUndo]);
+
+  useDocumentUndoHotkey(canUndo, applyUndo);
 
   useEffect(() => {
 
@@ -108,6 +163,8 @@ function BlockInspectionEditorInner({
     inspectionIdRef.current = inspection.id;
 
     if (!isNewInspection && isDirty) return;
+
+    clearUndo();
 
     setTitle(inspection.title);
 
@@ -249,7 +306,12 @@ function BlockInspectionEditorInner({
 
   );
 
-
+  useDocumentAutosave(
+    () => save(),
+    isDirty,
+    saveState === 'saving',
+    inspection.id,
+  );
 
   const markDirty = useCallback(() => {
 
@@ -263,21 +325,25 @@ function BlockInspectionEditorInner({
 
   const handleValueChange = useCallback((path: BlockPath, value: unknown) => {
 
+    recordUndo(`block:${path.join('.')}`);
+
     setDocument((prev) => ({ ...prev, blocks: setBlockValue(prev.blocks, path, value) }));
 
     markDirty();
 
-  }, [markDirty]);
+  }, [markDirty, recordUndo]);
 
 
 
   const handlePatchBlocks = useCallback((mutator: (blocks: Block[]) => Block[]) => {
 
+    recordUndo();
+
     setDocument((prev) => ({ ...prev, blocks: mutator(prev.blocks) }));
 
     markDirty();
 
-  }, [markDirty]);
+  }, [markDirty, recordUndo]);
 
 
 
@@ -395,6 +461,26 @@ function BlockInspectionEditorInner({
 
             type="button"
 
+            disabled={!canUndo}
+
+            onClick={applyUndo}
+
+            title="Undo last change (Ctrl+Z)"
+
+            className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-2.5 py-1 text-xs text-neutral-200 hover:bg-white/5 disabled:opacity-50"
+
+          >
+
+            <Undo2 className="size-3.5" />
+
+            Undo
+
+          </button>
+
+          <button
+
+            type="button"
+
             onClick={() => void save()}
 
             className="rounded-md border border-white/10 px-2.5 py-1 text-xs text-neutral-200 hover:bg-white/5"
@@ -479,6 +565,8 @@ function BlockInspectionEditorInner({
 
               onChange={(e) => {
 
+                recordUndo('meta:title');
+
                 setTitle(e.target.value);
 
                 markDirty();
@@ -531,6 +619,8 @@ function BlockInspectionEditorInner({
 
               onChange={(e) => {
 
+                recordUndo('meta:inspector');
+
                 setInspector(e.target.value);
 
                 markDirty();
@@ -552,6 +642,8 @@ function BlockInspectionEditorInner({
               value={inspectedAt}
 
               onChange={(e) => {
+
+                recordUndo('meta:inspectedAt');
 
                 setInspectedAt(e.target.value);
 
@@ -575,6 +667,8 @@ function BlockInspectionEditorInner({
 
               onChange={(e) => {
 
+                recordUndo('meta:projectNumber');
+
                 setProjectNumber(e.target.value);
 
                 markDirty();
@@ -596,6 +690,8 @@ function BlockInspectionEditorInner({
               value={cadence}
 
               onChange={(e) => {
+
+                recordUndo('meta:cadence');
 
                 setCadence(e.target.value as CadencePreset);
 

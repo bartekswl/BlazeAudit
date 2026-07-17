@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -9,6 +11,7 @@ import {
 } from 'react';
 import { FileText, Pencil, Plus, Search, Trash2, Users, X } from 'lucide-react';
 import { validateCountry, validatePhone, validatePostCode, validateProvince } from '../../../shared/address';
+import type { Inspection } from '../../../shared/inspection';
 import type { Client, ClientInput } from '../../../shared/types';
 import { cn } from '../../lib/cn';
 import { InlineLoader } from '../../components/LoadingOverlay';
@@ -18,6 +21,10 @@ import { paginateItems } from '../../lib/pagination';
 import { CustomerDetailScreen } from './CustomerDetailScreen';
 import { filterClients } from './filterClients';
 import { inputCls } from '../templates/BlockList';
+
+const InspectionEditor = lazy(() =>
+  import('../documents/InspectionEditor').then((module) => ({ default: module.InspectionEditor })),
+);
 
 const EMPTY: ClientInput = {
   name: '',
@@ -41,17 +48,18 @@ type EditorState = { mode: 'closed' } | { mode: 'new' } | { mode: 'edit'; client
 
 export type CustomerDetailBreadcrumb = {
   clientName: string;
+  documentTitle?: string;
   onBack: () => void;
+  onBackToList: () => void;
+  onBackToClient?: () => void;
 };
 
 export function CustomersScreen({
   onDetailChange,
   onNewInspection,
-  onOpenInspection,
 }: {
   onDetailChange?: (detail: CustomerDetailBreadcrumb | null) => void;
   onNewInspection?: (clientId: string) => void;
-  onOpenInspection?: (inspectionId: string) => void;
 }) {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,13 +70,22 @@ export function CustomersScreen({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedClientName, setSelectedClientName] = useState<string | null>(null);
   const [detailRefreshKey, setDetailRefreshKey] = useState(0);
+  const [openInspectionId, setOpenInspectionId] = useState<string | null>(null);
+  const [openInspection, setOpenInspection] = useState<Inspection | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Client | null>(null);
   const [blockedDelete, setBlockedDelete] = useState<{
     client: Client;
     documentCount: number;
   } | null>(null);
 
+  const closeInspection = useCallback(() => {
+    setOpenInspectionId(null);
+    setOpenInspection(null);
+  }, []);
+
   const goBackToList = useCallback(() => {
+    setOpenInspectionId(null);
+    setOpenInspection(null);
     setSelectedId(null);
     setSelectedClientName(null);
   }, []);
@@ -76,11 +93,52 @@ export function CustomersScreen({
   useEffect(() => {
     if (!onDetailChange) return;
     if (selectedId && selectedClientName) {
-      onDetailChange({ clientName: selectedClientName, onBack: goBackToList });
+      if (openInspectionId && openInspection) {
+        onDetailChange({
+          clientName: selectedClientName,
+          documentTitle: openInspection.title,
+          onBack: closeInspection,
+          onBackToList: goBackToList,
+          onBackToClient: closeInspection,
+        });
+      } else {
+        onDetailChange({
+          clientName: selectedClientName,
+          onBack: goBackToList,
+          onBackToList: goBackToList,
+        });
+      }
     } else {
       onDetailChange(null);
     }
-  }, [selectedId, selectedClientName, onDetailChange, goBackToList]);
+  }, [
+    selectedId,
+    selectedClientName,
+    openInspectionId,
+    openInspection,
+    onDetailChange,
+    goBackToList,
+    closeInspection,
+  ]);
+
+  useEffect(() => {
+    if (!openInspectionId) {
+      setOpenInspection(null);
+      return;
+    }
+    let cancelled = false;
+    void window.blazeaudit.inspections.get(openInspectionId).then((row) => {
+      if (cancelled) return;
+      if (row) setOpenInspection(row);
+      else {
+        setOpenInspectionId(null);
+        setError('Document not found.');
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [openInspectionId]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -170,6 +228,26 @@ export function CustomersScreen({
     </ConfirmDialog>
   ) : null;
 
+  if (selectedId && openInspectionId) {
+    if (!openInspection) {
+      return <InlineLoader label="Loading document…" />;
+    }
+    return (
+      <Suspense fallback={<InlineLoader label="Loading document editor…" />}>
+        <InspectionEditor
+          inspection={openInspection}
+          onBack={() => {
+            closeInspection();
+            setDetailRefreshKey((k) => k + 1);
+          }}
+          onSaved={(saved) => {
+            setOpenInspection(saved);
+          }}
+        />
+      </Suspense>
+    );
+  }
+
   if (selectedId) {
     return (
       <div className="flex h-full min-h-0 flex-col">
@@ -178,7 +256,10 @@ export function CustomersScreen({
           clientId={selectedId}
           onEdit={(client) => setEditor({ mode: 'edit', client })}
           onNewInspection={(clientId) => onNewInspection?.(clientId)}
-          onOpenInspection={(inspectionId) => onOpenInspection?.(inspectionId)}
+          onOpenInspection={(inspectionId) => {
+            setError(null);
+            setOpenInspectionId(inspectionId);
+          }}
         />
         {editor.mode !== 'closed' && (
           <ClientEditor

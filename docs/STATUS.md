@@ -7,7 +7,7 @@
 | **Status** | Living snapshot — update as the project evolves |
 | **Last updated** | 2026-07-17 |
 | **HEAD** | `4519740` on `main` (`github.com/bartekswl/BlazeAudit`) |
-| **Schema** | SQLite `user_version` **12** (`LATEST_SCHEMA_VERSION`) |
+| **Schema** | SQLite `user_version` **13** (`LATEST_SCHEMA_VERSION`) |
 | **Current focus** | ULC S536 built-in form polish (template · document · PDF parity) |
 | **Roadmap next** | Phase 7 (encrypted backups) — not started; form work is active ahead of it |
 
@@ -131,7 +131,11 @@ Controls on `FormPageCanvas` (`pageExtraControls`); add/remove in document edito
 
 ### Other recent modules
 
-- **Calendar** — month grid (`features/calendar/`).
+- **Calendar** — month/year grids with day schedule tasks (`features/calendar/`,
+  schema v13 `calendar_tasks`: add/edit/remove with optional times; day markers).
+  Dashboard **Upcoming Tasks** lists calendar tasks from today forward.
+- **Customers → document** — opening a customer document stays on the Customers
+  crumb (Customers → client → document); Back returns to that client.
 - **Name Badges** — CRUD + PDF sheet (`features/nameBadges/`, schema v11
   `name_badges` table).
 - **Project number** (schema v12) — `inspections.project_number`; entered on create,

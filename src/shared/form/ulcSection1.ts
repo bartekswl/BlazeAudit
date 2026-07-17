@@ -76,7 +76,21 @@ export interface UlcSection1Value {
   fireSignalCentre: string;
   fireSignalPhone: string;
   fireSignalFax: string;
+  /**
+   * Once the inspector edits any page-1 phone field, empty values stay empty
+   * (no live fall-back to client phone bindings).
+   */
+  phonesEdited: boolean;
 }
+
+/** Page-1 phone fields that prefill from the client but stay document-editable. */
+export const ULC_SECTION1_PHONE_KEYS = [
+  'contactPhone',
+  'ownerPhone',
+  'fireSignalPhone',
+] as const;
+
+export type UlcSection1PhoneKey = (typeof ULC_SECTION1_PHONE_KEYS)[number];
 
 export function emptyUlcSection1Value(): UlcSection1Value {
   return {
@@ -110,6 +124,7 @@ export function emptyUlcSection1Value(): UlcSection1Value {
     fireSignalCentre: '',
     fireSignalPhone: '',
     fireSignalFax: '',
+    phonesEdited: false,
   };
 }
 
@@ -127,6 +142,12 @@ const FIELD_BINDINGS: Partial<Record<keyof UlcSection1Value, BindingPath>> = {
   fireSignalPhone: 'client.signalReceivingCenterPhone',
 };
 
+const PHONE_FIELD_KEYS = new Set<keyof UlcSection1Value>([
+  'contactPhone',
+  'ownerPhone',
+  'fireSignalPhone',
+]);
+
 export function resolveUlcSection1Field(
   key: keyof UlcSection1Value,
   value: UlcSection1Value,
@@ -134,6 +155,9 @@ export function resolveUlcSection1Field(
 ): string {
   const stored = value[key];
   if (typeof stored === 'string' && stored.trim()) return stored;
+  if (PHONE_FIELD_KEYS.has(key) && value.phonesEdited) {
+    return typeof stored === 'string' ? stored : '';
+  }
   const binding = FIELD_BINDINGS[key];
   if (binding && context) return resolveBinding(context, binding);
   return typeof stored === 'string' ? stored : '';

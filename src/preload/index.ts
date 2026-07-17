@@ -34,6 +34,7 @@ import type {
   InspectorInput,
 } from '../shared/profile';
 import type { NameBadge, NameBadgeInput } from '../shared/nameBadges';
+import type { CalendarTask, CalendarTaskInput } from '../shared/calendarTasks';
 import type { RollbackInfo, UpdateStatus } from '../shared/update';
 import type { Client, ClientInput } from '../shared/types';
 
@@ -209,6 +210,18 @@ const api = {
       defaultFilename?: string,
     ): Promise<{ saved: false } | { saved: true; filePath: string }> =>
       ipcRenderer.invoke(IpcChannels.nameBadgesExportPdf, html, defaultFilename),
+  },
+  calendarTasks: {
+    listForDate: (taskDate: string): Promise<CalendarTask[]> =>
+      ipcRenderer.invoke(IpcChannels.calendarTasksListForDate, taskDate),
+    listInRange: (fromDate: string, toDate: string): Promise<CalendarTask[]> =>
+      ipcRenderer.invoke(IpcChannels.calendarTasksListInRange, fromDate, toDate),
+    create: (input: CalendarTaskInput): Promise<CalendarTask> =>
+      ipcRenderer.invoke(IpcChannels.calendarTasksCreate, input),
+    update: (id: string, input: CalendarTaskInput): Promise<CalendarTask> =>
+      ipcRenderer.invoke(IpcChannels.calendarTasksUpdate, id, input),
+    remove: (id: string): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.calendarTasksDelete, id),
   },
 };
 
