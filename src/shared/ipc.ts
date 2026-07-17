@@ -76,6 +76,11 @@ export const IpcChannels = {
   nameBadgesPickPhoto: 'name-badges:pick-photo',
   nameBadgesRemovePhoto: 'name-badges:remove-photo',
   nameBadgesExportPdf: 'name-badges:export-pdf',
+  calendarTasksListForDate: 'calendar-tasks:list-for-date',
+  calendarTasksListInRange: 'calendar-tasks:list-in-range',
+  calendarTasksCreate: 'calendar-tasks:create',
+  calendarTasksUpdate: 'calendar-tasks:update',
+  calendarTasksDelete: 'calendar-tasks:delete',
 } as const;
 
 export type IpcChannel = (typeof IpcChannels)[keyof typeof IpcChannels];

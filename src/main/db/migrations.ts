@@ -297,6 +297,25 @@ const migrations: Migration[] = [
       `);
     },
   },
+  {
+    version: 13,
+    up: (db) => {
+      db.exec(`
+        CREATE TABLE calendar_tasks (
+          id          TEXT PRIMARY KEY,
+          title       TEXT NOT NULL,
+          notes       TEXT NOT NULL DEFAULT '',
+          task_date   TEXT NOT NULL,
+          start_time  TEXT,
+          end_time    TEXT,
+          created_at  TEXT NOT NULL,
+          updated_at  TEXT NOT NULL
+        );
+
+        CREATE INDEX idx_calendar_tasks_date ON calendar_tasks (task_date);
+      `);
+    },
+  },
 ];
 
 /** Applies any migrations newer than the database's current `user_version`. */

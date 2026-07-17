@@ -1,9 +1,11 @@
+import { useEffect, useRef } from 'react';
 import type { DocumentContext } from '../../../shared/document';
 import { normalizeIsoDateInput } from '../../../shared/dates';
 import {
   formatBusinessCompanyDisplay,
   normalizeUlcSection1Value,
   resolveUlcSection1Field,
+  ULC_SECTION1_PHONE_KEYS,
   type UlcSection1Value,
 } from '../../../shared/form/ulcSection1';
 import { InspectionDateField } from '../../components/InspectionDateField';
@@ -124,34 +126,50 @@ function DateField({
   );
 }
 
-function PhoneDisabledStack({
+function PhoneStack({
   phoneKey,
   value,
   context,
   readOnly,
   onChange,
 }: {
-  phoneKey: keyof UlcSection1Value;
+  phoneKey: 'contactPhone' | 'ownerPhone' | 'fireSignalPhone';
   value: UlcSection1Value;
   context: DocumentContext | null;
   readOnly?: boolean;
   onChange?: (next: UlcSection1Value) => void;
 }) {
-  const phoneDisplay = effectiveFieldText(phoneKey, value, context);
+  // Always show stored value when phones have been edited; otherwise prefer
+  // client binding, then empty (still editable).
+  const shown = effectiveFieldText(phoneKey, value, context);
+
   return (
     <div className="ulc-s1-phone-fax">
-      <div className={cellCls}>
+      <div className={cn(cellCls, 'ulc-s1-phone-value')}>
         <div className={labelCls}>Phone:</div>
         {readOnly ? (
-          <div className="ulc-s1-value">{phoneDisplay || '\u00a0'}</div>
+          <div className="ulc-s1-value">{shown || '\u00a0'}</div>
         ) : (
-          <VisibleWidthInput
-            className={inputCls}
-            value={phoneDisplay}
-            onChange={(v) => onChange?.(updateField(value, phoneKey, v))}
+          <input
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            className={cn(inputCls, 'ulc-s1-phone-input')}
+            value={shown}
+            placeholder=""
+            spellCheck={false}
+            onChange={(e) => {
+              const next = e.target.value;
+              onChange?.({
+                ...value,
+                [phoneKey]: next,
+                phonesEdited: true,
+              });
+            }}
           />
         )}
       </div>
+      {/* Former Fax half — decorative empty cell only (not interactive). */}
       <div className="ulc-s1-cell ulc-s1-fax-disabled" aria-hidden="true" />
     </div>
   );
@@ -220,6 +238,27 @@ export function FormUlcSection1View({
   onChange?: (value: UlcSection1Value) => void;
 }) {
   const value = normalizeUlcSection1Value(rawValue);
+  const phonesSeededRef = useRef(false);
+
+  // Copy client phones into the document once so the inputs are real editable
+  // fields (still empty + editable when the client has no phone on file).
+  useEffect(() => {
+    if (phonesSeededRef.current || readOnly || !onChange || !context || value.phonesEdited) {
+      phonesSeededRef.current = true;
+      return;
+    }
+    let next = value;
+    let changed = false;
+    for (const key of ULC_SECTION1_PHONE_KEYS) {
+      if (next[key].trim()) continue;
+      const fromClient = resolveUlcSection1Field(key, next, context);
+      if (!fromClient) continue;
+      next = { ...next, [key]: fromClient };
+      changed = true;
+    }
+    phonesSeededRef.current = true;
+    if (changed) onChange(next);
+  }, [readOnly, onChange, context, value]);
 
   return (
     <div className="ulc-s1-panel">
@@ -410,7 +449,7 @@ export function FormUlcSection1View({
             onChange={onChange}
             className="ulc-s1-cell--medium"
           />
-          <PhoneDisabledStack
+          <PhoneStack
             phoneKey="contactPhone"
             value={value}
             context={context}
@@ -437,7 +476,7 @@ export function FormUlcSection1View({
             onChange={onChange}
             className="ulc-s1-cell--medium"
           />
-          <PhoneDisabledStack
+          <PhoneStack
             phoneKey="ownerPhone"
             value={value}
             context={context}
@@ -472,7 +511,7 @@ export function FormUlcSection1View({
             readOnly={readOnly}
             onChange={onChange}
           />
-          <PhoneDisabledStack
+          <PhoneStack
             phoneKey="fireSignalPhone"
             value={value}
             context={context}

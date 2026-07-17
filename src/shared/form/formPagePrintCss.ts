@@ -405,16 +405,18 @@ export const ULC_SECTION1_PRINT_CSS = `
     line-height: 1;
   }
   .ulc-s1-phone-fax {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: minmax(2.25rem, 1fr) minmax(1.25rem, 1fr);
     min-width: 0;
     min-height: 0;
+    height: 100%;
   }
   .ulc-s1-phone-fax .ulc-s1-cell {
-    flex: 1;
     border-bottom: var(--ulc-line);
+    min-height: 0;
   }
   .ulc-s1-phone-fax .ulc-s1-cell:last-child { border-bottom: none; }
+  .ulc-s1-phone-value { min-height: 2.25rem; }
   .ulc-s1-bottom { flex-shrink: 0; }
   .ulc-s1-bottom-row {
     display: grid;

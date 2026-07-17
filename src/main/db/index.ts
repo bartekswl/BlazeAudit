@@ -6,5 +6,6 @@ export * as templateRegistry from './templateRegistry';
 export * as inspections from './inspections';
 export * as profile from './profile';
 export * as nameBadges from './nameBadges';
+export * as calendarTasks from './calendarTasks';
 export { resolveDocumentContext, resolveBuiltinSeedId } from './resolveDocumentContext';
 export { seedDefaultTemplates } from './seedTemplates';

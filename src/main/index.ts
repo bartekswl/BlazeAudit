@@ -9,6 +9,7 @@ import { registerTemplatesIpc } from './ipc/templates';
 import { registerInspectionsIpc } from './ipc/inspections';
 import { registerProfileIpc } from './ipc/profile';
 import { registerNameBadgesIpc } from './ipc/nameBadges';
+import { registerCalendarTasksIpc } from './ipc/calendarTasks';
 import { registerAuthIpc } from './ipc/auth';
 import { provisionDemoIfNeeded } from './demo/provisionDemo';
 import { registerUpdateIpc } from './update/updater';
@@ -122,6 +123,7 @@ void app.whenReady().then(async () => {
   registerInspectionsIpc();
   registerProfileIpc();
   registerNameBadgesIpc();
+  registerCalendarTasksIpc();
   registerUpdateIpc();
   createMainWindow();
 

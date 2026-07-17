@@ -1,6 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatIsoDateLocal } from '../../../shared/dates';
 import { cn } from '../../lib/cn';
+import { DayScheduleDialog } from './DayScheduleDialog';
 
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 const MONTH_NAMES = [
@@ -44,6 +46,21 @@ function buildMonthGrid(viewYear: number, viewMonth: number): Date[] {
   });
 }
 
+function monthRangeIso(viewYear: number, viewMonth: number): { from: string; to: string } {
+  const days = buildMonthGrid(viewYear, viewMonth);
+  return {
+    from: formatIsoDateLocal(days[0]),
+    to: formatIsoDateLocal(days[days.length - 1]),
+  };
+}
+
+function yearRangeIso(viewYear: number): { from: string; to: string } {
+  return {
+    from: `${viewYear}-01-01`,
+    to: `${viewYear}-12-31`,
+  };
+}
+
 function dayCellCls({
   inCurrentMonth,
   isToday,
@@ -59,7 +76,7 @@ function dayCellCls({
     compact
       ? 'min-h-[1.35rem] rounded px-0.5 py-0 text-[10px] font-medium'
       : 'min-h-0 rounded-lg text-sm font-semibold',
-    'relative flex items-center justify-center border tabular-nums transition-colors',
+    'relative flex flex-col items-center justify-center border tabular-nums transition-colors',
     inCurrentMonth
       ? 'border-[var(--ba-panel-border)] bg-[var(--ba-surface-elevated)] text-[var(--ba-text-primary)] hover:border-flame-500/35 hover:bg-flame-500/8'
       : 'border-transparent bg-transparent text-[var(--ba-text-faint)] opacity-45 hover:opacity-70',
@@ -74,6 +91,7 @@ function MonthGrid({
   viewMonth,
   today,
   selectedDate,
+  taskCounts,
   onSelectDate,
   compact = false,
   showWeekdays = true,
@@ -82,6 +100,7 @@ function MonthGrid({
   viewMonth: number;
   today: Date;
   selectedDate: Date;
+  taskCounts: Map<string, number>;
   onSelectDate: (day: Date) => void;
   compact?: boolean;
   showWeekdays?: boolean;
@@ -116,15 +135,33 @@ function MonthGrid({
           const inCurrentMonth = day.getMonth() === viewMonth;
           const isToday = isSameDay(day, today);
           const isSelected = isSameDay(day, selectedDate);
+          const iso = formatIsoDateLocal(day);
+          const count = taskCounts.get(iso) ?? 0;
 
           return (
             <button
-              key={day.toISOString()}
+              key={iso}
               type="button"
               onClick={() => onSelectDate(startOfDay(day))}
               className={dayCellCls({ inCurrentMonth, isToday, isSelected, compact })}
+              aria-label={
+                count > 0
+                  ? `${day.toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}, ${count} task${count === 1 ? '' : 's'}`
+                  : undefined
+              }
             >
-              {day.getDate()}
+              <span>{day.getDate()}</span>
+              {count > 0 ? (
+                <span
+                  className={cn(
+                    'pointer-events-none absolute rounded-full bg-flame-500',
+                    compact
+                      ? 'bottom-0.5 size-1'
+                      : 'bottom-1.5 size-1.5 shadow-[0_0_0_1px_rgb(249_115_22_/_0.35)]',
+                  )}
+                  aria-hidden
+                />
+              ) : null}
             </button>
           );
         })}
@@ -138,9 +175,30 @@ export function CalendarScreen() {
   const [viewMode, setViewMode] = useState<CalendarView>('month');
   const [viewDate, setViewDate] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(today));
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [taskCounts, setTaskCounts] = useState<Map<string, number>>(() => new Map());
 
   const viewYear = viewDate.getFullYear();
   const viewMonth = viewDate.getMonth();
+
+  const refreshMarkers = useCallback(async () => {
+    try {
+      const range =
+        viewMode === 'month' ? monthRangeIso(viewYear, viewMonth) : yearRangeIso(viewYear);
+      const tasks = await window.blazeaudit.calendarTasks.listInRange(range.from, range.to);
+      const next = new Map<string, number>();
+      for (const task of tasks) {
+        next.set(task.taskDate, (next.get(task.taskDate) ?? 0) + 1);
+      }
+      setTaskCounts(next);
+    } catch {
+      setTaskCounts(new Map());
+    }
+  }, [viewMode, viewYear, viewMonth]);
+
+  useEffect(() => {
+    void refreshMarkers();
+  }, [refreshMarkers]);
 
   const headerLabel =
     viewMode === 'month'
@@ -153,6 +211,14 @@ export function CalendarScreen() {
     day: 'numeric',
     year: 'numeric',
   });
+
+  const selectedIso = formatIsoDateLocal(selectedDate);
+  const selectedCount = taskCounts.get(selectedIso) ?? 0;
+
+  const openDay = (day: Date) => {
+    setSelectedDate(day);
+    setScheduleOpen(true);
+  };
 
   const goPrev = () => {
     if (viewMode === 'month') {
@@ -241,7 +307,8 @@ export function CalendarScreen() {
             viewMonth={viewMonth}
             today={today}
             selectedDate={selectedDate}
-            onSelectDate={setSelectedDate}
+            taskCounts={taskCounts}
+            onSelectDate={openDay}
           />
         ) : (
           <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-y-auto sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -273,10 +340,11 @@ export function CalendarScreen() {
                     viewMonth={monthIndex}
                     today={today}
                     selectedDate={selectedDate}
+                    taskCounts={taskCounts}
                     onSelectDate={(day) => {
-                      setSelectedDate(day);
                       setViewDate(new Date(day.getFullYear(), day.getMonth(), 1));
                       setViewMode('month');
+                      openDay(day);
                     }}
                     compact
                     showWeekdays={false}
@@ -288,12 +356,35 @@ export function CalendarScreen() {
         )}
       </section>
 
-      <section className="ba-panel shrink-0 px-4 py-2.5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ba-text-faint)]">
-          Selected date
-        </p>
-        <p className="mt-0.5 text-sm font-semibold text-[var(--ba-text-primary)]">{selectedLabel}</p>
+      <section className="ba-panel flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-2.5">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ba-text-faint)]">
+            Selected date
+          </p>
+          <p className="mt-0.5 text-sm font-semibold text-[var(--ba-text-primary)]">{selectedLabel}</p>
+          {selectedCount > 0 ? (
+            <p className="mt-0.5 text-xs text-[var(--ba-text-muted)]">
+              {selectedCount} scheduled task{selectedCount === 1 ? '' : 's'}
+            </p>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={() => setScheduleOpen(true)}
+          className="ba-btn ba-btn--secondary px-3 py-1.5 text-xs"
+        >
+          Open schedule
+        </button>
       </section>
+
+      {scheduleOpen ? (
+        <DayScheduleDialog
+          taskDate={selectedIso}
+          dateLabel={selectedLabel}
+          onClose={() => setScheduleOpen(false)}
+          onChanged={() => void refreshMarkers()}
+        />
+      ) : null}
     </div>
   );
 }
