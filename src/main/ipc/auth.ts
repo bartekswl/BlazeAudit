@@ -3,6 +3,7 @@ import { userInfo } from 'node:os';
 import {
   activate,
   beginAddAccount,
+  changePassword,
   getAuthStatus,
   getLoginPolicy,
   getColorTheme,
@@ -17,7 +18,12 @@ import {
 import { getActiveAccountId } from '../auth/context';
 import { describeDataDir } from '../db/paths';
 import { IpcChannels } from '../../shared/ipc';
-import type { ActivateInput, LoginInput, SetPasswordInput } from '../../shared/auth';
+import type {
+  ActivateInput,
+  ChangePasswordInput,
+  LoginInput,
+  SetPasswordInput,
+} from '../../shared/auth';
 import type { LoginPolicy } from '../../shared/loginPolicy';
 import type { ColorTheme } from '../../shared/theme';
 
@@ -28,6 +34,10 @@ export function registerAuthIpc(): void {
 
   ipcMain.handle(IpcChannels.authSetPassword, (_event, input: SetPasswordInput) =>
     setPassword(input),
+  );
+
+  ipcMain.handle(IpcChannels.authChangePassword, (_event, input: ChangePasswordInput) =>
+    changePassword(input),
   );
 
   ipcMain.handle(IpcChannels.authLogin, (_event, input: LoginInput) => login(input));

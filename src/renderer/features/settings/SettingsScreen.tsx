@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { DEFAULT_LOGIN_POLICY, type LoginPolicy } from '../../../shared/loginPolicy';
 import { LoginPolicySelect } from '../../components/LoginPolicySelect';
 import { AppearanceSection } from './AppearanceSection';
+import { ChangePasswordSection } from './ChangePasswordSection';
 import { UserProfileSection } from './UserProfileSection';
 
 export type SettingsScrollTarget = 'user-profile';
@@ -81,6 +82,8 @@ export function SettingsScreen({
         {message && <p className="mt-2 text-xs text-emerald-300">{message}</p>}
         {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
       </section>
+
+      <ChangePasswordSection />
 
       <section className="ba-panel p-5">
         <h3 className="ba-section-title">Data location</h3>

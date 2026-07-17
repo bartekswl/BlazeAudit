@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '../lib/cn';
+import { AuthBackground } from '../features/auth/AuthBackground';
 import { TitleBar } from './TitleBar';
 import { StartupLoader } from './StartupLoader';
 
@@ -21,18 +22,19 @@ export function AppFrame({
   const showOverlay = bootOverlay !== 'hidden';
 
   return (
-    <div className="relative flex h-screen flex-col overflow-hidden bg-[#0a0a0a]">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-[var(--ba-app-bg)]">
       {showChrome ? <TitleBar /> : null}
       <div className="relative min-h-0 flex-1">{children}</div>
       {showOverlay ? (
         <div
           className={cn(
-            'app-boot-overlay absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#0a0a0a] [-webkit-app-region:drag]',
+            'app-boot-overlay absolute inset-0 z-50 flex flex-col items-center justify-center overflow-hidden [-webkit-app-region:drag]',
             bootOverlay === 'hiding' && 'app-boot-overlay--hide',
           )}
           aria-busy={bootOverlay === 'visible'}
         >
-          <div className="[-webkit-app-region:no-drag]">
+          <AuthBackground />
+          <div className="relative z-10 [-webkit-app-region:no-drag]">
             <StartupLoader inline />
           </div>
         </div>

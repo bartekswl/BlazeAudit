@@ -10,7 +10,11 @@ import type { AuthStatus } from '../../../shared/auth';
 import { cn } from '../../lib/cn';
 import { AppFrame } from '../../components/AppFrame';
 import { AuthRefreshContext } from './authContext';
-import { notifyAccountThemeSync, releaseBootTheme } from '../../theme/ThemeProvider';
+import {
+  notifyAccountThemeSync,
+  prepareBootTheme,
+  releaseBootTheme,
+} from '../../theme/ThemeProvider';
 
 const ActivationScreen = lazy(() =>
   import('./ActivationScreen').then((module) => ({ default: module.ActivationScreen })),
@@ -41,9 +45,10 @@ export function AuthGate() {
   const [appMotion, setAppMotion] = useState<'enter' | 'exit' | null>(null);
 
   const finishBootReveal = useCallback(async () => {
+    // Resolve light/dark under the boot overlay before revealing login/app.
+    await prepareBootTheme();
     releaseBootTheme();
-    notifyAccountThemeSync();
-    // One frame so theme paints under the dark overlay, then fade out.
+    // One frame so theme paints under the overlay, then fade out.
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => resolve());
     });
@@ -155,7 +160,7 @@ export function AuthGate() {
         {showAuth && status ? (
           <div
             className={cn(
-              'absolute inset-0 z-20 bg-neutral-950',
+              'absolute inset-0 z-20',
               authLeaving ? 'auth-panel-exit' : undefined,
             )}
           >

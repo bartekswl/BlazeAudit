@@ -1254,7 +1254,7 @@ const PRINT_OVERRIDES = `
     background: transparent !important;
   }
 
-  /* Documentation checklist — 21 Documentation (fill page height, readable type) */
+  /* Documentation checklist — 21 Documentation (PDF only: fill height, keep last line) */
   .form-print-root .doc-panel {
     --doc-line: 0.5px solid #64748b !important;
     flex: 1 1 auto !important;
@@ -1272,6 +1272,7 @@ const PRINT_OVERRIDES = `
     background: #ffffff !important;
     display: flex !important;
     flex-direction: column !important;
+    padding-bottom: 2pt !important;
   }
   .form-print-root .doc-legend {
     flex: 0 0 auto !important;
@@ -1326,7 +1327,7 @@ const PRINT_OVERRIDES = `
     background: #edf7ef !important;
   }
   .form-print-root .doc-td--no {
-    background: #fdeeee !important;
+    background: #ffedd5 !important;
   }
   .form-print-root .doc-td--na-disabled {
     background: #e2e8f0 !important;
@@ -1355,7 +1356,8 @@ const PRINT_OVERRIDES = `
     height: 1% !important;
   }
   .form-print-root .doc-ruled-stack {
-    --doc-ruled-line-height: 1.35em !important;
+    --doc-ruled-line-height: 1.3em !important;
+    flex: 0 0 auto !important;
     flex-shrink: 0 !important;
     height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 3)) !important;
     min-height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 3)) !important;
@@ -1363,25 +1365,27 @@ const PRINT_OVERRIDES = `
   }
   .form-print-root .doc-ruled-body {
     height: 100% !important;
-    line-height: var(--doc-ruled-line-height, 1.35em) !important;
+    line-height: var(--doc-ruled-line-height, 1.3em) !important;
     font-size: 9pt !important;
   }
   .form-print-root .doc-ruled-line {
-    flex: 0 0 var(--doc-ruled-line-height, 1.35em) !important;
-    height: var(--doc-ruled-line-height, 1.35em) !important;
+    flex: 0 0 var(--doc-ruled-line-height, 1.3em) !important;
+    height: var(--doc-ruled-line-height, 1.3em) !important;
     border-bottom: 0.5px solid #64748b !important;
     box-sizing: border-box !important;
   }
+  /* Keep annex notes at a fixed ruled height so the last line is never clipped. */
   .form-print-root .doc-ruled-stack--annex {
     --doc-ruled-line-count: 11 !important;
-    --doc-ruled-line-height: calc(1.35em * 1.35) !important;
-    flex: 1 1 auto !important;
+    --doc-ruled-line-height: 1.3em !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 11)) !important;
     min-height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 11)) !important;
-    height: auto !important;
-    max-height: none !important;
+    max-height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 11)) !important;
   }
   .form-print-root .doc-ruled-stack--annex .doc-ruled-line:last-child {
-    border-bottom: none !important;
+    border-bottom: 0.5px solid #64748b !important;
   }
   .form-print-root .doc-ruled-stack--location {
     --doc-ruled-line-count: 3 !important;
@@ -1391,19 +1395,23 @@ const PRINT_OVERRIDES = `
     color: #ffffff !important;
     font-size: 8.5pt !important;
     padding: 3pt 5pt !important;
+    flex: 0 0 auto !important;
   }
   .form-print-root .doc-annex {
-    flex: 1 1 auto !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
     min-height: 0 !important;
     border-top: none !important;
     display: flex !important;
     flex-direction: column !important;
   }
   .form-print-root .doc-annex-body {
-    flex: 1 1 auto !important;
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
     min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
+    overflow: visible !important;
   }
   .form-print-root .form-page-section:has(.doc-panel) .form-element-frame--flush {
     margin-top: 0 !important;
@@ -1504,7 +1512,7 @@ const PRINT_OVERRIDES = `
     background: #edf7ef !important;
   }
   .form-print-root .cut-td--no {
-    background: #fdeeee !important;
+    background: #ffedd5 !important;
   }
   .form-print-root .cut-td--na {
     background: #f1f5f9 !important;
@@ -1646,7 +1654,7 @@ const PRINT_OVERRIDES = `
     background: #edf7ef !important;
   }
   .form-print-root .cur-td--no {
-    background: #fdeeee !important;
+    background: #ffedd5 !important;
   }
   .form-print-root .cur-td--na {
     background: #f1f5f9 !important;
@@ -1759,7 +1767,7 @@ const PRINT_OVERRIDES = `
     background: #edf7ef !important;
   }
   .form-print-root .vct-td--no {
-    background: #fdeeee !important;
+    background: #ffedd5 !important;
   }
   .form-print-root .vct-td--na {
     background: #f1f5f9 !important;

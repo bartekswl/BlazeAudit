@@ -64,7 +64,7 @@ export function LoginScreen({
     >
       <div className="space-y-4">
         <div>
-          <p className="mb-2 text-xs font-medium text-neutral-400">Accounts on this computer</p>
+          <p className="ba-auth-label mb-2 text-xs font-medium">Accounts on this computer</p>
           <ul className="space-y-1.5">
             {accounts.map((account) => {
               const selected = account.id === accountId;
@@ -76,25 +76,23 @@ export function LoginScreen({
                     disabled={busy}
                     onClick={() => void switchAccount(account.id)}
                     className={cn(
-                      'flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors disabled:opacity-50',
-                      selected
-                        ? 'border-flame-500/40 bg-flame-500/10'
-                        : 'border-white/5 bg-neutral-950/60 hover:border-white/10 hover:bg-white/[0.03]',
+                      'ba-auth-account flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors disabled:opacity-50',
+                      selected && 'ba-auth-account--selected',
                     )}
                   >
                     <span
                       className={cn(
-                        'grid size-8 shrink-0 place-items-center rounded-full',
-                        selected ? 'bg-flame-500/20 text-flame-400' : 'bg-white/5 text-neutral-500',
+                        'ba-auth-account-icon grid size-8 shrink-0 place-items-center rounded-full',
+                        selected && 'ba-auth-account-icon--selected',
                       )}
                     >
                       <User className="size-3.5" />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-neutral-100">
+                      <span className="ba-auth-account-email block truncate text-sm font-medium">
                         {account.email}
                       </span>
-                      <span className="block text-xs text-neutral-500">
+                      <span className="ba-auth-account-meta block text-xs">
                         {switching ? 'Switching…' : selected ? 'Signing in to this account' : 'Switch'}
                       </span>
                     </span>
@@ -105,12 +103,10 @@ export function LoginScreen({
           </ul>
         </div>
 
-        <form onSubmit={submit} className="space-y-4 border-t border-white/5 pt-4">
+        <form onSubmit={submit} className="ba-auth-divider space-y-4 border-t pt-4">
           <AuthError message={error} />
           <label className="block">
-            <span className="mb-1.5 block text-xs font-medium text-neutral-400">
-              Password for {email}
-            </span>
+            <span className="ba-auth-label mb-1.5 block text-xs font-medium">Password for {email}</span>
             <input
               className={authInputCls}
               type="password"
@@ -128,7 +124,7 @@ export function LoginScreen({
           type="button"
           disabled={busy}
           onClick={() => void addAccount()}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-white/10 py-2.5 text-sm text-neutral-400 transition-colors hover:border-flame-500/40 hover:text-flame-300 disabled:opacity-50"
+          className="ba-auth-add flex w-full items-center justify-center gap-2 rounded-lg border border-dashed py-2.5 text-sm transition-colors disabled:opacity-50"
         >
           <Plus className="size-4" />
           Add another account

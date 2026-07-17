@@ -35,9 +35,22 @@ jobs:
       - name: Build installer
         run: npm run dist
 
+      - name: Release notes (plain text from tag commit)
+        id: notes
+        shell: bash
+        run: |
+          MSG=$(git log -1 --pretty=%B "${GITHUB_REF_NAME}")
+          NOTES=$(printf '%s' "$MSG" | sed -E 's/^Release v[0-9]+\.[0-9]+\.[0-9]+:[[:space:]]*//')
+          {
+            echo "body<<EOF"
+            printf '%s\n' "$NOTES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          body: ${{ steps.notes.outputs.body }}
           files: |
             release/*.exe
             release/*.exe.blockmap

@@ -21,7 +21,7 @@ html[data-theme='light'] .text-neutral-100 {
 }
 
 html[data-theme='light'] .text-neutral-200 {
-  color: #3d342c;
+  color: #292524;
 }
 
 html[data-theme='light'] .text-neutral-300 {
@@ -41,11 +41,11 @@ html[data-theme='light'] .bg-neutral-950 {
 }
 
 html[data-theme='light'] .bg-neutral-950\/60 {
-  background: rgb(248 238 226 / 0.92) !important;
+  background: rgb(255 243 230 / 0.9) !important;
 }
 
 html[data-theme='light'] .bg-neutral-950\/40 {
-  background: rgb(236 224 210 / 0.78) !important;
+  background: rgb(255 237 213 / 0.75) !important;
 }
 
 html[data-theme='light'] .bg-neutral-900 {
@@ -106,8 +106,8 @@ html[data-theme='light'] .text-emerald-300 {
 }
 
 html[data-theme='light'] select option {
-  background-color: #faf6f0;
-  color: #2a2420;
+  background-color: #fffaf5;
+  color: #1c1917;
 }
 
 /* Dark mode: enrich flat legacy panels */

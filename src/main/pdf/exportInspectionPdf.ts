@@ -1,10 +1,9 @@
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, dialog } from 'electron';
 import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
 import { buildPdfInspectionExport } from '../../shared/pdf';
 import { inspections, resolveDocumentContext } from '../db';
 import { appendExportPayloadToPdf } from './embed';
+import { printMixedOrientationHtmlToPdf } from './printMixedOrientationHtml';
 import { renderInspectionHtmlForExport } from './renderInspectionHtmlForExport';
 
 export async function exportInspectionPdf(
@@ -22,57 +21,21 @@ export async function exportInspectionPdf(
     prebuiltHtml ??
     renderInspectionHtmlForExport(inspection, context.client, context, exportPayload);
 
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'blazeaudit-pdf-'));
-  const htmlPath = path.join(tmpDir, 'report.html');
-  fs.writeFileSync(htmlPath, html, 'utf8');
+  const pdf = await printMixedOrientationHtmlToPdf(html);
 
-  const win = new BrowserWindow({
-    show: false,
-    width: 816,
-    height: 1056,
-    webPreferences: {
-      sandbox: true,
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
+  const safeName = inspection.title.replace(/[^\w\-]+/g, '-').replace(/-+/g, '-');
+  const { canceled, filePath } = await dialog.showSaveDialog({
+    title: 'Save inspection as PDF',
+    defaultPath: `${safeName || 'inspection'}.pdf`,
+    filters: [
+      { name: 'PDF', extensions: ['pdf'] },
+      { name: 'All files', extensions: ['*'] },
+    ],
   });
 
-  try {
-    await win.loadFile(htmlPath);
-    await win.webContents.executeJavaScript(`
-      (async () => {
-        if (document.fonts?.ready) await document.fonts.ready;
-        await Promise.all(Array.from(document.images).map((img) =>
-          img.complete ? Promise.resolve() : new Promise((r) => { img.onload = r; img.onerror = r; })
-        ));
-        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-      })()
-    `);
+  if (canceled || !filePath) return { saved: false as const };
 
-    const pdf = await win.webContents.printToPDF({
-      printBackground: true,
-      preferCSSPageSize: true,
-      pageSize: 'A4',
-      margins: { marginType: 'none' },
-    });
-
-    const safeName = inspection.title.replace(/[^\w\-]+/g, '-').replace(/-+/g, '-');
-    const { canceled, filePath } = await dialog.showSaveDialog({
-      title: 'Save inspection as PDF',
-      defaultPath: `${safeName || 'inspection'}.pdf`,
-      filters: [
-        { name: 'PDF', extensions: ['pdf'] },
-        { name: 'All files', extensions: ['*'] },
-      ],
-    });
-
-    if (canceled || !filePath) return { saved: false as const };
-
-    const withEmbed = appendExportPayloadToPdf(Buffer.from(pdf), exportPayload);
-    fs.writeFileSync(filePath, withEmbed);
-    return { saved: true as const, filePath };
-  } finally {
-    win.destroy();
-    fs.rmSync(tmpDir, { recursive: true, force: true });
-  }
+  const withEmbed = appendExportPayloadToPdf(pdf, exportPayload);
+  fs.writeFileSync(filePath, withEmbed);
+  return { saved: true as const, filePath };
 }

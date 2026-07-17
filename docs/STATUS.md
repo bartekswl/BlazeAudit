@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | **Status** | Living snapshot — update as the project evolves |
-| **Last updated** | 2026-07-16 |
+| **Last updated** | 2026-07-17 |
 | **HEAD** | `4519740` on `main` (`github.com/bartekswl/BlazeAudit`) |
 | **Schema** | SQLite `user_version` **12** (`LATEST_SCHEMA_VERSION`) |
 | **Current focus** | ULC S536 built-in form polish (template · document · PDF parity) |
@@ -96,6 +96,9 @@ Do not bump Electron without a matching ABI prebuild.
 - Shared logic under `src/shared/form/`; UI under `src/renderer/features/form/`;
   CSS mostly `src/renderer/theme/components.css` (print overrides in
   `buildFormPrintHtml.tsx`).
+- **PDF mixed orientation:** `printMixedOrientationHtmlToPdf` prints consecutive
+  portrait/landscape runs separately (`landscape` + A4 page size), then merges
+  with `pdf-lib` so landscape pages get real landscape MediaBoxes (printer-friendly).
 - Page meta headers: CFAA / branding logos with rem sizing aligned editor ↔ PDF.
 - **Contents rail:** outline for Built-in + Custom Templates and Documents; duplicate
   repeatable labels merge to ranges (e.g. `Page x–y`) via `outline.ts`.
