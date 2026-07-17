@@ -65,7 +65,13 @@ export default defineConfig(({ command }) => {
             rollupOptions: {
               // Native module can't be bundled — keep it external so it's
               // require()'d from node_modules at runtime.
-              external: ['better-sqlite3-multiple-ciphers', '@node-rs/argon2', 'electron-updater'],
+              external: [
+                'better-sqlite3-multiple-ciphers',
+                '@node-rs/argon2',
+                'electron-updater',
+                // CJS package — Vite ESM interop breaks (__extends undefined).
+                'pdf-lib',
+              ],
               output: { format: 'es', entryFileNames: 'index.js' },
             },
           },

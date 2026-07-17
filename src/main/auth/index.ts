@@ -1,13 +1,16 @@
 import { app } from 'electron';
-import type {
-  AccountSummary,
-  ActivateInput,
-  AuthStatus,
-  LoginInput,
-  SetPasswordInput,
+import {
+  assertPasswordLength,
+  type AccountSummary,
+  type ActivateInput,
+  type AuthStatus,
+  type ChangePasswordInput,
+  type LoginInput,
+  type SetPasswordInput,
 } from '../../shared/auth';
 import { accountIdFromEmail } from '../../shared/accountId';
 import { DEFAULT_LOGIN_POLICY } from '../../shared/loginPolicy';
+import type { ColorTheme } from '../../shared/theme';
 import { setLoginPolicy as persistLoginPolicy } from '../settings/store';
 import { wrapKeyWithPassword, unwrapKeyWithPassword } from './crypto';
 import {
@@ -85,11 +88,18 @@ function accountSummaries(): AccountSummary[] {
 }
 
 function loginStatus(email: string): AuthStatus {
+  let colorTheme: ColorTheme | undefined;
+  try {
+    colorTheme = getColorTheme();
+  } catch {
+    /* settings unavailable — renderer falls back to cache */
+  }
   return {
     phase: 'login',
     email,
     accountId: getActiveAccountId()!,
     accounts: accountSummaries(),
+    colorTheme,
   };
 }
 
@@ -209,9 +219,7 @@ export async function setPassword(input: SetPasswordInput): Promise<void> {
   if (!manifest) throw new Error('Activate before setting a password.');
   if (manifest.passwordSet) throw new Error('Password is already set. Log in instead.');
 
-  if (input.password.length < 8) {
-    throw new Error('Password must be at least 8 characters.');
-  }
+  assertPasswordLength(input.password);
   if (input.password !== input.confirmPassword) {
     throw new Error('Passwords do not match.');
   }
@@ -231,6 +239,37 @@ export async function setPassword(input: SetPasswordInput): Promise<void> {
   writeManifest(updated);
   persistLoginPolicy(input.loginPolicy ?? DEFAULT_LOGIN_POLICY);
   completeUnlock(keyX, updated);
+}
+
+/** Re-wrap key X with a new password while the session is unlocked. */
+export async function changePassword(input: ChangePasswordInput): Promise<void> {
+  if (!isSessionUnlocked()) {
+    throw new Error('Unlock the app before changing your password.');
+  }
+
+  const manifest = readManifest();
+  if (!manifest?.passwordSet) {
+    throw new Error('No password is set for this account.');
+  }
+
+  assertPasswordLength(input.newPassword);
+  if (input.newPassword !== input.confirmPassword) {
+    throw new Error('Passwords do not match.');
+  }
+  if (input.currentPassword === input.newPassword) {
+    throw new Error('New password must be different from the current password.');
+  }
+
+  const wrap = readPasswordWrap();
+  if (!wrap) throw new Error('Password wrap is missing. Contact support.');
+
+  const keyX = await unwrapKeyWithPassword(wrap, input.currentPassword);
+  if (manifest.keyXId && keyXFingerprint(keyX) !== manifest.keyXId) {
+    throw new Error('Password verification failed.');
+  }
+
+  const next = await wrapKeyWithPassword(keyX, input.newPassword);
+  storePasswordWrap(next);
 }
 
 export async function login(input: LoginInput): Promise<void> {

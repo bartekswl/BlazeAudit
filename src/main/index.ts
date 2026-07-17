@@ -14,6 +14,7 @@ import { provisionDemoIfNeeded } from './demo/provisionDemo';
 import { registerUpdateIpc } from './update/updater';
 import { closeDatabase } from './db/connection';
 import { IpcChannels } from '../shared/ipc';
+import { buildBootSplashHtml } from '../shared/bootSplash';
 
 // Dev/preview: never write under the real AppData profile. Keep all Electron
 // runtime files (cache, prefs, etc.) inside the repo. Packaged builds only use
@@ -47,26 +48,7 @@ process.on('message', (message) => {
 // appearing, even if the real page takes a moment (e.g. cold dev-server
 // compile). Mirrors the boot markup/styles in index.html so the swap to the
 // real page is visually seamless.
-const BOOT_SPLASH_HTML = `<!doctype html>
-<html lang="en" data-theme="dark">
-<head>
-<meta charset="UTF-8" />
-<style>
-  html, body { height: 100%; margin: 0; }
-  body { overflow: hidden; background: #0a0a0a; color: #a3a3a3; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-  #app-boot-loader { display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 0.875rem; background: #0a0a0a; -webkit-app-region: drag; }
-  #app-boot-loader .boot-spinner { width: 1.75rem; height: 1.75rem; border: 2px solid rgb(249 115 22 / 0.2); border-top-color: #f97316; border-radius: 9999px; animation: boot-spin 0.75s linear infinite; }
-  #app-boot-loader .boot-label { font-size: 0.8125rem; letter-spacing: 0.04em; }
-  @keyframes boot-spin { to { transform: rotate(360deg); } }
-</style>
-</head>
-<body>
-  <div id="app-boot-loader" aria-live="polite" aria-busy="true">
-    <div class="boot-spinner" aria-hidden="true"></div>
-    <span class="boot-label">Loading…</span>
-  </div>
-</body>
-</html>`;
+const BOOT_SPLASH_HTML = buildBootSplashHtml();
 const BOOT_SPLASH_URL = `data:text/html;charset=UTF-8,${encodeURIComponent(BOOT_SPLASH_HTML)}`;
 
 function createMainWindow(): BrowserWindow {

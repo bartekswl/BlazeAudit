@@ -27,6 +27,7 @@ export const IpcChannels = {
   authGetStatus: 'auth:get-status',
   authActivate: 'auth:activate',
   authSetPassword: 'auth:set-password',
+  authChangePassword: 'auth:change-password',
   authLogin: 'auth:login',
   authLogOut: 'auth:log-out',
   authSelectAccount: 'auth:select-account',

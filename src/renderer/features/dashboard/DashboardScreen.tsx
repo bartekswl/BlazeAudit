@@ -106,7 +106,7 @@ export function DashboardScreen({
               <div className="text-xs text-[var(--ba-text-faint)]">No address on file</div>
             )}
           </div>
-          <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border-2 border-[var(--ba-chrome-border)] bg-white p-1.5">
+          <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border-2 border-[var(--ba-chrome-border)] bg-[var(--ba-input-bg)] p-1.5">
             {logoDataUrl ? (
               <img
                 src={logoDataUrl}

@@ -45,7 +45,7 @@ export function ActivationScreen({
         <button
           type="button"
           onClick={() => void onBack()}
-          className="mb-4 text-xs text-neutral-500 transition-colors hover:text-flame-300"
+          className="ba-auth-back mb-4 text-xs transition-colors"
         >
           ← Back to sign in
         </button>
@@ -53,7 +53,7 @@ export function ActivationScreen({
       <form onSubmit={submit} className="space-y-4">
         <AuthError message={error} />
         <label className="block">
-          <span className="mb-1.5 block text-xs font-medium text-neutral-400">Email</span>
+          <span className="ba-auth-label mb-1.5 block text-xs font-medium">Email</span>
           <input
             className={authInputCls}
             type="email"
@@ -64,7 +64,7 @@ export function ActivationScreen({
           />
         </label>
         <label className="block">
-          <span className="mb-1.5 block text-xs font-medium text-neutral-400">Activation key</span>
+          <span className="ba-auth-label mb-1.5 block text-xs font-medium">Activation key</span>
           <input
             className={authInputCls}
             value={activationKey}

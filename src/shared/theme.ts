@@ -1,18 +1,18 @@
 export type ColorTheme = 'dark' | 'light';
 
-export const DEFAULT_COLOR_THEME: ColorTheme = 'dark';
+export const DEFAULT_COLOR_THEME: ColorTheme = 'light';
 
 export const COLOR_THEME_STORAGE_KEY = 'blazeaudit:colorTheme';
 
 export const COLOR_THEMES: { value: ColorTheme; label: string; description: string }[] = [
   {
-    value: 'dark',
-    label: 'Dark',
-    description: 'Default BlazeAudit look — tuned for long inspection sessions.',
-  },
-  {
     value: 'light',
     label: 'Light',
-    description: 'Saturated ember + cyan gradients — bold like dark, less white wash.',
+    description: 'Default — cream and safety orange, matched to the dashboard banner.',
+  },
+  {
+    value: 'dark',
+    label: 'Dark',
+    description: 'Low-glare look tuned for long inspection sessions.',
   },
 ];

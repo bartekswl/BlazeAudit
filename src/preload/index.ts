@@ -3,6 +3,7 @@ import { IpcChannels } from '../shared/ipc';
 import type {
   ActivateInput,
   AuthStatus,
+  ChangePasswordInput,
   LoginInput,
   SecuritySettings,
   SetPasswordInput,
@@ -85,6 +86,8 @@ const api = {
       ipcRenderer.invoke(IpcChannels.authActivate, input),
     setPassword: (input: SetPasswordInput): Promise<void> =>
       ipcRenderer.invoke(IpcChannels.authSetPassword, input),
+    changePassword: (input: ChangePasswordInput): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.authChangePassword, input),
     login: (input: LoginInput): Promise<void> => ipcRenderer.invoke(IpcChannels.authLogin, input),
     logOut: (): Promise<void> => ipcRenderer.invoke(IpcChannels.authLogOut),
     selectAccount: (accountId: string): Promise<void> =>

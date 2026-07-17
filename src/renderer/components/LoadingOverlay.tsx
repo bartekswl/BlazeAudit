@@ -1,4 +1,5 @@
 import { cn } from '../lib/cn';
+import { AuthBackground } from '../features/auth/AuthBackground';
 import { StartupLoader } from './StartupLoader';
 
 type LoadingOverlayProps = {
@@ -16,14 +17,17 @@ export function LoadingOverlay({
   return (
     <div
       className={cn(
-        'ba-loading-overlay inset-0 z-50 flex flex-col bg-neutral-950/92 backdrop-blur-[2px]',
+        'ba-loading-overlay inset-0 z-50 flex flex-col',
         position === 'fixed' ? 'fixed' : 'absolute',
         className,
       )}
       aria-busy="true"
       role="status"
     >
-      <StartupLoader label={label} />
+      <AuthBackground />
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+        <StartupLoader label={label} />
+      </div>
     </div>
   );
 }
