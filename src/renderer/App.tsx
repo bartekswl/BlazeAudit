@@ -17,7 +17,6 @@ import type { TemplateDetailBreadcrumb } from './features/templates/TemplatesScr
 
 import { DocumentOutlineProvider } from './features/documents/DocumentOutlineContext';
 import { navItems, type NavId } from './navigation';
-import { cn } from './lib/cn';
 
 import { DashboardScreen } from './features/dashboard/DashboardScreen';
 
