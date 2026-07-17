@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Flame, Minus, Square, Copy, X } from 'lucide-react';
 import { cn } from '../lib/cn';
+import titleBarIcon from '../assets/titlebar-icon.png';
 
 function ControlButton({
   label,
@@ -32,26 +33,23 @@ function ControlButton({
 
 export function TitleBar() {
   const [isMaximized, setIsMaximized] = useState(false);
-  const [iconUrl, setIconUrl] = useState<string | null>(null);
+  const [iconFailed, setIconFailed] = useState(false);
 
   useEffect(() => {
     void window.blazeaudit.window.isMaximized().then(setIsMaximized);
     return window.blazeaudit.window.onMaximizeChange(setIsMaximized);
   }, []);
 
-  useEffect(() => {
-    void window.blazeaudit.app.getTitleBarIconUrl().then(setIconUrl);
-  }, []);
-
   return (
     <header className="ba-titlebar flex h-10 shrink-0 items-center justify-between [-webkit-app-region:drag]">
       <div className="flex items-center gap-2 px-3">
-        {iconUrl ? (
+        {!iconFailed ? (
           <img
-            src={iconUrl}
+            src={titleBarIcon}
             alt=""
-            className="size-[1.125rem] shrink-0 rounded-[0.2rem] object-contain"
+            className="size-[1.125rem] shrink-0 rounded-[0.2rem] object-contain [-webkit-app-region:no-drag]"
             draggable={false}
+            onError={() => setIconFailed(true)}
           />
         ) : (
           <Flame className="size-4 text-flame-500" />

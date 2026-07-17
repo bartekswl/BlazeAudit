@@ -263,6 +263,9 @@ The separate license/admin server (co-hosted with the marketing site) holds
 A backup is a **single, self-contained encrypted file**:
 
 - **Body:** the SQLCipher database (or an exported snapshot) encrypted with key X.
+  Phase 7 moves **account preferences** (login policy, color theme, and later
+  prefs) into the DB so they restore with clients, inspections, templates,
+  business profile, and inspectors — one file, same experience on a new install.
 - **Header (plaintext):** `{ accountEmail, schemaVersion, createdAt, appVersion }`
   — used only for friendly UX checks (e.g. "belongs to a different account"); it
   does **not** unlock the file. Only key X decrypts the body.

@@ -1,7 +1,7 @@
 {
   "name": "blazeaudit",
   "productName": "BlazeAudit",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Offline fire-inspection documentation desktop app by SubraLab.",
   "author": "SubraLab",
   "license": "SEE LICENSE IN README.md",
@@ -25,6 +25,7 @@
     "dist": "npm run build && electron-builder --publish never",
     "seed:demo": "npx electron scripts/build-demo-seed.mjs",
     "dist:demo": "npm run build && npm run seed:demo && electron-builder --config electron-builder.demo.yml --publish never && node scripts/trim-demo-release.mjs",
+    "icons:fix": "node scripts/fix-icon-transparency.mjs",
     "release:update": "node scripts/release-update.mjs",
     "release": "npm run build && electron-builder --publish always",
     "postinstall": "node scripts/rebuild-native.mjs"

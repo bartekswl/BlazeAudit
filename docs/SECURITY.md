@@ -97,12 +97,17 @@ sequenceDiagram
 
 - **Format:** a **single encrypted file** — the SQLCipher database (or an exported
   snapshot) encrypted with **key X**. Lightweight, self-contained, portable.
+- **Contents:** the DB must hold **account preferences** (login policy, theme,
+  etc.) as well as business profile, inspectors, and inspection data, so a
+  restore on a fresh install matches the previous machine without separate
+  settings files.
 - **Header:** a small plaintext metadata header stamps the **account email**,
   **schema version**, and **created-at**, so the app can show a friendly "this
   backup belongs to a different account" message. The header is **not** what
   unlocks the file — key X is.
 - **Cadence:** automatic every few weeks, plus **on-demand**, plus **automatically
-  before a lockout** (see §8).
+  before a lockout** (see §8). If the app was unused past the interval, write
+  the backup on the next open.
 - **Offsite:** the user manually copies the file wherever they like (e.g. Google
   Drive). The app never uploads it.
 
