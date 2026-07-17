@@ -7,6 +7,7 @@ import {
 
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function SummaryText({
   item,
@@ -33,11 +34,10 @@ function SummaryText({
           <span className="yns-fill-line" />
         )
       ) : (
-        <input
-          type="text"
+        <VisibleWidthInput
           className="yns-fill-input"
           value={row.fillIn ?? ''}
-          onChange={(e) => onFillChange?.(e.target.value)}
+          onChange={(v) => onFillChange?.(v)}
           aria-label={`${item.text} fill-in`}
         />
       )}

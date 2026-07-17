@@ -87,117 +87,111 @@
 [data-theme='light'] {
   color-scheme: light;
 
-  --ba-flame: #ea580c;
-  --ba-flame-soft: rgb(251 146 60 / 0.16);
-  --ba-flame-glow: rgb(251 146 60 / 0.2);
+  /* Banner-led Wes Anderson light — cream/peach/flame, soft red + dusty blue accents */
+  --ba-flame: #e85d1c;
+  --ba-flame-soft: rgb(232 93 28 / 0.16);
+  --ba-flame-glow: rgb(232 93 28 / 0.28);
 
-  --ba-app-bg: #f0f9ff;
+  --ba-app-bg: #ebe2d6;
   --ba-app-bg-image:
-    radial-gradient(ellipse 75% 55% at 8% 0%, rgb(254 243 226 / 0.9), transparent 58%),
-    radial-gradient(ellipse 60% 50% at 92% 4%, rgb(219 234 254 / 0.92), transparent 52%),
-    radial-gradient(ellipse 55% 45% at 50% 100%, rgb(209 250 229 / 0.55), transparent 55%),
-    radial-gradient(ellipse 40% 35% at 70% 45%, rgb(186 230 253 / 0.4), transparent 50%),
-    linear-gradient(165deg, #fffbeb 0%, #f0f9ff 38%, #ecfdf5 72%, #fff7ed 100%);
+    radial-gradient(ellipse 70% 50% at 0% -5%, rgb(249 115 22 / 0.28), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 100% 105%, rgb(185 48 48 / 0.12), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 92% 8%, rgb(90 120 148 / 0.14), transparent 50%),
+    linear-gradient(160deg, #f4ebe0 0%, #ebe0d2 42%, #e6ddd4 72%, #e8d9c8 100%);
 
-  --ba-chrome-bg: rgb(255 255 255 / 0.55);
+  --ba-chrome-bg: rgb(245 236 224 / 0.94);
   --ba-chrome-bg-image: linear-gradient(
     135deg,
-    rgb(255 251 235 / 0.92) 0%,
-    rgb(240 249 255 / 0.9) 45%,
-    rgb(236 253 245 / 0.88) 100%
+    rgb(255 232 210 / 0.7) 0%,
+    rgb(244 236 226 / 0.85) 48%,
+    rgb(232 214 196 / 0.75) 100%
   );
-  --ba-chrome-border: rgb(125 211 252 / 0.35);
+  --ba-chrome-border: rgb(180 140 110 / 0.45);
   --ba-chrome-shadow:
-    0 1px 0 rgb(255 255 255 / 0.75) inset,
-    0 4px 18px rgb(56 189 248 / 0.08);
+    0 1px 0 rgb(255 255 255 / 0.55) inset,
+    0 4px 18px rgb(90 60 40 / 0.1);
 
   --ba-panel-bg: linear-gradient(
     145deg,
-    rgb(255 251 235 / 0.88) 0%,
-    rgb(224 242 254 / 0.78) 48%,
-    rgb(236 253 245 / 0.82) 100%
+    rgb(255 250 244 / 0.94) 0%,
+    rgb(252 240 226 / 0.9) 55%,
+    rgb(246 232 216 / 0.92) 100%
   );
-  --ba-panel-border: rgb(125 211 252 / 0.28);
+  --ba-panel-border: rgb(196 150 110 / 0.42);
   --ba-panel-shadow:
-    0 1px 0 rgb(255 255 255 / 0.65) inset,
-    0 2px 8px rgb(56 189 248 / 0.06),
-    0 10px 28px rgb(125 211 252 / 0.1);
+    0 1px 0 rgb(255 255 255 / 0.6) inset,
+    0 0 0 1px rgb(232 93 28 / 0.08),
+    0 6px 18px rgb(90 55 35 / 0.1),
+    0 14px 36px rgb(90 120 148 / 0.06);
 
   --ba-panel-hero-bg: linear-gradient(
     125deg,
-    rgb(254 215 170 / 0.75) 0%,
-    rgb(254 243 226 / 0.7) 30%,
-    rgb(191 219 254 / 0.7) 70%,
-    rgb(167 243 208 / 0.55) 100%
+    rgb(255 186 120 / 0.78) 0%,
+    rgb(255 228 200 / 0.82) 38%,
+    rgb(214 196 178 / 0.75) 72%,
+    rgb(168 188 208 / 0.55) 100%
   );
-  --ba-panel-hero-border: rgb(251 146 60 / 0.28);
+  --ba-panel-hero-border: rgb(185 70 35 / 0.48);
   --ba-panel-hero-shadow:
-    0 4px 10px rgb(251 146 60 / 0.1),
-    0 18px 42px rgb(56 189 248 / 0.12);
+    0 6px 18px rgb(232 93 28 / 0.16),
+    0 16px 40px rgb(90 60 40 / 0.1);
 
-  --ba-input-bg: linear-gradient(180deg, rgb(255 251 235 / 0.95) 0%, rgb(240 249 255 / 0.9) 100%);
-  --ba-input-border: rgb(125 211 252 / 0.35);
-  --ba-input-text: #44403c;
-  --ba-input-placeholder: #a8a29e;
-  --ba-input-shadow: 0 1px 2px rgb(56 189 248 / 0.06) inset;
+  --ba-input-bg: linear-gradient(180deg, rgb(255 252 247 / 0.98) 0%, rgb(248 238 226 / 0.95) 100%);
+  --ba-input-border: rgb(176 140 108 / 0.48);
+  --ba-input-text: #2a2420;
+  --ba-input-placeholder: #7a6a5c;
+  --ba-input-shadow: 0 1px 3px rgb(90 55 35 / 0.08) inset;
 
-  --ba-text-primary: #3f3f46;
-  --ba-text-secondary: #57534e;
-  --ba-text-muted: #78716c;
-  --ba-text-faint: #a8a29e;
+  --ba-text-primary: #2a2420;
+  --ba-text-secondary: #3d342c;
+  --ba-text-muted: #6b5c4e;
+  --ba-text-faint: #8a7a6a;
 
-  --ba-hover-bg: linear-gradient(
-    90deg,
-    rgb(254 243 226 / 0.65) 0%,
-    rgb(224 242 254 / 0.45) 100%
-  );
-  --ba-row-hover-bg: linear-gradient(
-    90deg,
-    rgb(255 251 235 / 0.75) 0%,
-    rgb(224 242 254 / 0.55) 100%
-  );
+  --ba-hover-bg: rgb(90 120 148 / 0.12);
+  --ba-row-hover-bg: rgb(232 93 28 / 0.1);
   --ba-table-head-bg: linear-gradient(
     90deg,
-    rgb(254 243 226 / 0.75) 0%,
-    rgb(224 242 254 / 0.7) 50%,
-    rgb(209 250 229 / 0.65) 100%
+    rgb(255 214 175 / 0.9) 0%,
+    rgb(232 200 175 / 0.75) 55%,
+    rgb(196 176 158 / 0.65) 100%
   );
 
   --ba-nav-active-bg: linear-gradient(
     90deg,
-    rgb(254 215 170 / 0.65) 0%,
-    rgb(254 243 226 / 0.45) 100%
+    rgb(255 186 120 / 0.72) 0%,
+    rgb(232 200 175 / 0.55) 70%,
+    rgb(168 188 208 / 0.35) 100%
   );
-  --ba-nav-active-border: rgb(251 146 60 / 0.35);
-  --ba-nav-active-text: #c2410c;
+  --ba-nav-active-border: rgb(185 70 35 / 0.5);
+  --ba-nav-active-text: #9a3412;
 
-  --ba-stat-flame-bg: linear-gradient(145deg, rgb(255 237 213 / 0.95) 0%, rgb(254 215 170 / 0.45) 100%);
-  --ba-stat-flame-border: rgb(251 146 60 / 0.32);
-  --ba-stat-flame-icon: #ea580c;
-  --ba-stat-emerald-bg: linear-gradient(145deg, rgb(209 250 229 / 0.95) 0%, rgb(167 243 208 / 0.45) 100%);
-  --ba-stat-emerald-border: rgb(52 211 153 / 0.32);
-  --ba-stat-emerald-icon: #059669;
-  --ba-stat-sky-bg: linear-gradient(145deg, rgb(224 242 254 / 0.95) 0%, rgb(186 230 253 / 0.5) 100%);
-  --ba-stat-sky-border: rgb(56 189 248 / 0.32);
-  --ba-stat-sky-icon: #0284c7;
-  --ba-stat-violet-bg: linear-gradient(145deg, rgb(254 243 226 / 0.95) 0%, rgb(253 230 138 / 0.35) 100%);
-  --ba-stat-violet-border: rgb(251 191 36 / 0.32);
-  --ba-stat-violet-icon: #d97706;
+  --ba-stat-flame-bg: linear-gradient(145deg, rgb(255 210 170 / 0.92) 0%, rgb(255 236 214 / 0.8) 100%);
+  --ba-stat-flame-border: rgb(185 70 35 / 0.45);
+  --ba-stat-flame-icon: #c2410c;
+  --ba-stat-emerald-bg: linear-gradient(145deg, rgb(196 214 186 / 0.85) 0%, rgb(236 232 220 / 0.75) 100%);
+  --ba-stat-emerald-border: rgb(74 110 80 / 0.4);
+  --ba-stat-emerald-icon: #3f6b4a;
+  --ba-stat-sky-bg: linear-gradient(145deg, rgb(186 204 220 / 0.85) 0%, rgb(242 232 220 / 0.75) 100%);
+  --ba-stat-sky-border: rgb(90 120 148 / 0.42);
+  --ba-stat-sky-icon: #4a6a88;
+  --ba-stat-violet-bg: linear-gradient(145deg, rgb(232 186 170 / 0.85) 0%, rgb(246 232 220 / 0.75) 100%);
+  --ba-stat-violet-border: rgb(168 72 64 / 0.4);
+  --ba-stat-violet-icon: #a84840;
 
-  --ba-overlay: rgb(12 74 110 / 0.22);
+  --ba-overlay: rgb(42 36 32 / 0.42);
   --ba-drawer-bg: linear-gradient(
     180deg,
-    rgb(255 251 235 / 0.96) 0%,
-    rgb(224 242 254 / 0.92) 55%,
-    rgb(236 253 245 / 0.94) 100%
+    rgb(255 236 214) 0%,
+    rgb(242 230 216) 50%,
+    rgb(214 200 186) 100%
   );
-  --ba-drawer-shadow: -12px 0 40px rgb(56 189 248 / 0.12);
+  --ba-drawer-shadow: -14px 0 44px rgb(42 36 32 / 0.18);
 
   --ba-modal-shadow:
-    0 24px 48px rgb(56 189 248 / 0.14),
-    0 0 0 1px rgb(255 255 255 / 0.45) inset,
-    0 0 60px rgb(125 211 252 / 0.1);
+    0 28px 56px rgb(42 36 32 / 0.22),
+    0 0 0 1px rgb(185 70 35 / 0.2),
+    0 0 72px rgb(232 93 28 / 0.1);
 
-  --ba-scrollbar-thumb: rgb(56 189 248 / 0.28);
-  --ba-scrollbar-thumb-hover: rgb(251 146 60 / 0.45);
+  --ba-scrollbar-thumb: rgb(176 140 108 / 0.45);
+  --ba-scrollbar-thumb-hover: rgb(232 93 28 / 0.5);
 }

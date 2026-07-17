@@ -4,6 +4,7 @@ import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { IpcChannels } from '../../shared/ipc';
 import type { RollbackInfo, UpdateStatus } from '../../shared/update';
+import { sanitizeReleaseNotes } from '../../shared/update';
 import { downloadRollbackInstaller, spawnSilentInstall } from './rollback';
 import { readUpdateState, syncUpdateStateOnStartup } from './updateState';
 
@@ -42,12 +43,14 @@ function isNewerVersion(current: string, other: string): boolean {
 
 function releaseNotesToText(notes: UpdateInfo['releaseNotes']): string | null {
   if (!notes) return null;
-  if (typeof notes === 'string') return notes.trim() || null;
-  const joined = notes
-    .map((entry) => entry.note?.trim())
-    .filter((note): note is string => Boolean(note))
-    .join('\n\n');
-  return joined || null;
+  const raw =
+    typeof notes === 'string'
+      ? notes
+      : notes
+          .map((entry) => entry.note?.trim())
+          .filter((note): note is string => Boolean(note))
+          .join('\n\n');
+  return sanitizeReleaseNotes(raw);
 }
 
 function broadcast(status: UpdateStatus): void {

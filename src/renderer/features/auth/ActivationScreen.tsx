@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { AuthError, AuthShell, AuthSubmit, authInputCls } from './AuthShell';
+import { AuthError, AuthShell, AuthSubmit, authInputCls, formatAuthError } from './AuthShell';
 
 declare const __BLAZEAUDIT_DEV_ACTIVATION__: boolean;
 
@@ -27,7 +27,7 @@ export function ActivationScreen({
       await window.blazeaudit.auth.activate({ email, activationKey });
       onDone();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Activation failed.');
+      setError(formatAuthError(err, 'Activation failed.'));
       setLoading(false);
     }
   };

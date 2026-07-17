@@ -3,7 +3,7 @@ import { Plus, User } from 'lucide-react';
 import type { AccountSummary } from '../../../shared/auth';
 import { cn } from '../../lib/cn';
 import { notifyAccountThemeSync } from '../../theme/ThemeProvider';
-import { AuthError, AuthShell, AuthSubmit, authInputCls } from './AuthShell';
+import { AuthError, AuthShell, AuthSubmit, authInputCls, formatAuthError } from './AuthShell';
 
 export function LoginScreen({
   email,
@@ -31,7 +31,7 @@ export function LoginScreen({
       await window.blazeaudit.auth.login({ password });
       onDone();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed.');
+      setError(formatAuthError(err, 'Login failed.'));
       setLoading(false);
     }
   };

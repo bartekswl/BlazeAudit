@@ -26,6 +26,7 @@ import { cn } from '../../lib/cn';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { handleFixedRowGridTextInputKeyDown } from './formGridTableKeyboard';
+import { VisibleWidthInput } from './VisibleWidthInput';
 
 function TextCell({
   value,
@@ -40,12 +41,10 @@ function TextCell({
     return <span className="adc-cell-value">{value || '\u00a0'}</span>;
   }
   return (
-    <input
-      type="text"
+    <VisibleWidthInput
       className="adc-cell-input"
       value={value}
-      spellCheck={false}
-      onChange={(e) => onChange?.(e.target.value)}
+      onChange={(next) => onChange?.(next)}
       onKeyDown={handleFixedRowGridTextInputKeyDown}
     />
   );

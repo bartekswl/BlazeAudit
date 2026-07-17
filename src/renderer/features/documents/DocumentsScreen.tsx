@@ -51,6 +51,7 @@ export function DocumentsScreen({
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'complete'>('all');
+  const [yearFilter, setYearFilter] = useState<'all' | string>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [dateSort, setDateSort] = useState<'newest' | 'oldest'>('newest');
@@ -115,12 +116,30 @@ export function DocumentsScreen({
     });
   }, [editingId]);
 
-  const hasActiveFilters = Boolean(search || statusFilter !== 'all' || dateFrom || dateTo);
+  const yearOptions = useMemo(() => {
+    const years = new Set<number>();
+    const current = new Date().getFullYear();
+    years.add(current);
+    for (const row of inspections) {
+      const raw = row.inspectedAt?.trim();
+      if (!raw || raw.length < 4) continue;
+      const y = Number.parseInt(raw.slice(0, 4), 10);
+      if (!Number.isNaN(y) && y >= 1990 && y <= current + 1) years.add(y);
+    }
+    return [...years].sort((a, b) => b - a);
+  }, [inspections]);
+
+  const hasActiveFilters = Boolean(
+    search || statusFilter !== 'all' || yearFilter !== 'all' || dateFrom || dateTo,
+  );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const rows = inspections.filter((row) => {
       if (statusFilter !== 'all' && row.status !== statusFilter) return false;
+      if (yearFilter !== 'all') {
+        if (!row.inspectedAt?.startsWith(yearFilter)) return false;
+      }
       if (q) {
         const matches =
           row.title.toLowerCase().includes(q) ||
@@ -134,11 +153,11 @@ export function DocumentsScreen({
       return true;
     });
     return sortInspectionsByDate(rows, dateSort);
-  }, [inspections, search, statusFilter, dateFrom, dateTo, dateSort]);
+  }, [inspections, search, statusFilter, yearFilter, dateFrom, dateTo, dateSort]);
 
   useEffect(() => {
     setListPage(1);
-  }, [search, statusFilter, dateFrom, dateTo, dateSort]);
+  }, [search, statusFilter, yearFilter, dateFrom, dateTo, dateSort]);
 
   const paged = useMemo(() => paginateItems(filtered, listPage), [filtered, listPage]);
 
@@ -238,6 +257,20 @@ export function DocumentsScreen({
               <option value="draft">Drafts</option>
               <option value="complete">Complete</option>
             </select>
+            <select
+              value={yearFilter}
+              onChange={(e) => setYearFilter(e.target.value)}
+              title="Inspection year"
+              aria-label="Filter by year"
+              className={cn(filterInputCls, 'px-1.5 py-1')}
+            >
+              <option value="all">All years</option>
+              {yearOptions.map((year) => (
+                <option key={year} value={String(year)}>
+                  {year}
+                </option>
+              ))}
+            </select>
             <input
               type="date"
               value={dateFrom}
@@ -259,6 +292,7 @@ export function DocumentsScreen({
                 onClick={() => {
                   setSearch('');
                   setStatusFilter('all');
+                  setYearFilter('all');
                   setDateFrom('');
                   setDateTo('');
                 }}

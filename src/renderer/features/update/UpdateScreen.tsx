@@ -9,14 +9,7 @@ import {
 } from 'lucide-react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import type { RollbackInfo, UpdateStatus } from '../../../shared/update';
-
-function notesToLines(notes: string | null): string[] {
-  if (!notes) return [];
-  return notes
-    .split('\n')
-    .map((line) => line.replace(/^[-*]\s*/, '').trim())
-    .filter(Boolean);
-}
+import { releaseNotesToLines } from '../../../shared/update';
 
 export function UpdateScreen() {
   const [currentVersion, setCurrentVersion] = useState('');
@@ -94,6 +87,8 @@ export function UpdateScreen() {
       : status.phase === 'downloaded'
         ? 'Preparing update…'
         : `Downloading${status.phase === 'downloading' && status.version ? ` v${status.version}` : ''}…`;
+  const noteLines =
+    status.phase === 'available' ? releaseNotesToLines(status.notes) : [];
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -159,9 +154,9 @@ export function UpdateScreen() {
                 Update
               </button>
             </div>
-            {notesToLines(status.notes).length > 0 && (
+            {noteLines.length > 0 && (
               <ul className="mt-3 space-y-1.5 border-t border-[var(--ba-panel-border)] pt-3 text-xs text-[var(--ba-text-muted)]">
-                {notesToLines(status.notes).map((note) => (
+                {noteLines.map((note) => (
                   <li key={note} className="flex gap-2">
                     <span className="mt-1 size-1 shrink-0 rounded-full bg-[var(--ba-flame)]" />
                     <span>{note}</span>

@@ -13,6 +13,6 @@ export const COLOR_THEMES: { value: ColorTheme; label: string; description: stri
   {
     value: 'light',
     label: 'Light',
-    description: 'Clean neutral palette with white panels and readable forms.',
+    description: 'Saturated ember + cyan gradients — bold like dark, less white wash.',
   },
 ];

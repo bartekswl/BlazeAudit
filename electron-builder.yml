@@ -28,11 +28,14 @@ extraResources:
     to: app-icon.png
   - from: resources/titlebar-icon.png
     to: titlebar-icon.png
+  - from: resources/app-icon.ico
+    to: app-icon.ico
 
 win:
   target:
     - nsis
-  icon: resources/app-icon.png
+  # Multi-size ICO with real alpha — PNG-only conversion often leaves white corners on shortcuts.
+  icon: resources/app-icon.ico
   # Unsigned for now — SmartScreen may warn until a code-signing cert is added.
 
 nsis:

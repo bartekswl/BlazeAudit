@@ -9,8 +9,8 @@ export function AppearanceSection() {
     <section className="ba-panel p-5">
       <h3 className="ba-section-title">Appearance</h3>
       <p className="mt-1 text-xs leading-relaxed text-[var(--ba-text-muted)]">
-        Choose the color theme for BlazeAudit. Dark is tuned for field work; light uses a clean
-        neutral palette across panels and forms.
+        Choose the color theme for BlazeAudit. Dark is tuned for field work; light uses the
+        same flame and warm stone palette with clearer borders.
       </p>
       <div className="mt-4 space-y-2">
         <label className="block">
