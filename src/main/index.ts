@@ -74,8 +74,9 @@ function createMainWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
-    minWidth: 960,
-    minHeight: 640,
+    // Usable floor: sidebar + main content stay workable; user cannot shrink below this.
+    minWidth: 1024,
+    minHeight: 700,
     frame: false,
     backgroundColor: '#0a0a0a',
     show: false,
@@ -87,6 +88,10 @@ function createMainWindow(): BrowserWindow {
       sandbox: true,
     },
   });
+
+  if (icon) {
+    win.setIcon(icon);
+  }
 
   let shown = false;
   const revealWindow = () => {

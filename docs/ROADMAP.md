@@ -97,11 +97,18 @@ BlazeAudit-exported PDF can be re-imported losslessly.
 ## Phase 7 — Backups & recovery ← next
 
 - Produce a **single encrypted backup file**: scheduled (every few weeks),
-  on-demand, and automatically before any lockout.
-- Restore flow; recovery via key reissue on a fresh activated install.
+  on-demand, and automatically before any lockout. Catch up on next launch if
+  the app was unused past the interval.
+- **Move account preferences into the SQLCipher DB** (login policy, color theme,
+  and any later prefs) so a DB backup restores the same look-and-feel and
+  settings as business profile / inspectors / data. Stop relying on
+  `settings.bin` alone for restore parity.
+- Restore flow; recovery via key reissue on a fresh activated install (same
+  email → same key X).
 
 **Exit criteria:** a user can back up to one file and restore it on a fresh,
-re-activated install.
+re-activated install — including preferences, business profile, and all app
+data.
 
 ## Phase 8 — License server & admin panel
 

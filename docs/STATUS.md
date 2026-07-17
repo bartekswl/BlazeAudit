@@ -38,7 +38,8 @@ Inspired by fire-forms.com but a focused local tool, not a cloud SaaS. A compani
   cross-page row compaction.
 - **Active:** Keep ULC form **template / document editor / PDF** consistent; density
   and layout polish on later pages (esp. 22.x / 23.x).
-- **Next (roadmap):** Phase 7 — encrypted backup file + restore.
+- **Next (roadmap):** Phase 7 — encrypted backup file + restore; keep account
+  preferences in the DB so restore includes settings/theme with all data.
 - **Not started:** license server (Phase 8), full packaging pipeline (Phase 9;
   icon asset exists), marketing site (Phase 10).
 
