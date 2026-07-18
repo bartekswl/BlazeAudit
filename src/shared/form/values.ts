@@ -150,7 +150,10 @@ export function setElementValue(
   return { ...values, [elementId]: value };
 }
 
-/** Push inspection date into ULC Date of Service (and any other date-bound fields). */
+/**
+ * Push inspection date into ULC Date of Service only.
+ * Last Service Date is an independent document field and is never touched.
+ */
 export function syncFormDocumentInspectionDate(
   document: FormInspectionDocument,
   inspectedAt: string | null,
@@ -161,9 +164,12 @@ export function syncFormDocumentInspectionDate(
   walkFormElements(document.form, (element) => {
     if (element.kind !== 'ulcSection1') return;
     const current = normalizeUlcSection1Value(nextValues[element.id]);
+    if (current.dateOfService === inspectedAt) return;
     nextValues = setElementValue(nextValues, element.id, {
       ...current,
       dateOfService: inspectedAt,
+      // Explicitly preserve — must stay independent of Date of Service.
+      lastServiceDate: current.lastServiceDate,
     });
   });
 

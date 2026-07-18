@@ -2,6 +2,7 @@ import { memo, useCallback, useRef } from 'react';
 import type { DocumentContext } from '../../../shared/document';
 import {
   FORM_FOOTER_HEIGHT_PERCENT,
+  FORM_REPORT_DISCLAIMER,
   formSectionAnchorId,
   formSectionHeading,
   pageBodyPercent,
@@ -410,7 +411,7 @@ function FormPageCanvasInner({
         <div className="form-page-footer-count">
           Page {pageIndex + 1} of {totalPages}
         </div>
-        <p className="form-page-footer-disclaimer">{form.disclaimer}</p>
+        <p className="form-page-footer-disclaimer">{FORM_REPORT_DISCLAIMER}</p>
       </footer>
     </div>
   );

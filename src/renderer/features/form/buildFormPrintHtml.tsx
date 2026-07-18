@@ -3112,18 +3112,33 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
+/** Session cache — theme/CSS almost never changes between exports. */
+let cachedDocumentCss: string | null = null;
+let cachedDocumentCssKey: string | null = null;
+
+function documentCssCacheKey(): string {
+  const theme = document.documentElement.getAttribute('data-theme') ?? '';
+  const sheets = Array.from(document.styleSheets);
+  const hrefs = sheets.map((sheet) => sheet.href ?? `inline:${sheet.ownerNode?.nodeName ?? '?'}`);
+  return `${theme}|${sheets.length}|${hrefs.join('\n')}`;
+}
+
 /** Collect every stylesheet the live document uses (Tailwind + theme + components). */
 async function collectDocumentCss(): Promise<string> {
+  const key = documentCssCacheKey();
+  if (cachedDocumentCss && cachedDocumentCssKey === key) return cachedDocumentCss;
+
   const parts: string[] = [];
   const sheets = Array.from(document.styleSheets);
 
   for (const sheet of sheets) {
     try {
       const rules = sheet.cssRules;
-      let text = '';
+      const ruleTexts: string[] = new Array(rules.length);
       for (let i = 0; i < rules.length; i += 1) {
-        text += rules[i].cssText + '\n';
+        ruleTexts[i] = rules[i].cssText;
       }
+      const text = ruleTexts.join('\n');
       if (text) parts.push(text);
     } catch {
       // Cross-origin / file:// stylesheets block cssRules — fetch the source.
@@ -3138,8 +3153,11 @@ async function collectDocumentCss(): Promise<string> {
     }
   }
 
-  return parts.join('\n');
+  cachedDocumentCss = parts.join('\n');
+  cachedDocumentCssKey = key;
+  return cachedDocumentCss;
 }
+
 
 export interface FormPrintInput {
   form: FormDefinition;
@@ -3165,16 +3183,21 @@ export async function buildFormPrintHtml({
   linedNotesVisibleLines,
   linedNotesRowHeights: linedNotesRowHeightsInput,
 }: FormPrintInput): Promise<string> {
-  const linedNotesRowHeights =
-    linedNotesRowHeightsInput ??
-    (await measureLinedNotesPdfRowHeights({
-      form,
-      values,
-      context,
-      template,
-      linedNotesVisibleLines,
-      printCss: PRINT_OVERRIDES,
-    }));
+  // Measure lined-note rows and gather document CSS concurrently — both are
+  // independent of SSR page markup.
+  const [linedNotesRowHeights, css] = await Promise.all([
+    linedNotesRowHeightsInput
+      ? Promise.resolve(linedNotesRowHeightsInput)
+      : measureLinedNotesPdfRowHeights({
+          form,
+          values,
+          context,
+          template,
+          linedNotesVisibleLines,
+          printCss: PRINT_OVERRIDES,
+        }),
+    collectDocumentCss(),
+  ]);
 
   const pagesMarkup = form.pages
     .map((page, index) =>
@@ -3194,8 +3217,6 @@ export async function buildFormPrintHtml({
       ),
     )
     .join('');
-
-  const css = await collectDocumentCss();
 
   return `<!DOCTYPE html>
 <html lang="en" data-theme="light">

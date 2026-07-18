@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { FileDown, Undo2 } from 'lucide-react';
 
 import { CADENCE_PRESETS, cadenceLabel, type CadencePreset } from '../../../shared/cadence';
@@ -364,37 +365,35 @@ function BlockInspectionEditorInner({
 
 
   const exportPdf = async () => {
-
-    setExportingPdf(true);
-
     setPdfMessage(null);
-
     setError(null);
+
+    const targetPath = await window.blazeaudit.inspections.pickPdfPath(inspection.id);
+    if (!targetPath) return;
+
+    flushSync(() => {
+      setExportingPdf(true);
+    });
 
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
     });
 
     try {
-
-      const result = await window.blazeaudit.inspections.exportPdf(inspection.id);
+      const result = await window.blazeaudit.inspections.exportPdf(
+        inspection.id,
+        undefined,
+        targetPath,
+      );
 
       if (result.saved) {
-
         setPdfMessage(`PDF saved to ${result.filePath}`);
-
       }
-
     } catch (e) {
-
       setError(e instanceof Error ? e.message : 'PDF export failed.');
-
     } finally {
-
       setExportingPdf(false);
-
     }
-
   };
 
 
@@ -404,7 +403,7 @@ function BlockInspectionEditorInner({
     <div className="relative flex h-full min-h-0 flex-col gap-2">
 
       {exportingPdf ? (
-        <LoadingOverlay label="Exporting PDF…" position="absolute" />
+        <LoadingOverlay label="Exporting PDF…" />
       ) : null}
 
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">

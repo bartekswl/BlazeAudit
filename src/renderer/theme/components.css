@@ -426,6 +426,38 @@
   box-shadow: var(--ba-chrome-shadow);
 }
 
+/* Compact chrome when a document editor is open — reclaim vertical space. */
+.ba-main-header.ba-main-header--doc {
+  min-height: 1.75rem;
+  padding: 0.2rem 1rem;
+}
+
+.ba-main-header.ba-main-header--doc .ba-doc-crumb {
+  font-size: 0.75rem;
+  line-height: 1.1;
+  gap: 0.2rem;
+}
+
+.ba-main-header.ba-main-header--doc .ba-doc-back {
+  padding: 0.1rem 0.4rem;
+  font-size: 0.7rem;
+}
+
+/* Form field select mode — white hand cursor + selected cell highlight. */
+.ba-form-field-select-mode,
+.ba-form-field-select-mode * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' stroke='%23111111' stroke-width='1.2' d='M8 2.5v11.2l-1.7-1.4-1.5 1.8L9.6 21h8.2l2.2-7.2c.3-1 .1-2-.6-2.6L16 8.5V2.5H8z'/%3E%3C/svg%3E")
+      6 2,
+    grab !important;
+}
+
+.ba-field-selected {
+  outline: 2px solid rgb(249 115 22 / 0.95) !important;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 3px rgb(249 115 22 / 0.2);
+  background-color: rgb(249 115 22 / 0.12) !important;
+}
+
 [data-theme='light'] .ba-main-header {
   border-bottom-color: var(--ba-chrome-border);
 }

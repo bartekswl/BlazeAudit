@@ -60,6 +60,39 @@ export interface InspectionInput {
   cadence: Cadence;
 }
 
+/**
+ * List/breadcrumb display name: strip the ULC code from the template portion,
+ * keep " — Client" (e.g. "Annual Fire Alarm Test — Acme Building").
+ * If the stored title has no client suffix, `clientName` is appended when provided.
+ */
+export function shortInspectionDisplayName(
+  title: string,
+  clientName?: string | null,
+): string {
+  const trimmed = title.trim();
+  if (!trimmed) return trimmed;
+
+  let head = trimmed;
+  let clientSuffix = '';
+  if (trimmed.includes(' — ')) {
+    const idx = trimmed.lastIndexOf(' — ');
+    head = trimmed.slice(0, idx).trim();
+    clientSuffix = trimmed.slice(idx);
+  }
+
+  const testName =
+    head
+      .replace(/\s*-\s*ULC\s*536:2019\s*\(\s*2024\s*\)/gi, '')
+      .replace(/\s*ULC\s*536:2019\s*\(\s*2024\s*\)/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim() || head;
+
+  if (clientSuffix) return `${testName}${clientSuffix}`;
+  const client = clientName?.trim();
+  if (client) return `${testName} — ${client}`;
+  return testName;
+}
+
 /** Sort document lists by inspection date (blank dates sort last). */
 export function sortInspectionsByDate<T extends { inspectedAt: string | null; updatedAt: string }>(
   items: T[],

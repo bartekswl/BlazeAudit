@@ -72,3 +72,9 @@ AGENTS.md
 
 # Local reference PDFs (not part of the app)
 CANULC-S536.pdf
+
+# One-off local seed / OCR helpers that may contain client PII — never push
+scripts/seed-adelaide.mjs
+scripts/write-adelaide-gaps-pdf.mjs
+data/parse-adelaide-devices.py
+

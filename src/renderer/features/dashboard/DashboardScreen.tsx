@@ -8,7 +8,7 @@ import {
   type CalendarTask,
 } from '../../../shared/calendarTasks';
 import { formatIsoDateLocal, todayLocalIsoDate } from '../../../shared/dates';
-import type { DashboardStats } from '../../../shared/inspection';
+import { shortInspectionDisplayName, type DashboardStats } from '../../../shared/inspection';
 import type { BusinessProfile } from '../../../shared/profile';
 import { DashboardBanner } from './DashboardBanner';
 
@@ -201,7 +201,7 @@ export function DashboardScreen({
                     className="ba-list-item w-full px-3 py-2 text-left"
                   >
                     <span className="block truncate text-sm font-medium text-[var(--ba-text-primary)]">
-                      {row.title}
+                      {shortInspectionDisplayName(row.title, row.clientName)}
                     </span>
                     <span className="block truncate text-xs text-[var(--ba-text-muted)]">
                       {row.clientName} · {row.status}

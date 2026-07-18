@@ -31,10 +31,18 @@ export function registerNameBadgesIpc(): void {
   );
 
   ipcMain.handle(
+    IpcChannels.nameBadgesPickPdfPath,
+    async (_event, defaultFilename?: string) => {
+      const { pickNameBadgesPdfPath } = await import('../pdf/exportNameBadgesPdf');
+      return pickNameBadgesPdfPath(defaultFilename);
+    },
+  );
+
+  ipcMain.handle(
     IpcChannels.nameBadgesExportPdf,
-    async (_event, html: string, defaultFilename?: string) => {
+    async (_event, html: string, defaultFilename?: string, targetPath?: string) => {
       const { exportNameBadgesPdf } = await import('../pdf/exportNameBadgesPdf');
-      return exportNameBadgesPdf(html, defaultFilename);
+      return exportNameBadgesPdf(html, defaultFilename, targetPath);
     },
   );
 }

@@ -164,14 +164,33 @@ const api = {
       lastDocumentDate: string | null;
       nextInspectionDue: string | null;
     }> => ipcRenderer.invoke(IpcChannels.inspectionsClientStats, clientId),
+    pickPdfPath: (id: string): Promise<string | null> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsPickPdfPath, id),
     exportPdf: (
       id: string,
       html?: string,
+      targetPath?: string,
     ): Promise<{ saved: false } | { saved: true; filePath: string }> =>
-      ipcRenderer.invoke(IpcChannels.inspectionsExportPdf, id, html),
+      ipcRenderer.invoke(IpcChannels.inspectionsExportPdf, id, html, targetPath),
     importPdf: (): Promise<
       { imported: false } | { imported: true; inspectionId: string; filePath: string }
     > => ipcRenderer.invoke(IpcChannels.inspectionsImportPdf),
+    inspectPdfImport: (): Promise<
+      | { canceled: true }
+      | {
+          canceled: false;
+          filePath: string;
+          needsNewClient: boolean;
+          clientName: string;
+          clientId: string;
+          documentTitle: string;
+          hasClientSnapshot: boolean;
+        }
+    > => ipcRenderer.invoke(IpcChannels.inspectionsInspectPdfImport),
+    confirmPdfImport: (
+      filePath: string,
+    ): Promise<{ imported: false } | { imported: true; inspectionId: string; filePath: string }> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsConfirmPdfImport, filePath),
     resolveContext: (id: string): Promise<DocumentContext> =>
       ipcRenderer.invoke(IpcChannels.inspectionsResolveContext, id),
   },
@@ -205,11 +224,14 @@ const api = {
       ipcRenderer.invoke(IpcChannels.nameBadgesPickPhoto, id),
     removePhoto: (id: string): Promise<NameBadge> =>
       ipcRenderer.invoke(IpcChannels.nameBadgesRemovePhoto, id),
+    pickPdfPath: (defaultFilename?: string): Promise<string | null> =>
+      ipcRenderer.invoke(IpcChannels.nameBadgesPickPdfPath, defaultFilename),
     exportPdf: (
       html: string,
       defaultFilename?: string,
+      targetPath?: string,
     ): Promise<{ saved: false } | { saved: true; filePath: string }> =>
-      ipcRenderer.invoke(IpcChannels.nameBadgesExportPdf, html, defaultFilename),
+      ipcRenderer.invoke(IpcChannels.nameBadgesExportPdf, html, defaultFilename, targetPath),
   },
   calendarTasks: {
     listForDate: (taskDate: string): Promise<CalendarTask[]> =>

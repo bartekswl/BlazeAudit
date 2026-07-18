@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | **Status** | Living snapshot — update as the project evolves |
-| **Last updated** | 2026-07-17 |
+| **Last updated** | 2026-07-18 (editor chrome + PDF import) |
 | **HEAD** | `4519740` on `main` (`github.com/bartekswl/BlazeAudit`) |
 | **Schema** | SQLite `user_version` **13** (`LATEST_SCHEMA_VERSION`) |
 | **Current focus** | ULC S536 built-in form polish (template · document · PDF parity) |
@@ -136,6 +136,11 @@ Controls on `FormPageCanvas` (`pageExtraControls`); add/remove in document edito
   Dashboard **Upcoming Tasks** lists calendar tasks from today forward.
 - **Customers → document** — opening a customer document stays on the Customers
   crumb (Customers → client → document); Back returns to that client.
+  Re-clicking a sidebar tile (Customers / Documents / Templates) returns to that
+  section’s root list. Customer rename updates linked document titles + ULC
+  building name. Date of Service ↔ top-panel date (confirm dialog); Last Service
+  Date is independent. List titles show **Annual Fire Alarm Test** (no ULC suffix).
+  Report footer: BlazeAudit / SubraLab disclaimer on every page.
 - **Name Badges** — CRUD + PDF sheet (`features/nameBadges/`, schema v11
   `name_badges` table).
 - **Project number** (schema v12) — `inspections.project_number`; entered on create,
