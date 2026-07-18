@@ -1,7 +1,17 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowDownUp, FileText, Plus, Search, Trash2, X } from 'lucide-react';
+import {
+  ArrowDownUp,
+  FileText,
+  Plus,
+  Search,
+  Trash2,
+  Upload,
+  Users,
+  X,
+} from 'lucide-react';
 import { cadenceLabel, isOverdue } from '../../../shared/cadence';
 import {
+  shortInspectionDisplayName,
   sortInspectionsByDate,
   type Inspection,
   type InspectionSummary,
@@ -61,6 +71,13 @@ export function DocumentsScreen({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingInspection, setEditingInspection] = useState<Inspection | null>(null);
   const [pendingDelete, setPendingDelete] = useState<InspectionSummary | null>(null);
+  const [importingPdf, setImportingPdf] = useState(false);
+  const [pendingPdfImport, setPendingPdfImport] = useState<{
+    filePath: string;
+    clientName: string;
+    documentTitle: string;
+    hasClientSnapshot: boolean;
+  } | null>(null);
 
   const goBackToList = useCallback(() => {
     setEditingId(null);
@@ -70,7 +87,13 @@ export function DocumentsScreen({
   useEffect(() => {
     if (!onDetailChange) return;
     if (editingId && editingInspection) {
-      onDetailChange({ documentTitle: editingInspection.title, onBack: goBackToList });
+      onDetailChange({
+        documentTitle: shortInspectionDisplayName(
+          editingInspection.title,
+          editingInspection.clientName,
+        ),
+        onBack: goBackToList,
+      });
     } else {
       onDetailChange(null);
     }
@@ -186,6 +209,43 @@ export function DocumentsScreen({
     await refresh();
   };
 
+  const finishPdfImport = async (filePath: string) => {
+    setImportingPdf(true);
+    setError(null);
+    try {
+      const result = await window.blazeaudit.inspections.confirmPdfImport(filePath);
+      if (result.imported) {
+        setEditingId(result.inspectionId);
+        await refresh();
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'PDF import failed.');
+    } finally {
+      setImportingPdf(false);
+      setPendingPdfImport(null);
+    }
+  };
+
+  const startPdfImport = async () => {
+    setError(null);
+    try {
+      const preview = await window.blazeaudit.inspections.inspectPdfImport();
+      if (preview.canceled) return;
+      if (preview.needsNewClient) {
+        setPendingPdfImport({
+          filePath: preview.filePath,
+          clientName: preview.clientName,
+          documentTitle: preview.documentTitle,
+          hasClientSnapshot: preview.hasClientSnapshot,
+        });
+        return;
+      }
+      await finishPdfImport(preview.filePath);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'PDF import failed.');
+    }
+  };
+
   if (editingId) {
     if (!editingInspection) {
       return <InlineLoader label="Loading inspection…" />;
@@ -212,14 +272,25 @@ export function DocumentsScreen({
         <p className="min-w-0 text-sm text-neutral-400">
           All inspections live here — drafts and completed reports attached to clients.
         </p>
-        <button
-          type="button"
-          onClick={() => setShowNew(true)}
-          className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-flame-500 px-3 py-2 text-sm font-semibold text-white hover:bg-flame-600"
-        >
-          <Plus className="size-4" />
-          New inspection
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            disabled={importingPdf}
+            onClick={() => void startPdfImport()}
+            className="inline-flex items-center gap-2 rounded-lg border border-flame-500/40 bg-flame-500/10 px-3 py-2 text-sm font-semibold text-flame-300 hover:bg-flame-500/20 disabled:opacity-50"
+          >
+            <Upload className="size-4" />
+            {importingPdf ? 'Importing…' : 'Import Document'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowNew(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-flame-500 px-3 py-2 text-sm font-semibold text-white hover:bg-flame-600"
+          >
+            <Plus className="size-4" />
+            New inspection
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -343,7 +414,9 @@ export function DocumentsScreen({
                   onClick={() => setEditingId(row.id)}
                   className="min-w-0 text-left"
                 >
-                  <p className="truncate font-medium text-neutral-100">{row.title}</p>
+                  <p className="truncate font-medium text-neutral-100">
+                    {shortInspectionDisplayName(row.title, row.clientName)}
+                  </p>
                   <p className="truncate text-xs text-neutral-500">
                     {row.clientName}
                     {row.inspector ? ` · ${row.inspector}` : ''}
@@ -430,6 +503,53 @@ export function DocumentsScreen({
             will be permanently deleted.
           </p>
           <p>This cannot be undone.</p>
+        </ConfirmDialog>
+      )}
+
+      {pendingPdfImport && (
+        <ConfirmDialog
+          title={
+            pendingPdfImport.hasClientSnapshot
+              ? 'Create customer profile?'
+              : 'Cannot create customer'
+          }
+          icon={Users}
+          confirmLabel={pendingPdfImport.hasClientSnapshot ? 'Create & import' : 'OK'}
+          showCancel={pendingPdfImport.hasClientSnapshot}
+          onCancel={() => setPendingPdfImport(null)}
+          onConfirm={() => {
+            if (!pendingPdfImport.hasClientSnapshot) {
+              setPendingPdfImport(null);
+              return;
+            }
+            void finishPdfImport(pendingPdfImport.filePath);
+          }}
+        >
+          {pendingPdfImport.hasClientSnapshot ? (
+            <>
+              <p>
+                Customer{' '}
+                <span className="font-medium text-[var(--ba-text-primary)]">
+                  {pendingPdfImport.clientName}
+                </span>{' '}
+                is not in this database. Importing will create their profile and add document{' '}
+                <span className="font-medium text-[var(--ba-text-primary)]">
+                  {pendingPdfImport.documentTitle}
+                </span>
+                .
+              </p>
+              <p>Continue?</p>
+            </>
+          ) : (
+            <p>
+              Customer{' '}
+              <span className="font-medium text-[var(--ba-text-primary)]">
+                {pendingPdfImport.clientName}
+              </span>{' '}
+              is missing and this PDF has no client snapshot. Create the customer first, or
+              re-export from a newer BlazeAudit.
+            </p>
+          )}
         </ConfirmDialog>
       )}
     </div>

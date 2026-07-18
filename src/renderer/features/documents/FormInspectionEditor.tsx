@@ -1,5 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FileDown, TriangleAlert, Undo2 } from 'lucide-react';
+import { flushSync } from 'react-dom';
+import {
+  ClipboardCopy,
+  ClipboardPaste,
+  FileDown,
+  MousePointer2,
+  Pin,
+  PinOff,
+  Scissors,
+  TriangleAlert,
+  Undo2,
+} from 'lucide-react';
+import { cn } from '../../lib/cn';
 import { CADENCE_PRESETS, type CadencePreset } from '../../../shared/cadence';
 import type { DocumentContext } from '../../../shared/document';
 import {
@@ -35,6 +47,7 @@ import { FormPageCanvas, type FormPageExtraControlsConfig } from '../form/FormPa
 import { FormPageViewport } from '../form/FormPageViewport';
 import { collectLinedNotesVisibleLines } from '../form/collectLinedNotesVisibleLines';
 import { LoadingOverlay } from '../../components/LoadingOverlay';
+import { useFormFieldClipboard } from './useFormFieldClipboard';
 
 type PendingPageRemove =
   | { kind: 'idr'; pageIndex: number }
@@ -49,9 +62,11 @@ type FormEditorSnapshot = {
 };
 
 const compactInputCls = 'ba-input ba-input--compact';
-const compactFieldCls = `${compactInputCls} !py-1`;
+const compactFieldCls = `${compactInputCls} !py-0.5 !text-[11px] !leading-4`;
 const toolbarBtnCls =
-  'inline-flex h-[1.75rem] items-center gap-1.5 rounded-md border border-flame-500/30 bg-flame-500/10 px-2.5 text-xs leading-5 text-flame-300 transition-colors hover:bg-flame-500/20 disabled:opacity-50';
+  'inline-flex h-6 items-center gap-1 rounded-md border border-flame-500/30 bg-flame-500/10 px-1.5 text-[11px] leading-4 text-flame-300 transition-colors hover:bg-flame-500/20 disabled:opacity-50';
+const toolbarIconBtnCls =
+  'inline-flex size-6 items-center justify-center rounded-md border border-flame-500/30 bg-flame-500/10 text-flame-300 transition-colors hover:bg-flame-500/20 disabled:opacity-50';
 
 export function FormInspectionEditor(props: {
   inspection: Inspection;
@@ -112,6 +127,16 @@ function FormInspectionEditorInner({
     return synced !== formDocInitial;
   });
   const [pendingPageRemove, setPendingPageRemove] = useState<PendingPageRemove | null>(null);
+  const [pendingDateChange, setPendingDateChange] = useState<string | null>(null);
+  const [metaPinned, setMetaPinned] = useState(true);
+  const formStackRef = useRef<HTMLDivElement>(null);
+  const {
+    selectMode,
+    toggleSelectMode,
+    copySelected,
+    cutSelected,
+    pasteSelected,
+  } = useFormFieldClipboard(formStackRef);
 
   const formDocRef = useRef(formDoc);
   formDocRef.current = formDoc;
@@ -201,6 +226,15 @@ function FormInspectionEditorInner({
   markDirtyRef.current = markDirty;
 
   const onValueChange = useCallback((elementId: string, value: unknown) => {
+    if (typeof value === 'object' && value !== null && 'dateOfService' in value) {
+      const prev = normalizeUlcSection1Value(formDocRef.current.values[elementId]);
+      const next = normalizeUlcSection1Value(value);
+      if (prev.dateOfService !== next.dateOfService) {
+        // Date of Service ↔ top-panel date; confirm before applying. Last Service is untouched.
+        setPendingDateChange(next.dateOfService);
+        return;
+      }
+    }
     recordUndo(`value:${elementId}`);
     if (
       typeof value === 'object' &&
@@ -317,12 +351,37 @@ function FormInspectionEditorInner({
     [formDoc.form],
   );
 
-  const onInspectionDateChange = useCallback((nextDate: string) => {
-    recordUndo('meta:inspectedAt');
-    setInspectedAt(nextDate);
-    setFormDoc((prev) => syncFormDocumentInspectionDate(prev, nextDate || null));
-    markDirtyRef.current();
-  }, [recordUndo]);
+  const applyInspectionDateChange = useCallback(
+    (nextDate: string) => {
+      recordUndo('meta:inspectedAt');
+      setInspectedAt(nextDate);
+      setFormDoc((prev) => syncFormDocumentInspectionDate(prev, nextDate || null));
+      setContext((prev) =>
+        prev
+          ? {
+              ...prev,
+              inspection: { ...prev.inspection, inspectedAt: nextDate || null },
+            }
+          : prev,
+      );
+      markDirtyRef.current();
+    },
+    [recordUndo],
+  );
+
+  const requestInspectionDateChange = useCallback(
+    (nextDate: string) => {
+      if (nextDate === inspectedAt) return;
+      setPendingDateChange(nextDate);
+    },
+    [inspectedAt],
+  );
+
+  const confirmPendingDateChange = useCallback(() => {
+    if (pendingDateChange == null) return;
+    applyInspectionDateChange(pendingDateChange);
+    setPendingDateChange(null);
+  }, [pendingDateChange, applyInspectionDateChange]);
 
   const onProjectNumberChange = useCallback((next: string) => {
     recordUndo('meta:projectNumber');
@@ -344,18 +403,28 @@ function FormInspectionEditorInner({
   );
 
   const exportPdf = async () => {
-    setExportingPdf(true);
     setPdfMessage(null);
-    // Let the loading overlay paint before blocking HTML/PDF work.
+    // Prefetch the print builder while the user picks a save path.
+    const buildModulePromise = import('../form/buildFormPrintHtml');
+    const targetPath = await window.blazeaudit.inspections.pickPdfPath(inspection.id);
+    if (!targetPath) return;
+
+    // Force the overlay to paint before heavy HTML/PDF work blocks the UI.
+    flushSync(() => {
+      setExportingPdf(true);
+    });
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
     });
     try {
+      // Persist first so the PDF embed JSON matches the visible report.
+      await save();
       const linedNotesVisibleLines = collectLinedNotesVisibleLines();
-      const { buildFormPrintHtml } = await import('../form/buildFormPrintHtml');
+      const { buildFormPrintHtml } = await buildModulePromise;
+      const latest = formDocRef.current;
       const printHtml = await buildFormPrintHtml({
-        form: formDoc.form,
-        values: formDoc.values,
+        form: latest.form,
+        values: latest.values,
         context,
         template: context?.template
           ? {
@@ -367,7 +436,11 @@ function FormInspectionEditorInner({
         title,
         linedNotesVisibleLines,
       });
-      const result = await window.blazeaudit.inspections.exportPdf(inspection.id, printHtml);
+      const result = await window.blazeaudit.inspections.exportPdf(
+        inspection.id,
+        printHtml,
+        targetPath,
+      );
       if (result.saved) setPdfMessage(`Exported to ${result.filePath}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'PDF export failed.');
@@ -385,8 +458,24 @@ function FormInspectionEditorInner({
 
   return (
     <div className="relative flex h-full min-h-0 flex-col gap-2">
-      {exportingPdf ? (
-        <LoadingOverlay label="Exporting PDF…" position="absolute" />
+      {exportingPdf ? <LoadingOverlay label="Exporting PDF…" /> : null}
+      {pendingDateChange != null ? (
+        <ConfirmDialog
+          title="Change date of service?"
+          icon={TriangleAlert}
+          confirmLabel="Change date"
+          onCancel={() => setPendingDateChange(null)}
+          onConfirm={confirmPendingDateChange}
+        >
+          <p>
+            This updates the document date and Date of Service together
+            {pendingDateChange.trim()
+              ? ` to ${pendingDateChange}`
+              : ' (clearing the date)'}
+            .
+          </p>
+          <p>Last Service Date is not changed.</p>
+        </ConfirmDialog>
       ) : null}
       {pendingPageRemove != null ? (
         <ConfirmDialog
@@ -411,115 +500,190 @@ function FormInspectionEditorInner({
       {error && <div className="ba-alert ba-alert--error shrink-0">{error}</div>}
       {pdfMessage && <div className="ba-alert ba-alert--success shrink-0">{pdfMessage}</div>}
 
-      <div className="shrink-0 rounded-lg border border-[var(--ba-panel-border)] bg-[var(--ba-panel-bg)] p-2">
-        <div className="grid grid-cols-[minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 gap-y-1.5">
-          <div className="min-w-0">
-            <span className="mb-0.5 block text-[10px] text-[var(--ba-text-muted)]">Title</span>
-            <p className={`${compactFieldCls} truncate font-medium text-[var(--ba-text-primary)]`}>
-              {title}
-            </p>
-          </div>
-          <label className="block min-w-0">
-            <span className="mb-0.5 block text-[10px] text-[var(--ba-text-muted)]">
-              Project Number
-            </span>
-            <input
-              type="text"
-              className={compactFieldCls}
-              value={projectNumber}
-              onChange={(e) => onProjectNumberChange(e.target.value)}
-              placeholder="—"
-            />
-          </label>
-          <label className="block min-w-0">
-            <span className="mb-0.5 block text-[10px] text-[var(--ba-text-muted)]">Date</span>
-            <input
-              type="date"
-              className={compactFieldCls}
-              value={inspectedAt}
-              onChange={(e) => onInspectionDateChange(e.target.value)}
-            />
-          </label>
-          <label className="block min-w-0">
-            <span className="mb-0.5 block text-[10px] text-[var(--ba-text-muted)]">Status</span>
-            <select
-              className={`${compactFieldCls} ba-select`}
-              value={status}
-              onChange={(e) => {
-                recordUndo('meta:status');
-                setStatus(e.target.value as InspectionStatus);
-                markDirty();
-              }}
-            >
-              <option value="draft">Draft</option>
-              <option value="complete">Complete</option>
-            </select>
-          </label>
-        </div>
-
-        <div
-          className="mt-2 grid gap-x-2 gap-y-0.5"
-          style={{ gridTemplateColumns: '8rem minmax(0, 14rem) 1fr' }}
+      <div
+        className={cn(
+          'relative shrink-0 rounded-md border border-[var(--ba-panel-border)] bg-[var(--ba-panel-bg)] transition-[padding,min-height] duration-200',
+          metaPinned ? 'px-2 py-1' : 'h-2 overflow-hidden px-0 py-0',
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => setMetaPinned((v) => !v)}
+          className={cn(
+            toolbarIconBtnCls,
+            'absolute right-1 top-0.5 z-10',
+            !metaPinned && 'top-[-1px] right-1 size-5',
+          )}
+          title={metaPinned ? 'Unpin meta panel' : 'Pin meta panel'}
+          aria-pressed={metaPinned}
         >
-          <span className="text-[10px] text-[var(--ba-text-muted)]">Cadence</span>
-          <span className="text-[10px] text-[var(--ba-text-muted)]">Client</span>
-          <span aria-hidden="true" />
-          <select
-            className={`${compactFieldCls} ba-select`}
-            value={cadence}
-            onChange={(e) => {
-              recordUndo('meta:cadence');
-              setCadence(e.target.value as CadencePreset);
-              markDirty();
-            }}
-          >
-            {CADENCE_PRESETS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-          <p
-            className={`${compactFieldCls} min-w-0 truncate font-medium text-[var(--ba-text-primary)]`}
-            title={inspection.clientName}
-          >
-            {inspection.clientName}
-          </p>
-          <div className="flex items-center justify-end gap-2 pr-2">
-            <button
-              type="button"
-              disabled={!canUndo}
-              onClick={applyUndo}
-              className={toolbarBtnCls}
-              title="Undo last change (Ctrl+Z)"
+          {metaPinned ? <PinOff className="size-3" /> : <Pin className="size-3" />}
+        </button>
+
+        {metaPinned ? (
+          <>
+            <div className="grid grid-cols-[minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 gap-y-0.5 pr-7">
+              <div className="min-w-0">
+                <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+                  Title
+                </span>
+                <p
+                  className={`${compactFieldCls} truncate font-medium text-[var(--ba-text-primary)]`}
+                >
+                  {title}
+                </p>
+              </div>
+              <label className="block min-w-0">
+                <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+                  Project Number
+                </span>
+                <input
+                  type="text"
+                  className={compactFieldCls}
+                  value={projectNumber}
+                  onChange={(e) => onProjectNumberChange(e.target.value)}
+                  placeholder="—"
+                />
+              </label>
+              <label className="block min-w-0">
+                <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+                  Date
+                </span>
+                <input
+                  type="date"
+                  className={compactFieldCls}
+                  value={inspectedAt}
+                  onChange={(e) => requestInspectionDateChange(e.target.value)}
+                />
+              </label>
+              <label className="block min-w-0">
+                <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+                  Status
+                </span>
+                <select
+                  className={`${compactFieldCls} ba-select`}
+                  value={status}
+                  onChange={(e) => {
+                    recordUndo('meta:status');
+                    setStatus(e.target.value as InspectionStatus);
+                    markDirty();
+                  }}
+                >
+                  <option value="draft">Draft</option>
+                  <option value="complete">Complete</option>
+                </select>
+              </label>
+            </div>
+
+            <div
+              className="mt-1 grid gap-x-2 gap-y-0"
+              style={{ gridTemplateColumns: '7rem minmax(0, 12rem) 1fr' }}
             >
-              <Undo2 className="size-3.5" />
-              Undo
-            </button>
-            <button
-              type="button"
-              disabled={saveState === 'saving'}
-              onClick={() => void save()}
-              className={toolbarBtnCls}
-            >
-              {saveLabel}
-            </button>
-            <button
-              type="button"
-              disabled={exportingPdf}
-              onClick={() => void exportPdf()}
-              className={toolbarBtnCls}
-            >
-              <FileDown className="size-3.5" />
-              {exportingPdf ? 'Exporting…' : 'Export PDF'}
-            </button>
-          </div>
-        </div>
+              <span className="text-[9px] leading-none text-[var(--ba-text-muted)]">Cadence</span>
+              <span className="text-[9px] leading-none text-[var(--ba-text-muted)]">Client</span>
+              <span aria-hidden="true" />
+              <select
+                className={`${compactFieldCls} ba-select`}
+                value={cadence}
+                onChange={(e) => {
+                  recordUndo('meta:cadence');
+                  setCadence(e.target.value as CadencePreset);
+                  markDirty();
+                }}
+              >
+                {CADENCE_PRESETS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+              <p
+                className={`${compactFieldCls} min-w-0 truncate font-medium text-[var(--ba-text-primary)]`}
+                title={inspection.clientName}
+              >
+                {inspection.clientName}
+              </p>
+              <div className="flex flex-wrap items-center justify-end gap-1 pr-7">
+                <button
+                  type="button"
+                  onClick={() => void copySelected()}
+                  className={toolbarBtnCls}
+                  title="Copy selected field(s)"
+                >
+                  <ClipboardCopy className="size-3" />
+                  Copy
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void pasteSelected()}
+                  className={toolbarBtnCls}
+                  title="Paste into selected field(s)"
+                >
+                  <ClipboardPaste className="size-3" />
+                  Paste
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void cutSelected()}
+                  className={toolbarBtnCls}
+                  title="Cut selected field(s)"
+                >
+                  <Scissors className="size-3" />
+                  Cut
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleSelectMode}
+                  className={cn(toolbarBtnCls, selectMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
+                  title={
+                    selectMode
+                      ? 'Exit select mode'
+                      : 'Select fields (hand cursor). Ctrl+click or drag for multiple'
+                  }
+                  aria-pressed={selectMode}
+                >
+                  <MousePointer2 className="size-3" />
+                  {selectMode ? 'Selecting' : 'Select'}
+                </button>
+                <button
+                  type="button"
+                  disabled={!canUndo}
+                  onClick={applyUndo}
+                  className={toolbarBtnCls}
+                  title="Undo last change (Ctrl+Z)"
+                >
+                  <Undo2 className="size-3" />
+                  Undo
+                </button>
+                <button
+                  type="button"
+                  disabled={saveState === 'saving'}
+                  onClick={() => void save()}
+                  className={toolbarBtnCls}
+                >
+                  {saveLabel}
+                </button>
+                <button
+                  type="button"
+                  disabled={exportingPdf}
+                  onClick={() => void exportPdf()}
+                  className={toolbarBtnCls}
+                >
+                  <FileDown className="size-3" />
+                  {exportingPdf ? 'Exporting…' : 'Export PDF'}
+                </button>
+              </div>
+            </div>
+          </>
+        ) : null}
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
         <FormPageViewport pageIndex={0} totalPages={pageCount} continuous showZoomControls>
-          <div className="form-page-stack">
+          <div
+            ref={formStackRef}
+            className={cn('form-page-stack', selectMode && 'ba-form-field-select-mode')}
+          >
             {formDoc.form.pages.map((p, index) => (
               <FormPageCanvas
                 key={p.id}

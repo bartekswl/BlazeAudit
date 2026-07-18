@@ -1,6 +1,7 @@
 import type { DocumentContext } from '../../shared/document';
 import {
   FORM_FOOTER_HEIGHT_PERCENT,
+  FORM_REPORT_DISCLAIMER,
   formSectionHeading,
   pageBodyPercent,
   resolveFormBinding,
@@ -427,7 +428,7 @@ function renderPageHtml(
       </div>
       <footer class="form-page-footer" style="height:${FORM_FOOTER_HEIGHT_PERCENT}%">
         <div class="form-page-footer-count">Page ${pageIndex + 1} of ${totalPages}</div>
-        <p class="form-page-footer-disclaimer">${escapeHtml(form.disclaimer)}</p>
+        <p class="form-page-footer-disclaimer">${escapeHtml(FORM_REPORT_DISCLAIMER)}</p>
       </footer>
     </section>`;
 }

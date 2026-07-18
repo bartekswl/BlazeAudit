@@ -22,6 +22,11 @@ export function formatAddressForList(parts: AddressParts): string {
   return [line1, locality].filter(Boolean).join(', ');
 }
 
+/** Compact customers-table address: street + city only. */
+export function formatStreetCity(parts: Pick<AddressParts, 'street' | 'city'>): string {
+  return [parts.street?.trim(), parts.city?.trim()].filter(Boolean).join(', ');
+}
+
 const CA_POSTAL = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
 const US_ZIP = /^\d{5}(-\d{4})?$/;
 const GENERIC_POSTAL = /^[A-Za-z0-9 -]{3,10}$/;

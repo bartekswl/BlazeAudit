@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { FileDown, ImagePlus, Plus, Trash2, UserRound } from 'lucide-react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { InlineLoader, LoadingOverlay } from '../../components/LoadingOverlay';
@@ -219,7 +220,19 @@ export function NameBadgesScreen() {
   );
 
   const handleExport = async () => {
-    setExporting(true);
+    const filename = businessName.trim()
+      ? `${businessName.trim()}-name-badges`
+      : 'name-badges';
+    // Pick the save path before HTML/PDF work so Cancel is instant.
+    const targetPath = await window.blazeaudit.nameBadges.pickPdfPath(filename);
+    if (!targetPath) return;
+
+    flushSync(() => {
+      setExporting(true);
+    });
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
     try {
       const pages = paginateNameBadgeSlots(printSlots, badgesPerPage);
       const html = buildNameBadgesPrintHtml({
@@ -228,10 +241,7 @@ export function NameBadgesScreen() {
         badgesPerPage,
         pages,
       });
-      const filename = businessName.trim()
-        ? `${businessName.trim()}-name-badges`
-        : 'name-badges';
-      await window.blazeaudit.nameBadges.exportPdf(html, filename);
+      await window.blazeaudit.nameBadges.exportPdf(html, filename, targetPath);
     } finally {
       setExporting(false);
     }

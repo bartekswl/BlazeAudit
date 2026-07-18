@@ -106,7 +106,12 @@ function DateField({
   onChange?: (next: UlcSection1Value) => void;
   className?: string;
 }) {
-  const shown = normalizeIsoDateInput(effectiveFieldText(fieldKey, value, context));
+  // Last Service Date is document-local only — never fall back to bindings / Date of Service.
+  const shown = normalizeIsoDateInput(
+    fieldKey === 'lastServiceDate'
+      ? value.lastServiceDate
+      : effectiveFieldText(fieldKey, value, context),
+  );
   return (
     <div className={cn(cellCls, className)}>
       <div className={labelCls}>{label}</div>

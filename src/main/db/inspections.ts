@@ -11,6 +11,7 @@ import {
   isFormInspectionDocument,
   migrateFormInspectionIdrRowGaps,
   migrateFormInspectionPowerSupplyLayout,
+  syncFormDocumentInspectionDate,
   syncFormDocumentProjectNumber,
   validateFormInspectionDocument,
   type FormInspectionDocument,
@@ -28,6 +29,7 @@ import type {
 } from '../../shared/inspection';
 import type { TemplateKind } from '../../shared/document';
 import * as builtinTemplates from './builtinTemplates';
+import * as clients from './clients';
 import { getDatabase } from './connection';
 import * as templateRegistry from './templateRegistry';
 
@@ -231,9 +233,12 @@ export function createInspectionFromTemplate(input: CreateInspectionInput): Insp
   if (input.templateKind === 'builtin') {
     const builtin = builtinTemplates.getBuiltinTemplate(input.templateId);
     if (!builtin) throw new Error(`Template not found: builtin:${input.templateId}`);
-    document = syncFormDocumentProjectNumber(
-      createFormInspectionDocument(builtin.form, input.clientId),
-      projectNumber,
+    document = syncFormDocumentInspectionDate(
+      syncFormDocumentProjectNumber(
+        createFormInspectionDocument(builtin.form, input.clientId),
+        projectNumber,
+      ),
+      inspectedAt,
     );
     defaultTitle = `${builtin.name} — ${client.name}`;
   } else {
@@ -282,22 +287,40 @@ export function createInspectionFromTemplate(input: CreateInspectionInput): Insp
 export function createInspectionFromPdfExport(payload: PdfInspectionExport): Inspection {
   const src = payload.inspection;
 
-  const client = getDatabase()
+  let clientId = src.clientId;
+  const existingClient = getDatabase()
     .prepare('SELECT id FROM clients WHERE id = ?')
-    .get(src.clientId) as { id: string } | undefined;
-  if (!client) {
-    throw new Error(
-      `Client "${src.clientName}" is not in this database. Import on the account that owns this client.`,
-    );
+    .get(clientId) as { id: string } | undefined;
+
+  if (!existingClient) {
+    if (payload.client && payload.client.id) {
+      // Auto-create from embedded client snapshot (export schema v2). No DB migration.
+      const created = clients.ensureClientFromExport(payload.client);
+      clientId = created.id;
+    } else {
+      throw new Error(
+        `Client "${src.clientName}" is not in this database. Re-export from a newer BlazeAudit (includes client), or create the client first.`,
+      );
+    }
   }
 
-  const docResult = validateDocument(src.document);
-  if (!docResult.ok) throw new Error(docResult.errors.join(' '));
+  let document: InspectionDocument;
+  if (isFormInspectionDocument(src.document)) {
+    const formResult = validateFormInspectionDocument(src.document);
+    if (!formResult.ok) throw new Error(formResult.errors.join(' '));
+    document = {
+      ...formResult.document,
+      clientId,
+    };
+  } else {
+    const docResult = validateDocument(src.document);
+    if (!docResult.ok) throw new Error(docResult.errors.join(' '));
+    document = {
+      ...docResult.document,
+      meta: { ...docResult.document.meta, clientId },
+    };
+  }
 
-  const document = {
-    ...docResult.document,
-    meta: { ...docResult.document.meta, clientId: src.clientId },
-  };
   const cadence = (src.cadence?.trim() || 'annual') as Cadence;
   const inspectedAt = src.inspectedAt?.trim() || null;
   const status = src.status === 'complete' ? 'complete' : 'draft';
@@ -321,7 +344,7 @@ export function createInspectionFromPdfExport(payload: PdfInspectionExport): Ins
     )
     .run({
       id,
-      clientId: src.clientId,
+      clientId,
       templateKind,
       templateId: src.templateId,
       title,
@@ -329,7 +352,7 @@ export function createInspectionFromPdfExport(payload: PdfInspectionExport): Ins
       inspector: src.inspector?.trim() ?? '',
       document: JSON.stringify(document),
       inspectedAt,
-      projectNumber: '',
+      projectNumber: src.projectNumber?.trim() ?? '',
       cadence,
       nextDueAt,
       createdAt: now,

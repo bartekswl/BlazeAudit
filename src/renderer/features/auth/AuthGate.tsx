@@ -99,25 +99,36 @@ export function AuthGate() {
     void (async () => {
       // Load auth state and the lightweight app shell concurrently. Unlocked
       // startup needs both, so doing these sequentially only extends boot.
-      const appImport = import('../../App');
-      const next = await window.blazeaudit.auth.getStatus();
-      if (cancelled) return;
-
-      if (next.phase === 'unlocked') {
-        const mod = await appImport;
+      // Always clear the boot overlay — a thrown getStatus previously left
+      // "Loading…" up forever.
+      try {
+        const appImport = import('../../App');
+        const next = await window.blazeaudit.auth.getStatus();
         if (cancelled) return;
-        setAppComponent(() => mod.default);
-        setAppVisible(true);
-        setAuthOverlay(false);
-      } else {
-        // Keep warming App while the user is on login/activation.
-        void appImport;
-        setAuthOverlay(true);
-      }
 
-      setStatus(next);
-      if (cancelled) return;
-      await finishBootReveal();
+        if (next.phase === 'unlocked') {
+          const mod = await appImport;
+          if (cancelled) return;
+          setAppComponent(() => mod.default);
+          setAppVisible(true);
+          setAuthOverlay(false);
+        } else {
+          // Keep warming App while the user is on login/activation.
+          void appImport;
+          setAuthOverlay(true);
+        }
+
+        setStatus(next);
+      } catch (err) {
+        console.error('[AuthGate] boot failed', err);
+        if (!cancelled) {
+          setStatus({ phase: 'activation', hasExistingAccounts: true });
+          setAuthOverlay(true);
+          setAppVisible(false);
+        }
+      } finally {
+        if (!cancelled) await finishBootReveal();
+      }
     })();
 
     return () => {

@@ -112,7 +112,7 @@ const screens: Record<
 
 
 const headerBackBtnCls =
-  'inline-flex shrink-0 items-center gap-1 rounded-md border border-flame-500/30 bg-flame-500/10 px-2 py-1 text-xs text-flame-300 transition-colors hover:bg-flame-500/20';
+  'ba-doc-back inline-flex shrink-0 items-center gap-1 rounded-md border border-flame-500/30 bg-flame-500/10 px-2 py-1 text-xs text-flame-300 transition-colors hover:bg-flame-500/20';
 
 const screenModuleFallback = <InlineLoader label="Loading screen…" />;
 
@@ -169,6 +169,7 @@ export default function App() {
   );
 
   const customerBackRef = useRef<(() => void) | null>(null);
+  const customerResetRef = useRef<(() => void) | null>(null);
 
   const templateBackRef = useRef<(() => void) | null>(null);
 
@@ -183,6 +184,7 @@ export default function App() {
       setCustomerBreadcrumb(null);
 
       customerBackRef.current = null;
+      customerResetRef.current = null;
 
     }
 
@@ -231,7 +233,21 @@ export default function App() {
     setCustomerBreadcrumb(detail);
 
     customerBackRef.current = detail?.onBack ?? null;
+    customerResetRef.current = detail?.onBackToList ?? null;
 
+  };
+
+  const handleNavSelect = (id: NavId) => {
+    if (id === activeId) {
+      // Re-clicking the active menu tile returns to that section's root list.
+      if (id === 'customers') customerResetRef.current?.();
+      else if (id === 'documents') documentBackRef.current?.();
+      else if (id === 'builtinTemplates' || id === 'customTemplates') {
+        templateBackRef.current?.();
+      }
+      return;
+    }
+    setActiveId(id);
   };
 
 
@@ -262,6 +278,10 @@ export default function App() {
     activeId === 'customTemplates' ||
     activeId === 'documents';
 
+  const documentOpen =
+    Boolean(documentBreadcrumb) ||
+    Boolean(customerBreadcrumb?.documentTitle);
+
 
 
   return (
@@ -274,17 +294,21 @@ export default function App() {
 
         <Sidebar
           activeId={activeId}
-          onSelect={setActiveId}
+          onSelect={handleNavSelect}
           onOpenUserProfile={() => openSettings({ scrollTo: 'user-profile' })}
         />
 
         <main className="flex min-w-0 flex-1 flex-col">
 
-          <div className="ba-main-header shrink-0">
+          <div
+            className={
+              documentOpen ? 'ba-main-header ba-main-header--doc shrink-0' : 'ba-main-header shrink-0'
+            }
+          >
 
             {activeId === 'customers' && customerBreadcrumb ? (
 
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="flex min-w-0 items-center gap-1.5">
 
                 <button
 
@@ -296,13 +320,13 @@ export default function App() {
 
                 >
 
-                  <ChevronLeft className="size-3.5" aria-hidden />
+                  <ChevronLeft className="size-3" aria-hidden />
 
                   Back
 
                 </button>
 
-                <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-base">
+                <nav aria-label="Breadcrumb" className="ba-doc-crumb flex min-w-0 items-center gap-1 text-sm">
 
                   <button
 
@@ -413,7 +437,7 @@ export default function App() {
 
             ) : activeId === 'documents' && documentBreadcrumb ? (
 
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="flex min-w-0 items-center gap-1.5">
 
                 <button
 
@@ -425,13 +449,13 @@ export default function App() {
 
                 >
 
-                  <ChevronLeft className="size-3.5" aria-hidden />
+                  <ChevronLeft className="size-3" aria-hidden />
 
                   Back
 
                 </button>
 
-                <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-base">
+                <nav aria-label="Breadcrumb" className="ba-doc-crumb flex min-w-0 items-center gap-1 text-sm">
 
                   <button
 
@@ -447,7 +471,7 @@ export default function App() {
 
                   </button>
 
-                  <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
+                  <ChevronRight className="size-3 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
 
                   <span className="truncate font-semibold text-[var(--ba-text-primary)]">
 
@@ -477,7 +501,11 @@ export default function App() {
 
               hasSubNav || activeId === 'calendar'
 
-                ? 'flex min-h-0 flex-1 flex-col overflow-hidden px-6 pt-3 pb-6'
+                ? documentOpen
+
+                  ? 'flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-1.5 pb-3'
+
+                  : 'flex min-h-0 flex-1 flex-col overflow-hidden px-6 pt-3 pb-6'
 
                 : 'min-h-0 flex-1 overflow-y-auto p-6'
 

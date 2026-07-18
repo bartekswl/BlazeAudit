@@ -5,6 +5,13 @@ import {
   validateAddressFields,
   validatePhone,
 } from '../../shared/address';
+import {
+  isFormInspectionDocument,
+  normalizeUlcSection1Value,
+  setElementValue,
+  walkFormElements,
+  type FormInspectionDocument,
+} from '../../shared/form';
 import type { Client, ClientInput } from '../../shared/types';
 import { getDatabase } from './connection';
 
@@ -161,7 +168,159 @@ export function createClient(input: ClientInput): Client {
   return getClient(id)!;
 }
 
+/**
+ * Ensure a client from a PDF export exists. Reuses the exported id when free,
+ * otherwise creates a new row. No DB schema change — uses existing clients table.
+ */
+export function ensureClientFromExport(client: Client): Client {
+  const byId = getClient(client.id);
+  if (byId) return byId;
+
+  const fields = normalize({
+    name: client.name,
+    street: client.street,
+    unit: client.unit,
+    city: client.city,
+    postCode: client.postCode,
+    country: client.country,
+    province: client.province,
+    contactName: client.contactName,
+    phone: client.phone,
+    email: client.email,
+    ownerManagerName: client.ownerManagerName,
+    ownerManagerPhone: client.ownerManagerPhone,
+    signalReceivingCenterName: client.signalReceivingCenterName,
+    signalReceivingCenterPhone: client.signalReceivingCenterPhone,
+    notes: client.notes,
+  });
+
+  const now = new Date().toISOString();
+  getDatabase()
+    .prepare(
+      `INSERT INTO clients (
+         id, name, address, street, unit, city, post_code, country, province,
+         contact_name, phone, email,
+         owner_manager_name, owner_manager_phone,
+         signal_receiving_center_name, signal_receiving_center_phone,
+         notes, created_at, updated_at
+       ) VALUES (
+         @id, @name, @formattedAddress, @street, @unit, @city, @postCode, @country, @province,
+         @contactName, @phone, @email,
+         @ownerManagerName, @ownerManagerPhone,
+         @signalReceivingCenterName, @signalReceivingCenterPhone,
+         @notes, @createdAt, @updatedAt
+       )`,
+    )
+    .run({
+      id: client.id,
+      name: fields.name,
+      formattedAddress: fields.formattedAddress,
+      street: fields.street,
+      unit: fields.unit,
+      city: fields.city,
+      postCode: fields.postCode,
+      country: fields.country,
+      province: fields.province,
+      contactName: fields.contactName,
+      phone: fields.phone,
+      email: fields.email,
+      ownerManagerName: fields.ownerManagerName,
+      ownerManagerPhone: fields.ownerManagerPhone,
+      signalReceivingCenterName: fields.signalReceivingCenterName,
+      signalReceivingCenterPhone: fields.signalReceivingCenterPhone,
+      notes: fields.notes,
+      createdAt: client.createdAt || now,
+      updatedAt: now,
+    });
+
+  return getClient(client.id)!;
+}
+
+function rewriteInspectionTitleForClientRename(
+  title: string,
+  oldName: string,
+  newName: string,
+): string {
+  const suffix = ` — ${oldName}`;
+  if (title.endsWith(suffix)) {
+    return `${title.slice(0, -suffix.length)} — ${newName}`;
+  }
+  if (title === oldName) return newName;
+  return title;
+}
+
+function rewriteFormDocumentBuildingName(
+  documentJson: string,
+  oldName: string,
+  newName: string,
+): string | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(documentJson);
+  } catch {
+    return null;
+  }
+  if (!isFormInspectionDocument(parsed)) return null;
+
+  let nextValues = parsed.values;
+  let changed = false;
+  walkFormElements(parsed.form, (element) => {
+    if (element.kind !== 'ulcSection1') return;
+    const current = normalizeUlcSection1Value(nextValues[element.id]);
+    // Update stored building name when it still mirrors the old customer name
+    // (empty stays empty so live client.name binding continues to apply).
+    if (current.buildingName.trim() !== oldName) return;
+    nextValues = setElementValue(nextValues, element.id, {
+      ...current,
+      buildingName: newName,
+    });
+    changed = true;
+  });
+
+  if (!changed) return null;
+  const nextDoc: FormInspectionDocument = { ...parsed, values: nextValues };
+  return JSON.stringify(nextDoc);
+}
+
+/** Keep document titles / form building names in sync when a customer is renamed. */
+function propagateClientNameChange(clientId: string, oldName: string, newName: string): void {
+  if (!oldName || oldName === newName) return;
+
+  const db = getDatabase();
+  const rows = db
+    .prepare(`SELECT id, title, document FROM inspections WHERE client_id = ?`)
+    .all(clientId) as Array<{ id: string; title: string; document: string }>;
+
+  if (rows.length === 0) return;
+
+  const updateStmt = db.prepare(
+    `UPDATE inspections
+        SET title = @title, document = @document, updated_at = @updatedAt
+      WHERE id = @id`,
+  );
+  const now = new Date().toISOString();
+
+  const apply = db.transaction(() => {
+    for (const row of rows) {
+      const nextTitle = rewriteInspectionTitleForClientRename(row.title, oldName, newName);
+      const nextDocument =
+        rewriteFormDocumentBuildingName(row.document, oldName, newName) ?? row.document;
+      if (nextTitle === row.title && nextDocument === row.document) continue;
+      updateStmt.run({
+        id: row.id,
+        title: nextTitle,
+        document: nextDocument,
+        updatedAt: now,
+      });
+    }
+  });
+  apply();
+}
+
 export function updateClient(id: string, input: ClientInput): Client {
+  const existing = getClient(id);
+  if (!existing) throw new Error(`Client not found: ${id}`);
+
   const fields = normalize(input);
   const now = new Date().toISOString();
 
@@ -201,6 +360,11 @@ export function updateClient(id: string, input: ClientInput): Client {
     });
 
   if (result.changes === 0) throw new Error(`Client not found: ${id}`);
+
+  if (existing.name !== fields.name) {
+    propagateClientNameChange(id, existing.name, fields.name);
+  }
+
   return getClient(id)!;
 }
 

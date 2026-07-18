@@ -2,7 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowDownUp, FileText, Pencil, Plus, Search, X } from 'lucide-react';
 import { formatAddress } from '../../../shared/address';
 import { cadenceLabel, isOverdue } from '../../../shared/cadence';
-import { sortInspectionsByDate, type InspectionSummary } from '../../../shared/inspection';
+import {
+  shortInspectionDisplayName,
+  sortInspectionsByDate,
+  type InspectionSummary,
+} from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
 import { cn } from '../../lib/cn';
 import { InlineLoader } from '../../components/LoadingOverlay';
@@ -297,7 +301,7 @@ export function CustomerDetailScreen({
                   >
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-medium text-neutral-100">
-                        {row.title}
+                        {shortInspectionDisplayName(row.title, row.clientName)}
                       </span>
                       <span className="block truncate text-[11px] text-neutral-500">
                         {row.cadence ? cadenceLabel(row.cadence) : ''}

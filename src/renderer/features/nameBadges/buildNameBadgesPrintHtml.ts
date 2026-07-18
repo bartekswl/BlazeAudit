@@ -17,35 +17,46 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
+function escapeCssUrl(dataUrl: string): string {
+  // data: URLs used here are base64 — no quotes/newlines expected; still harden.
+  return dataUrl.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '');
+}
+
 const ICON_PERSON = `<svg class="badge-label-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
 
 const ICON_BRIEFCASE = `<svg class="badge-label-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/></svg>`;
 
 const ICON_SHIELD = `<svg class="badge-banner-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l8 3v6c0 5.25-3.5 9.74-8 11-4.5-1.26-8-5.75-8-11V5l8-3z" fill="white" stroke="white" stroke-width="0.5"/><path d="M12 7c-1.5 1.2-2.5 2.8-2.8 4.8h5.6C14.5 9.8 13.5 8.2 12 7z" fill="${MAROON}"/><path d="M10 13.5h4l-.4 2.2c-.2.9-.9 1.5-1.8 1.5s-1.6-.6-1.8-1.5L10 13.5z" fill="${MAROON}"/></svg>`;
 
-function renderBrandLogo(businessName: string, logoDataUrl: string | null): string {
+function renderBrandLogo(businessName: string, hasLogo: boolean): string {
   const company = escapeHtml(businessName.trim() || 'Company');
-  if (logoDataUrl) {
-    return `<img class="badge-brand-logo" src="${logoDataUrl}" alt="" />`;
+  if (hasLogo) {
+    // Background image is declared once in CSS (--badge-logo) — identical look to <img object-fit:contain>.
+    return `<div class="badge-brand-logo badge-logo-bg" aria-hidden="true"></div>`;
   }
   return `<div class="badge-brand-logo-fallback">${company.slice(0, 3).toUpperCase()}</div>`;
 }
 
-function renderWatermark(logoDataUrl: string | null, businessName: string): string {
-  if (logoDataUrl) {
-    return `<img class="badge-watermark" src="${logoDataUrl}" alt="" />`;
+function renderWatermark(hasLogo: boolean, businessName: string): string {
+  if (hasLogo) {
+    return `<div class="badge-watermark badge-logo-bg" aria-hidden="true"></div>`;
   }
   const initials = escapeHtml(businessName.trim().slice(0, 2).toUpperCase() || 'CO');
   return `<div class="badge-watermark badge-watermark-fallback">${initials}</div>`;
 }
 
-function renderBadge(slot: NameBadgePrintSlot, businessName: string, logoDataUrl: string | null): string {
+function renderBadge(
+  slot: NameBadgePrintSlot,
+  businessName: string,
+  hasLogo: boolean,
+  photoClass: string | null,
+): string {
   const name = escapeHtml(slot.name.trim() || 'Employee Name');
   const title = escapeHtml(slot.title.trim() || 'Employee Title');
   const company = escapeHtml(businessName.trim() || 'Company');
 
-  const photo = slot.photoDataUrl
-    ? `<img class="badge-photo" src="${slot.photoDataUrl}" alt="" />`
+  const photo = photoClass
+    ? `<div class="badge-photo ${photoClass}" aria-hidden="true"></div>`
     : `<div class="badge-photo-fallback">
         <svg viewBox="0 0 64 80" fill="none" aria-hidden="true">
           <circle cx="32" cy="24" r="12" fill="#cbd5e1"/>
@@ -55,9 +66,9 @@ function renderBadge(slot: NameBadgePrintSlot, businessName: string, logoDataUrl
       </div>`;
 
   return `<article class="badge-card">
-    ${renderWatermark(logoDataUrl, businessName)}
+    ${renderWatermark(hasLogo, businessName)}
     <header class="badge-brand">
-      ${renderBrandLogo(businessName, logoDataUrl)}
+      ${renderBrandLogo(businessName, hasLogo)}
       <div class="badge-brand-text">
         <div class="badge-company-name">${company}</div>
       </div>
@@ -91,12 +102,41 @@ function renderBadge(slot: NameBadgePrintSlot, businessName: string, logoDataUrl
   </article>`;
 }
 
+/**
+ * Build print HTML. Logo + unique photos are declared once in CSS and reused
+ * across padded/repeated badge slots — same pixels, much smaller HTML and faster
+ * Chromium decode.
+ */
 export function buildNameBadgesPrintHtml(context: NameBadgePrintContext): string {
+  const hasLogo = Boolean(context.logoDataUrl);
+  const photoClassByUrl = new Map<string, string>();
+  const photoCssRules: string[] = [];
+
+  const resolvePhotoClass = (photoDataUrl: string | null): string | null => {
+    if (!photoDataUrl) return null;
+    let cls = photoClassByUrl.get(photoDataUrl);
+    if (!cls) {
+      cls = `badge-photo-bg-${photoClassByUrl.size}`;
+      photoClassByUrl.set(photoDataUrl, cls);
+      photoCssRules.push(
+        `.${cls}{background-image:url("${escapeCssUrl(photoDataUrl)}");background-size:cover;background-position:center;background-repeat:no-repeat;}`,
+      );
+    }
+    return cls;
+  };
+
   const pagesHtml = context.pages
     .map((pageSlots) => {
       const { cols, rows } = nameBadgeGridLayout(pageSlots.length);
       const badges = pageSlots
-        .map((slot) => renderBadge(slot, context.businessName, context.logoDataUrl))
+        .map((slot) =>
+          renderBadge(
+            slot,
+            context.businessName,
+            hasLogo,
+            resolvePhotoClass(slot.photoDataUrl),
+          ),
+        )
         .join('');
 
       return `<section class="print-page" style="--badge-cols:${cols}; --badge-rows:${rows};">
@@ -104,6 +144,23 @@ export function buildNameBadgesPrintHtml(context: NameBadgePrintContext): string
       </section>`;
     })
     .join('');
+
+  const logoCss = hasLogo
+    ? `:root{--badge-logo:url("${escapeCssUrl(context.logoDataUrl!)}");}
+.badge-logo-bg{background-image:var(--badge-logo);background-size:contain;background-repeat:no-repeat;background-position:center;}`
+    : '';
+
+  // Hidden <img> preloads so printToPDF waits on document.images while visible
+  // badges reuse the same decoded bitmaps via CSS (no per-slot base64 copies).
+  const preloadUrls: string[] = [];
+  if (hasLogo && context.logoDataUrl) preloadUrls.push(context.logoDataUrl);
+  for (const url of photoClassByUrl.keys()) preloadUrls.push(url);
+  const preloadHtml =
+    preloadUrls.length > 0
+      ? `<div class="ba-print-preload" aria-hidden="true">${preloadUrls
+          .map((url) => `<img src="${url}" alt="" />`)
+          .join('')}</div>`
+      : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -123,6 +180,18 @@ export function buildNameBadgesPrintHtml(context: NameBadgePrintContext): string
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
+
+    .ba-print-preload {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    ${logoCss}
+    ${photoCssRules.join('\n')}
 
     .print-page {
       width: 210mm;
@@ -168,7 +237,6 @@ export function buildNameBadgesPrintHtml(context: NameBadgePrintContext): string
       transform: translateY(-42%);
       width: 28mm;
       height: 28mm;
-      object-fit: contain;
       opacity: 0.07;
       pointer-events: none;
       z-index: 0;
@@ -198,7 +266,6 @@ export function buildNameBadgesPrintHtml(context: NameBadgePrintContext): string
     .badge-brand-logo {
       width: 10mm;
       height: 10mm;
-      object-fit: contain;
       flex-shrink: 0;
     }
 
@@ -303,8 +370,6 @@ export function buildNameBadgesPrintHtml(context: NameBadgePrintContext): string
     .badge-photo {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      object-position: center;
       display: block;
     }
 
@@ -420,6 +485,6 @@ export function buildNameBadgesPrintHtml(context: NameBadgePrintContext): string
     }
   </style>
 </head>
-<body>${pagesHtml}</body>
+<body>${preloadHtml}${pagesHtml}</body>
 </html>`;
 }

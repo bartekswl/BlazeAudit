@@ -14,6 +14,7 @@ import { registerAuthIpc } from './ipc/auth';
 import { provisionDemoIfNeeded } from './demo/provisionDemo';
 import { registerUpdateIpc } from './update/updater';
 import { closeDatabase } from './db/connection';
+import { disposePrintWindow, warmPrintWindow } from './pdf/printHtmlWindow';
 import { IpcChannels } from '../shared/ipc';
 import { buildBootSplashHtml } from '../shared/bootSplash';
 
@@ -52,6 +53,8 @@ process.on('message', (message) => {
 const BOOT_SPLASH_HTML = buildBootSplashHtml();
 const BOOT_SPLASH_URL = `data:text/html;charset=UTF-8,${encodeURIComponent(BOOT_SPLASH_HTML)}`;
 
+let mainWindow: BrowserWindow | null = null;
+
 function createMainWindow(): BrowserWindow {
   const icon = resolveAppIconPath();
   const win = new BrowserWindow({
@@ -71,6 +74,7 @@ function createMainWindow(): BrowserWindow {
       sandbox: true,
     },
   });
+  mainWindow = win;
 
   if (icon) {
     win.setIcon(icon);
@@ -93,6 +97,17 @@ function createMainWindow(): BrowserWindow {
   };
   win.on('maximize', emitMaximizeState);
   win.on('unmaximize', emitMaximizeState);
+
+  // Hidden print BrowserWindow must die with the main UI — otherwise
+  // window-all-closed never fires and Electron (and vite) stay running after X.
+  win.on('close', () => {
+    disposePrintWindow();
+  });
+  win.on('closed', () => {
+    if (mainWindow === win) mainWindow = null;
+    disposePrintWindow();
+    if (process.platform !== 'darwin') app.quit();
+  });
 
   // Paint the spinner instantly (no network round-trip), then swap in the
   // real app once it's ready. The window's backgroundColor + identical boot
@@ -127,15 +142,26 @@ void app.whenReady().then(async () => {
   registerUpdateIpc();
   createMainWindow();
 
+  // Pre-warm Chromium print host after UI is up so first PDF export skips cold start.
+  setTimeout(() => {
+    void warmPrintWindow();
+  }, 2500);
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
   });
 });
 
 app.on('window-all-closed', () => {
+  disposePrintWindow();
   if (process.platform !== 'darwin') app.quit();
 });
 
+app.on('before-quit', () => {
+  disposePrintWindow();
+});
+
 app.on('will-quit', () => {
+  disposePrintWindow();
   closeDatabase();
 });

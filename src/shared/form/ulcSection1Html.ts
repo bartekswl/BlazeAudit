@@ -43,7 +43,12 @@ function dateCell(
   value: UlcSection1Value,
   context: DocumentContext,
 ): string {
-  const text = normalizeIsoDateInput(resolveUlcSection1Field(key, value, context));
+  // Last Service Date is independent — never resolve from Date of Service / inspection date.
+  const raw =
+    key === 'lastServiceDate'
+      ? value.lastServiceDate
+      : resolveUlcSection1Field(key, value, context);
+  const text = normalizeIsoDateInput(raw);
   return `<div class="ulc-s1-cell"><div class="ulc-s1-label">${escapeHtml(label)}</div><div class="ulc-s1-value">${dash(text)}</div></div>`;
 }
 

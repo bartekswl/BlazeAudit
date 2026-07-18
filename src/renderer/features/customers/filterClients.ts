@@ -9,6 +9,8 @@ export function filterClients(clients: Client[], query: string): Client[] {
     const haystack = [
       client.name,
       client.contactName,
+      client.street,
+      client.city,
       client.address,
       client.ownerManagerName,
       client.signalReceivingCenterName,

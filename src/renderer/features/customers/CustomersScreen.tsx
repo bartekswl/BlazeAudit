@@ -10,8 +10,14 @@ import {
   type ReactNode,
 } from 'react';
 import { FileText, Pencil, Plus, Search, Trash2, Users, X } from 'lucide-react';
-import { validateCountry, validatePhone, validatePostCode, validateProvince } from '../../../shared/address';
-import type { Inspection } from '../../../shared/inspection';
+import {
+  formatStreetCity,
+  validateCountry,
+  validatePhone,
+  validatePostCode,
+  validateProvince,
+} from '../../../shared/address';
+import { shortInspectionDisplayName, type Inspection } from '../../../shared/inspection';
 import type { Client, ClientInput } from '../../../shared/types';
 import { cn } from '../../lib/cn';
 import { InlineLoader } from '../../components/LoadingOverlay';
@@ -96,7 +102,10 @@ export function CustomersScreen({
       if (openInspectionId && openInspection) {
         onDetailChange({
           clientName: selectedClientName,
-          documentTitle: openInspection.title,
+          documentTitle: shortInspectionDisplayName(
+            openInspection.title,
+            openInspection.clientName,
+          ),
           onBack: closeInspection,
           onBackToList: goBackToList,
           onBackToClient: closeInspection,
@@ -340,11 +349,11 @@ export function CustomersScreen({
             <table className="w-full table-fixed text-left text-sm">
               <thead className="ba-table-head sticky top-0 text-xs uppercase tracking-wide text-[var(--ba-text-secondary)]">
                 <tr>
-                  <th className="w-[18%] px-4 py-3 font-medium">Building name</th>
+                  <th className="w-[28%] px-4 py-3 font-medium">Building name</th>
                   <th className="w-[14%] px-4 py-3 font-medium">Contact person</th>
                   <th className="w-[12%] px-4 py-3 font-medium">Phone</th>
                   <th className="w-[18%] px-4 py-3 font-medium">Email</th>
-                  <th className="w-[30%] px-4 py-3 font-medium">Address</th>
+                  <th className="w-[18%] px-4 py-3 text-right font-medium">Address</th>
                   <th className="w-20 px-4 py-3" />
                 </tr>
               </thead>
@@ -362,7 +371,10 @@ export function CustomersScreen({
                   <TruncateCell value={client.contactName} />
                   <TruncateCell value={client.phone} />
                   <TruncateCell value={client.email} />
-                  <TruncateCell value={client.address} />
+                  <TruncateCell
+                    value={formatStreetCity(client)}
+                    className="text-right"
+                  />
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
                       <button
@@ -409,9 +421,13 @@ export function CustomersScreen({
         <ClientEditor
           initial={editor.mode === 'edit' ? editor.client : null}
           onClose={() => setEditor({ mode: 'closed' })}
-          onSaved={async () => {
+          onSaved={async (saved) => {
+            if (selectedId && saved.id === selectedId) {
+              setSelectedClientName(saved.name);
+            }
             setEditor({ mode: 'closed' });
             await refresh();
+            if (selectedId) setDetailRefreshKey((k) => k + 1);
           }}
         />
       )}
@@ -429,7 +445,7 @@ function ClientEditor({
 }: {
   initial: Client | null;
   onClose: () => void;
-  onSaved: () => void | Promise<void>;
+  onSaved: (saved: Client) => void | Promise<void>;
 }) {
   const [form, setForm] = useState<ClientInput>(
     initial
@@ -494,9 +510,10 @@ function ClientEditor({
     if (!validateForm()) return;
     setSaving(true);
     try {
-      if (initial) await window.blazeaudit.clients.update(initial.id, form);
-      else await window.blazeaudit.clients.create(form);
-      await onSaved();
+      const saved = initial
+        ? await window.blazeaudit.clients.update(initial.id, form)
+        : await window.blazeaudit.clients.create(form);
+      await onSaved(saved);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save.');
       setSaving(false);

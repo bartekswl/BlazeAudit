@@ -28,14 +28,35 @@ export function registerInspectionsIpc(): void {
     inspections.getClientInspectionStats(clientId),
   );
 
-  ipcMain.handle(IpcChannels.inspectionsExportPdf, async (_event, id: string, html?: string) => {
-    const { exportInspectionPdf } = await import('../pdf/exportInspectionPdf');
-    return exportInspectionPdf(id, html);
-  });
+  ipcMain.handle(
+    IpcChannels.inspectionsPickPdfPath,
+    async (_event, id: string) => {
+      const { pickInspectionPdfPath } = await import('../pdf/exportInspectionPdf');
+      return pickInspectionPdfPath(id);
+    },
+  );
+
+  ipcMain.handle(
+    IpcChannels.inspectionsExportPdf,
+    async (_event, id: string, html?: string, targetPath?: string) => {
+      const { exportInspectionPdf } = await import('../pdf/exportInspectionPdf');
+      return exportInspectionPdf(id, html, targetPath);
+    },
+  );
 
   ipcMain.handle(IpcChannels.inspectionsImportPdf, async () => {
     const { importInspectionPdf } = await import('../pdf/importInspectionPdf');
     return importInspectionPdf();
+  });
+
+  ipcMain.handle(IpcChannels.inspectionsInspectPdfImport, async () => {
+    const { inspectInspectionPdfImport } = await import('../pdf/importInspectionPdf');
+    return inspectInspectionPdfImport();
+  });
+
+  ipcMain.handle(IpcChannels.inspectionsConfirmPdfImport, async (_event, filePath: string) => {
+    const { confirmInspectionPdfImport } = await import('../pdf/importInspectionPdf');
+    return confirmInspectionPdfImport(filePath);
   });
 
   ipcMain.handle(IpcChannels.inspectionsResolveContext, (_event, id: string) => {

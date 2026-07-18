@@ -1,3 +1,4 @@
+import { FORM_REPORT_DISCLAIMER } from '../disclaimer';
 import type { FormDefinition } from '../types';
 import { FORM_PROTOTYPE_SUMMARY_ITEMS } from '../yesNoSummary';
 
@@ -7,7 +8,7 @@ export function formPrototypeDefinition(): FormDefinition {
   return {
     schemaVersion: 2,
     kind: 'form-definition',
-    disclaimer: 'Disclaimer text — replace when form content is finalized.',
+    disclaimer: FORM_REPORT_DISCLAIMER,
     pages: [
       {
         id: 'page-1',
