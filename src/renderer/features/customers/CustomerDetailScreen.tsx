@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowDownUp, FileText, Pencil, Plus, Search, X } from 'lucide-react';
+import { ArrowDownUp, FileText, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { formatAddress } from '../../../shared/address';
 import { cadenceLabel, isOverdue } from '../../../shared/cadence';
 import {
@@ -19,11 +19,13 @@ const filterInputCls =
 export function CustomerDetailScreen({
   clientId,
   onEdit,
+  onDelete,
   onNewInspection,
   onOpenInspection,
 }: {
   clientId: string;
   onEdit: (client: Client) => void;
+  onDelete?: (client: Client) => void;
   onNewInspection: (clientId: string) => void;
   onOpenInspection: (inspectionId: string) => void;
 }) {
@@ -151,6 +153,16 @@ export function CustomerDetailScreen({
               <Pencil className="size-3.5" />
               Edit
             </button>
+            {onDelete ? (
+              <button
+                type="button"
+                onClick={() => onDelete(client)}
+                className="inline-flex items-center gap-1 rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red-300 transition-colors hover:bg-red-500/20"
+              >
+                <Trash2 className="size-3.5" />
+                Delete
+              </button>
+            ) : null}
           </div>
         </div>
 

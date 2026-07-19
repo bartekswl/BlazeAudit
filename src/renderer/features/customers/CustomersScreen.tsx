@@ -9,7 +9,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from 'react';
-import { FileText, Pencil, Plus, Search, Trash2, Users, X } from 'lucide-react';
+import { FileText, Pencil, Plus, Search, Trash2, Upload, Users, X } from 'lucide-react';
 import {
   formatStreetCity,
   validateCountry,
@@ -58,6 +58,8 @@ export type CustomerDetailBreadcrumb = {
   onBack: () => void;
   onBackToList: () => void;
   onBackToClient?: () => void;
+  metaPinned?: boolean;
+  onToggleMetaPin?: () => void;
 };
 
 export function CustomersScreen({
@@ -78,11 +80,15 @@ export function CustomersScreen({
   const [detailRefreshKey, setDetailRefreshKey] = useState(0);
   const [openInspectionId, setOpenInspectionId] = useState<string | null>(null);
   const [openInspection, setOpenInspection] = useState<Inspection | null>(null);
+  const [metaPinned, setMetaPinned] = useState(true);
+  const toggleMetaPin = useCallback(() => setMetaPinned((v) => !v), []);
   const [pendingDelete, setPendingDelete] = useState<Client | null>(null);
   const [blockedDelete, setBlockedDelete] = useState<{
     client: Client;
     documentCount: number;
   } | null>(null);
+  const [importingCsv, setImportingCsv] = useState(false);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
 
   const closeInspection = useCallback(() => {
     setOpenInspectionId(null);
@@ -109,6 +115,8 @@ export function CustomersScreen({
           onBack: closeInspection,
           onBackToList: goBackToList,
           onBackToClient: closeInspection,
+          metaPinned,
+          onToggleMetaPin: toggleMetaPin,
         });
       } else {
         onDetailChange({
@@ -128,6 +136,8 @@ export function CustomersScreen({
     onDetailChange,
     goBackToList,
     closeInspection,
+    metaPinned,
+    toggleMetaPin,
   ]);
 
   useEffect(() => {
@@ -190,6 +200,26 @@ export function CustomersScreen({
     }
   };
 
+  const importCustomersCsv = async () => {
+    setError(null);
+    setImportMessage(null);
+    setImportingCsv(true);
+    try {
+      const result = await window.blazeaudit.database.importClientsCsv();
+      if (!result.imported) return;
+      await refresh();
+      const parts = [`Added ${result.created}`];
+      if (result.skippedExisting > 0) {
+        parts.push(`skipped ${result.skippedExisting} already in the system`);
+      }
+      setImportMessage(`${parts.join(', ')}.`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Customer import failed.');
+    } finally {
+      setImportingCsv(false);
+    }
+  };
+
   const confirmDelete = async () => {
     if (!pendingDelete) return;
     try {
@@ -249,6 +279,8 @@ export function CustomersScreen({
             closeInspection();
             setDetailRefreshKey((k) => k + 1);
           }}
+          metaPinned={metaPinned}
+          onToggleMetaPin={toggleMetaPin}
           onSaved={(saved) => {
             setOpenInspection(saved);
           }}
@@ -264,6 +296,7 @@ export function CustomersScreen({
           key={`${selectedId}-${detailRefreshKey}`}
           clientId={selectedId}
           onEdit={(client) => setEditor({ mode: 'edit', client })}
+          onDelete={(client) => void requestDelete(client)}
           onNewInspection={(clientId) => onNewInspection?.(clientId)}
           onOpenInspection={(inspectionId) => {
             setError(null);
@@ -288,6 +321,8 @@ export function CustomersScreen({
             }}
           />
         )}
+        {deleteConfirmDialog}
+        {blockedDeleteDialog}
       </div>
     );
   }
@@ -305,14 +340,25 @@ export function CustomersScreen({
             className="ba-search"
           />
         </div>
-        <button
-          type="button"
-          onClick={() => setEditor({ mode: 'new' })}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-flame-500 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-flame-600"
-        >
-          <Plus className="size-4" />
-          Add client
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            disabled={importingCsv}
+            onClick={() => void importCustomersCsv()}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-flame-500/40 bg-flame-500/10 px-3 py-2 text-sm font-semibold text-flame-300 transition-colors hover:bg-flame-500/20 disabled:opacity-50"
+          >
+            <Upload className="size-4" />
+            {importingCsv ? 'Importing…' : 'Import Customers'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditor({ mode: 'new' })}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-flame-500 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-flame-600"
+          >
+            <Plus className="size-4" />
+            Add client
+          </button>
+        </div>
       </div>
 
       <p className="mb-4 text-sm text-neutral-400">
@@ -320,6 +366,12 @@ export function CustomersScreen({
           ? `${filtered.length} of ${clients.length} ${clients.length === 1 ? 'client' : 'clients'}`
           : `${clients.length} ${clients.length === 1 ? 'client' : 'clients'}`}
       </p>
+
+      {importMessage && (
+        <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
+          {importMessage}
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-300">

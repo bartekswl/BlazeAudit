@@ -37,6 +37,8 @@ const NewInspectionDialog = lazy(() =>
 export type DocumentDetailBreadcrumb = {
   documentTitle: string;
   onBack: () => void;
+  metaPinned?: boolean;
+  onToggleMetaPin?: () => void;
 };
 
 export type DocumentsBootState = {
@@ -78,6 +80,8 @@ export function DocumentsScreen({
     documentTitle: string;
     hasClientSnapshot: boolean;
   } | null>(null);
+  const [metaPinned, setMetaPinned] = useState(true);
+  const toggleMetaPin = useCallback(() => setMetaPinned((v) => !v), []);
 
   const goBackToList = useCallback(() => {
     setEditingId(null);
@@ -93,11 +97,13 @@ export function DocumentsScreen({
           editingInspection.clientName,
         ),
         onBack: goBackToList,
+        metaPinned,
+        onToggleMetaPin: toggleMetaPin,
       });
     } else {
       onDetailChange(null);
     }
-  }, [editingId, editingInspection, onDetailChange, goBackToList]);
+  }, [editingId, editingInspection, onDetailChange, goBackToList, metaPinned, toggleMetaPin]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -255,6 +261,8 @@ export function DocumentsScreen({
         <InspectionEditor
           inspection={editingInspection}
           onBack={goBackToList}
+          metaPinned={metaPinned}
+          onToggleMetaPin={toggleMetaPin}
           onSaved={(saved) => {
             setEditingInspection(saved);
             void refresh();

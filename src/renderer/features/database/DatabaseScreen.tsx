@@ -20,6 +20,7 @@ export function DatabaseScreen({
   const [exportingKit, setExportingKit] = useState(false);
   const [importingJson, setImportingJson] = useState(false);
   const [importingPdf, setImportingPdf] = useState(false);
+  const [importingClients, setImportingClients] = useState(false);
   const [openingFolder, setOpeningFolder] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +42,26 @@ export function DatabaseScreen({
       setError(e instanceof Error ? e.message : 'Export failed.');
     } finally {
       setExporting(false);
+    }
+  };
+
+  const importCustomersCsv = async () => {
+    setImportingClients(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const result = await window.blazeaudit.database.importClientsCsv();
+      if (result.imported) {
+        const parts = [`Added ${result.created} customer${result.created === 1 ? '' : 's'}`];
+        if (result.skippedExisting > 0) {
+          parts.push(`skipped ${result.skippedExisting} already in the system`);
+        }
+        setMessage(`${parts.join('; ')}.`);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Customer import failed.');
+    } finally {
+      setImportingClients(false);
     }
   };
 
@@ -190,10 +211,12 @@ export function DatabaseScreen({
         <ActionButton icon={Download} label="Export to JSON" disabled hint="Coming soon" />
         <ActionButton
           icon={Upload}
-          label="Import from CSV / Excel / JSON"
-          disabled
-          hint="Coming soon"
+          label="Import from CSV"
+          loadingLabel="Importing…"
+          onClick={() => void importCustomersCsv()}
+          loading={importingClients}
         />
+        <ActionButton icon={Upload} label="Import from Excel / JSON" disabled hint="Coming soon" />
       </Section>
 
       <div className="flex items-center gap-2 text-xs text-neutral-600">

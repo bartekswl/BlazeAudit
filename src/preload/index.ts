@@ -105,6 +105,17 @@ const api = {
   database: {
     exportClientsCsv: (): Promise<{ saved: false } | { saved: true; filePath: string }> =>
       ipcRenderer.invoke(IpcChannels.databaseExportClientsCsv),
+    importClientsCsv: (): Promise<
+      | { imported: false }
+      | {
+          imported: true;
+          filePath: string;
+          created: number;
+          skippedExisting: number;
+          skippedEmpty: number;
+          totalRows: number;
+        }
+    > => ipcRenderer.invoke(IpcChannels.databaseImportClientsCsv),
     getDataDir: (): Promise<string> => ipcRenderer.invoke(IpcChannels.databaseGetDataDir),
     openDataFolder: (): Promise<{ opened: true; path: string }> =>
       ipcRenderer.invoke(IpcChannels.databaseOpenDataFolder),

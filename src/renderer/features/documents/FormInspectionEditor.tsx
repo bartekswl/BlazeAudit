@@ -5,8 +5,6 @@ import {
   ClipboardPaste,
   FileDown,
   MousePointer2,
-  Pin,
-  PinOff,
   Scissors,
   TriangleAlert,
   Undo2,
@@ -64,14 +62,14 @@ type FormEditorSnapshot = {
 const compactInputCls = 'ba-input ba-input--compact';
 const compactFieldCls = `${compactInputCls} !py-0.5 !text-[11px] !leading-4`;
 const toolbarBtnCls =
-  'inline-flex h-6 items-center gap-1 rounded-md border border-flame-500/30 bg-flame-500/10 px-1.5 text-[11px] leading-4 text-flame-300 transition-colors hover:bg-flame-500/20 disabled:opacity-50';
-const toolbarIconBtnCls =
-  'inline-flex size-6 items-center justify-center rounded-md border border-flame-500/30 bg-flame-500/10 text-flame-300 transition-colors hover:bg-flame-500/20 disabled:opacity-50';
+  'ba-clipboard-btn inline-flex h-6 items-center gap-1 rounded-md border border-flame-500/30 bg-flame-500/10 px-1.5 text-[11px] leading-4 text-flame-300 transition-colors hover:bg-flame-500/20 active:scale-[0.96] active:bg-flame-500/35 disabled:opacity-50';
 
 export function FormInspectionEditor(props: {
   inspection: Inspection;
   onSaved: (inspection: Inspection) => void;
   onBack: () => void;
+  metaPinned?: boolean;
+  onToggleMetaPin?: () => void;
 }) {
   if (!isFormInspectionDocument(props.inspection.document)) {
     return <p className="text-sm text-red-300">Invalid form inspection document.</p>;
@@ -83,11 +81,14 @@ function FormInspectionEditorInner({
   inspection,
   document: formDocInitial,
   onSaved,
+  metaPinned: metaPinnedProp,
 }: {
   inspection: Inspection;
   document: FormInspectionDocument;
   onSaved: (inspection: Inspection) => void;
   onBack: () => void;
+  metaPinned?: boolean;
+  onToggleMetaPin?: () => void;
 }) {
   const [title] = useState(inspection.title);
   const [status, setStatus] = useState<InspectionStatus>(inspection.status);
@@ -128,10 +129,11 @@ function FormInspectionEditorInner({
   });
   const [pendingPageRemove, setPendingPageRemove] = useState<PendingPageRemove | null>(null);
   const [pendingDateChange, setPendingDateChange] = useState<string | null>(null);
-  const [metaPinned, setMetaPinned] = useState(true);
+  const metaPinned = metaPinnedProp ?? true;
   const formStackRef = useRef<HTMLDivElement>(null);
   const {
     selectMode,
+    actionFlash,
     toggleSelectMode,
     copySelected,
     cutSelected,
@@ -500,182 +502,165 @@ function FormInspectionEditorInner({
       {error && <div className="ba-alert ba-alert--error shrink-0">{error}</div>}
       {pdfMessage && <div className="ba-alert ba-alert--success shrink-0">{pdfMessage}</div>}
 
-      <div
-        className={cn(
-          'relative shrink-0 rounded-md border border-[var(--ba-panel-border)] bg-[var(--ba-panel-bg)] transition-[padding,min-height] duration-200',
-          metaPinned ? 'px-2 py-1' : 'h-2 overflow-hidden px-0 py-0',
-        )}
-      >
-        <button
-          type="button"
-          onClick={() => setMetaPinned((v) => !v)}
-          className={cn(
-            toolbarIconBtnCls,
-            'absolute right-1 top-0.5 z-10',
-            !metaPinned && 'top-[-1px] right-1 size-5',
-          )}
-          title={metaPinned ? 'Unpin meta panel' : 'Pin meta panel'}
-          aria-pressed={metaPinned}
-        >
-          {metaPinned ? <PinOff className="size-3" /> : <Pin className="size-3" />}
-        </button>
-
-        {metaPinned ? (
-          <>
-            <div className="grid grid-cols-[minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 gap-y-0.5 pr-7">
-              <div className="min-w-0">
-                <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
-                  Title
-                </span>
-                <p
-                  className={`${compactFieldCls} truncate font-medium text-[var(--ba-text-primary)]`}
-                >
-                  {title}
-                </p>
-              </div>
-              <label className="block min-w-0">
-                <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
-                  Project Number
-                </span>
-                <input
-                  type="text"
-                  className={compactFieldCls}
-                  value={projectNumber}
-                  onChange={(e) => onProjectNumberChange(e.target.value)}
-                  placeholder="—"
-                />
-              </label>
-              <label className="block min-w-0">
-                <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
-                  Date
-                </span>
-                <input
-                  type="date"
-                  className={compactFieldCls}
-                  value={inspectedAt}
-                  onChange={(e) => requestInspectionDateChange(e.target.value)}
-                />
-              </label>
-              <label className="block min-w-0">
-                <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
-                  Status
-                </span>
-                <select
-                  className={`${compactFieldCls} ba-select`}
-                  value={status}
-                  onChange={(e) => {
-                    recordUndo('meta:status');
-                    setStatus(e.target.value as InspectionStatus);
-                    markDirty();
-                  }}
-                >
-                  <option value="draft">Draft</option>
-                  <option value="complete">Complete</option>
-                </select>
-              </label>
+      {metaPinned ? (
+        <div className="relative shrink-0 rounded-md border border-[var(--ba-panel-border)] bg-[var(--ba-panel-bg)] px-2 py-1">
+          <div className="grid grid-cols-[minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 gap-y-0.5">
+            <div className="min-w-0">
+              <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+                Title
+              </span>
+              <p className={`${compactFieldCls} truncate font-medium text-[var(--ba-text-primary)]`}>
+                {title}
+              </p>
             </div>
-
-            <div
-              className="mt-1 grid gap-x-2 gap-y-0"
-              style={{ gridTemplateColumns: '7rem minmax(0, 12rem) 1fr' }}
-            >
-              <span className="text-[9px] leading-none text-[var(--ba-text-muted)]">Cadence</span>
-              <span className="text-[9px] leading-none text-[var(--ba-text-muted)]">Client</span>
-              <span aria-hidden="true" />
+            <label className="block min-w-0">
+              <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+                Project Number
+              </span>
+              <input
+                type="text"
+                className={compactFieldCls}
+                value={projectNumber}
+                onChange={(e) => onProjectNumberChange(e.target.value)}
+                placeholder="—"
+              />
+            </label>
+            <label className="block min-w-0">
+              <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+                Date
+              </span>
+              <input
+                type="date"
+                className={compactFieldCls}
+                value={inspectedAt}
+                onChange={(e) => requestInspectionDateChange(e.target.value)}
+              />
+            </label>
+            <label className="block min-w-0">
+              <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+                Status
+              </span>
               <select
                 className={`${compactFieldCls} ba-select`}
-                value={cadence}
+                value={status}
                 onChange={(e) => {
-                  recordUndo('meta:cadence');
-                  setCadence(e.target.value as CadencePreset);
+                  recordUndo('meta:status');
+                  setStatus(e.target.value as InspectionStatus);
                   markDirty();
                 }}
               >
-                {CADENCE_PRESETS.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
+                <option value="draft">Draft</option>
+                <option value="complete">Complete</option>
               </select>
-              <p
-                className={`${compactFieldCls} min-w-0 truncate font-medium text-[var(--ba-text-primary)]`}
-                title={inspection.clientName}
+            </label>
+          </div>
+
+          <div
+            className="mt-1 grid gap-x-2 gap-y-0"
+            style={{ gridTemplateColumns: '7rem minmax(0, 12rem) 1fr' }}
+          >
+            <span className="text-[9px] leading-none text-[var(--ba-text-muted)]">Cadence</span>
+            <span className="text-[9px] leading-none text-[var(--ba-text-muted)]">Client</span>
+            <span aria-hidden="true" />
+            <select
+              className={`${compactFieldCls} ba-select`}
+              value={cadence}
+              onChange={(e) => {
+                recordUndo('meta:cadence');
+                setCadence(e.target.value as CadencePreset);
+                markDirty();
+              }}
+            >
+              {CADENCE_PRESETS.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            <p
+              className={`${compactFieldCls} min-w-0 truncate font-medium text-[var(--ba-text-primary)]`}
+              title={inspection.clientName}
+            >
+              {inspection.clientName}
+            </p>
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                disabled={exportingPdf}
+                onClick={() => void exportPdf()}
+                className={toolbarBtnCls}
               >
-                {inspection.clientName}
-              </p>
-              <div className="flex flex-wrap items-center justify-end gap-1 pr-7">
-                <button
-                  type="button"
-                  onClick={() => void copySelected()}
-                  className={toolbarBtnCls}
-                  title="Copy selected field(s)"
-                >
-                  <ClipboardCopy className="size-3" />
-                  Copy
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void pasteSelected()}
-                  className={toolbarBtnCls}
-                  title="Paste into selected field(s)"
-                >
-                  <ClipboardPaste className="size-3" />
-                  Paste
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void cutSelected()}
-                  className={toolbarBtnCls}
-                  title="Cut selected field(s)"
-                >
-                  <Scissors className="size-3" />
-                  Cut
-                </button>
-                <button
-                  type="button"
-                  onClick={toggleSelectMode}
-                  className={cn(toolbarBtnCls, selectMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
-                  title={
-                    selectMode
-                      ? 'Exit select mode'
-                      : 'Select fields (hand cursor). Ctrl+click or drag for multiple'
-                  }
-                  aria-pressed={selectMode}
-                >
-                  <MousePointer2 className="size-3" />
-                  {selectMode ? 'Selecting' : 'Select'}
-                </button>
-                <button
-                  type="button"
-                  disabled={!canUndo}
-                  onClick={applyUndo}
-                  className={toolbarBtnCls}
-                  title="Undo last change (Ctrl+Z)"
-                >
-                  <Undo2 className="size-3" />
-                  Undo
-                </button>
-                <button
-                  type="button"
-                  disabled={saveState === 'saving'}
-                  onClick={() => void save()}
-                  className={toolbarBtnCls}
-                >
-                  {saveLabel}
-                </button>
-                <button
-                  type="button"
-                  disabled={exportingPdf}
-                  onClick={() => void exportPdf()}
-                  className={toolbarBtnCls}
-                >
-                  <FileDown className="size-3" />
-                  {exportingPdf ? 'Exporting…' : 'Export PDF'}
-                </button>
-              </div>
+                <FileDown className="size-3" />
+                {exportingPdf ? 'Exporting…' : 'Export PDF'}
+              </button>
             </div>
-          </>
-        ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      <div
+        className="flex shrink-0 flex-wrap items-center justify-end gap-1 py-0.5"
+        data-ba-clipboard-toolbar=""
+      >
+        <button
+          type="button"
+          onClick={() => void copySelected()}
+          className={cn(toolbarBtnCls, actionFlash === 'copy' && 'ba-clipboard-btn--flash')}
+          title="Copy full cell(s) (Ctrl+C). Highlights stay until you click the form."
+        >
+          <ClipboardCopy className="size-3" />
+          Copy
+        </button>
+        <button
+          type="button"
+          onClick={() => void pasteSelected()}
+          className={cn(toolbarBtnCls, actionFlash === 'paste' && 'ba-clipboard-btn--flash')}
+          title="Paste into cell(s) / row (Ctrl+V)"
+        >
+          <ClipboardPaste className="size-3" />
+          Paste
+        </button>
+        <button
+          type="button"
+          onClick={() => void cutSelected()}
+          className={cn(toolbarBtnCls, actionFlash === 'cut' && 'ba-clipboard-btn--flash')}
+          title="Cut full cell(s) (Ctrl+X)"
+        >
+          <Scissors className="size-3" />
+          Cut
+        </button>
+        <button
+          type="button"
+          onClick={toggleSelectMode}
+          className={cn(toolbarBtnCls, selectMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
+          title={
+            selectMode
+              ? 'Exit select mode'
+              : 'Select cells (drag / Ctrl+click). Alt+click or double-click = whole row'
+          }
+          aria-pressed={selectMode}
+        >
+          <MousePointer2 className="size-3" />
+          {selectMode ? 'Selecting' : 'Select'}
+        </button>
+        <button
+          type="button"
+          disabled={!canUndo}
+          onClick={applyUndo}
+          className={toolbarBtnCls}
+          title="Undo last change (Ctrl+Z)"
+        >
+          <Undo2 className="size-3" />
+          Undo
+        </button>
+        <button
+          type="button"
+          disabled={saveState === 'saving'}
+          onClick={() => void save()}
+          className={toolbarBtnCls}
+        >
+          {saveLabel}
+        </button>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">

@@ -22,6 +22,7 @@ export const IpcChannels = {
   clientsUpdate: 'clients:update',
   clientsDelete: 'clients:delete',
   databaseExportClientsCsv: 'database:export-clients-csv',
+  databaseImportClientsCsv: 'database:import-clients-csv',
   databaseGetDataDir: 'database:get-data-dir',
   databaseOpenDataFolder: 'database:open-data-folder',
   authGetStatus: 'auth:get-status',

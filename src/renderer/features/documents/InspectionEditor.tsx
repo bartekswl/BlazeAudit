@@ -37,14 +37,24 @@ export function InspectionEditor({
   inspection,
   onSaved,
   onBack,
+  metaPinned,
+  onToggleMetaPin,
 }: {
   inspection: Inspection;
   onSaved: (inspection: Inspection) => void;
   onBack: () => void;
+  metaPinned?: boolean;
+  onToggleMetaPin?: () => void;
 }) {
   if (isFormInspectionDocument(inspection.document)) {
     return (
-      <FormInspectionEditor inspection={inspection} onSaved={onSaved} onBack={onBack} />
+      <FormInspectionEditor
+        inspection={inspection}
+        onSaved={onSaved}
+        onBack={onBack}
+        metaPinned={metaPinned}
+        onToggleMetaPin={onToggleMetaPin}
+      />
     );
   }
   return (

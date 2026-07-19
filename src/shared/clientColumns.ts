@@ -44,3 +44,62 @@ export function clientToSpreadsheetRow(client: Client): Record<ClientSpreadsheet
     notes: client.notes,
   };
 }
+
+function normalizeHeader(header: string): string {
+  return header.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/**
+ * Map CSV header + data rows onto ClientInput records using spreadsheet column headers.
+ * Rows with an empty building name are omitted.
+ */
+export function clientInputsFromSpreadsheetCsv(
+  headers: string[],
+  rows: string[][],
+): ClientInput[] {
+  const headerIndex = new Map<string, number>();
+  headers.forEach((header, index) => {
+    headerIndex.set(normalizeHeader(header), index);
+  });
+
+  const columnIndexes = CLIENT_SPREADSHEET_COLUMNS.map((col) => ({
+    key: col.key,
+    index: headerIndex.get(normalizeHeader(col.header)) ?? -1,
+  }));
+
+  const nameCol = columnIndexes.find((c) => c.key === 'name');
+  if (!nameCol || nameCol.index < 0) {
+    throw new Error(
+      'CSV is missing the required "Building Name" column. Export customers from BlazeAudit for a template.',
+    );
+  }
+
+  const inputs: ClientInput[] = [];
+  for (const cells of rows) {
+    const get = (key: ClientSpreadsheetKey): string => {
+      const col = columnIndexes.find((c) => c.key === key);
+      if (!col || col.index < 0) return '';
+      return (cells[col.index] ?? '').trim();
+    };
+    const name = get('name');
+    if (!name) continue;
+    inputs.push({
+      name,
+      street: get('street'),
+      unit: get('unit'),
+      city: get('city'),
+      postCode: get('postCode'),
+      province: get('province'),
+      country: get('country'),
+      contactName: get('contactName'),
+      phone: get('phone'),
+      email: get('email'),
+      ownerManagerName: get('ownerManagerName'),
+      ownerManagerPhone: get('ownerManagerPhone'),
+      signalReceivingCenterName: get('signalReceivingCenterName'),
+      signalReceivingCenterPhone: get('signalReceivingCenterPhone'),
+      notes: get('notes'),
+    });
+  }
+  return inputs;
+}
