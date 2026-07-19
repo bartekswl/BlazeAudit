@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, lazy, Suspense, type ReactNode } from 'react';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pin, PinOff } from 'lucide-react';
 
 import { Sidebar } from './components/Sidebar';
 
@@ -282,7 +282,18 @@ export default function App() {
     Boolean(documentBreadcrumb) ||
     Boolean(customerBreadcrumb?.documentTitle);
 
-
+  const metaPinControl =
+    activeId === 'documents' && documentBreadcrumb?.onToggleMetaPin
+      ? {
+          pinned: documentBreadcrumb.metaPinned ?? true,
+          toggle: documentBreadcrumb.onToggleMetaPin,
+        }
+      : activeId === 'customers' && customerBreadcrumb?.onToggleMetaPin
+        ? {
+            pinned: customerBreadcrumb.metaPinned ?? true,
+            toggle: customerBreadcrumb.onToggleMetaPin,
+          }
+        : null;
 
   return (
 
@@ -302,13 +313,15 @@ export default function App() {
 
           <div
             className={
-              documentOpen ? 'ba-main-header ba-main-header--doc shrink-0' : 'ba-main-header shrink-0'
+              documentOpen
+                ? 'ba-main-header ba-main-header--doc flex shrink-0 items-center justify-between gap-2'
+                : 'ba-main-header shrink-0'
             }
           >
 
             {activeId === 'customers' && customerBreadcrumb ? (
 
-              <div className="flex min-w-0 items-center gap-1.5">
+              <div className="flex min-w-0 flex-1 items-center gap-1.5">
 
                 <button
 
@@ -437,7 +450,7 @@ export default function App() {
 
             ) : activeId === 'documents' && documentBreadcrumb ? (
 
-              <div className="flex min-w-0 items-center gap-1.5">
+              <div className="flex min-w-0 flex-1 items-center gap-1.5">
 
                 <button
 
@@ -492,6 +505,22 @@ export default function App() {
               </h1>
 
             )}
+
+            {metaPinControl ? (
+              <button
+                type="button"
+                onClick={metaPinControl.toggle}
+                className={headerBackBtnCls}
+                title={metaPinControl.pinned ? 'Hide document details' : 'Show document details'}
+                aria-pressed={metaPinControl.pinned}
+              >
+                {metaPinControl.pinned ? (
+                  <PinOff className="size-3" aria-hidden />
+                ) : (
+                  <Pin className="size-3" aria-hidden />
+                )}
+              </button>
+            ) : null}
 
           </div>
 

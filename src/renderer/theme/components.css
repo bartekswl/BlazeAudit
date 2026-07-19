@@ -458,6 +458,17 @@
   background-color: rgb(249 115 22 / 0.12) !important;
 }
 
+tr.ba-row-selected > td {
+  background-color: rgb(249 115 22 / 0.08);
+}
+
+.ba-clipboard-btn--flash {
+  background-color: rgb(249 115 22 / 0.45) !important;
+  border-color: rgb(251 146 60 / 0.8) !important;
+  color: #fff !important;
+  transform: scale(0.96);
+}
+
 [data-theme='light'] .ba-main-header {
   border-bottom-color: var(--ba-chrome-border);
 }
