@@ -55,6 +55,15 @@ function outlineEntryForSection(section: FormSection): { label: string; depth: n
     return { label: 'Individual Device Record', depth: 1 };
   if (only?.kind === 'circuitFaultToleranceTestSheet')
     return { label: 'Circuit Fault Tolerance Test Sheet', depth: 1 };
+  if (only?.kind === 'portableExtinguisherCover')
+    return { label: 'Portable Extinguishers Cover', depth: 1 };
+  if (only?.kind === 'fireExtinguisherTestRecord')
+    return { label: 'Fire Extinguisher Test Record', depth: 1 };
+  if (only?.kind === 'emergencyLightingCover')
+    return { label: 'Emergency Lighting Cover', depth: 1 };
+  if (only?.kind === 'emergencyLightingDeviceLegend') return { label: 'Device Legend', depth: 1 };
+  if (only?.kind === 'emergencyLightingInspectionRecord')
+    return { label: 'Inspection Record', depth: 1 };
 
   const title = section.title?.trim();
   if (title) return { label: title, depth: 0 };

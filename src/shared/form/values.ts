@@ -30,6 +30,17 @@ import { emptyCircuitFaultToleranceTestSheetValue } from './circuitFaultToleranc
 import { emptyLinedNotesValue } from './linedNotes';
 import { emptyUlcSection1Value, normalizeUlcSection1Value } from './ulcSection1';
 import { emptyYesNoSummaryValue } from './yesNoSummary';
+import {
+  emptyPortableExtinguisherCoverValue,
+  normalizePortableExtinguisherCoverValue,
+} from './portableExtinguisherCover';
+import { emptyFireExtinguisherTestRecordValue } from './fireExtinguisherTestRecord';
+import {
+  emptyEmergencyLightingCoverValue,
+  normalizeEmergencyLightingCoverValue,
+} from './emergencyLightingCover';
+import { emptyEmergencyLightingDeviceLegendValue } from './emergencyLightingDeviceLegend';
+import { emptyEmergencyLightingInspectionRecordValue } from './emergencyLightingInspectionRecord';
 
 function emptyTableValue(element: Extract<FormElement, { kind: 'table' }>): TableElementValue {
   const rowCount = Math.max(1, element.minRows ?? element.rowLabels?.length ?? 1);
@@ -109,6 +120,16 @@ export function initialValueForElement(element: FormElement): unknown {
       return emptyIndividualDeviceRecordValue();
     case 'circuitFaultToleranceTestSheet':
       return emptyCircuitFaultToleranceTestSheetValue();
+    case 'portableExtinguisherCover':
+      return emptyPortableExtinguisherCoverValue();
+    case 'fireExtinguisherTestRecord':
+      return emptyFireExtinguisherTestRecordValue();
+    case 'emergencyLightingCover':
+      return emptyEmergencyLightingCoverValue();
+    case 'emergencyLightingDeviceLegend':
+      return emptyEmergencyLightingDeviceLegendValue();
+    case 'emergencyLightingInspectionRecord':
+      return emptyEmergencyLightingInspectionRecordValue();
     default: {
       const _exhaustive: never = element;
       return _exhaustive;
@@ -162,15 +183,28 @@ export function syncFormDocumentInspectionDate(
 
   let nextValues = document.values;
   walkFormElements(document.form, (element) => {
-    if (element.kind !== 'ulcSection1') return;
-    const current = normalizeUlcSection1Value(nextValues[element.id]);
-    if (current.dateOfService === inspectedAt) return;
-    nextValues = setElementValue(nextValues, element.id, {
-      ...current,
-      dateOfService: inspectedAt,
-      // Explicitly preserve — must stay independent of Date of Service.
-      lastServiceDate: current.lastServiceDate,
-    });
+    if (element.kind === 'ulcSection1') {
+      const current = normalizeUlcSection1Value(nextValues[element.id]);
+      if (current.dateOfService === inspectedAt) return;
+      nextValues = setElementValue(nextValues, element.id, {
+        ...current,
+        dateOfService: inspectedAt,
+        // Explicitly preserve — must stay independent of Date of Service.
+        lastServiceDate: current.lastServiceDate,
+      });
+      return;
+    }
+    if (element.kind === 'portableExtinguisherCover') {
+      const current = normalizePortableExtinguisherCoverValue(nextValues[element.id]);
+      if (current.date === inspectedAt) return;
+      nextValues = setElementValue(nextValues, element.id, { ...current, date: inspectedAt });
+      return;
+    }
+    if (element.kind === 'emergencyLightingCover') {
+      const current = normalizeEmergencyLightingCoverValue(nextValues[element.id]);
+      if (current.date === inspectedAt) return;
+      nextValues = setElementValue(nextValues, element.id, { ...current, date: inspectedAt });
+    }
   });
 
   if (nextValues === document.values) return document;
@@ -187,14 +221,29 @@ export function syncFormDocumentProjectNumber(
   let changed = false;
 
   walkFormElements(document.form, (element) => {
-    if (element.kind !== 'ulcSection1') return;
-    const current = normalizeUlcSection1Value(nextValues[element.id]);
-    if (current.projectNumber === next) return;
-    nextValues = setElementValue(nextValues, element.id, {
-      ...current,
-      projectNumber: next,
-    });
-    changed = true;
+    if (element.kind === 'ulcSection1') {
+      const current = normalizeUlcSection1Value(nextValues[element.id]);
+      if (current.projectNumber === next) return;
+      nextValues = setElementValue(nextValues, element.id, {
+        ...current,
+        projectNumber: next,
+      });
+      changed = true;
+      return;
+    }
+    if (element.kind === 'portableExtinguisherCover') {
+      const current = normalizePortableExtinguisherCoverValue(nextValues[element.id]);
+      if (current.jobContactNo === next) return;
+      nextValues = setElementValue(nextValues, element.id, { ...current, jobContactNo: next });
+      changed = true;
+      return;
+    }
+    if (element.kind === 'emergencyLightingCover') {
+      const current = normalizeEmergencyLightingCoverValue(nextValues[element.id]);
+      if (current.jobContactNo === next) return;
+      nextValues = setElementValue(nextValues, element.id, { ...current, jobContactNo: next });
+      changed = true;
+    }
   });
 
   if (!changed) return document;

@@ -221,6 +221,26 @@ Region example (page 1 header):
 - **PDF notes:** Primary export via `buildFormPrintHtml` (SSR + live CSS); panel outer frame 2pt in print overrides; section gap 0.375rem
 - **Reuse notes:** Follow `docs/FORM_ELEMENT_BLUEPRINT.md` for every new composite element
 
+### Portable Extinguishers (`portable-extinguishers`)
+
+- **Code:** EXT-ANNUAL
+- **Title:** Annual Portable Extinguishers Inspection Report
+- **Added:** 2026-07-21
+- **Pages:** 2 — cover (`portableExtinguisherCover`) with client/business bindings + notes; Fire Extinguisher Test Record working grid (`fireExtinguisherTestRecord`)
+- **Bindings used:** `template.code`, `template.title`, `client.name`, `client.addressFormatted`, `business.*`, inspector name seed
+- **PDF notes:** Primary via `buildFormPrintHtml`; `.irc-panel` / `.rrg-panel` in print frame list
+- **Reuse notes:** Shared `reportRecordGrid` + `FormReportRecordGridView` for working tables
+
+### Emergency Lighting (`emergency-lighting`)
+
+- **Code:** EL-ANNUAL
+- **Title:** Emergency Lighting Inspection Report
+- **Added:** 2026-07-21
+- **Pages:** 3 — cover with cert checkboxes + static test notes; comments/recommendations lined notes + Device Legend; Inspection Record grid (crossed-out paper columns omitted)
+- **Bindings used:** same client/business pattern as portable extinguishers
+- **PDF notes:** same panel frame treatment as extinguisher forms
+- **Reuse notes:** Device legend + inspection record use shared report grid
+
 ### Template section template (copy when adding)
 
 ```markdown

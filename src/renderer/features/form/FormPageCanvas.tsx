@@ -75,6 +75,19 @@ function FormPageCanvasInner({
   const isUlc536 =
     /ULC\s*536/i.test(template?.code ?? '') ||
     /ULC\s*536/i.test(context?.template?.code ?? '');
+  const isInspectionReportForm = form.pages.some((p) =>
+    p.sections.some((section) =>
+      section.elements.some(
+        (element) =>
+          element.kind === 'portableExtinguisherCover' ||
+          element.kind === 'fireExtinguisherTestRecord' ||
+          element.kind === 'emergencyLightingCover' ||
+          element.kind === 'emergencyLightingDeviceLegend' ||
+          element.kind === 'emergencyLightingInspectionRecord',
+      ),
+    ),
+  );
+  const useHeaderBranding = isUlc536 || isInspectionReportForm;
   const hasLinedNotes = page.sections.some((section) =>
     section.elements.some(
       (element) => element.kind === 'recommendations' || element.kind === 'testingNotes',
@@ -82,6 +95,14 @@ function FormPageCanvasInner({
   );
   const hasAttendanceLog = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'attendanceLog'),
+  );
+  const hasReportRecordGrid = page.sections.some((section) =>
+    section.elements.some(
+      (element) =>
+        element.kind === 'fireExtinguisherTestRecord' ||
+        element.kind === 'emergencyLightingInspectionRecord' ||
+        element.kind === 'emergencyLightingDeviceLegend',
+    ),
   );
   const hasDocumentation = page.sections.some((section) =>
     section.elements.some((element) => element.kind === 'documentation'),
@@ -163,6 +184,8 @@ function FormPageCanvasInner({
         hasIndividualDeviceRecordPage && 'form-page-sheet--individual-device-record',
         hasCircuitFaultToleranceTestSheetPage &&
           'form-page-sheet--circuit-fault-tolerance-test-sheet',
+        hasReportRecordGrid && 'form-page-sheet--report-record-grid',
+        isInspectionReportForm && 'form-page-sheet--inspection-report',
         fixedPageLayout && 'form-page-sheet--fixed',
         pageExtraControls &&
           pageExtraControls.mode !== 'none' &&
@@ -184,7 +207,7 @@ function FormPageCanvasInner({
         style={fixedPageLayout ? { minHeight: `${bodyPercent}%` } : undefined}
       >
         {useMetaHeader ? (
-          <FormPageMetaHeader context={context} template={template} branded={isUlc536} />
+          <FormPageMetaHeader context={context} template={template} branded={useHeaderBranding} />
         ) : (
           page.regions.length > 0 && (
             <div className="form-page-header">
@@ -221,7 +244,7 @@ function FormPageCanvasInner({
                     </div>
                   );
                 });
-                return isUlc536 ? (
+                return useHeaderBranding ? (
                   <FormPageHeaderBranding context={context} page1>
                     {content}
                   </FormPageHeaderBranding>
@@ -239,6 +262,7 @@ function FormPageCanvasInner({
             isLandscape && 'form-page-content--landscape',
             hasLinedNotes && 'form-page-content--lined-notes',
             hasAttendanceLog && 'form-page-content--attendance-log',
+            hasReportRecordGrid && 'form-page-content--report-record-grid',
             hasDocumentation && 'form-page-content--documentation',
             hasControlUnitTest && 'form-page-content--control-unit-test',
             hasControlUnitRecord && 'form-page-content--control-unit-record',

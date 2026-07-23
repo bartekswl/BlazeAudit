@@ -22,6 +22,8 @@ const INPUT_CLIENT_WIDTH_CLAMP_SELECTOR = [
   '.def-grid',
   '.def-compliance-field',
   '.att-table',
+  '.rrg-table',
+  '.irc-panel',
   '.yns-table-wrap',
   '.doc-table-wrap',
   '.ulc-s1-panel',
