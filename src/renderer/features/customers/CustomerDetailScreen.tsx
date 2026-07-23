@@ -170,7 +170,7 @@ export function CustomerDetailScreen({
           <DetailField label="Contact" value={client.contactName} />
           <DetailField label="Phone" value={client.phone} />
           <DetailField label="Email" value={client.email} />
-          <DetailField label="Address" value={fullAddress} />
+          <DetailField label="Address" value={fullAddress} lines={2} />
           <DetailField label="Owner / manager" value={client.ownerManagerName} />
           <DetailField label="Owner / manager phone" value={client.ownerManagerPhone} />
         </dl>
@@ -364,13 +364,26 @@ export function CustomerDetailScreen({
   );
 }
 
-function DetailField({ label, value }: { label: string; value: string }) {
+function DetailField({
+  label,
+  value,
+  lines = 1,
+}: {
+  label: string;
+  value: string;
+  /** Max visible rows before ellipsis (address uses 2). */
+  lines?: 1 | 2;
+}) {
   const trimmed = value.trim();
   return (
     <div className="min-w-0">
       <dt className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">{label}</dt>
       <dd
-        className={cn('truncate text-xs text-neutral-200', !trimmed && 'text-neutral-600')}
+        className={cn(
+          'text-xs text-neutral-200',
+          lines === 2 ? 'line-clamp-2 break-words whitespace-normal' : 'truncate',
+          !trimmed && 'text-neutral-600',
+        )}
         title={trimmed || undefined}
       >
         {trimmed || '—'}

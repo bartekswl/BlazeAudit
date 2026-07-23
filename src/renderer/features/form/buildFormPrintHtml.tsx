@@ -2619,7 +2619,9 @@ const PRINT_OVERRIDES = `
   .form-print-root .dclft-panel,
   .form-print-root .fdtl-panel,
   .form-print-root .idr-panel,
-  .form-print-root .cfts-panel {
+  .form-print-root .cfts-panel,
+  .form-print-root .irc-panel,
+  .form-print-root .rrg-panel {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }
@@ -2639,8 +2641,57 @@ const PRINT_OVERRIDES = `
   .form-print-root .dclft-panel,
   .form-print-root .fdtl-panel,
   .form-print-root .idr-panel,
-  .form-print-root .cfts-panel {
+  .form-print-root .cfts-panel,
+  .form-print-root .irc-panel,
+  .form-print-root .rrg-panel {
     overflow: hidden !important;
+  }
+
+  .form-print-root .rrg-th {
+    background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%) !important;
+  }
+  .form-print-root .rrg-accent-bar {
+    min-height: 0.45rem !important;
+  }
+  .form-print-root .rrg-panel--fet .rrg-accent-bar {
+    background: #c2410c !important;
+  }
+  .form-print-root .rrg-panel--eld .rrg-accent-bar {
+    background: #1b6b2f !important;
+  }
+  .form-print-root .rrg-panel--elr .rrg-accent-bar {
+    background: #1e3a8a !important;
+  }
+  .form-print-root .rrg-table {
+    height: 100% !important;
+  }
+  .form-print-root .form-page-sheet--report-record-grid .form-page-section:has(.rrg-panel),
+  .form-print-root .form-page-sheet--report-record-grid .form-page-section:has(.rrg-panel) > div,
+  .form-print-root .form-page-sheet--report-record-grid .form-page-section:has(.rrg-panel) .form-element-frame--flush,
+  .form-print-root .form-page-sheet--report-record-grid .rrg-panel {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+  .form-print-root .form-page-sheet--inspection-report .form-page-header--meta {
+    margin-bottom: 0.85rem !important;
+  }
+  .form-print-root .rrg-td {
+    height: 1% !important;
+  }
+  .form-print-root .irc-notes--green .irc-notes-title {
+    background: #1b6b2f !important;
+    color: #fff !important;
+  }
+  .form-print-root .irc-notes--blue .irc-notes-title {
+    background: #1e3a8a !important;
+    color: #fff !important;
+  }
+  .form-print-root .irc-cert-banner {
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;
+    color: #fff !important;
+  }
+  .form-print-root .irc-label {
+    color: #334155 !important;
   }
 
   .form-print-root .def-grid {

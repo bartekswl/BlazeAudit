@@ -15,10 +15,12 @@ or run git tag commands manually unless the script fails.
 From the repo root, after your code changes are saved:
 
 ```powershell
-npm run release:update -- "Short note about what changed"
+npm run release:update
 ```
 
-The note is optional but helps the commit message.
+Do **not** auto-add an update message. The GitHub Release body stays empty so the
+in-app Update tab shows no notes. If you want a message shown there, add it
+**manually** on the GitHub Release after publish (or ask for that explicitly).
 
 **What the script does automatically:**
 
@@ -48,8 +50,8 @@ The note is optional but helps the commit message.
 | Command | Bumps |
 | --- | --- |
 | `npm run release:update` | patch (`0.1.1` → `0.1.2`) |
-| `npm run release:update -- --minor "Feature X"` | minor (`0.1.1` → `0.2.0`) |
-| `npm run release:update -- --major "Breaking Y"` | major (`0.1.1` → `1.0.0`) |
+| `npm run release:update -- --minor` | minor (`0.1.1` → `0.2.0`) |
+| `npm run release:update -- --major` | major (`0.1.1` → `1.0.0`) |
 
 ---
 
@@ -60,11 +62,12 @@ When shipping an update for the demo tester:
 1. Ensure code changes are complete and the working tree reflects what should ship.
 2. Run from repo root:
    ```powershell
-   npm run release:update -- "<brief summary of changes>"
+   npm run release:update
    ```
 3. Report the new version and tag URL.
 4. Wait ~3–4 minutes, then the tester can use **Update** in the demo app.
-5. Do **not** run `dist:demo` unless bundled seed data changed (see [`DEMO_UPDATE.md`](DEMO_UPDATE.md)).
+5. Optional: if you want in-app update notes, edit the GitHub Release body yourself.
+6. Do **not** run `dist:demo` unless bundled seed data changed (see [`DEMO_UPDATE.md`](DEMO_UPDATE.md)).
 
 Do **not** bump `package.json` by hand or create tags manually unless the script errors.
 

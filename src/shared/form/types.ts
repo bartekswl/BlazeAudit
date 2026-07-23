@@ -146,6 +146,26 @@ export type FormElement =
   | {
       kind: 'circuitFaultToleranceTestSheet';
       id: string;
+    }
+  | {
+      kind: 'portableExtinguisherCover';
+      id: string;
+    }
+  | {
+      kind: 'fireExtinguisherTestRecord';
+      id: string;
+    }
+  | {
+      kind: 'emergencyLightingCover';
+      id: string;
+    }
+  | {
+      kind: 'emergencyLightingDeviceLegend';
+      id: string;
+    }
+  | {
+      kind: 'emergencyLightingInspectionRecord';
+      id: string;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';

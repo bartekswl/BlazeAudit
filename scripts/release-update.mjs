@@ -4,8 +4,11 @@
  *
  * Usage:
  *   npm run release:update
- *   npm run release:update -- "Sidebar color tweak"
- *   node scripts/release-update.mjs --minor "New feature"
+ *   npm run release:update -- --minor
+ *   npm run release:update -- --major
+ *
+ * Do not pass a changelog string — GitHub Release body stays empty unless you
+ * add notes manually on the release (shown in the in-app Update tab only then).
  */
 
 import { execSync } from 'node:child_process';
@@ -26,14 +29,18 @@ function runOut(cmd) {
 
 function parseArgs(argv) {
   let bump = 'patch';
-  const notes = [];
   for (const arg of argv) {
     if (arg === '--minor') bump = 'minor';
     else if (arg === '--major') bump = 'major';
     else if (arg === '--patch') bump = 'patch';
-    else if (!arg.startsWith('-')) notes.push(arg);
+    else if (!arg.startsWith('-')) {
+      console.warn(
+        `release-update: ignoring "${arg}" — do not auto-add update notes. ` +
+          'Add a message manually on the GitHub Release if you want one shown in-app.',
+      );
+    }
   }
-  return { bump, notes: notes.join(' ').trim() };
+  return { bump };
 }
 
 function bumpSemver(version, kind) {
@@ -76,7 +83,7 @@ function tagExists(tag) {
   }
 }
 
-const { bump, notes } = parseArgs(process.argv.slice(2));
+const { bump } = parseArgs(process.argv.slice(2));
 
 try {
   const branch = runOut('git rev-parse --abbrev-ref HEAD');
@@ -106,9 +113,7 @@ try {
   }
 
   const stillDirty = runOut('git status --porcelain').length > 0;
-  const commitMsg = notes
-    ? `Release ${tag}: ${notes}`
-    : `Release ${tag}.`;
+  const commitMsg = `Release ${tag}.`;
 
   if (stillDirty) {
     const msgFile = path.join(tmpdir(), `blazeaudit-release-${Date.now()}.txt`);
@@ -130,7 +135,8 @@ try {
   console.log(`  Tag: ${tag}`);
   console.log('  GitHub Actions will build and publish in ~3–4 minutes.');
   console.log(`  Release: https://github.com/bartekswl/BlazeAudit/releases/tag/${tag}`);
-  console.log('\nTester: Update tab → Check for updates → Update → Restart & install.\n');
+  console.log('  Update notes: none (add manually on the GitHub Release if wanted).\n');
+  console.log('Tester: Update tab → Check for updates → Update → Restart & install.\n');
 
   try {
     const runs = runOut('gh run list --workflow=release.yml --limit 1 --json url,status -q ".[0]"');

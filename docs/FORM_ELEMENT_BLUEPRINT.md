@@ -56,6 +56,8 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `fieldDeviceTestingNotes` — 23.1.1 Testing Notes static numbered list (`.fdtn-*`)
 - `individualDeviceRecord` — 23.2 Individual Device Record landscape grid (`.idr-*`)
 - `circuitFaultToleranceTestSheet` — 23.3 Circuit Fault Tolerance Test Sheet landscape grid (`.cfts-*`)
+- `portableExtinguisherCover` / `fireExtinguisherTestRecord` — portable extinguisher cover + test record (`.irc-*` / `.rrg-*`)
+- `emergencyLightingCover` / `emergencyLightingDeviceLegend` / `emergencyLightingInspectionRecord` — emergency lighting pages (`.irc-*` / `.rrg-*`)
 
 ---
 

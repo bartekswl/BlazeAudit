@@ -46,12 +46,13 @@ the seed DB), not for normal UI/code fixes.
 ### Automated (preferred)
 
 ```powershell
-npm run release:update -- "What you changed"
+npm run release:update
 ```
 
 See **[`UPDATE_RELEASE_BLUEPRINT.md`](UPDATE_RELEASE_BLUEPRINT.md)** — one command bumps
 version, commits, tags, pushes, and triggers GitHub Actions. Tester can **Update** ~3–4
-minutes later.
+minutes later. Do not auto-add release notes; add a message on the GitHub Release only if
+you want it shown in the Update tab.
 
 ### Manual (only if the script fails)
 

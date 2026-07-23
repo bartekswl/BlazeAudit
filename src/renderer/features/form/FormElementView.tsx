@@ -32,6 +32,11 @@ import { FormDeficienciesView } from './FormDeficienciesView';
 import { FormLinedNotesView } from './FormLinedNotesView';
 import { FormUlcSection1View } from './FormUlcSection1View';
 import { FormYesNoSummaryView } from './FormYesNoSummaryView';
+import { FormPortableExtinguisherCoverView } from './FormPortableExtinguisherCoverView';
+import { FormFireExtinguisherTestRecordView } from './FormFireExtinguisherTestRecordView';
+import { FormEmergencyLightingCoverView } from './FormEmergencyLightingCoverView';
+import { FormEmergencyLightingDeviceLegendView } from './FormEmergencyLightingDeviceLegendView';
+import { FormEmergencyLightingInspectionRecordView } from './FormEmergencyLightingInspectionRecordView';
 
 const inputCls = 'ba-input !px-2 !py-1.5 !text-xs';
 
@@ -95,7 +100,12 @@ function FormElementViewInner({
     element.kind === 'fieldDeviceTestingLegend' ||
     element.kind === 'fieldDeviceTestingNotes' ||
     element.kind === 'individualDeviceRecord' ||
-    element.kind === 'circuitFaultToleranceTestSheet';
+    element.kind === 'circuitFaultToleranceTestSheet' ||
+    element.kind === 'portableExtinguisherCover' ||
+    element.kind === 'fireExtinguisherTestRecord' ||
+    element.kind === 'emergencyLightingCover' ||
+    element.kind === 'emergencyLightingDeviceLegend' ||
+    element.kind === 'emergencyLightingInspectionRecord';
 
   return (
     <div
@@ -537,6 +547,48 @@ function FormElementBody({
     case 'circuitFaultToleranceTestSheet':
       return (
         <FormCircuitFaultToleranceTestSheetView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'portableExtinguisherCover':
+      return (
+        <FormPortableExtinguisherCoverView
+          value={value}
+          context={context ?? null}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'fireExtinguisherTestRecord':
+      return (
+        <FormFireExtinguisherTestRecordView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'emergencyLightingCover':
+      return (
+        <FormEmergencyLightingCoverView
+          value={value}
+          context={context ?? null}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'emergencyLightingDeviceLegend':
+      return (
+        <FormEmergencyLightingDeviceLegendView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'emergencyLightingInspectionRecord':
+      return (
+        <FormEmergencyLightingInspectionRecordView
           value={value}
           readOnly={readOnly}
           onChange={onChange}
