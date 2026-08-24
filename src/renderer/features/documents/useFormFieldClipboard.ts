@@ -6,7 +6,10 @@ const ROW_SELECTED_CLASS = 'ba-row-selected';
 export const CLIPBOARD_TOOLBAR_ATTR = 'data-ba-clipboard-toolbar';
 
 const ROW_CLIP_PREFIX = 'BA_ROW';
+const ROWS_CLIP_PREFIX = 'BA_ROWS';
 const FIELDS_CLIP_PREFIX = 'BA_FIELDS';
+
+export type FormFieldSelectMode = 'off' | 'cell' | 'line';
 
 function isTextEditable(
   el: Element,
@@ -89,7 +92,6 @@ function setFieldText(el: HTMLElement, text: string): void {
   if (isChoiceButton(el)) {
     const wanted = normalizeChoiceToken(text);
     if (wanted === null && text.trim() === '') {
-      // Clear: cycle until empty (max 4).
       for (let i = 0; i < 4; i++) {
         if (readChoiceButton(el) === '') return;
         el.click();
@@ -172,25 +174,81 @@ function rowOf(el: HTMLElement): HTMLTableRowElement | null {
   return el.closest('tr');
 }
 
+function dataRowsInSection(tr: HTMLTableRowElement): HTMLTableRowElement[] {
+  const section = tr.parentElement;
+  if (!section) return [tr];
+  return [...section.children].filter(
+    (node): node is HTMLTableRowElement =>
+      node instanceof HTMLTableRowElement && fieldsInRow(node).length > 0,
+  );
+}
+
+function orderedUniqueRows(fields: HTMLElement[]): HTMLTableRowElement[] {
+  const seen = new Set<HTMLTableRowElement>();
+  const rows: HTMLTableRowElement[] = [];
+  for (const el of fields) {
+    const tr = rowOf(el);
+    if (!tr || seen.has(tr)) continue;
+    seen.add(tr);
+    rows.push(tr);
+  }
+  rows.sort((a, b) => {
+    const pos = a.compareDocumentPosition(b);
+    if (pos & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+    if (pos & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+    return 0;
+  });
+  return rows;
+}
+
 function isFullRowSelection(fields: HTMLElement[]): boolean {
   if (fields.length === 0) return false;
-  const tr = rowOf(fields[0]);
-  if (!tr) return false;
-  const rowFields = fieldsInRow(tr);
-  if (rowFields.length === 0 || rowFields.length !== fields.length) return false;
-  return rowFields.every((f) => fields.includes(f));
+  const rows = orderedUniqueRows(fields);
+  if (rows.length === 0) return false;
+  return rows.every((tr) => {
+    const rowFields = fieldsInRow(tr);
+    return rowFields.length > 0 && rowFields.every((f) => fields.includes(f));
+  });
+}
+
+function syncRowHighlights(fields: HTMLElement[]): void {
+  const rows = orderedUniqueRows(fields);
+  for (const tr of rows) {
+    const rowFields = fieldsInRow(tr);
+    if (rowFields.length > 0 && rowFields.every((f) => fields.includes(f))) {
+      tr.classList.add(ROW_SELECTED_CLASS);
+    } else {
+      tr.classList.remove(ROW_SELECTED_CLASS);
+    }
+  }
 }
 
 function encodeRowClipboard(fields: HTMLElement[]): string {
   return [ROW_CLIP_PREFIX, ...fields.map((el) => fieldText(el).replace(/\t/g, ' '))].join('\t');
 }
 
+function encodeRowsClipboard(rows: HTMLTableRowElement[]): string {
+  const lines = rows.map((tr) =>
+    fieldsInRow(tr)
+      .map((el) => fieldText(el).replace(/\t/g, ' '))
+      .join('\t'),
+  );
+  return `${ROWS_CLIP_PREFIX}\n${lines.join('\n')}`;
+}
+
 function encodeFieldsClipboard(fields: HTMLElement[]): string {
   return [FIELDS_CLIP_PREFIX, ...fields.map((el) => fieldText(el).replace(/\t/g, ' '))].join('\t');
 }
 
-function parseClipboardPayload(raw: string): { kind: 'row' | 'fields' | 'plain'; values: string[] } {
+function parseClipboardPayload(
+  raw: string,
+): { kind: 'row' | 'rows' | 'fields' | 'plain'; values: string[]; rows?: string[][] } {
   const text = raw.replace(/\r\n/g, '\n').trimEnd();
+  if (text.startsWith(`${ROWS_CLIP_PREFIX}\n`) || text === ROWS_CLIP_PREFIX) {
+    const body = text.slice(ROWS_CLIP_PREFIX.length).replace(/^\n/, '');
+    const rows = body === '' ? [] : body.split('\n').map((line) => line.split('\t'));
+    return { kind: 'rows', values: rows[0] ?? [], rows };
+  }
   if (text.startsWith(`${ROW_CLIP_PREFIX}\t`) || text === ROW_CLIP_PREFIX) {
     const values = text.split('\t').slice(1);
     return { kind: 'row', values };
@@ -199,15 +257,59 @@ function parseClipboardPayload(raw: string): { kind: 'row' | 'fields' | 'plain';
     const values = text.split('\t').slice(1);
     return { kind: 'fields', values };
   }
-  // Tab-separated plain row (e.g. from Excel) — treat as row when ≥2 columns.
   if (text.includes('\t') && !text.includes('\n')) {
     return { kind: 'row', values: text.split('\t') };
+  }
+  if (text.includes('\t') && text.includes('\n')) {
+    const rows = text.split('\n').map((line) => line.split('\t'));
+    return { kind: 'rows', values: rows[0] ?? [], rows };
   }
   return { kind: 'plain', values: [toSingleLine(text)] };
 }
 
+/** Clear selected rows in place — do not pull content from below. */
+function clearRowsInPlace(rows: HTMLTableRowElement[]): void {
+  for (const tr of rows) {
+    for (const el of fieldsInRow(tr)) setFieldText(el, '');
+  }
+}
+
+/**
+ * Remove selected rows' content and shift remaining sibling rows up so gaps close.
+ * Keeps the same number of data rows (empties trail at the bottom).
+ */
+function collapseRowsAfterCut(rows: HTMLTableRowElement[]): void {
+  const bySection = new Map<Element, HTMLTableRowElement[]>();
+  for (const tr of rows) {
+    const section = tr.parentElement;
+    if (!section) continue;
+    const list = bySection.get(section) ?? [];
+    list.push(tr);
+    bySection.set(section, list);
+  }
+
+  for (const [, cutRows] of bySection) {
+    const sample = cutRows[0];
+    if (!sample) continue;
+    const allRows = dataRowsInSection(sample);
+    if (allRows.length === 0) continue;
+    const cutSet = new Set(cutRows);
+    const keptValues = allRows
+      .filter((tr) => !cutSet.has(tr))
+      .map((tr) => fieldsInRow(tr).map((el) => fieldText(el)));
+
+    allRows.forEach((tr, index) => {
+      const targets = fieldsInRow(tr);
+      const values = keptValues[index] ?? [];
+      targets.forEach((el, col) => {
+        setFieldText(el, values[col] ?? '');
+      });
+    });
+  }
+}
+
 export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
-  const [selectMode, setSelectMode] = useState(false);
+  const [selectMode, setSelectMode] = useState<FormFieldSelectMode>('off');
   const [actionFlash, setActionFlash] = useState<'copy' | 'paste' | 'cut' | null>(null);
   const selectedRef = useRef<Set<HTMLElement>>(new Set());
   const lastFocusedRef = useRef<HTMLElement | null>(null);
@@ -253,9 +355,7 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
         el.classList.add(SELECTED_CLASS);
         selectAllCellContent(el);
       }
-      if (fields.length > 0 && isFullRowSelection([...selectedRef.current])) {
-        rowOf(fields[0])?.classList.add(ROW_SELECTED_CLASS);
-      }
+      syncRowHighlights([...selectedRef.current]);
       madeSelectionRef.current = true;
       sync();
     },
@@ -277,13 +377,12 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
         return;
       }
       markSelected(fieldsInRow(tr), additive);
-      tr.classList.add(ROW_SELECTED_CLASS);
     },
     [addToSelection, markSelected],
   );
 
   const endSelectMode = useCallback(() => {
-    setSelectMode(false);
+    setSelectMode('off');
     dragRef.current = false;
     sync();
   }, [sync]);
@@ -303,13 +402,16 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     flash('copy');
     const fields = orderedSelected();
     if (fields.length > 0) {
-      const payload = isFullRowSelection(fields)
-        ? encodeRowClipboard(fields)
-        : fields.length > 1
-          ? encodeFieldsClipboard(fields)
-          : fieldText(fields[0]);
+      const rows = orderedUniqueRows(fields);
+      const payload =
+        isFullRowSelection(fields) && rows.length > 1
+          ? encodeRowsClipboard(rows)
+          : isFullRowSelection(fields)
+            ? encodeRowClipboard(fieldsInRow(rows[0]))
+            : fields.length > 1
+              ? encodeFieldsClipboard(fields)
+              : fieldText(fields[0]);
       await navigator.clipboard.writeText(payload);
-      // Keep orange highlight — cleared only by clicking the document.
       for (const el of fields) selectAllCellContent(el);
       return;
     }
@@ -323,14 +425,25 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     flash('cut');
     const fields = orderedSelected();
     if (fields.length > 0) {
-      const payload = isFullRowSelection(fields)
-        ? encodeRowClipboard(fields)
-        : fields.length > 1
-          ? encodeFieldsClipboard(fields)
-          : fieldText(fields[0]);
+      const rows = orderedUniqueRows(fields);
+      const fullRows = isFullRowSelection(fields);
+      const payload =
+        fullRows && rows.length > 1
+          ? encodeRowsClipboard(rows)
+          : fullRows
+            ? encodeRowClipboard(fieldsInRow(rows[0]))
+            : fields.length > 1
+              ? encodeFieldsClipboard(fields)
+              : fieldText(fields[0]);
       await navigator.clipboard.writeText(payload);
-      for (const el of fields) setFieldText(el, '');
-      // Keep highlights on emptied cells until user clicks the document.
+      if (fullRows) {
+        // Cut whole line(s): pull content underneath up to close the gap.
+        collapseRowsAfterCut(rows);
+      } else {
+        for (const el of fields) setFieldText(el, '');
+      }
+      clearHighlights(selectedRef.current);
+      sync();
       return;
     }
     const el = targetEditable();
@@ -339,7 +452,20 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     const text = fieldText(el);
     await navigator.clipboard.writeText(text);
     setFieldText(el, '');
-  }, [orderedSelected, flash, targetEditable]);
+  }, [orderedSelected, flash, targetEditable, sync]);
+
+  /** Backspace/Delete on marked line(s): clear only — leave rows below in place. */
+  const clearSelectedInPlace = useCallback(() => {
+    const fields = orderedSelected();
+    if (fields.length === 0) return;
+    if (isFullRowSelection(fields)) {
+      clearRowsInPlace(orderedUniqueRows(fields));
+    } else {
+      for (const el of fields) setFieldText(el, '');
+    }
+    clearHighlights(selectedRef.current);
+    sync();
+  }, [orderedSelected, sync]);
 
   const pasteSelected = useCallback(async () => {
     flash('paste');
@@ -351,6 +477,28 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     }
     const parsed = parseClipboardPayload(raw);
     const fields = orderedSelected();
+
+    if (parsed.kind === 'rows' && parsed.rows && parsed.rows.length > 0) {
+      const anchor = fields[0] ?? targetEditable();
+      if (!anchor) return;
+      const startTr = rowOf(anchor);
+      if (!startTr) return;
+      const sectionRows = dataRowsInSection(startTr);
+      const startIndex = sectionRows.indexOf(startTr);
+      if (startIndex < 0) return;
+      parsed.rows.forEach((values, offset) => {
+        const tr = sectionRows[startIndex + offset];
+        if (!tr) return;
+        fieldsInRow(tr).forEach((el, i) => {
+          setFieldText(el, values[i] ?? '');
+        });
+      });
+      const pasted = sectionRows
+        .slice(startIndex, startIndex + parsed.rows.length)
+        .flatMap((tr) => fieldsInRow(tr));
+      if (pasted.length > 0) markSelected(pasted, false);
+      return;
+    }
 
     if (parsed.kind === 'row') {
       const anchor = fields[0] ?? targetEditable();
@@ -385,7 +533,6 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
       return;
     }
 
-    // Plain text → replace full cell(s).
     const value = parsed.values[0] ?? '';
     if (fields.length > 0) {
       for (const el of fields) setFieldText(el, value);
@@ -395,12 +542,13 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     if (el) setFieldText(el, value);
   }, [orderedSelected, flash, targetEditable, markSelected]);
 
-  // Select-mode picking.
+  // Select-mode picking (cell or whole-line).
   useEffect(() => {
-    if (!selectMode) return;
+    if (selectMode === 'off') return;
 
     const root = rootRef.current;
     if (!root) return;
+    const lineMode = selectMode === 'line';
 
     madeSelectionRef.current = false;
 
@@ -409,12 +557,12 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
       if (!field) return;
       event.preventDefault();
       dragRef.current = true;
-      // Alt+click = whole table row (columns stay aligned on paste).
-      if (event.altKey) {
-        selectEntireRow(field, event.ctrlKey || event.metaKey);
+      const additive = event.ctrlKey || event.metaKey;
+      if (lineMode || event.altKey) {
+        selectEntireRow(field, additive);
         return;
       }
-      addToSelection(field, event.ctrlKey || event.metaKey);
+      addToSelection(field, additive);
     };
 
     const onDblClick = (event: MouseEvent) => {
@@ -431,7 +579,16 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
         return;
       }
       const field = resolveField(event.target);
-      if (!field || selectedRef.current.has(field)) return;
+      if (!field) return;
+      if (lineMode) {
+        const tr = rowOf(field);
+        if (!tr) return;
+        const rowFields = fieldsInRow(tr);
+        if (rowFields.every((f) => selectedRef.current.has(f))) return;
+        markSelected(rowFields, true);
+        return;
+      }
+      if (selectedRef.current.has(field)) return;
       selectedRef.current.add(field);
       field.classList.add(SELECTED_CLASS);
       selectAllCellContent(field);
@@ -442,7 +599,6 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     const onPointerUp = () => {
       dragRef.current = false;
       if (madeSelectionRef.current && selectedRef.current.size > 0) {
-        // Exit select mode (normal cursor / button off) but keep orange highlights.
         endSelectMode();
       }
     };
@@ -459,11 +615,11 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
       window.removeEventListener('pointerup', onPointerUp);
       dragRef.current = false;
     };
-  }, [selectMode, rootRef, addToSelection, selectEntireRow, sync, endSelectMode]);
+  }, [selectMode, rootRef, addToSelection, selectEntireRow, markSelected, sync, endSelectMode]);
 
   // Any click on the document (outside the clipboard toolbar) clears highlights.
   useEffect(() => {
-    if (selectMode) return;
+    if (selectMode !== 'off') return;
 
     const onPointerDown = (event: PointerEvent) => {
       if (selectedRef.current.size === 0) return;
@@ -480,12 +636,23 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && (selectMode || selectedRef.current.size > 0)) {
+      if (event.key === 'Escape' && (selectMode !== 'off' || selectedRef.current.size > 0)) {
         clearHighlights(selectedRef.current);
-        setSelectMode(false);
+        setSelectMode('off');
         sync();
         return;
       }
+
+      if (
+        (event.key === 'Backspace' || event.key === 'Delete') &&
+        selectedRef.current.size > 0 &&
+        !(event.ctrlKey || event.metaKey || event.altKey)
+      ) {
+        event.preventDefault();
+        clearSelectedInPlace();
+        return;
+      }
+
       if (!(event.ctrlKey || event.metaKey)) return;
       const key = event.key.toLowerCase();
       if (key === 'c' && selectedRef.current.size > 0) {
@@ -501,7 +668,7 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [selectMode, copySelected, cutSelected, pasteSelected, sync]);
+  }, [selectMode, copySelected, cutSelected, pasteSelected, clearSelectedInPlace, sync]);
 
   useEffect(
     () => () => {
@@ -512,22 +679,30 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
 
   const toggleSelectMode = useCallback(() => {
     setSelectMode((prev) => {
-      if (prev) {
-        clearHighlights(selectedRef.current);
-        return false;
-      }
       clearHighlights(selectedRef.current);
       madeSelectionRef.current = false;
-      return true;
+      return prev === 'cell' ? 'off' : 'cell';
+    });
+    sync();
+  }, [sync]);
+
+  const toggleLineSelectMode = useCallback(() => {
+    setSelectMode((prev) => {
+      clearHighlights(selectedRef.current);
+      madeSelectionRef.current = false;
+      return prev === 'line' ? 'off' : 'line';
     });
     sync();
   }, [sync]);
 
   return {
     selectMode,
+    cellSelectMode: selectMode === 'cell',
+    lineSelectMode: selectMode === 'line',
     selectedCount: selectedRef.current.size,
     actionFlash,
     toggleSelectMode,
+    toggleLineSelectMode,
     copySelected,
     cutSelected,
     pasteSelected,
