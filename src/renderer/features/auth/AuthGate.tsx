@@ -127,7 +127,17 @@ export function AuthGate() {
           setAppVisible(false);
         }
       } finally {
-        if (!cancelled) await finishBootReveal();
+        // Never leave the boot "Loading…" overlay up — theme/settings failures
+        // after a database restore previously could reject here forever.
+        if (!cancelled) {
+          try {
+            await finishBootReveal();
+          } catch (revealErr) {
+            console.error('[AuthGate] boot reveal failed', revealErr);
+            releaseBootTheme();
+            setBootOverlay('hidden');
+          }
+        }
       }
     })();
 

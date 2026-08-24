@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import {
   Database,
   Download,
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react';
 import type { DatabaseBackupInspectResult } from '../../../shared/databaseBackup';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { LoadingOverlay } from '../../components/LoadingOverlay';
 
 function formatStamp(iso: string): string {
   const ms = Date.parse(iso);
@@ -205,14 +207,22 @@ export function DatabaseScreen({
 
   const confirmImportBackup = async () => {
     if (!backupPreview) return;
-    setApplyingBackup(true);
-    setError(null);
-    try {
-      const result = await window.blazeaudit.database.applyBackup(backupPreview.filePath);
+    const filePath = backupPreview.filePath;
+    // Paint the restoring overlay before the (blocking) main-process import.
+    flushSync(() => {
       setBackupPreview(null);
+      setApplyingBackup(true);
+      setError(null);
+      setMessage(null);
+    });
+    try {
+      const result = await window.blazeaudit.database.applyBackup(filePath);
       if (result.applied) {
-        setMessage('Database restored. Reloading…');
-        window.setTimeout(() => window.location.reload(), 400);
+        flushSync(() => {
+          setMessage('Database restored. Reloading…');
+        });
+        window.setTimeout(() => window.location.reload(), 250);
+        return;
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Database import failed.');
@@ -225,6 +235,7 @@ export function DatabaseScreen({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      {applyingBackup ? <LoadingOverlay label="Restoring database…" /> : null}
       <p className="text-sm text-neutral-400">
         Import, export, and portability tools for your local BlazeAudit data.
       </p>
@@ -243,7 +254,7 @@ export function DatabaseScreen({
       <Section
         icon={HardDriveDownload}
         title="Full database"
-        description="Export or restore the entire encrypted local database — clients, templates, inspections, preferences, company logo, and ID photos — as one .blazebak file. Import only works for the same account email."
+        description="Export or restore the entire encrypted local database — clients, templates, inspections, preferences, company logo, and ID photos — as one .blazebak file. Import works on any PC as long as you are logged in with the same account email."
       >
         <ActionButton
           icon={FolderOpen}

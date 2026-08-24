@@ -13,7 +13,10 @@ import { LATEST_SCHEMA_VERSION } from '../db/migrations';
 import { accountDir } from '../db/paths';
 import { buildBackupFile } from './format';
 import { readFileEntry } from './pack';
+import { buildSettingsPayloadEntry } from './settingsPayload';
 import { computeLocalDataStamp, listBackupSourceFiles, normalizeAccountEmail } from './stamp';
+
+const SKIP_RAW_SETTINGS = new Set(['settings.bin', 'settings.json']);
 
 function checkpointDatabase(): void {
   try {
@@ -63,8 +66,11 @@ export async function exportDatabaseBackup(): Promise<DatabaseBackupExportResult
 
     for (const file of listBackupSourceFiles(accountDir())) {
       if (file.relativePath === 'blazeaudit.db') continue;
+      // Prefer logical settings payload — raw settings.bin is machine-sealed.
+      if (SKIP_RAW_SETTINGS.has(file.relativePath)) continue;
       entries.push(readFileEntry(file.absolutePath, file.relativePath));
     }
+    entries.push(buildSettingsPayloadEntry());
 
     const file = buildBackupFile({
       header: {

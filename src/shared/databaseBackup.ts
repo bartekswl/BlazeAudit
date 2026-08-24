@@ -21,6 +21,11 @@ export type DatabaseBackupHeader = {
   /** Max mtime of packed data at export time (ISO). */
   dataStamp: string;
   appVersion: string;
+  /**
+   * Key X sealed to the account email so another machine unlocked under the
+   * same email can decrypt the body and re-key the DB to its local key X.
+   */
+  keyXRecovery?: string;
 };
 
 export type DatabaseBackupInspectResult =
