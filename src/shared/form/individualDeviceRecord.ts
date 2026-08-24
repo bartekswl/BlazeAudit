@@ -53,8 +53,8 @@ export const INDIVIDUAL_DEVICE_RECORD_COLUMNS: readonly IndividualDeviceRecordCo
   },
   {
     key: 'requiresService',
-    title: 'Requires Service, Repairs, Cleaning or Missing',
-    widthPercent: 7,
+    title: 'Requires Service',
+    widthPercent: 4,
     orientation: 'vertical',
     kind: 'choice',
   },
@@ -68,7 +68,7 @@ export const INDIVIDUAL_DEVICE_RECORD_COLUMNS: readonly IndividualDeviceRecordCo
   {
     key: 'fireZone',
     title: 'Annunciated FIRE ZONE',
-    widthPercent: 6,
+    widthPercent: 3,
     orientation: 'vertical',
     kind: 'text',
   },
@@ -89,20 +89,20 @@ export const INDIVIDUAL_DEVICE_RECORD_COLUMNS: readonly IndividualDeviceRecordCo
   {
     key: 'alarmConfirmed',
     title: 'Alarm /\nActivation\nConfirmed',
-    widthPercent: 4,
+    widthPercent: 5,
     orientation: 'vertical',
     kind: 'choice',
   },
   {
     key: 'annunciatorIndication',
-    title: 'Annunciator Indication',
-    widthPercent: 3,
+    title: 'Annunciator\nIndication',
+    widthPercent: 4,
     orientation: 'vertical',
     kind: 'choice',
   },
   {
     key: 'supervisedCircuitTrouble',
-    title: 'Supervised Circuit Trouble Signal',
+    title: 'Supervised Circuit\nTrouble Signal',
     widthPercent: 5,
     orientation: 'vertical',
     kind: 'choice',
@@ -110,7 +110,7 @@ export const INDIVIDUAL_DEVICE_RECORD_COLUMNS: readonly IndividualDeviceRecordCo
   {
     key: 'comments',
     title: 'Comments',
-    widthPercent: 13,
+    widthPercent: 17,
     orientation: 'horizontal',
     kind: 'text',
   },

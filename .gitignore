@@ -76,6 +76,7 @@ CANULC-S536.pdf
 # One-off local seed / OCR helpers that may contain client PII — never push
 scripts/seed-adelaide.mjs
 scripts/seed-pps-reports.mjs
+scripts/seed-streetsville.mjs
 scripts/write-adelaide-gaps-pdf.mjs
 data/parse-adelaide-devices.py
 data/extract-pps-pdfs.py

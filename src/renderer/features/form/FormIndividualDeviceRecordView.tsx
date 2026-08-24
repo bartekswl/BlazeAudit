@@ -155,7 +155,14 @@ export function FormIndividualDeviceRecordView({
                   )}
                   style={{ width: `${col.widthPercent}%` }}
                 >
-                  <span className="idr-th-text">{col.title}</span>
+                  <span className="idr-th-text">
+                    {col.title.split('\n').map((line, lineIndex) => (
+                      <span key={`${col.key}-${lineIndex}`}>
+                        {lineIndex > 0 ? <br /> : null}
+                        {line}
+                      </span>
+                    ))}
+                  </span>
                 </th>
               ))}
             </tr>

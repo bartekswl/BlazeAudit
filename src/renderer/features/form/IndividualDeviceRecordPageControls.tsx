@@ -4,7 +4,7 @@ import type { FormExtraPageControls as ControlsMode } from '../../../shared/form
 import { cn } from '../../lib/cn';
 
 const controlBtnCls =
-  'inline-flex size-9 items-center justify-center rounded-md border border-[var(--ba-panel-border)] bg-[var(--ba-panel-bg)] text-[var(--ba-text-secondary)] shadow-sm transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flame-500/60';
+  'idr-page-controls-btn inline-flex size-12 items-center justify-center rounded-lg border border-sky-700/50 bg-sky-700/30 text-sky-50 shadow-md transition-colors hover:bg-sky-700/45 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70';
 
 function ControlTooltip({ text, children }: { text: string; children: ReactNode }) {
   return (
@@ -40,22 +40,22 @@ export function FormExtraPageControlsBar({
         <ControlTooltip text={removeTooltip}>
           <button
             type="button"
-            className={cn(controlBtnCls, 'idr-page-controls-btn idr-page-controls-btn--remove')}
+            className={cn(controlBtnCls, 'idr-page-controls-btn--remove')}
             onClick={onRemove}
             aria-label={removeTooltip}
           >
-            <Minus className="size-4" strokeWidth={2.5} />
+            <Minus className="size-6" strokeWidth={2.75} />
           </button>
         </ControlTooltip>
       ) : null}
       <ControlTooltip text={addTooltip}>
         <button
           type="button"
-          className={cn(controlBtnCls, 'idr-page-controls-btn idr-page-controls-btn--add')}
+          className={cn(controlBtnCls, 'idr-page-controls-btn--add')}
           onClick={onAdd}
           aria-label={addTooltip}
         >
-          <Plus className="size-4" strokeWidth={2.5} />
+          <Plus className="size-6" strokeWidth={2.75} />
         </button>
       </ControlTooltip>
     </div>
