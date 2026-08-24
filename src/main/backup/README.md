@@ -5,11 +5,15 @@ Isolated feature for full-account export/import (`.blazebak`).
 ## Contents of one file
 
 - Encrypted SQLCipher database (`blazeaudit.db`)
-- Account preferences (`settings.bin`)
+- Account preferences as logical JSON (`settings.payload.json`), re-sealed
+  locally on import
 - Assets: company logo + name-badge / ID photos (`assets/**`)
+- Header field `keyXRecovery` — key X sealed to the account email so another
+  machine unlocked under the **same email** can open the file and re-key the DB
+  to its local key X
 
-Auth/password wraps are **not** included — restore only works on an install
-activated under the **same email** (same key X).
+Auth/password wraps are **not** included. Gate: unlocked session whose email
+matches the backup header.
 
 ## Remove this feature
 

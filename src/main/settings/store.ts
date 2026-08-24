@@ -1,9 +1,10 @@
+import { existsSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 import type { LoginPolicy } from '../../shared/loginPolicy';
 import { DEFAULT_LOGIN_POLICY } from '../../shared/loginPolicy';
 import { DEFAULT_COLOR_THEME, type ColorTheme } from '../../shared/theme';
 import { ensureAccountRecordSecret } from '../auth/recordSecret';
-import { readManifest, SettingsTamperedError } from '../auth/store';
+import { readManifest } from '../auth/store';
 import { readSignedBinaryRecord, writeSignedBinaryRecord } from '../storage/binaryRecord';
 import { RecordTamperError } from '../storage/recordSeal';
 import { accountDir } from '../db/paths';
@@ -33,9 +34,18 @@ export function readAccountSettings(): AccountSettings {
     if (existing) return existing;
   } catch (e) {
     if (e instanceof RecordTamperError) {
-      throw new SettingsTamperedError();
+      // Prefer healing over bricking the session (e.g. after a bad backup restore
+      // of a machine-sealed settings.bin). Theme/login policy reset to defaults.
+      console.warn('[settings] integrity check failed — recreating defaults');
+      try {
+        if (existsSync(settingsBin())) unlinkSync(settingsBin());
+        if (existsSync(settingsJson())) unlinkSync(settingsJson());
+      } catch {
+        /* ignore */
+      }
+    } else {
+      throw e;
     }
-    throw e;
   }
 
   const manifest = readManifest();
@@ -65,4 +75,17 @@ export function setColorTheme(theme: ColorTheme): ColorTheme {
   const settings = readAccountSettings();
   writeSignedBinaryRecord(settingsBin(), { ...settings, colorTheme: theme }, ensureAccountRecordSecret());
   return theme;
+}
+
+/** Replace on-disk preferences (re-seals with this machine's account record secret). */
+export function writeAccountSettings(settings: AccountSettings): void {
+  writeSignedBinaryRecord(settingsBin(), settings, ensureAccountRecordSecret());
+  const legacy = settingsJson();
+  if (existsSync(legacy)) {
+    try {
+      unlinkSync(legacy);
+    } catch {
+      /* ignore */
+    }
+  }
 }

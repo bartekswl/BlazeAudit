@@ -5,36 +5,50 @@ import {
   type DatabaseBackupHeader,
   type DatabaseBackupRecency,
 } from '../../shared/databaseBackup';
-import { decryptWithKeyX, encryptWithKeyX } from './crypto';
+import {
+  decryptWithKeyX,
+  encryptWithKeyX,
+  openKeyXFromEmailRecovery,
+  sealKeyXForEmailRecovery,
+} from './crypto';
 import { packEntries, unpackEntries, type PackedEntry } from './pack';
+import { normalizeAccountEmail } from './stamp';
 
 function isHeader(value: unknown): value is DatabaseBackupHeader {
   if (!value || typeof value !== 'object') return false;
   const h = value as Record<string, unknown>;
-  return (
-    h.formatVersion === DATABASE_BACKUP_FORMAT_VERSION &&
-    typeof h.accountEmail === 'string' &&
-    typeof h.schemaVersion === 'number' &&
-    typeof h.createdAt === 'string' &&
-    typeof h.dataStamp === 'string' &&
-    typeof h.appVersion === 'string'
-  );
+  if (
+    h.formatVersion !== DATABASE_BACKUP_FORMAT_VERSION ||
+    typeof h.accountEmail !== 'string' ||
+    typeof h.schemaVersion !== 'number' ||
+    typeof h.createdAt !== 'string' ||
+    typeof h.dataStamp !== 'string' ||
+    typeof h.appVersion !== 'string'
+  ) {
+    return false;
+  }
+  if (h.keyXRecovery !== undefined && typeof h.keyXRecovery !== 'string') {
+    return false;
+  }
+  return true;
 }
 
 export function buildBackupFile(args: {
-  header: Omit<DatabaseBackupHeader, 'formatVersion' | 'appVersion'> & {
+  header: Omit<DatabaseBackupHeader, 'formatVersion' | 'appVersion' | 'keyXRecovery'> & {
     appVersion?: string;
   };
   entries: PackedEntry[];
   keyX: string;
 }): Buffer {
+  const accountEmail = normalizeAccountEmail(args.header.accountEmail);
   const header: DatabaseBackupHeader = {
     formatVersion: DATABASE_BACKUP_FORMAT_VERSION,
-    accountEmail: args.header.accountEmail,
+    accountEmail,
     schemaVersion: args.header.schemaVersion,
     createdAt: args.header.createdAt,
     dataStamp: args.header.dataStamp,
     appVersion: args.header.appVersion ?? app.getVersion(),
+    keyXRecovery: sealKeyXForEmailRecovery(args.keyX, accountEmail),
   };
 
   const headerJson = Buffer.from(JSON.stringify(header), 'utf8');
@@ -70,13 +84,57 @@ export function readBackupHeader(file: Buffer): DatabaseBackupHeader {
   return parsed;
 }
 
-export function decryptBackupEntries(file: Buffer, keyX: string): PackedEntry[] {
+export type OpenedBackup = {
+  header: DatabaseBackupHeader;
+  entries: PackedEntry[];
+  /** Key X that encrypts the packed body / SQLCipher snapshot. */
+  sourceKeyX: string;
+};
+
+/**
+ * Open a backup for an unlocked session whose email already matched the header.
+ * Prefers the local key X; falls back to email-bound recovery (cross-machine).
+ */
+export function openBackupForAccount(file: Buffer, localKeyX: string): OpenedBackup {
   const header = readBackupHeader(file);
   const headerLen = file.readUInt32BE(4);
   const encrypted = file.subarray(8 + headerLen);
-  const packed = decryptWithKeyX(encrypted, keyX);
-  void header;
-  return unpackEntries(packed);
+  const email = normalizeAccountEmail(header.accountEmail);
+
+  try {
+    const packed = decryptWithKeyX(encrypted, localKeyX);
+    return {
+      header,
+      entries: unpackEntries(packed),
+      sourceKeyX: localKeyX.toLowerCase(),
+    };
+  } catch (localErr) {
+    if (!header.keyXRecovery) {
+      throw localErr instanceof Error
+        ? localErr
+        : new Error(
+            'This backup cannot be opened with the current account. Export a new backup from the source machine.',
+          );
+    }
+    const sourceKeyX = openKeyXFromEmailRecovery(header.keyXRecovery, email);
+    try {
+      const packed = decryptWithKeyX(encrypted, sourceKeyX);
+      return {
+        header,
+        entries: unpackEntries(packed),
+        sourceKeyX,
+      };
+    } catch {
+      throw new Error(
+        'This backup cannot be opened for this account email. Export a new backup from the source machine.',
+      );
+    }
+  }
+}
+
+/** @deprecated Prefer openBackupForAccount — kept for narrow call sites. */
+export function decryptBackupEntries(file: Buffer, keyX: string): PackedEntry[] {
+  return openBackupForAccount(file, keyX).entries;
 }
 
 export function compareBackupRecency(

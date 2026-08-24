@@ -154,24 +154,30 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 
   const loadAccountTheme = useCallback(async () => {
-    const status = await window.blazeaudit.auth.getStatus();
-    if (status.phase === 'unlocked') {
-      setAccountId(status.accountId);
-      const settings = await window.blazeaudit.auth.getSecuritySettings();
-      applyTheme(settings.colorTheme ?? DEFAULT_COLOR_THEME, status.accountId);
-      return;
+    try {
+      const status = await window.blazeaudit.auth.getStatus();
+      if (status.phase === 'unlocked') {
+        setAccountId(status.accountId);
+        const settings = await window.blazeaudit.auth.getSecuritySettings();
+        applyTheme(settings.colorTheme ?? DEFAULT_COLOR_THEME, status.accountId);
+        return;
+      }
+      if (status.phase === 'login') {
+        setAccountId(status.accountId);
+        const next =
+          status.colorTheme ??
+          resolveCachedTheme(status.accountId);
+        applyTheme(next, status.accountId);
+        return;
+      }
+      // activation / set_password — use last global preference
+      setAccountId(null);
+      applyTheme(resolveCachedTheme());
+    } catch (err) {
+      console.error('[theme] boot theme load failed', err);
+      setAccountId(null);
+      applyTheme(resolveCachedTheme());
     }
-    if (status.phase === 'login') {
-      setAccountId(status.accountId);
-      const next =
-        status.colorTheme ??
-        resolveCachedTheme(status.accountId);
-      applyTheme(next, status.accountId);
-      return;
-    }
-    // activation / set_password — use last global preference
-    setAccountId(null);
-    applyTheme(resolveCachedTheme());
   }, [applyTheme]);
 
   useEffect(() => {

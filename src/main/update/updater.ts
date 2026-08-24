@@ -61,6 +61,8 @@ function broadcast(status: UpdateStatus): void {
 
 let wired = false;
 let installScheduled = false;
+/** Target version for the in-flight download (not the installed app version). */
+let pendingDownloadVersion = '';
 
 function showUpdatingToast(): void {
   if (!Notification.isSupported()) return;
@@ -92,16 +94,22 @@ function wireAutoUpdaterEvents(): void {
   autoUpdater.autoInstallOnAppQuit = false;
 
   autoUpdater.on('checking-for-update', () => broadcast({ phase: 'checking' }));
-  autoUpdater.on('update-available', (info) =>
-    broadcast({ phase: 'available', version: info.version, notes: releaseNotesToText(info.releaseNotes) }),
-  );
-  autoUpdater.on('update-not-available', (info) =>
-    broadcast({ phase: 'not-available', version: info.version }),
-  );
+  autoUpdater.on('update-available', (info) => {
+    pendingDownloadVersion = info.version;
+    broadcast({
+      phase: 'available',
+      version: info.version,
+      notes: releaseNotesToText(info.releaseNotes),
+    });
+  });
+  autoUpdater.on('update-not-available', (info) => {
+    pendingDownloadVersion = '';
+    broadcast({ phase: 'not-available', version: info.version });
+  });
   autoUpdater.on('download-progress', (progress) =>
     broadcast({
       phase: 'downloading',
-      version: autoUpdater.currentVersion?.version ?? '',
+      version: pendingDownloadVersion,
       percent: Math.round(progress.percent),
       transferred: progress.transferred,
       total: progress.total,
@@ -109,6 +117,7 @@ function wireAutoUpdaterEvents(): void {
     }),
   );
   autoUpdater.on('update-downloaded', (info) => {
+    pendingDownloadVersion = info.version;
     broadcast({
       phase: 'downloaded',
       version: info.version,
@@ -116,9 +125,10 @@ function wireAutoUpdaterEvents(): void {
     });
     setTimeout(() => installAndQuit(info.version), 400);
   });
-  autoUpdater.on('error', (err) =>
-    broadcast({ phase: 'error', message: err?.message ?? 'Update failed.' }),
-  );
+  autoUpdater.on('error', (err) => {
+    pendingDownloadVersion = '';
+    broadcast({ phase: 'error', message: err?.message ?? 'Update failed.' });
+  });
 }
 
 function rollbackInfo(): RollbackInfo {

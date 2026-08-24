@@ -7,12 +7,25 @@ import {
   type DatabaseBackupInspectResult,
 } from '../../shared/databaseBackup';
 import { requireSessionKeyX, unlockDatabaseWithKey } from '../auth/session';
+import { clearAuthStatusCache } from '../auth/statusCache';
 import { readManifest } from '../auth/store';
 import { closeDatabase } from '../db/connection';
 import { accountDir } from '../db/paths';
-import { compareBackupRecency, decryptBackupEntries, readBackupHeader } from './format';
+import { seedDefaultTemplates } from '../db/seedTemplates';
+import { compareBackupRecency, openBackupForAccount, readBackupHeader } from './format';
 import { resolvePackedPath } from './pack';
+import { rekeyDatabaseFile } from './rekeyDatabase';
+import {
+  installSettingsFromBackupEntries,
+  SETTINGS_PAYLOAD_RELATIVE_PATH,
+} from './settingsPayload';
 import { computeLocalDataStamp, normalizeAccountEmail } from './stamp';
+
+const SETTINGS_ENTRY_PATHS = new Set([
+  'settings.bin',
+  'settings.json',
+  SETTINGS_PAYLOAD_RELATIVE_PATH,
+]);
 
 function assertSameAccount(backupEmail: string): void {
   const manifest = readManifest();
@@ -42,8 +55,8 @@ export async function inspectDatabaseBackup(): Promise<DatabaseBackupInspectResu
   const header = readBackupHeader(raw);
   assertSameAccount(header.accountEmail);
 
-  // Crypto binding — wrong key / tampered body fails here.
-  decryptBackupEntries(raw, requireSessionKeyX());
+  // Must open under this email (local key X or email-bound recovery).
+  openBackupForAccount(raw, requireSessionKeyX());
 
   const localDataStamp = computeLocalDataStamp();
   const recency = compareBackupRecency(header.dataStamp, localDataStamp);
@@ -82,14 +95,14 @@ export async function applyDatabaseBackup(filePath: string): Promise<DatabaseBac
     return { applied: false, reason: 'canceled' };
   }
 
-  const keyX = requireSessionKeyX();
+  const localKeyX = requireSessionKeyX();
   const raw = fs.readFileSync(filePath);
   const header = readBackupHeader(raw);
   assertSameAccount(header.accountEmail);
 
   const localDataStamp = computeLocalDataStamp();
   const recency = compareBackupRecency(header.dataStamp, localDataStamp);
-  const entries = decryptBackupEntries(raw, keyX);
+  const { entries, sourceKeyX } = openBackupForAccount(raw, localKeyX);
 
   const hasDb = entries.some((e) => e.relativePath === 'blazeaudit.db');
   if (!hasDb) throw new Error('Backup is missing the database file.');
@@ -132,12 +145,21 @@ export async function applyDatabaseBackup(filePath: string): Promise<DatabaseBac
     clearDirectoryContents(path.join(root, 'assets'));
 
     for (const entry of entries) {
+      if (SETTINGS_ENTRY_PATHS.has(entry.relativePath)) continue;
       const target = resolvePackedPath(root, entry.relativePath);
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, entry.data);
     }
+    installSettingsFromBackupEntries(root, entries);
 
-    unlockDatabaseWithKey(keyX);
+    // Snapshot may be encrypted with the source machine's key X — adopt local key.
+    rekeyDatabaseFile(sourceKeyX, localKeyX);
+
+    unlockDatabaseWithKey(localKeyX);
+    // Finish template seed on this tick before the renderer reloads — otherwise
+    // deferred seed blocks the main process and boot stays on "Loading…".
+    seedDefaultTemplates();
+    clearAuthStatusCache();
     fs.rmSync(safetyRoot, { recursive: true, force: true });
 
     return { applied: true, filePath, recency };
@@ -160,7 +182,7 @@ export async function applyDatabaseBackup(filePath: string): Promise<DatabaseBac
       if (fs.existsSync(assetsSafety)) {
         fs.cpSync(assetsSafety, path.join(root, 'assets'), { recursive: true });
       }
-      unlockDatabaseWithKey(keyX);
+      unlockDatabaseWithKey(localKeyX);
     } catch (rollbackError) {
       console.error('[backup] rollback failed:', rollbackError);
     }
