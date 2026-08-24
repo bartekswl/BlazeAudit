@@ -6,7 +6,9 @@ import {
   clientToSpreadsheetRow,
 } from '../../shared/clientColumns';
 import { buildCsv, parseCsv } from '../../shared/csv';
+import { DATABASE_BACKUP_FEATURE_ENABLED } from '../../shared/databaseBackup';
 import { IpcChannels } from '../../shared/ipc';
+import { applyDatabaseBackup, exportDatabaseBackup, inspectDatabaseBackup } from '../backup';
 import { clients } from '../db';
 import { dataDir, describeDataDir } from '../db/paths';
 
@@ -23,6 +25,14 @@ export function registerDatabaseIpc(): void {
     if (err) throw new Error(err);
     return { opened: true as const, path: dir };
   });
+
+  if (DATABASE_BACKUP_FEATURE_ENABLED) {
+    ipcMain.handle(IpcChannels.databaseExportBackup, () => exportDatabaseBackup());
+    ipcMain.handle(IpcChannels.databaseInspectBackup, () => inspectDatabaseBackup());
+    ipcMain.handle(IpcChannels.databaseApplyBackup, (_event, filePath: string) =>
+      applyDatabaseBackup(filePath),
+    );
+  }
 
   ipcMain.handle(IpcChannels.databaseExportClientsCsv, async () => {
     const { canceled, filePath } = await dialog.showSaveDialog({

@@ -5,11 +5,11 @@
 | | |
 | --- | --- |
 | **Status** | Living snapshot — update as the project evolves |
-| **Last updated** | 2026-07-18 (editor chrome + PDF import) |
-| **HEAD** | `4519740` on `main` (`github.com/bartekswl/BlazeAudit`) |
+| **Last updated** | 2026-08-24 (on-demand DB backup export/import) |
+| **HEAD** | `main` (`github.com/bartekswl/BlazeAudit`) |
 | **Schema** | SQLite `user_version` **13** (`LATEST_SCHEMA_VERSION`) |
-| **Current focus** | ULC S536 built-in form polish (template · document · PDF parity) |
-| **Roadmap next** | Phase 7 (encrypted backups) — not started; form work is active ahead of it |
+| **Current focus** | ULC S536 form polish + Phase 7 on-demand backups |
+| **Roadmap next** | Phase 7 remainder (scheduled backups / prefs fully in DB) — on-demand `.blazebak` export/import is live |
 
 ## How to use this file
 
@@ -38,8 +38,10 @@ Inspired by fire-forms.com but a focused local tool, not a cloud SaaS. A compani
   cross-page row compaction.
 - **Active:** Keep ULC form **template / document editor / PDF** consistent; density
   and layout polish on later pages (esp. 22.x / 23.x).
-- **Next (roadmap):** Phase 7 — encrypted backup file + restore; keep account
-  preferences in the DB so restore includes settings/theme with all data.
+- **Phase 7 (partial):** On-demand encrypted `.blazebak` export/import is live
+  (`src/main/backup/` — removable). Includes DB + preferences + logo + ID photos;
+  same-email only; recency warning on import. Still open: scheduled backups,
+  moving prefs fully into SQLCipher.
 - **Not started:** license server (Phase 8), full packaging pipeline (Phase 9;
   icon asset exists), marketing site (Phase 10).
 

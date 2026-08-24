@@ -776,7 +776,7 @@ function HeaderField({
 
     <label className={`block min-w-0 ${className ?? ''}`}>
 
-      <span className="mb-0.5 block text-[10px] font-medium text-neutral-500">{label}</span>
+      <span className="mb-0.5 block text-[11px] font-bold text-neutral-500">{label}</span>
 
       {children}
 

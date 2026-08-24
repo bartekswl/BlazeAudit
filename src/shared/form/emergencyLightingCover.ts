@@ -1,8 +1,10 @@
+export type EmergencyLightingCertChoice = 'yes' | 'no' | null;
+
 export type EmergencyLightingCoverValue = {
   date: string;
   jobContactNo: string;
-  certifyTested: boolean;
-  certifyFunctional: boolean;
+  certifyTested: EmergencyLightingCertChoice;
+  certifyFunctional: EmergencyLightingCertChoice;
   technicianName: string;
   signatureName: string;
 };
@@ -11,11 +13,32 @@ export function emptyEmergencyLightingCoverValue(): EmergencyLightingCoverValue 
   return {
     date: '',
     jobContactNo: '',
-    certifyTested: false,
-    certifyFunctional: false,
+    certifyTested: null,
+    certifyFunctional: null,
     technicianName: '',
     signatureName: '',
   };
+}
+
+function normalizeCertChoice(raw: unknown): EmergencyLightingCertChoice {
+  if (raw === 'yes' || raw === 'y' || raw === 'Y' || raw === true) return 'yes';
+  if (raw === 'no' || raw === 'n' || raw === 'N') return 'no';
+  // Legacy boolean false meant unchecked (empty), not an explicit No.
+  return null;
+}
+
+export function cycleEmergencyLightingCertChoice(
+  current: EmergencyLightingCertChoice,
+): EmergencyLightingCertChoice {
+  if (current === null) return 'yes';
+  if (current === 'yes') return 'no';
+  return null;
+}
+
+export function emergencyLightingCertSymbol(choice: EmergencyLightingCertChoice): string {
+  if (choice === 'yes') return '✓';
+  if (choice === 'no') return '✗';
+  return '';
 }
 
 export function normalizeEmergencyLightingCoverValue(raw: unknown): EmergencyLightingCoverValue {
@@ -25,8 +48,8 @@ export function normalizeEmergencyLightingCoverValue(raw: unknown): EmergencyLig
   return {
     date: typeof r.date === 'string' ? r.date : base.date,
     jobContactNo: typeof r.jobContactNo === 'string' ? r.jobContactNo : base.jobContactNo,
-    certifyTested: Boolean(r.certifyTested),
-    certifyFunctional: Boolean(r.certifyFunctional),
+    certifyTested: normalizeCertChoice(r.certifyTested),
+    certifyFunctional: normalizeCertChoice(r.certifyFunctional),
     technicianName: typeof r.technicianName === 'string' ? r.technicianName : base.technicianName,
     signatureName: typeof r.signatureName === 'string' ? r.signatureName : base.signatureName,
   };

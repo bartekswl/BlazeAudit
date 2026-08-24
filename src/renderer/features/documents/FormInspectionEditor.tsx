@@ -506,7 +506,7 @@ function FormInspectionEditorInner({
         <div className="relative shrink-0 rounded-md border border-[var(--ba-panel-border)] bg-[var(--ba-panel-bg)] px-2 py-1">
           <div className="grid grid-cols-[minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 gap-y-0.5">
             <div className="min-w-0">
-              <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+              <span className="mb-px block text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">
                 Title
               </span>
               <p className={`${compactFieldCls} truncate font-medium text-[var(--ba-text-primary)]`}>
@@ -514,7 +514,7 @@ function FormInspectionEditorInner({
               </p>
             </div>
             <label className="block min-w-0">
-              <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+              <span className="mb-px block text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">
                 Project Number
               </span>
               <input
@@ -526,7 +526,7 @@ function FormInspectionEditorInner({
               />
             </label>
             <label className="block min-w-0">
-              <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+              <span className="mb-px block text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">
                 Date
               </span>
               <input
@@ -537,7 +537,7 @@ function FormInspectionEditorInner({
               />
             </label>
             <label className="block min-w-0">
-              <span className="mb-px block text-[9px] leading-none text-[var(--ba-text-muted)]">
+              <span className="mb-px block text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">
                 Status
               </span>
               <select
@@ -559,8 +559,8 @@ function FormInspectionEditorInner({
             className="mt-1 grid gap-x-2 gap-y-0"
             style={{ gridTemplateColumns: '7rem minmax(0, 12rem) 1fr' }}
           >
-            <span className="text-[9px] leading-none text-[var(--ba-text-muted)]">Cadence</span>
-            <span className="text-[9px] leading-none text-[var(--ba-text-muted)]">Client</span>
+            <span className="text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">Cadence</span>
+            <span className="text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">Client</span>
             <span aria-hidden="true" />
             <select
               className={`${compactFieldCls} ba-select`}

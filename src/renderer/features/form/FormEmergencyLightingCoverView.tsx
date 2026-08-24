@@ -1,13 +1,15 @@
 import { useEffect, useRef } from 'react';
 import type { DocumentContext } from '../../../shared/document';
 import {
+  cycleEmergencyLightingCertChoice,
   EMERGENCY_LIGHTING_TEST_NOTES,
+  emergencyLightingCertSymbol,
   normalizeEmergencyLightingCoverValue,
+  type EmergencyLightingCertChoice,
   type EmergencyLightingCoverValue,
 } from '../../../shared/form/emergencyLightingCover';
 import { InspectionDateField } from '../../components/InspectionDateField';
 import { cn } from '../../lib/cn';
-import { FormCheckGlyph } from './FormCheckGlyph';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 const inputCls = 'irc-input';
@@ -60,36 +62,52 @@ function BoundLine({
   );
 }
 
-function CertCheck({
+function CertChoiceBox({
+  choice,
+  readOnly,
+  onCycle,
   id,
   label,
-  checked,
-  readOnly,
-  onToggle,
 }: {
   id: string;
   label: string;
-  checked: boolean;
+  choice: EmergencyLightingCertChoice;
   readOnly?: boolean;
-  onToggle?: () => void;
+  onCycle?: () => void;
 }) {
+  const symbol = emergencyLightingCertSymbol(choice);
+  const box = (
+    <span
+      className={cn(
+        'irc-cert-choice',
+        choice === 'yes' && 'irc-cert-choice--yes',
+        choice === 'no' && 'irc-cert-choice--no',
+        !choice && 'irc-cert-choice--blank',
+      )}
+      aria-hidden="true"
+    >
+      {symbol || '\u00a0'}
+    </span>
+  );
+
   return (
-    <label className="irc-check" htmlFor={id}>
+    <div className="irc-check">
       {readOnly ? (
-        <FormCheckGlyph checked={checked} className="irc-check-box" />
+        box
       ) : (
         <button
           id={id}
           type="button"
           className="irc-check-toggle"
-          aria-pressed={checked}
-          onClick={onToggle}
+          aria-label={`${label}: ${choice === 'yes' ? 'Yes' : choice === 'no' ? 'No' : 'blank'}. Click to cycle.`}
+          title="Cycle: blank → Yes (✓) → No (✗)"
+          onClick={onCycle}
         >
-          <FormCheckGlyph checked={checked} className="irc-check-box" />
+          {box}
         </button>
       )}
       <span>{label}</span>
-    </label>
+    </div>
   );
 }
 
@@ -168,19 +186,25 @@ export function FormEmergencyLightingCoverView({
       <div className="irc-cert-box">
         <div className="irc-cert-banner">Certification</div>
         <div className="irc-cert-body">
-          <CertCheck
+          <CertChoiceBox
             id="el-cert-tested"
             label="This is to Certify that Emergency Lighting has been tested and inspected in accordance with the Fire Code requirements."
-            checked={value.certifyTested}
+            choice={value.certifyTested}
             readOnly={readOnly}
-            onToggle={() => patch({ certifyTested: !value.certifyTested })}
+            onCycle={() =>
+              patch({ certifyTested: cycleEmergencyLightingCertChoice(value.certifyTested) })
+            }
           />
-          <CertCheck
+          <CertChoiceBox
             id="el-cert-functional"
             label="All units inspected are now fully functional."
-            checked={value.certifyFunctional}
+            choice={value.certifyFunctional}
             readOnly={readOnly}
-            onToggle={() => patch({ certifyFunctional: !value.certifyFunctional })}
+            onCycle={() =>
+              patch({
+                certifyFunctional: cycleEmergencyLightingCertChoice(value.certifyFunctional),
+              })
+            }
           />
           <BoundLine label="Company issuing this report" value={companyName} />
           <BoundLine label="Company Address" value={companyAddress} className="irc-address" />
