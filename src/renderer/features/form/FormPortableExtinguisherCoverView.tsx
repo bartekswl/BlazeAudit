@@ -122,7 +122,7 @@ export function FormPortableExtinguisherCoverView({
         </div>
         <BoundLine label="Address" value={address} className="irc-span-3 irc-address" />
         <LineField
-          label="Job / Contact No."
+          label="Project Number"
           value={value.jobContactNo}
           readOnly={readOnly}
           onChange={(jobContactNo) => patch({ jobContactNo })}

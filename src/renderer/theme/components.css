@@ -1624,7 +1624,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   width: 100%;
   box-sizing: border-box;
   padding: 0;
-  min-height: 0;
+  /* Reserve vertical room so absolute logos are not covered by page content below. */
+  min-height: 3.85rem;
 }
 
 .form-page-header-branding-content {
@@ -1634,6 +1635,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   min-width: 0;
   flex-direction: column;
   gap: 0.125rem;
+  /* Keep title / meta clear of left/right logos. */
+  padding-inline: 5.1rem;
 }
 
 .form-page-header--meta .form-page-header-branding-content {
@@ -1643,9 +1646,9 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-header-brand {
   position: absolute;
   top: 0;
-  z-index: 0;
+  z-index: 2;
   display: flex;
-  overflow: hidden;
+  overflow: visible;
   pointer-events: none;
 }
 
@@ -1705,6 +1708,16 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 .form-page-sheet--landscape .form-page-header-brand--cfaa .form-page-header-brand-img {
   max-height: 3.6rem;
+}
+
+.form-page-header-branding--page1 {
+  min-height: 4.35rem;
+}
+
+.form-page-header-branding--page1 .form-page-header-branding-content {
+  padding-inline: 5.75rem;
+  justify-content: center;
+  min-height: 4.35rem;
 }
 
 .form-page-header-branding--page1 .form-page-header-brand--company {
@@ -3478,42 +3491,52 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   height: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: 0.6875rem;
+  font-size: 0.5625rem;
 }
 
 .rrg-th {
   background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%);
   color: #1e293b;
   font-weight: 700;
-  font-size: 0.625rem;
-  letter-spacing: 0.02em;
+  font-size: 0.5625rem;
+  letter-spacing: 0.015em;
   text-align: center;
   vertical-align: middle;
   border-right: var(--rrg-line);
   border-bottom: var(--rrg-line);
-  padding: 0.3rem 0.2rem;
-  height: 3.1rem;
+  padding: 0.2rem 0.12rem;
+  height: 3.35rem;
 }
 
 .rrg-th:last-child {
   border-right: none;
 }
 
+.rrg-th-label {
+  display: block;
+  white-space: pre-line;
+  line-height: 1.15;
+  font-size: inherit;
+  letter-spacing: inherit;
+}
+
+/* Compact multi-line headers (no tall vertical text). */
 .rrg-th--vertical {
-  height: 6rem;
-  padding: 0.2rem 0;
+  height: 3.35rem;
+  padding: 0.2rem 0.1rem;
 }
 
 .rrg-th--vertical .rrg-th-label {
-  display: inline-block;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  white-space: nowrap;
-  max-height: 5.5rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.15;
-  font-size: 0.625rem;
+  writing-mode: horizontal-tb;
+  transform: none;
+  white-space: pre-line;
+  max-height: none;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.12;
+  font-size: inherit;
+  letter-spacing: inherit;
+  word-break: normal;
 }
 
 .rrg-td {
@@ -3521,7 +3544,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   border-bottom: var(--rrg-line);
   padding: 0;
   vertical-align: middle;
-  height: calc((100% - 6rem) / var(--rrg-row-count));
+  height: calc((100% - 3.35rem) / var(--rrg-row-count));
   background: #fff;
 }
 
@@ -3553,9 +3576,9 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   min-height: 100%;
   border: none;
   background: transparent;
-  padding: 0.15rem 0.3rem;
+  padding: 0.12rem 0.25rem;
   font: inherit;
-  font-size: 0.6875rem;
+  font-size: 0.5625rem;
   color: var(--ba-text-primary);
   outline: none;
 }
@@ -3598,6 +3621,18 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 .rrg-choice--blank {
   color: transparent;
+}
+
+.form-page-sheet--inspection-report .form-page-header-branding {
+  min-height: 4.1rem;
+}
+
+.form-page-sheet--inspection-report .form-page-header-branding--page1 {
+  min-height: 4.5rem;
+}
+
+.form-page-sheet--inspection-report .form-page-header-branding--page1 .form-page-header-branding-content {
+  min-height: 4.5rem;
 }
 
 .form-page-sheet--inspection-report .form-page-header--meta {
@@ -7414,6 +7449,11 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   gap: 0.5rem;
   pointer-events: auto;
   overflow: visible;
+}
+
+/* EL / extinguisher (portrait) — pin controls to the page’s right edge */
+.form-page-sheet--inspection-report .idr-page-controls {
+  right: 0.5rem;
 }
 
 .idr-page-controls-btn {

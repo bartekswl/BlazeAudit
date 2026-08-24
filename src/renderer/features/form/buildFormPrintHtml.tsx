@@ -52,7 +52,7 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-header-branding {
     position: relative !important;
     width: 100% !important;
-    min-height: 0 !important;
+    min-height: 3.85rem !important;
     padding: 0 !important;
     box-sizing: border-box !important;
   }
@@ -60,12 +60,13 @@ const PRINT_OVERRIDES = `
     position: relative !important;
     z-index: 1 !important;
     width: 100% !important;
+    padding-inline: 5.1rem !important;
   }
   .form-print-root .form-page-header-brand {
     position: absolute !important;
     top: 0 !important;
-    z-index: 0 !important;
-    overflow: hidden !important;
+    z-index: 2 !important;
+    overflow: visible !important;
     pointer-events: none !important;
   }
   .form-print-root .form-page-header-brand--company {
@@ -113,6 +114,21 @@ const PRINT_OVERRIDES = `
   }
   .form-print-root .form-page-sheet--landscape .form-page-header-brand--cfaa .form-page-header-brand-img {
     max-height: 3.6rem !important;
+  }
+  .form-print-root .form-page-header-branding--page1 {
+    min-height: 4.35rem !important;
+  }
+  .form-print-root .form-page-header-branding--page1 .form-page-header-branding-content {
+    padding-inline: 5.75rem !important;
+    min-height: 4.35rem !important;
+    justify-content: center !important;
+  }
+  .form-print-root .form-page-sheet--inspection-report .form-page-header-branding {
+    min-height: 4.1rem !important;
+  }
+  .form-print-root .form-page-sheet--inspection-report .form-page-header-branding--page1,
+  .form-print-root .form-page-sheet--inspection-report .form-page-header-branding--page1 .form-page-header-branding-content {
+    min-height: 4.5rem !important;
   }
   .form-print-root .form-page-header-branding--page1 .form-page-header-brand--company {
     left: 0.625rem !important;
@@ -2649,6 +2665,27 @@ const PRINT_OVERRIDES = `
 
   .form-print-root .rrg-th {
     background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%) !important;
+  }
+  .form-print-root .rrg-table,
+  .form-print-root .rrg-th,
+  .form-print-root .rrg-cell-input,
+  .form-print-root .rrg-cell-value {
+    font-size: 0.5625rem !important;
+  }
+  .form-print-root .rrg-th,
+  .form-print-root .rrg-th--vertical {
+    height: 3.35rem !important;
+  }
+  .form-print-root .rrg-th-label,
+  .form-print-root .rrg-th--vertical .rrg-th-label {
+    writing-mode: horizontal-tb !important;
+    transform: none !important;
+    white-space: pre-line !important;
+    max-height: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    font-size: inherit !important;
+    line-height: 1.12 !important;
   }
   .form-print-root .rrg-accent-bar {
     min-height: 0.45rem !important;
