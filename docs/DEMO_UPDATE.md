@@ -36,6 +36,13 @@ Send the tester:
 - Email: `jackpps@mail.com`
 - Password: `password` (auto-unlock; no prompt with default demo policy)
 
+Uninstall does **not** delete AppData. If login fails after reinstall (e.g.
+“Incorrect password”), delete this folder then launch again:
+
+`%APPDATA%\BlazeAudit Demo\`
+
+(Or wait for a build that auto-repairs demo auth on startup.)
+
 They only need a **new** demo installer if bundled seed data changes (clients/docs in
 the seed DB), not for normal UI/code fixes.
 
