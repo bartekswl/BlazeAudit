@@ -99,3 +99,17 @@ export function setReportGridChoiceCell(
     ),
   };
 }
+
+/** True when any text cell is non-empty or any choice is set. */
+export function reportGridHasContent(
+  value: ReportGridValue,
+  columns: readonly ReportGridColumnDef[],
+): boolean {
+  return value.rows.some((row) =>
+    columns.some((col) => {
+      const cell = row[col.key];
+      if (col.kind === 'choice') return cell === 'yes' || cell === 'no';
+      return typeof cell === 'string' && cell.trim() !== '';
+    }),
+  );
+}
