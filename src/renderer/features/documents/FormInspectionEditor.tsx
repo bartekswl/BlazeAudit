@@ -5,6 +5,7 @@ import {
   ClipboardPaste,
   FileDown,
   MousePointer2,
+  Rows3,
   Scissors,
   TriangleAlert,
   Undo2,
@@ -133,8 +134,11 @@ function FormInspectionEditorInner({
   const formStackRef = useRef<HTMLDivElement>(null);
   const {
     selectMode,
+    cellSelectMode,
+    lineSelectMode,
     actionFlash,
     toggleSelectMode,
+    toggleLineSelectMode,
     copySelected,
     cutSelected,
     pasteSelected,
@@ -624,7 +628,7 @@ function FormInspectionEditorInner({
           type="button"
           onClick={() => void cutSelected()}
           className={cn(toolbarBtnCls, actionFlash === 'cut' && 'ba-clipboard-btn--flash')}
-          title="Cut full cell(s) (Ctrl+X)"
+          title="Cut cell(s) or whole line(s) (Ctrl+X). Cutting a full line moves rows below up."
         >
           <Scissors className="size-3" />
           Cut
@@ -632,16 +636,30 @@ function FormInspectionEditorInner({
         <button
           type="button"
           onClick={toggleSelectMode}
-          className={cn(toolbarBtnCls, selectMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
+          className={cn(toolbarBtnCls, cellSelectMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
           title={
-            selectMode
-              ? 'Exit select mode'
+            cellSelectMode
+              ? 'Exit cell select mode'
               : 'Select cells (drag / Ctrl+click). Alt+click or double-click = whole row'
           }
-          aria-pressed={selectMode}
+          aria-pressed={cellSelectMode}
         >
           <MousePointer2 className="size-3" />
-          {selectMode ? 'Selecting' : 'Select'}
+          {cellSelectMode ? 'Selecting' : 'Select'}
+        </button>
+        <button
+          type="button"
+          onClick={toggleLineSelectMode}
+          className={cn(toolbarBtnCls, lineSelectMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
+          title={
+            lineSelectMode
+              ? 'Exit line select mode'
+              : 'Select entire table rows (click / drag). Cut shifts rows up; Backspace clears in place.'
+          }
+          aria-pressed={lineSelectMode}
+        >
+          <Rows3 className="size-3" />
+          {lineSelectMode ? 'Line selecting' : 'Line Select'}
         </button>
         <button
           type="button"
@@ -667,7 +685,10 @@ function FormInspectionEditorInner({
         <FormPageViewport pageIndex={0} totalPages={pageCount} continuous showZoomControls>
           <div
             ref={formStackRef}
-            className={cn('form-page-stack', selectMode && 'ba-form-field-select-mode')}
+            className={cn(
+              'form-page-stack',
+              selectMode !== 'off' && 'ba-form-field-select-mode',
+            )}
           >
             {formDoc.form.pages.map((p, index) => (
               <FormPageCanvas
