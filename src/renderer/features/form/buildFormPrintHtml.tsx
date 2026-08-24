@@ -2917,7 +2917,7 @@ const PRINT_OVERRIDES = `
     border-right: none !important;
   }
 
-  /* 23.2 PDF column widths — keep Requires Service / Supervised Circuit readable */
+  /* 23.2 PDF column widths — match INDIVIDUAL_DEVICE_RECORD_COLUMNS */
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--deviceLocation,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--deviceLocation {
     width: 26% !important;
@@ -2935,7 +2935,7 @@ const PRINT_OVERRIDES = `
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--requiresService,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--requiresService {
-    width: 7% !important;
+    width: 4% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--circuitNumber,
@@ -2945,7 +2945,7 @@ const PRINT_OVERRIDES = `
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--fireZone,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--fireZone {
-    width: 6% !important;
+    width: 3% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--correctlyInstalled,
@@ -2966,12 +2966,12 @@ const PRINT_OVERRIDES = `
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--alarmConfirmed,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--alarmConfirmed {
-    width: 4% !important;
+    width: 5% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--annunciatorIndication,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--annunciatorIndication {
-    width: 3% !important;
+    width: 4% !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--supervisedCircuitTrouble,
@@ -2981,12 +2981,20 @@ const PRINT_OVERRIDES = `
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-col--comments,
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th--comments {
-    width: 13% !important;
+    width: 17% !important;
   }
 
   .form-print-root
     .form-page-sheet--individual-device-record.form-page-sheet--landscape
     .idr-th--alarmConfirmed.idr-th--vertical
+    .idr-th-text,
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--annunciatorIndication.idr-th--vertical
+    .idr-th-text,
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--supervisedCircuitTrouble.idr-th--vertical
     .idr-th-text {
     white-space: pre-line !important;
     line-height: 1.12 !important;
@@ -2994,27 +3002,33 @@ const PRINT_OVERRIDES = `
 
   .form-print-root
     .form-page-sheet--individual-device-record.form-page-sheet--landscape
-    .idr-th--alarmConfirmed.idr-th--vertical,
-  .form-print-root
-    .form-page-sheet--individual-device-record.form-page-sheet--landscape
-    .idr-th--annunciatorIndication.idr-th--vertical,
-  .form-print-root
-    .form-page-sheet--individual-device-record.form-page-sheet--landscape
-    .idr-th--supervisedCircuitTrouble.idr-th--vertical {
-    padding-left: 2pt !important;
-    padding-right: 2pt !important;
+    .idr-th--alarmConfirmed.idr-th--vertical {
+    padding-left: 2.5pt !important;
+    padding-right: 2.5pt !important;
   }
 
   .form-print-root
     .form-page-sheet--individual-device-record.form-page-sheet--landscape
-    .idr-th--requiresService.idr-th--vertical
-    .idr-th-text,
+    .idr-th--annunciatorIndication.idr-th--vertical {
+    padding-left: 1.5pt !important;
+    padding-right: 1.5pt !important;
+  }
+
   .form-print-root
     .form-page-sheet--individual-device-record.form-page-sheet--landscape
-    .idr-th--supervisedCircuitTrouble.idr-th--vertical
-    .idr-th-text {
-    font-size: 8pt !important;
-    line-height: 1.05 !important;
+    .idr-th--supervisedCircuitTrouble.idr-th--vertical {
+    padding-left: 0.5pt !important;
+    padding-right: 0.5pt !important;
+  }
+
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--fireZone.idr-th--vertical,
+  .form-print-root
+    .form-page-sheet--individual-device-record.form-page-sheet--landscape
+    .idr-th--requiresService.idr-th--vertical {
+    padding-left: 1.5pt !important;
+    padding-right: 1.5pt !important;
   }
 
   .form-print-root .form-page-sheet--individual-device-record.form-page-sheet--landscape .idr-th:not(.idr-th--deviceLocation) {
