@@ -1,11 +1,18 @@
 import { useEffect, useRef } from 'react';
 import type { DocumentContext } from '../../../shared/document';
 import {
+  clampLinedNotesToMaxLines,
+  normalizeLinedNotesValue,
+} from '../../../shared/form/linedNotes';
+import {
   normalizePortableExtinguisherCoverValue,
   type PortableExtinguisherCoverValue,
 } from '../../../shared/form/portableExtinguisherCover';
 import { InspectionDateField } from '../../components/InspectionDateField';
 import { cn } from '../../lib/cn';
+import { FormLinedNotesInput } from './FormLinedNotesInput';
+import { LinedNoteRuleRows } from './LinedNoteRuleRows';
+import { useLinedNotesVisibleLineCount } from './useLinedNotesVisibleLineCount';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 const inputCls = 'irc-input';
@@ -54,6 +61,43 @@ function BoundLine({
     <div className={cn('irc-field', className)}>
       <span className={labelCls}>{label}</span>
       <span className="irc-value">{value || '\u00a0'}</span>
+    </div>
+  );
+}
+
+function CoverRuledNotes({
+  elementId,
+  value,
+  readOnly,
+  onChange,
+}: {
+  elementId: string;
+  value: string;
+  readOnly?: boolean;
+  onChange?: (next: string) => void;
+}) {
+  const text = normalizeLinedNotesValue(value);
+  const stackRef = useRef<HTMLDivElement>(null);
+  const { lineCount: measuredLineCount } = useLinedNotesVisibleLineCount(stackRef);
+  const lineCount = measuredLineCount > 1 ? measuredLineCount : 10;
+  const clamped = clampLinedNotesToMaxLines(text, lineCount);
+
+  return (
+    <div
+      ref={stackRef}
+      className="ln-body-stack ln-body-stack--fill irc-notes-stack"
+      data-lined-notes-stack={elementId}
+    >
+      <LinedNoteRuleRows count={lineCount} />
+      {readOnly ? (
+        <div className="ln-body ln-body--readonly">{clamped || '\u00a0'}</div>
+      ) : (
+        <FormLinedNotesInput
+          value={clamped}
+          lineCount={lineCount}
+          onChange={(next) => onChange?.(next)}
+        />
+      )}
     </div>
   );
 }
@@ -150,20 +194,14 @@ export function FormPortableExtinguisherCoverView({
         <BoundLine label="Company Telephone" value={companyPhone} className="irc-span-3" />
       </div>
 
-      <div className="irc-notes irc-notes--green">
+      <div className="irc-notes irc-notes--green irc-notes--ruled">
         <div className="irc-notes-title">Inspection Recommendations and Notes</div>
-        {readOnly ? (
-          <div className="irc-notes-body irc-notes-body--readonly">
-            {value.recommendationsNotes || '\u00a0'}
-          </div>
-        ) : (
-          <textarea
-            className="irc-notes-body"
-            value={value.recommendationsNotes}
-            onChange={(e) => patch({ recommendationsNotes: e.target.value })}
-            rows={12}
-          />
-        )}
+        <CoverRuledNotes
+          elementId="portable-extinguisher-cover-notes"
+          value={value.recommendationsNotes}
+          readOnly={readOnly}
+          onChange={(recommendationsNotes) => patch({ recommendationsNotes })}
+        />
       </div>
     </div>
   );

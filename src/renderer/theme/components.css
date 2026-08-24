@@ -3247,6 +3247,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   flex-direction: column;
   gap: 0.85rem;
   width: 100%;
+  min-height: 0;
   overflow: hidden;
   border-radius: 0.625rem;
   background: var(--ba-input-bg, #ffffff);
@@ -3323,6 +3324,35 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   overflow: hidden;
 }
 
+.irc-notes--ruled {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.irc-notes-stack {
+  --ln-line: 1px solid rgb(148 163 184 / 0.55);
+  --ln-line-height: 1.375rem;
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 11rem;
+  height: 100%;
+  background: #fff;
+}
+
+.irc-notes-stack .ln-body {
+  font-size: 0.8125rem;
+  line-height: var(--ln-line-height);
+  padding: 0 0.55rem;
+  background: transparent;
+}
+
+[data-theme='dark'] .irc-notes-stack {
+  --ln-line: 1px solid rgb(148 163 184 / 0.35);
+  background: var(--ba-input-bg, #ffffff);
+}
+
 .irc-notes-title,
 .irc-cert-banner {
   padding: 0.4rem 0.65rem;
@@ -3351,7 +3381,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   display: block;
   width: 100%;
   min-height: 11rem;
-  resize: vertical;
+  resize: none;
   border: none;
   background: #fff;
   padding: 0.55rem 0.65rem;
@@ -3388,7 +3418,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .irc-check {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.55rem;
   font-size: 0.75rem;
   line-height: 1.4;
   color: var(--ba-text-primary);
@@ -3406,6 +3436,38 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 .irc-check-box {
   flex-shrink: 0;
+}
+
+.irc-cert-choice {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border: 1.5px solid rgb(100 116 139 / 0.85);
+  border-radius: 0.25rem;
+  background: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #64748b;
+}
+
+.irc-cert-choice--yes {
+  border-color: #15803d;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.irc-cert-choice--no {
+  border-color: #b91c1c;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.irc-cert-choice--blank {
+  color: transparent;
 }
 
 .irc-tech-row {
@@ -3652,6 +3714,20 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-sheet--inspection-report .form-page-meta-code {
   font-size: 0.8rem;
   margin-bottom: 0.45rem;
+}
+
+.form-page-sheet--inspection-report .form-page-meta-table {
+  width: 88%;
+  max-width: 88%;
+}
+
+.form-page-sheet--inspection-report .form-page-meta-value {
+  max-width: none;
+  min-width: 4.5rem;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
 }
 
 .form-page-sheet--inspection-report .form-page-section-title {

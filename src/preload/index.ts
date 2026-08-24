@@ -37,6 +37,12 @@ import type { NameBadge, NameBadgeInput } from '../shared/nameBadges';
 import type { CalendarTask, CalendarTaskInput } from '../shared/calendarTasks';
 import type { RollbackInfo, UpdateStatus } from '../shared/update';
 import type { Client, ClientInput } from '../shared/types';
+import type {
+  DatabaseBackupApplyResult,
+  DatabaseBackupExportResult,
+  DatabaseBackupInspectResult,
+} from '../shared/databaseBackup';
+import { DATABASE_BACKUP_FEATURE_ENABLED } from '../shared/databaseBackup';
 
 const api = {
   window: {
@@ -119,6 +125,13 @@ const api = {
     getDataDir: (): Promise<string> => ipcRenderer.invoke(IpcChannels.databaseGetDataDir),
     openDataFolder: (): Promise<{ opened: true; path: string }> =>
       ipcRenderer.invoke(IpcChannels.databaseOpenDataFolder),
+    backupEnabled: DATABASE_BACKUP_FEATURE_ENABLED,
+    exportBackup: (): Promise<DatabaseBackupExportResult> =>
+      ipcRenderer.invoke(IpcChannels.databaseExportBackup),
+    inspectBackup: (): Promise<DatabaseBackupInspectResult> =>
+      ipcRenderer.invoke(IpcChannels.databaseInspectBackup),
+    applyBackup: (filePath: string): Promise<DatabaseBackupApplyResult> =>
+      ipcRenderer.invoke(IpcChannels.databaseApplyBackup, filePath),
     importTemplateJson: (): Promise<
       { imported: false } | { imported: true; templateId: string; filePath: string }
     > => ipcRenderer.invoke(IpcChannels.customTemplatesImportJson),

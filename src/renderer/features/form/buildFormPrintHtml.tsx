@@ -2712,8 +2712,26 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--inspection-report .form-page-header--meta {
     margin-bottom: 0.85rem !important;
   }
+  .form-print-root .form-page-sheet--inspection-report .form-page-meta-table {
+    width: 88% !important;
+    max-width: 88% !important;
+  }
+  .form-print-root .form-page-sheet--inspection-report .form-page-meta-value {
+    max-width: none !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word !important;
+  }
   .form-print-root .rrg-td {
     height: 1% !important;
+  }
+  .form-print-root .irc-notes-stack {
+    --ln-line: 1px solid rgb(148 163 184 / 0.55) !important;
+    min-height: 11rem !important;
+  }
+  .form-print-root .irc-notes-stack .ln-row {
+    border-bottom: var(--ln-line) !important;
   }
   .form-print-root .irc-notes--green .irc-notes-title {
     background: #1b6b2f !important;
@@ -2722,6 +2740,25 @@ const PRINT_OVERRIDES = `
   .form-print-root .irc-notes--blue .irc-notes-title {
     background: #1e3a8a !important;
     color: #fff !important;
+  }
+  .form-print-root .irc-cert-choice {
+    width: 1.45rem !important;
+    height: 1.45rem !important;
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+    border: 1.5px solid #64748b !important;
+    border-radius: 0.25rem !important;
+    background: #fff !important;
+  }
+  .form-print-root .irc-cert-choice--yes {
+    border-color: #15803d !important;
+    background: #dcfce7 !important;
+    color: #166534 !important;
+  }
+  .form-print-root .irc-cert-choice--no {
+    border-color: #b91c1c !important;
+    background: #fee2e2 !important;
+    color: #991b1b !important;
   }
   .form-print-root .irc-cert-banner {
     background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;

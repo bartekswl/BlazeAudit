@@ -9,6 +9,40 @@ import {
   HardDriveDownload,
   Upload,
 } from 'lucide-react';
+import type { DatabaseBackupInspectResult } from '../../../shared/databaseBackup';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+
+function formatStamp(iso: string): string {
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return iso;
+  return new Date(ms).toLocaleString();
+}
+
+function recencyCopy(preview: Extract<DatabaseBackupInspectResult, { canceled: false }>): {
+  title: string;
+  body: string;
+  warnOlder: boolean;
+} {
+  if (preview.recency === 'newer') {
+    return {
+      title: 'Import newer backup?',
+      body: `This backup is more recent than your current data (backup ${formatStamp(preview.header.dataStamp)}; local ${formatStamp(preview.localDataStamp)}). Importing will replace clients, documents, templates, preferences, logo, and ID photos on this account.`,
+      warnOlder: false,
+    };
+  }
+  if (preview.recency === 'older') {
+    return {
+      title: 'This backup is older',
+      body: `This backup is not more recent than your current data (backup ${formatStamp(preview.header.dataStamp)}; local ${formatStamp(preview.localDataStamp)}). Importing will overwrite newer local changes with the older backup.`,
+      warnOlder: true,
+    };
+  }
+  return {
+    title: 'Import backup?',
+    body: `This backup looks about the same age as your current data (${formatStamp(preview.header.dataStamp)}). Importing will replace clients, documents, templates, preferences, logo, and ID photos on this account.`,
+    warnOlder: false,
+  };
+}
 
 export function DatabaseScreen({
   onInspectionImported,
@@ -18,12 +52,21 @@ export function DatabaseScreen({
   const [dataDir, setDataDir] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [exportingKit, setExportingKit] = useState(false);
+  const [exportingBackup, setExportingBackup] = useState(false);
+  const [inspectingBackup, setInspectingBackup] = useState(false);
+  const [applyingBackup, setApplyingBackup] = useState(false);
+  const [backupPreview, setBackupPreview] = useState<Extract<
+    DatabaseBackupInspectResult,
+    { canceled: false }
+  > | null>(null);
   const [importingJson, setImportingJson] = useState(false);
   const [importingPdf, setImportingPdf] = useState(false);
   const [importingClients, setImportingClients] = useState(false);
   const [openingFolder, setOpeningFolder] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const backupEnabled = window.blazeaudit.database.backupEnabled;
 
   useEffect(() => {
     void window.blazeaudit.database.getDataDir().then(setDataDir);
@@ -128,6 +171,58 @@ export function DatabaseScreen({
     }
   };
 
+  const exportBackup = async () => {
+    setExportingBackup(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const result = await window.blazeaudit.database.exportBackup();
+      if (result.saved) {
+        setMessage(`Database backup exported to ${result.filePath}`);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Database export failed.');
+    } finally {
+      setExportingBackup(false);
+    }
+  };
+
+  const beginImportBackup = async () => {
+    setInspectingBackup(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const result = await window.blazeaudit.database.inspectBackup();
+      if (!result.canceled) {
+        setBackupPreview(result);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Database import failed.');
+    } finally {
+      setInspectingBackup(false);
+    }
+  };
+
+  const confirmImportBackup = async () => {
+    if (!backupPreview) return;
+    setApplyingBackup(true);
+    setError(null);
+    try {
+      const result = await window.blazeaudit.database.applyBackup(backupPreview.filePath);
+      setBackupPreview(null);
+      if (result.applied) {
+        setMessage('Database restored. Reloading…');
+        window.setTimeout(() => window.location.reload(), 400);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Database import failed.');
+    } finally {
+      setApplyingBackup(false);
+    }
+  };
+
+  const previewCopy = backupPreview ? recencyCopy(backupPreview) : null;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <p className="text-sm text-neutral-400">
@@ -148,7 +243,7 @@ export function DatabaseScreen({
       <Section
         icon={HardDriveDownload}
         title="Full database"
-        description="Export or restore the entire encrypted local database — clients, templates, inspections, and settings. On a normal install the database lives in your Windows AppData folder."
+        description="Export or restore the entire encrypted local database — clients, templates, inspections, preferences, company logo, and ID photos — as one .blazebak file. Import only works for the same account email."
       >
         <ActionButton
           icon={FolderOpen}
@@ -157,8 +252,29 @@ export function DatabaseScreen({
           onClick={() => void openDataFolder()}
           loading={openingFolder}
         />
-        <ActionButton icon={Download} label="Export database" disabled hint="Coming soon" />
-        <ActionButton icon={Upload} label="Import database" disabled hint="Coming soon" />
+        {backupEnabled ? (
+          <>
+            <ActionButton
+              icon={Download}
+              label="Export database"
+              loadingLabel="Exporting…"
+              onClick={() => void exportBackup()}
+              loading={exportingBackup}
+            />
+            <ActionButton
+              icon={Upload}
+              label="Import database"
+              loadingLabel="Checking…"
+              onClick={() => void beginImportBackup()}
+              loading={inspectingBackup || applyingBackup}
+            />
+          </>
+        ) : (
+          <>
+            <ActionButton icon={Download} label="Export database" disabled hint="Coming soon" />
+            <ActionButton icon={Upload} label="Import database" disabled hint="Coming soon" />
+          </>
+        )}
         {dataDir && (
           <p className="w-full text-xs text-neutral-600">
             <span className="text-neutral-500">Data folder · </span>
@@ -223,6 +339,25 @@ export function DatabaseScreen({
         <Database className="size-3.5" />
         <span>All data stays on this machine unless you export it.</span>
       </div>
+
+      {backupPreview && previewCopy ? (
+        <ConfirmDialog
+          title={previewCopy.title}
+          confirmLabel={applyingBackup ? 'Importing…' : 'Import and replace'}
+          cancelLabel="Cancel"
+          onConfirm={() => void confirmImportBackup()}
+          onCancel={() => {
+            if (!applyingBackup) setBackupPreview(null);
+          }}
+        >
+          <p>{previewCopy.body}</p>
+          {previewCopy.warnOlder ? (
+            <p className="mt-2 text-amber-300/90">
+              You can still continue, but anything newer on this PC will be lost.
+            </p>
+          ) : null}
+        </ConfirmDialog>
+      ) : null}
     </div>
   );
 }
