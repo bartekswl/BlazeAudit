@@ -44,20 +44,18 @@ export function registerInspectionsIpc(): void {
     },
   );
 
-  ipcMain.handle(IpcChannels.inspectionsImportPdf, async () => {
-    const { importInspectionPdf } = await import('../pdf/importInspectionPdf');
-    return importInspectionPdf();
-  });
-
   ipcMain.handle(IpcChannels.inspectionsInspectPdfImport, async () => {
     const { inspectInspectionPdfImport } = await import('../pdf/importInspectionPdf');
     return inspectInspectionPdfImport();
   });
 
-  ipcMain.handle(IpcChannels.inspectionsConfirmPdfImport, async (_event, filePath: string) => {
-    const { confirmInspectionPdfImport } = await import('../pdf/importInspectionPdf');
-    return confirmInspectionPdfImport(filePath);
-  });
+  ipcMain.handle(
+    IpcChannels.inspectionsConfirmPdfImport,
+    async (_event, filePath: string, options?: { replaceExisting?: boolean }) => {
+      const { confirmInspectionPdfImport } = await import('../pdf/importInspectionPdf');
+      return confirmInspectionPdfImport(filePath, options ?? {});
+    },
+  );
 
   ipcMain.handle(IpcChannels.inspectionsResolveContext, (_event, id: string) => {
     const inspection = inspections.getInspection(id);

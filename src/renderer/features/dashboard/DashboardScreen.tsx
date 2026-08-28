@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CalendarClock, CalendarDays, CheckCircle2, ImagePlus, Users } from 'lucide-react';
+import { CalendarClock, CalendarDays, CheckCircle2, ImagePlus, Trash2, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import {
@@ -8,8 +8,14 @@ import {
   type CalendarTask,
 } from '../../../shared/calendarTasks';
 import { formatIsoDateLocal, todayLocalIsoDate } from '../../../shared/dates';
-import { shortInspectionDisplayName, type DashboardStats } from '../../../shared/inspection';
+import {
+  shortInspectionDisplayName,
+  type DashboardStats,
+  type InspectionSummary,
+} from '../../../shared/inspection';
 import type { BusinessProfile } from '../../../shared/profile';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { CompanyLogoMark } from '../../components/CompanyLogoMark';
 import { DashboardBanner } from './DashboardBanner';
 
 function useNow(): Date {
@@ -73,12 +79,19 @@ export function DashboardScreen({
   const [tasksLoading, setTasksLoading] = useState(true);
   const [business, setBusiness] = useState<BusinessProfile | null>(null);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<InspectionSummary | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
+  const refreshStats = () => {
+    setLoading(true);
     void window.blazeaudit.inspections
       .getDashboard()
       .then(setStats)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    refreshStats();
   }, []);
 
   useEffect(() => {
@@ -99,6 +112,20 @@ export function DashboardScreen({
       .catch(() => setUpcomingTasks([]))
       .finally(() => setTasksLoading(false));
   }, []);
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    try {
+      await window.blazeaudit.inspections.remove(pendingDelete.id);
+      setPendingDelete(null);
+      refreshStats();
+    } catch {
+      setPendingDelete(null);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     void Promise.all([
@@ -145,17 +172,11 @@ export function DashboardScreen({
               <div className="text-xs text-[var(--ba-text-faint)]">No address on file</div>
             )}
           </div>
-          <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border-2 border-[var(--ba-chrome-border)] bg-[var(--ba-input-bg)] p-1.5">
-            {logoDataUrl ? (
-              <img
-                src={logoDataUrl}
-                alt=""
-                className="size-full scale-[1.35] object-contain"
-              />
-            ) : (
-              <ImagePlus className="size-5 text-[var(--ba-text-faint)]" aria-hidden />
-            )}
-          </div>
+          <CompanyLogoMark
+            src={logoDataUrl}
+            size="lg"
+            fallback={<ImagePlus className="size-5 text-[var(--ba-text-faint)]" aria-hidden />}
+          />
         </div>
       </section>
 
@@ -194,11 +215,14 @@ export function DashboardScreen({
           ) : stats?.recentInspections.length ? (
             <ul className="mt-3 space-y-2">
               {stats.recentInspections.map((row) => (
-                <li key={row.id}>
+                <li
+                  key={row.id}
+                  className="ba-list-item flex items-center gap-1 px-1 py-1"
+                >
                   <button
                     type="button"
                     onClick={() => onOpenInspection(row.id)}
-                    className="ba-list-item w-full px-3 py-2 text-left"
+                    className="min-w-0 flex-1 px-2 py-1 text-left"
                   >
                     <span className="block truncate text-sm font-medium text-[var(--ba-text-primary)]">
                       {shortInspectionDisplayName(row.title, row.clientName)}
@@ -207,6 +231,15 @@ export function DashboardScreen({
                       {row.clientName} · {row.status}
                       {row.inspectedAt ? ` · ${row.inspectedAt}` : ''}
                     </span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Delete ${shortInspectionDisplayName(row.title, row.clientName)}`}
+                    title="Delete document"
+                    onClick={() => setPendingDelete(row)}
+                    className="shrink-0 rounded-md border border-transparent p-1.5 text-[var(--ba-text-muted)] transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
+                  >
+                    <Trash2 className="size-3.5" />
                   </button>
                 </li>
               ))}
@@ -243,6 +276,26 @@ export function DashboardScreen({
           )}
         </div>
       </section>
+
+      {pendingDelete ? (
+        <ConfirmDialog
+          title="Delete document?"
+          icon={Trash2}
+          confirmLabel={deleting ? 'Deleting…' : 'Delete'}
+          onCancel={() => {
+            if (!deleting) setPendingDelete(null);
+          }}
+          onConfirm={() => void confirmDelete()}
+        >
+          <p>
+            <span className="font-medium text-[var(--ba-text-primary)]">
+              {shortInspectionDisplayName(pendingDelete.title, pendingDelete.clientName)}
+            </span>{' '}
+            will be permanently deleted.
+          </p>
+          <p>This cannot be undone.</p>
+        </ConfirmDialog>
+      ) : null}
     </div>
   );
 }

@@ -9,6 +9,7 @@ import type { Block, BlockPath, Document } from '../../../shared/document';
 import { setBlockValue } from '../../../shared/document';
 
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
+import { formatDateTimeCompact } from '../../../shared/dates';
 import { isFormInspectionDocument, isBlockDocument } from '../../../shared/form';
 
 import { BlockFillIn } from './BlockFillIn';
@@ -687,6 +688,22 @@ function BlockInspectionEditorInner({
               placeholder="—"
 
             />
+
+          </HeaderField>
+
+          <HeaderField label="Modified">
+
+            <p
+
+              className="truncate rounded border border-white/5 bg-neutral-950/60 px-2 py-1 text-xs tabular-nums text-neutral-400"
+
+              title={inspection.updatedAt}
+
+            >
+
+              {formatDateTimeCompact(inspection.updatedAt)}
+
+            </p>
 
           </HeaderField>
 

@@ -108,6 +108,7 @@ function toSummary(row: InspectionRow): InspectionSummary {
     clientId: row.client_id,
     clientName: row.client_name ?? '',
     title: row.title,
+    templateName: row.template_name ?? null,
     status: row.status as InspectionSummary['status'],
     inspector: row.inspector,
     inspectedAt: row.inspected_at,
@@ -119,9 +120,12 @@ function toSummary(row: InspectionRow): InspectionSummary {
 }
 
 const summarySelect = `
-  SELECT i.*, c.name AS client_name
+  SELECT i.*, c.name AS client_name,
+         COALESCE(bt.name, ct.name) AS template_name
     FROM inspections i
     JOIN clients c ON c.id = i.client_id
+    LEFT JOIN builtin_templates bt ON i.template_kind = 'builtin' AND bt.id = i.template_id
+    LEFT JOIN custom_templates ct ON i.template_kind = 'custom' AND ct.id = i.template_id
 `;
 
 const detailSelect = `
@@ -284,7 +288,10 @@ export function createInspectionFromTemplate(input: CreateInspectionInput): Insp
   return getInspection(id)!;
 }
 
-export function createInspectionFromPdfExport(payload: PdfInspectionExport): Inspection {
+export function createInspectionFromPdfExport(
+  payload: PdfInspectionExport,
+  options: { replaceExisting?: boolean } = {},
+): Inspection {
   const src = payload.inspection;
 
   let clientId = src.clientId;
@@ -327,10 +334,57 @@ export function createInspectionFromPdfExport(payload: PdfInspectionExport): Ins
   const nextDueAt = status === 'complete' ? computeNextDueAt(inspectedAt, cadence) : null;
   const title = src.title?.trim() || 'Imported inspection';
   const now = new Date().toISOString();
-  const id = randomUUID();
+
+  const preferredId = payload.inspectionId?.trim() || src.id?.trim() || '';
+  const existingByPreferredId = preferredId ? getInspection(preferredId) : null;
+  if (existingByPreferredId && !options.replaceExisting) {
+    throw new Error(
+      `Document "${existingByPreferredId.title}" is already in this database.`,
+    );
+  }
 
   const templateKind: TemplateKind | null =
     src.templateKind === 'builtin' || src.templateKind === 'custom' ? src.templateKind : null;
+
+  if (existingByPreferredId && options.replaceExisting) {
+    const id = existingByPreferredId.id;
+    getDatabase()
+      .prepare(
+        `UPDATE inspections SET
+           client_id = @clientId,
+           template_kind = @templateKind,
+           template_id = @templateId,
+           title = @title,
+           status = @status,
+           inspector = @inspector,
+           document = @document,
+           inspected_at = @inspectedAt,
+           project_number = @projectNumber,
+           cadence = @cadence,
+           next_due_at = @nextDueAt,
+           updated_at = @updatedAt
+         WHERE id = @id`,
+      )
+      .run({
+        id,
+        clientId,
+        templateKind,
+        templateId: src.templateId,
+        title,
+        status,
+        inspector: src.inspector?.trim() ?? '',
+        document: JSON.stringify(document),
+        inspectedAt,
+        projectNumber: src.projectNumber?.trim() ?? '',
+        cadence,
+        nextDueAt,
+        updatedAt: now,
+      });
+    return getInspection(id)!;
+  }
+
+  // Prefer the exported id so re-import of the same PDF can detect duplicates.
+  const id = preferredId || randomUUID();
 
   getDatabase()
     .prepare(

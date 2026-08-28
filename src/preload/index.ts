@@ -196,9 +196,6 @@ const api = {
       targetPath?: string,
     ): Promise<{ saved: false } | { saved: true; filePath: string }> =>
       ipcRenderer.invoke(IpcChannels.inspectionsExportPdf, id, html, targetPath),
-    importPdf: (): Promise<
-      { imported: false } | { imported: true; inspectionId: string; filePath: string }
-    > => ipcRenderer.invoke(IpcChannels.inspectionsImportPdf),
     inspectPdfImport: (): Promise<
       | { canceled: true }
       | {
@@ -209,12 +206,15 @@ const api = {
           clientId: string;
           documentTitle: string;
           hasClientSnapshot: boolean;
+          documentAlreadyExists: boolean;
+          existingInspectionId: string | null;
         }
     > => ipcRenderer.invoke(IpcChannels.inspectionsInspectPdfImport),
     confirmPdfImport: (
       filePath: string,
+      options?: { replaceExisting?: boolean },
     ): Promise<{ imported: false } | { imported: true; inspectionId: string; filePath: string }> =>
-      ipcRenderer.invoke(IpcChannels.inspectionsConfirmPdfImport, filePath),
+      ipcRenderer.invoke(IpcChannels.inspectionsConfirmPdfImport, filePath, options),
     resolveContext: (id: string): Promise<DocumentContext> =>
       ipcRenderer.invoke(IpcChannels.inspectionsResolveContext, id),
   },
