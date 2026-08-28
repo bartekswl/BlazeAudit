@@ -419,7 +419,7 @@ export function CustomersScreen({
                   }}
                   className="cursor-pointer border-t border-[var(--ba-panel-border)] hover:bg-[var(--ba-row-hover-bg)]"
                 >
-                  <TruncateCell value={client.name} className="font-medium" />
+                  <TruncateCell value={client.name} className="font-medium" wrap />
                   <TruncateCell value={client.contactName} />
                   <TruncateCell value={client.phone} />
                   <TruncateCell value={client.email} />
@@ -722,20 +722,33 @@ function ClientEditor({
   );
 }
 
-/** Truncated table cell; native tooltip shows the full value on hover. */
-function TruncateCell({ value, className }: { value: string; className?: string }) {
+/** Table cell; wraps long values to 2 lines when `wrap`, otherwise single-line truncate. */
+function TruncateCell({
+  value,
+  className,
+  wrap = false,
+}: {
+  value: string;
+  className?: string;
+  wrap?: boolean;
+}) {
   const trimmed = value.trim();
   const isEmpty = !trimmed;
   return (
     <td
       className={cn(
-        'truncate px-4 py-3',
+        'px-4 py-3',
+        wrap ? 'align-middle' : 'truncate',
         isEmpty ? 'text-[var(--ba-text-faint)]' : 'text-[var(--ba-text-primary)]',
         className,
       )}
       title={trimmed || undefined}
     >
-      {trimmed || '—'}
+      {wrap ? (
+        <span className="line-clamp-2 leading-tight">{trimmed || '—'}</span>
+      ) : (
+        trimmed || '—'
+      )}
     </td>
   );
 }

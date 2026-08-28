@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import {
   Database,
@@ -13,6 +13,7 @@ import {
 import type { DatabaseBackupInspectResult } from '../../../shared/databaseBackup';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { LoadingOverlay } from '../../components/LoadingOverlay';
+import { useInspectionPdfImport } from '../documents/useInspectionPdfImport';
 
 function formatStamp(iso: string): string {
   const ms = Date.parse(iso);
@@ -62,11 +63,18 @@ export function DatabaseScreen({
     { canceled: false }
   > | null>(null);
   const [importingJson, setImportingJson] = useState(false);
-  const [importingPdf, setImportingPdf] = useState(false);
   const [importingClients, setImportingClients] = useState(false);
   const [openingFolder, setOpeningFolder] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const { startPdfImport, importingPdf, pdfImportDialogs } = useInspectionPdfImport({
+    onImported: (result) => {
+      setMessage(`Inspection imported from ${result.filePath}`);
+      onInspectionImported?.(result.inspectionId);
+    },
+    onError: (msg) => setError(msg),
+  });
 
   const backupEnabled = window.blazeaudit.database.backupEnabled;
 
@@ -142,21 +150,10 @@ export function DatabaseScreen({
     }
   };
 
-  const importInspectionPdf = async () => {
-    setImportingPdf(true);
+  const startPdfImportFromDatabase = () => {
     setMessage(null);
     setError(null);
-    try {
-      const result = await window.blazeaudit.inspections.importPdf();
-      if (result.imported) {
-        setMessage(`Inspection imported from ${result.filePath}`);
-        onInspectionImported?.(result.inspectionId);
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'PDF import failed.');
-    } finally {
-      setImportingPdf(false);
-    }
+    void startPdfImport();
   };
 
   const openDataFolder = async () => {
@@ -317,7 +314,7 @@ export function DatabaseScreen({
           icon={FileText}
           label="Import from BlazeAudit PDF"
           loadingLabel="Importing…"
-          onClick={() => void importInspectionPdf()}
+          onClick={startPdfImportFromDatabase}
           loading={importingPdf}
         />
       </Section>
@@ -369,6 +366,8 @@ export function DatabaseScreen({
           ) : null}
         </ConfirmDialog>
       ) : null}
+
+      {pdfImportDialogs}
     </div>
   );
 }

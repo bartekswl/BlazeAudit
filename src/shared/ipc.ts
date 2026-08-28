@@ -62,7 +62,6 @@ export const IpcChannels = {
   inspectionsClientStats: 'inspections:client-stats',
   inspectionsExportPdf: 'inspections:export-pdf',
   inspectionsPickPdfPath: 'inspections:pick-pdf-path',
-  inspectionsImportPdf: 'inspections:import-pdf',
   inspectionsInspectPdfImport: 'inspections:inspect-pdf-import',
   inspectionsConfirmPdfImport: 'inspections:confirm-pdf-import',
   inspectionsResolveContext: 'inspections:resolve-context',

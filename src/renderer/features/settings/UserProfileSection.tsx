@@ -10,6 +10,7 @@ import {
 } from '../../../shared/address';
 import { BUSINESS_PROFILE_LIMITS, type BusinessProfileInput, type Inspector } from '../../../shared/profile';
 import { inputCls } from '../templates/BlockList';
+import { CompanyLogoMark } from '../../components/CompanyLogoMark';
 import { InlineLoader } from '../../components/LoadingOverlay';
 
 const emptyBusiness = (): BusinessProfileInput => ({
@@ -271,13 +272,12 @@ export function UserProfileSection() {
         <div>
           <p className="mb-2 text-xs font-medium text-neutral-400">Company logo</p>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="grid size-16 place-items-center overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
-              {logoDataUrl ? (
-                <img src={logoDataUrl} alt="Company logo" className="max-h-full max-w-full object-contain" />
-              ) : (
-                <ImagePlus className="size-6 text-neutral-600" />
-              )}
-            </div>
+            <CompanyLogoMark
+              src={logoDataUrl}
+              size="lg"
+              alt="Company logo"
+              fallback={<ImagePlus className="size-6 text-neutral-600" />}
+            />
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"

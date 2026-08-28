@@ -38,6 +38,7 @@ import {
   type RepeatableFormPageKind,
 } from '../../../shared/form';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
+import { formatDateTimeCompact } from '../../../shared/dates';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useRegisterFormOutline } from './DocumentOutlineContext';
 import { useDocumentAutosave } from './useDocumentAutosave';
@@ -561,10 +562,13 @@ function FormInspectionEditorInner({
 
           <div
             className="mt-1 grid gap-x-2 gap-y-0"
-            style={{ gridTemplateColumns: '7rem minmax(0, 12rem) 1fr' }}
+            style={{ gridTemplateColumns: '7rem minmax(0, 1fr) 9.5rem auto' }}
           >
             <span className="text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">Cadence</span>
             <span className="text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">Client</span>
+            <span className="text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">
+              Modified
+            </span>
             <span aria-hidden="true" />
             <select
               className={`${compactFieldCls} ba-select`}
@@ -586,6 +590,12 @@ function FormInspectionEditorInner({
               title={inspection.clientName}
             >
               {inspection.clientName}
+            </p>
+            <p
+              className={`${compactFieldCls} truncate tabular-nums text-[var(--ba-text-muted)]`}
+              title={inspection.updatedAt}
+            >
+              {formatDateTimeCompact(inspection.updatedAt)}
             </p>
             <div className="flex items-center justify-end">
               <button

@@ -30,6 +30,7 @@ export interface InspectionSummary {
   clientId: string;
   clientName: string;
   title: string;
+  templateName: string | null;
   status: InspectionStatus;
   inspector: string;
   inspectedAt: string | null;

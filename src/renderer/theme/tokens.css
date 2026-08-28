@@ -19,6 +19,20 @@
   --ba-chrome-border: rgb(249 115 22 / 0.12);
   --ba-chrome-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset;
 
+  --ba-logo-plate-bg: linear-gradient(
+    155deg,
+    rgb(41 37 36 / 0.95) 0%,
+    rgb(24 22 20 / 0.98) 55%,
+    rgb(18 16 15 / 1) 100%
+  );
+  --ba-logo-plate-fade: rgb(24 22 20);
+  --ba-logo-plate-ring: rgb(249 115 22 / 0.42);
+  --ba-logo-plate-shadow:
+    0 1px 0 rgb(255 255 255 / 0.1) inset,
+    0 0 0 1px rgb(249 115 22 / 0.18),
+    0 6px 18px rgb(0 0 0 / 0.45),
+    0 0 0 1px rgb(0 0 0 / 0.35);
+
   --ba-panel-bg: linear-gradient(145deg, rgb(28 25 23 / 0.92) 0%, rgb(15 14 13 / 0.88) 100%);
   --ba-panel-border: rgb(255 255 255 / 0.08);
   --ba-panel-shadow:
@@ -115,6 +129,20 @@
     0 1px 0 rgb(255 255 255 / 0.7) inset,
     0 0 0 1px rgb(232 93 4 / 0.08),
     0 2px 14px rgb(232 93 4 / 0.1);
+
+  --ba-logo-plate-bg: linear-gradient(
+    155deg,
+    rgb(255 255 255 / 1) 0%,
+    rgb(255 250 244 / 0.98) 50%,
+    rgb(252 244 234 / 0.96) 100%
+  );
+  --ba-logo-plate-fade: rgb(255 250 244);
+  --ba-logo-plate-ring: rgb(232 93 4 / 0.48);
+  --ba-logo-plate-shadow:
+    0 1px 0 rgb(255 255 255 / 0.95) inset,
+    0 0 0 1px rgb(232 93 4 / 0.22),
+    0 6px 16px rgb(120 53 15 / 0.14),
+    0 0 0 1px rgb(232 93 4 / 0.1);
 
   /* Brighter than page cream — clean paper tiles */
   --ba-panel-bg: linear-gradient(

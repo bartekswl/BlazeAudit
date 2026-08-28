@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowDownUp, FileText, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { formatAddress } from '../../../shared/address';
-import { cadenceLabel, isOverdue } from '../../../shared/cadence';
+import { isOverdue } from '../../../shared/cadence';
+import { formatDateTimeCompact, formatDateTimeListParts } from '../../../shared/dates';
 import {
   shortInspectionDisplayName,
   sortInspectionsByDate,
@@ -9,12 +10,24 @@ import {
 } from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
 import { cn } from '../../lib/cn';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { InlineLoader } from '../../components/LoadingOverlay';
 import { ListPagination } from '../../components/ListPagination';
 import { paginateItems } from '../../lib/pagination';
 
 const filterInputCls =
   'rounded-md border border-white/10 bg-neutral-950/60 text-[11px] text-neutral-300 placeholder:text-neutral-600 focus:border-flame-500/40 focus:outline-none';
+
+/**
+ * Shared track sizes for header + rows (must match exactly).
+ * Modified + delete share the last track so they stay close; fixed cols are centered.
+ */
+const docRowGrid =
+  'grid-cols-[minmax(0,1fr)_5.5rem_5.5rem_3.75rem_auto] gap-x-3';
+
+const docMetaTailCls = 'flex items-center justify-end gap-1.5';
+const docModifiedColCls = 'w-[4.75rem] shrink-0 text-center';
+const docDeleteColCls = 'grid w-7 shrink-0 place-items-center';
 
 export function CustomerDetailScreen({
   clientId,
@@ -44,6 +57,9 @@ export function CustomerDetailScreen({
   const [yearFilter, setYearFilter] = useState<'all' | string>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<InspectionSummary | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -57,6 +73,7 @@ export function CustomerDetailScreen({
       setInspections(rows);
       setStats(clientStats);
       setError(result ? null : 'Client not found.');
+      setActionError(null);
     } catch (e) {
       setClient(null);
       setError(e instanceof Error ? e.message : 'Failed to load client.');
@@ -121,6 +138,22 @@ export function CustomerDetailScreen({
     [sortedInspections, listPage],
   );
 
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    setActionError(null);
+    try {
+      await window.blazeaudit.inspections.remove(pendingDelete.id);
+      setPendingDelete(null);
+      await load();
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : 'Failed to delete document.');
+      setPendingDelete(null);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return <InlineLoader />;
   }
@@ -133,6 +166,11 @@ export function CustomerDetailScreen({
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
+      {actionError ? (
+        <div className="shrink-0 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+          {actionError}
+        </div>
+      ) : null}
       <section className="shrink-0 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2">
         <div className="flex items-center justify-between gap-3">
           <h2 className="min-w-0 truncate text-sm font-semibold text-neutral-100">{client.name}</h2>
@@ -297,56 +335,106 @@ export function CustomerDetailScreen({
           </div>
         ) : (
           <>
-            <div className="mb-1 grid shrink-0 grid-cols-[minmax(0,1fr)_6.5rem_7rem_auto] gap-2 px-3 text-[10px] font-medium uppercase tracking-wide text-neutral-600">
+            <div
+              className={cn(
+                'mb-1 grid shrink-0 px-4 text-[10px] font-medium uppercase tracking-wide text-neutral-600',
+                docRowGrid,
+              )}
+            >
               <span>Name</span>
-              <span>Date</span>
-              <span>Project #</span>
-              <span className="w-16 text-right">Status</span>
+              <span className="text-center">Project #</span>
+              <span className="text-center">Date</span>
+              <span className="text-center">Status</span>
+              <div className={docMetaTailCls}>
+                <span className={docModifiedColCls}>Modified</span>
+                <span className={docDeleteColCls} aria-hidden="true" />
+              </div>
             </div>
-            <ul className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
-              {pagedInspections.items.map((row) => (
-                <li key={row.id}>
-                  <button
-                    type="button"
-                    onClick={() => onOpenInspection(row.id)}
-                    className="grid w-full grid-cols-[minmax(0,1fr)_6.5rem_7rem_auto] items-center gap-2 rounded-lg border border-white/5 bg-neutral-950/40 px-3 py-2 text-left transition-colors hover:border-white/10 hover:bg-white/[0.03]"
+            <ul className="min-h-0 flex-1 space-y-1.5 overflow-y-auto">
+              {pagedInspections.items.map((row) => {
+                const displayName = shortInspectionDisplayName(row.title, row.clientName);
+                const modified = formatDateTimeListParts(row.updatedAt);
+                return (
+                  <li
+                    key={row.id}
+                    className={cn(
+                      'grid items-center rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 transition-colors hover:border-white/10 hover:bg-white/[0.03]',
+                      docRowGrid,
+                    )}
                   >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-neutral-100">
-                        {shortInspectionDisplayName(row.title, row.clientName)}
-                      </span>
-                      <span className="block truncate text-[11px] text-neutral-500">
-                        {row.cadence ? cadenceLabel(row.cadence) : ''}
-                        {row.nextDueAt
-                          ? ` · due ${row.nextDueAt}${isOverdue(row.nextDueAt) ? ' (overdue)' : ''}`
-                          : ''}
-                      </span>
-                    </span>
-                    <span className="truncate text-xs text-neutral-400">
-                      {row.inspectedAt || '—'}
-                    </span>
-                    <span
+                    <button
+                      type="button"
+                      onClick={() => onOpenInspection(row.id)}
+                      className="min-w-0 text-left"
+                      title={[displayName, row.templateName].filter(Boolean).join('\n')}
+                    >
+                      <p className="line-clamp-2 text-sm font-medium leading-tight text-neutral-100">
+                        {displayName}
+                      </p>
+                      {row.templateName ? (
+                        <p className="truncate text-[10px] leading-tight text-neutral-500">
+                          {row.templateName}
+                        </p>
+                      ) : null}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onOpenInspection(row.id)}
                       className={cn(
-                        'truncate text-xs',
+                        'min-w-0 truncate text-center text-xs leading-tight',
                         row.projectNumber.trim() ? 'text-neutral-300' : 'text-neutral-600',
                       )}
                       title={row.projectNumber.trim() || undefined}
                     >
                       {row.projectNumber.trim() || '—'}
-                    </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onOpenInspection(row.id)}
+                      className="min-w-0 truncate text-center text-xs leading-tight text-neutral-400"
+                    >
+                      {row.inspectedAt || '—'}
+                    </button>
                     <span
                       className={cn(
-                        'w-16 shrink-0 rounded-full px-2 py-0.5 text-center text-[10px]',
+                        'justify-self-center rounded-full px-1.5 py-0.5 text-center text-[9px] leading-none capitalize',
                         row.status === 'complete'
-                          ? 'border border-emerald-500/30 text-emerald-300'
-                          : 'border border-amber-500/30 text-amber-300',
+                          ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                          : 'border border-amber-500/30 bg-amber-500/10 text-amber-300',
                       )}
                     >
                       {row.status}
                     </span>
-                  </button>
-                </li>
-              ))}
+                    <div className={docMetaTailCls}>
+                      <button
+                        type="button"
+                        onClick={() => onOpenInspection(row.id)}
+                        className={cn(
+                          docModifiedColCls,
+                          'text-[10px] leading-tight text-neutral-500',
+                        )}
+                        title={formatDateTimeCompact(row.updatedAt)}
+                      >
+                        <span className="block truncate">{modified.date}</span>
+                        {modified.time ? (
+                          <span className="block truncate">{modified.time}</span>
+                        ) : null}
+                      </button>
+                      <div className={docDeleteColCls}>
+                        <button
+                          type="button"
+                          aria-label={`Delete ${displayName}`}
+                          title="Delete document"
+                          onClick={() => setPendingDelete(row)}
+                          className="rounded-lg border border-white/10 p-1.5 text-neutral-500 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
             <ListPagination
               page={pagedInspections.page}
@@ -360,6 +448,26 @@ export function CustomerDetailScreen({
           </>
         )}
       </section>
+
+      {pendingDelete ? (
+        <ConfirmDialog
+          title="Delete document?"
+          icon={Trash2}
+          confirmLabel={deleting ? 'Deleting…' : 'Delete'}
+          onCancel={() => {
+            if (!deleting) setPendingDelete(null);
+          }}
+          onConfirm={() => void confirmDelete()}
+        >
+          <p>
+            <span className="font-medium text-[var(--ba-text-primary)]">
+              {shortInspectionDisplayName(pendingDelete.title, pendingDelete.clientName)}
+            </span>{' '}
+            will be permanently deleted.
+          </p>
+          <p>This cannot be undone.</p>
+        </ConfirmDialog>
+      ) : null}
     </div>
   );
 }

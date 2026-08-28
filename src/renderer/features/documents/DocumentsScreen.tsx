@@ -6,10 +6,10 @@ import {
   Search,
   Trash2,
   Upload,
-  Users,
   X,
 } from 'lucide-react';
 import { cadenceLabel, isOverdue } from '../../../shared/cadence';
+import { formatDateTimeCompact, formatDateTimeListParts } from '../../../shared/dates';
 import {
   shortInspectionDisplayName,
   sortInspectionsByDate,
@@ -23,9 +23,21 @@ import { InlineLoader } from '../../components/LoadingOverlay';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { ListPagination } from '../../components/ListPagination';
 import { paginateItems } from '../../lib/pagination';
+import { useInspectionPdfImport } from './useInspectionPdfImport';
 
 const filterInputCls =
   'rounded-md border border-white/10 bg-neutral-950/60 text-[11px] text-neutral-300 placeholder:text-neutral-600 focus:border-flame-500/40 focus:outline-none';
+
+/**
+ * Shared track sizes for header + rows (must match exactly).
+ * Modified + delete share the last track so they stay close; fixed cols are centered.
+ */
+const docRowGrid =
+  'grid-cols-[minmax(0,1fr)_5.5rem_5.5rem_3.75rem_auto] gap-x-3';
+
+const docMetaTailCls = 'flex items-center justify-end gap-1.5';
+const docModifiedColCls = 'w-[4.75rem] shrink-0 text-center';
+const docDeleteColCls = 'grid w-7 shrink-0 place-items-center';
 
 const InspectionEditor = lazy(() =>
   import('./InspectionEditor').then((module) => ({ default: module.InspectionEditor })),
@@ -73,13 +85,6 @@ export function DocumentsScreen({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingInspection, setEditingInspection] = useState<Inspection | null>(null);
   const [pendingDelete, setPendingDelete] = useState<InspectionSummary | null>(null);
-  const [importingPdf, setImportingPdf] = useState(false);
-  const [pendingPdfImport, setPendingPdfImport] = useState<{
-    filePath: string;
-    clientName: string;
-    documentTitle: string;
-    hasClientSnapshot: boolean;
-  } | null>(null);
   const [metaPinned, setMetaPinned] = useState(true);
   const toggleMetaPin = useCallback(() => setMetaPinned((v) => !v), []);
 
@@ -123,6 +128,14 @@ export function DocumentsScreen({
       setLoading(false);
     }
   }, []);
+
+  const { startPdfImport, importingPdf, pdfImportDialogs } = useInspectionPdfImport({
+    onImported: async (result) => {
+      setEditingId(result.inspectionId);
+      await refresh();
+    },
+    onError: (message) => setError(message),
+  });
 
   useEffect(() => {
     void refresh();
@@ -215,43 +228,6 @@ export function DocumentsScreen({
     await refresh();
   };
 
-  const finishPdfImport = async (filePath: string) => {
-    setImportingPdf(true);
-    setError(null);
-    try {
-      const result = await window.blazeaudit.inspections.confirmPdfImport(filePath);
-      if (result.imported) {
-        setEditingId(result.inspectionId);
-        await refresh();
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'PDF import failed.');
-    } finally {
-      setImportingPdf(false);
-      setPendingPdfImport(null);
-    }
-  };
-
-  const startPdfImport = async () => {
-    setError(null);
-    try {
-      const preview = await window.blazeaudit.inspections.inspectPdfImport();
-      if (preview.canceled) return;
-      if (preview.needsNewClient) {
-        setPendingPdfImport({
-          filePath: preview.filePath,
-          clientName: preview.clientName,
-          documentTitle: preview.documentTitle,
-          hasClientSnapshot: preview.hasClientSnapshot,
-        });
-        return;
-      }
-      await finishPdfImport(preview.filePath);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'PDF import failed.');
-    }
-  };
-
   if (editingId) {
     if (!editingInspection) {
       return <InlineLoader label="Loading inspection…" />;
@@ -284,7 +260,10 @@ export function DocumentsScreen({
           <button
             type="button"
             disabled={importingPdf}
-            onClick={() => void startPdfImport()}
+            onClick={() => {
+              setError(null);
+              void startPdfImport();
+            }}
             className="inline-flex items-center gap-2 rounded-lg border border-flame-500/40 bg-flame-500/10 px-3 py-2 text-sm font-semibold text-flame-300 hover:bg-flame-500/20 disabled:opacity-50"
           >
             <Upload className="size-4" />
@@ -404,74 +383,115 @@ export function DocumentsScreen({
             </div>
           ) : (
             <>
-          <div className="grid grid-cols-[minmax(0,1fr)_7rem_7rem_auto_auto] gap-3 px-4 text-[10px] font-medium uppercase tracking-wide text-neutral-600">
+          <div
+            className={cn(
+              'grid px-4 text-[10px] font-medium uppercase tracking-wide text-neutral-600',
+              docRowGrid,
+            )}
+          >
             <span>Name</span>
-            <span>Date</span>
-            <span>Project #</span>
-            <span className="w-20 text-center">Status</span>
-            <span className="w-9" aria-hidden="true" />
+            <span className="text-center">Project #</span>
+            <span className="text-center">Date</span>
+            <span className="text-center">Status</span>
+            <div className={docMetaTailCls}>
+              <span className={docModifiedColCls}>Modified</span>
+              <span className={docDeleteColCls} aria-hidden="true" />
+            </div>
           </div>
           <ul className="space-y-2">
-            {paged.items.map((row) => (
-              <li
-                key={row.id}
-                className="grid grid-cols-[minmax(0,1fr)_7rem_7rem_auto_auto] items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3"
-              >
-                <button
-                  type="button"
-                  onClick={() => setEditingId(row.id)}
-                  className="min-w-0 text-left"
-                >
-                  <p className="truncate font-medium text-neutral-100">
-                    {shortInspectionDisplayName(row.title, row.clientName)}
-                  </p>
-                  <p className="truncate text-xs text-neutral-500">
-                    {row.clientName}
-                    {row.inspector ? ` · ${row.inspector}` : ''}
-                    {row.nextDueAt
-                      ? ` · Next due ${row.nextDueAt}${isOverdue(row.nextDueAt) ? ' (overdue)' : ''}`
-                      : ''}
-                    {row.cadence ? ` · ${cadenceLabel(row.cadence)}` : ''}
-                  </p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingId(row.id)}
-                  className="truncate text-left text-sm text-neutral-400"
-                >
-                  {row.inspectedAt || '—'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingId(row.id)}
+            {paged.items.map((row) => {
+              const displayName = shortInspectionDisplayName(row.title, row.clientName);
+              const modified = formatDateTimeListParts(row.updatedAt);
+              const meta = [
+                row.clientName,
+                row.inspector ? row.inspector : '',
+                row.nextDueAt
+                  ? `due ${row.nextDueAt}${isOverdue(row.nextDueAt) ? ' (overdue)' : ''}`
+                  : '',
+                row.cadence ? cadenceLabel(row.cadence) : '',
+              ]
+                .filter(Boolean)
+                .join(' · ');
+              return (
+                <li
+                  key={row.id}
                   className={cn(
-                    'truncate text-left text-sm',
-                    row.projectNumber.trim() ? 'text-neutral-300' : 'text-neutral-600',
-                  )}
-                  title={row.projectNumber.trim() || undefined}
-                >
-                  {row.projectNumber.trim() || '—'}
-                </button>
-                <span
-                  className={cn(
-                    'w-20 rounded-full px-2 py-0.5 text-center text-xs',
-                    row.status === 'complete'
-                      ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                      : 'border border-amber-500/30 bg-amber-500/10 text-amber-300',
+                    'grid items-center rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5',
+                    docRowGrid,
                   )}
                 >
-                  {row.status}
-                </span>
-                <button
-                  type="button"
-                  aria-label={`Delete ${row.title}`}
-                  onClick={() => setPendingDelete(row)}
-                  className="rounded-lg border border-white/10 p-2 text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
-                >
-                  <Trash2 className="size-4" />
-                </button>
-              </li>
-            ))}
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(row.id)}
+                    className="min-w-0 text-left"
+                    title={[displayName, row.templateName, meta].filter(Boolean).join('\n')}
+                  >
+                    <p className="line-clamp-2 text-sm font-medium leading-tight text-neutral-100">
+                      {displayName}
+                    </p>
+                    {row.templateName ? (
+                      <p className="truncate text-[10px] leading-tight text-neutral-500">
+                        {row.templateName}
+                      </p>
+                    ) : null}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(row.id)}
+                    className={cn(
+                      'min-w-0 truncate text-center text-xs leading-tight',
+                      row.projectNumber.trim() ? 'text-neutral-300' : 'text-neutral-600',
+                    )}
+                    title={row.projectNumber.trim() || undefined}
+                  >
+                    {row.projectNumber.trim() || '—'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(row.id)}
+                    className="min-w-0 truncate text-center text-xs leading-tight text-neutral-400"
+                  >
+                    {row.inspectedAt || '—'}
+                  </button>
+                  <span
+                    className={cn(
+                      'justify-self-center rounded-full px-1.5 py-0.5 text-center text-[9px] leading-none capitalize',
+                      row.status === 'complete'
+                        ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                        : 'border border-amber-500/30 bg-amber-500/10 text-amber-300',
+                    )}
+                  >
+                    {row.status}
+                  </span>
+                  <div className={docMetaTailCls}>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(row.id)}
+                      className={cn(
+                        docModifiedColCls,
+                        'text-[10px] leading-tight text-neutral-500',
+                      )}
+                      title={formatDateTimeCompact(row.updatedAt)}
+                    >
+                      <span className="block truncate">{modified.date}</span>
+                      {modified.time ? (
+                        <span className="block truncate">{modified.time}</span>
+                      ) : null}
+                    </button>
+                    <div className={docDeleteColCls}>
+                      <button
+                        type="button"
+                        aria-label={`Delete ${row.title}`}
+                        onClick={() => setPendingDelete(row)}
+                        className="rounded-lg border border-white/10 p-1.5 text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
           <ListPagination
             page={paged.page}
@@ -514,52 +534,7 @@ export function DocumentsScreen({
         </ConfirmDialog>
       )}
 
-      {pendingPdfImport && (
-        <ConfirmDialog
-          title={
-            pendingPdfImport.hasClientSnapshot
-              ? 'Create customer profile?'
-              : 'Cannot create customer'
-          }
-          icon={Users}
-          confirmLabel={pendingPdfImport.hasClientSnapshot ? 'Create & import' : 'OK'}
-          showCancel={pendingPdfImport.hasClientSnapshot}
-          onCancel={() => setPendingPdfImport(null)}
-          onConfirm={() => {
-            if (!pendingPdfImport.hasClientSnapshot) {
-              setPendingPdfImport(null);
-              return;
-            }
-            void finishPdfImport(pendingPdfImport.filePath);
-          }}
-        >
-          {pendingPdfImport.hasClientSnapshot ? (
-            <>
-              <p>
-                Customer{' '}
-                <span className="font-medium text-[var(--ba-text-primary)]">
-                  {pendingPdfImport.clientName}
-                </span>{' '}
-                is not in this database. Importing will create their profile and add document{' '}
-                <span className="font-medium text-[var(--ba-text-primary)]">
-                  {pendingPdfImport.documentTitle}
-                </span>
-                .
-              </p>
-              <p>Continue?</p>
-            </>
-          ) : (
-            <p>
-              Customer{' '}
-              <span className="font-medium text-[var(--ba-text-primary)]">
-                {pendingPdfImport.clientName}
-              </span>{' '}
-              is missing and this PDF has no client snapshot. Create the customer first, or
-              re-export from a newer BlazeAudit.
-            </p>
-          )}
-        </ConfirmDialog>
-      )}
+      {pdfImportDialogs}
     </div>
   );
 }

@@ -10,6 +10,42 @@ export function todayLocalIsoDate(): string {
   return formatIsoDateLocal(new Date());
 }
 
+/** Compact local date+time for document meta (e.g. 8/24/26, 2:19 PM). */
+export function formatDateTimeCompact(iso: string | null | undefined): string {
+  if (!iso?.trim()) return '—';
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return '—';
+  return new Date(ms).toLocaleString(undefined, {
+    year: '2-digit',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+/** Two-line list cells: date then time (e.g. 8/24/26 · 2:19 PM). */
+export function formatDateTimeListParts(iso: string | null | undefined): {
+  date: string;
+  time: string;
+} {
+  if (!iso?.trim()) return { date: '—', time: '' };
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return { date: '—', time: '' };
+  const d = new Date(ms);
+  return {
+    date: d.toLocaleDateString(undefined, {
+      year: '2-digit',
+      month: 'numeric',
+      day: 'numeric',
+    }),
+    time: d.toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+    }),
+  };
+}
+
 export function parseIsoDateLocal(iso: string): Date | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   if (!match) return null;

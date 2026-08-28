@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { ColorThemeToggle } from './ColorThemeToggle';
+import { CompanyLogoMark } from './CompanyLogoMark';
 import { ConfirmDialog } from './ConfirmDialog';
 import { navItems, type NavId } from '../navigation';
 import { cn } from '../lib/cn';
@@ -124,30 +125,34 @@ export function Sidebar({
         >
           {expanded ? (
             <>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-start gap-2.5">
                 <button
                   type="button"
                   onClick={onOpenUserProfile}
                   title="User profile settings"
                   className={cn(
-                    'flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 py-1 text-left transition-colors',
+                    'flex min-w-0 flex-1 items-start gap-2.5 rounded-lg px-1 py-1 text-left transition-colors',
                     activeId === 'settings'
                       ? 'text-[var(--ba-nav-active-text)]'
                       : 'hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]',
                   )}
                 >
                   <UserAvatar logoDataUrl={logoDataUrl} initial={initial} />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium text-[var(--ba-text-primary)]">
+                  <div className="min-w-0 flex-1 pt-0.5">
+                    <div
+                      className="truncate text-[11px] font-medium leading-tight text-[var(--ba-text-primary)]"
+                      title={email || 'Inspector'}
+                    >
                       {email || 'Inspector'}
                     </div>
                     <div
                       className={cn(
-                        'truncate text-xs',
+                        'mt-0.5 truncate text-[10px] leading-tight',
                         businessName.trim()
                           ? 'text-[var(--ba-text-muted)]'
                           : 'text-[var(--ba-text-faint)]',
                       )}
+                      title={subtitle}
                     >
                       {subtitle}
                     </div>
@@ -158,7 +163,7 @@ export function Sidebar({
                   onClick={handleLogOut}
                   aria-label="Close and Log Out"
                   title="Close and Log Out"
-                  className="rounded-md p-1.5 text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
+                  className="mt-0.5 shrink-0 rounded-md p-1.5 text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
                 >
                   <LogOut className="size-4" />
                 </button>
@@ -214,15 +219,11 @@ export function Sidebar({
 
 function UserAvatar({ logoDataUrl, initial }: { logoDataUrl: string | null; initial: string }) {
   if (logoDataUrl) {
-    return (
-      <div className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--ba-chrome-border)] bg-white p-0.5">
-        <img src={logoDataUrl} alt="" className="size-full scale-[1.35] rounded-full object-contain" />
-      </div>
-    );
+    return <CompanyLogoMark src={logoDataUrl} size="sm" />;
   }
 
   return (
-    <div className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-flame-400 via-flame-500 to-red-600 text-sm font-semibold text-white shadow-md shadow-flame-500/30">
+    <div className="grid size-11 shrink-0 place-items-center rounded-xl border-2 border-[var(--ba-logo-plate-ring)] bg-gradient-to-br from-flame-400 via-flame-500 to-red-600 text-sm font-semibold text-white shadow-[var(--ba-logo-plate-shadow)]">
       {initial}
     </div>
   );
