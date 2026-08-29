@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { flushSync } from 'react-dom';
 
 const SELECTED_CLASS = 'ba-field-selected';
 const ROW_SELECTED_CLASS = 'ba-row-selected';
@@ -9,7 +10,20 @@ const ROW_CLIP_PREFIX = 'BA_ROW';
 const ROWS_CLIP_PREFIX = 'BA_ROWS';
 const FIELDS_CLIP_PREFIX = 'BA_FIELDS';
 
-export type FormFieldSelectMode = 'off' | 'cell' | 'line';
+/** Inputs + cycle choice buttons (IDR / CFTS / report grids). */
+const FIELD_SELECTOR =
+  'input, textarea, select, button.idr-choice-cell, button.cfts-choice-cell, button.rrg-choice-btn, button[class*="choice-cell"]';
+
+export type FormFieldSelectMode = 'off' | 'cell' | 'line' | 'insert';
+
+export type InsertLineTarget = {
+  elementId: string;
+  elementKind: string;
+  pageIndex: number;
+  rowIndex: number;
+  /** Viewport position for the popup. */
+  anchor: { top: number; left: number; bottom: number };
+};
 
 function isTextEditable(
   el: Element,
@@ -25,13 +39,14 @@ function isTextEditable(
   return false;
 }
 
-/** IDR-style cycle buttons and similar choice cells. */
+/** IDR / CFTS / report-grid cycle buttons and similar choice cells. */
 function isChoiceButton(el: Element): el is HTMLButtonElement {
+  if (!(el instanceof HTMLButtonElement) || el.disabled) return false;
   return (
-    el instanceof HTMLButtonElement &&
-    !el.disabled &&
-    (el.classList.contains('idr-choice-cell') ||
-      /(?:^|\s)[\w-]*choice-cell(?:\s|$)/.test(el.className))
+    el.classList.contains('idr-choice-cell') ||
+    el.classList.contains('cfts-choice-cell') ||
+    el.classList.contains('rrg-choice-btn') ||
+    /(?:^|\s)[\w-]*choice-cell(?:\s|$)/.test(el.className)
   );
 }
 
@@ -41,36 +56,46 @@ function isEditableField(el: Element): el is HTMLElement {
 
 function resolveField(target: EventTarget | null): HTMLElement | null {
   if (!(target instanceof Element)) return null;
-  const hit = target.closest(
-    'input, textarea, select, button.idr-choice-cell, button[class*="choice-cell"]',
-  );
+  const hit = target.closest(FIELD_SELECTOR);
   if (!hit || !isEditableField(hit)) return null;
   return hit;
 }
 
 function readChoiceButton(el: HTMLButtonElement): string {
+  const cls = el.className;
   if (
     el.classList.contains('idr-choice-cell--yes') ||
-    el.className.includes('choice-cell--yes')
+    el.classList.contains('rrg-choice--yes') ||
+    cls.includes('choice-cell--yes')
   ) {
     return 'yes';
   }
   if (
     el.classList.contains('idr-choice-cell--no') ||
-    el.className.includes('choice-cell--no')
+    el.classList.contains('rrg-choice--no') ||
+    cls.includes('choice-cell--no')
   ) {
     return 'no';
   }
   if (
     el.classList.contains('idr-choice-cell--na') ||
-    el.className.includes('choice-cell--na')
+    el.classList.contains('cfts-choice-cell--na') ||
+    cls.includes('choice-cell--na')
   ) {
     return 'na';
+  }
+  if (el.classList.contains('cfts-choice-cell--pass') || cls.includes('choice-cell--pass')) {
+    return 'pass';
+  }
+  if (el.classList.contains('cfts-choice-cell--fail') || cls.includes('choice-cell--fail')) {
+    return 'fail';
   }
   const t = el.textContent?.trim() ?? '';
   if (t === '✓' || t === 'Y' || t.toLowerCase() === 'yes') return 'yes';
   if (t === '✗' || t === 'N' || t.toLowerCase() === 'no') return 'no';
   if (t === '—' || t === 'N/A' || t.toLowerCase() === 'na') return 'na';
+  if (t === 'P' || t.toLowerCase() === 'pass') return 'pass';
+  if (t === 'F' || t.toLowerCase() === 'fail') return 'fail';
   return '';
 }
 
@@ -88,56 +113,92 @@ function toSingleLine(text: string): string {
   return text.replace(/\r\n/g, '\n').replace(/[\n\r]+/g, ' ').replace(/ {2,}/g, ' ').trim();
 }
 
-function setFieldText(el: HTMLElement, text: string): void {
-  if (isChoiceButton(el)) {
-    const wanted = normalizeChoiceToken(text);
-    if (wanted === null && text.trim() === '') {
-      for (let i = 0; i < 4; i++) {
-        if (readChoiceButton(el) === '') return;
-        el.click();
+/** Canonical choice token for clipboard, or '' for empty. null = unrecognised. */
+function normalizeChoiceToken(text: string): string | null {
+  const t = text.trim().toLowerCase();
+  if (t === '') return '';
+  if (t === 'yes' || t === 'y' || t === 'true' || t === '✓' || t === 'check') return 'yes';
+  if (t === 'no' || t === 'n' || t === 'false' || t === '✗' || t === 'x') return 'no';
+  if (t === 'na' || t === 'n/a' || t === '—' || t === '-') return 'na';
+  if (t === 'pass' || t === 'p') return 'pass';
+  if (t === 'fail' || t === 'f') return 'fail';
+  return null;
+}
+
+function setChoiceButton(el: HTMLButtonElement, text: string): void {
+  const wanted = normalizeChoiceToken(text);
+  if (wanted === null) return;
+  for (let i = 0; i < 6; i++) {
+    if (readChoiceButton(el) === wanted) return;
+    // Controlled React cells only advance after commit — flush between clicks.
+    flushSync(() => {
+      el.click();
+    });
+  }
+}
+
+function setToggleInput(el: HTMLInputElement, text: string): void {
+  const wanted =
+    text === 'true' || text === '1' || text.trim().toLowerCase() === 'yes' || text === 'pass';
+  if (el.type === 'radio') {
+    if (wanted) {
+      if (!el.checked) {
+        flushSync(() => {
+          el.click();
+        });
       }
       return;
     }
-    if (!wanted) return;
-    for (let i = 0; i < 4; i++) {
-      if (readChoiceButton(el) === wanted) return;
-      el.click();
+    // Uncheck: toggle-radios clear on click when already selected (no onChange).
+    if (el.checked) {
+      flushSync(() => {
+        el.click();
+      });
     }
+    return;
+  }
+  // checkbox
+  if (el.checked !== wanted) {
+    flushSync(() => {
+      el.click();
+    });
+  }
+}
+
+function setFieldText(el: HTMLElement, text: string): void {
+  if (isChoiceButton(el)) {
+    setChoiceButton(el, text);
     return;
   }
   if (el instanceof HTMLInputElement) {
     if (el.type === 'checkbox' || el.type === 'radio') {
-      el.checked = text === 'true' || text === '1' || text.toLowerCase() === 'yes';
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
+      setToggleInput(el, text);
       return;
     }
-    const proto = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-    proto?.set?.call(el, text);
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
+    flushSync(() => {
+      const proto = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+      proto?.set?.call(el, text);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
     return;
   }
   if (el instanceof HTMLTextAreaElement) {
-    const proto = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
-    proto?.set?.call(el, text);
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
+    flushSync(() => {
+      const proto = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
+      proto?.set?.call(el, text);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
     return;
   }
   if (el instanceof HTMLSelectElement) {
-    el.value = text;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
+    flushSync(() => {
+      el.value = text;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
   }
-}
-
-function normalizeChoiceToken(text: string): 'yes' | 'no' | 'na' | null {
-  const t = text.trim().toLowerCase();
-  if (t === 'yes' || t === 'y' || t === 'true' || t === '✓' || t === 'check') return 'yes';
-  if (t === 'no' || t === 'n' || t === 'false' || t === '✗' || t === 'x') return 'no';
-  if (t === 'na' || t === 'n/a' || t === '—' || t === '-') return 'na';
-  return null;
 }
 
 /** Always select the entire cell contents (inputs/textareas). */
@@ -165,9 +226,7 @@ function clearHighlights(selected: Set<HTMLElement>): void {
 }
 
 function fieldsInRow(tr: HTMLTableRowElement): HTMLElement[] {
-  return [...tr.querySelectorAll('input, textarea, select, button.idr-choice-cell, button[class*="choice-cell"]')].filter(
-    isEditableField,
-  );
+  return [...tr.querySelectorAll(FIELD_SELECTOR)].filter(isEditableField);
 }
 
 function rowOf(el: HTMLElement): HTMLTableRowElement | null {
@@ -181,6 +240,59 @@ function dataRowsInSection(tr: HTMLTableRowElement): HTMLTableRowElement[] {
     (node): node is HTMLTableRowElement =>
       node instanceof HTMLTableRowElement && fieldsInRow(node).length > 0,
   );
+}
+
+/** Shift row values down by `count` empty rows below `tr` (single table section). */
+export function insertEmptyRowsViaDom(tr: HTMLTableRowElement, count: number): void {
+  if (!Number.isInteger(count) || count < 1) return;
+  const allRows = dataRowsInSection(tr);
+  const index = allRows.indexOf(tr);
+  if (index < 0) return;
+
+  const values = allRows.map((row) => fieldsInRow(row).map((el) => fieldText(el)));
+  const empty = () => (values[0] ?? []).map(() => '');
+  const next = [
+    ...values.slice(0, index + 1),
+    ...Array.from({ length: count }, empty),
+    ...values.slice(index + 1),
+  ].slice(0, values.length);
+
+  allRows.forEach((row, rowIndex) => {
+    const targets = fieldsInRow(row);
+    const rowValues = next[rowIndex] ?? [];
+    targets.forEach((el, col) => {
+      setFieldText(el, rowValues[col] ?? '');
+    });
+  });
+}
+
+function resolveInsertLineTargetFromEvent(target: EventTarget | null): InsertLineTarget | null {
+  if (!(target instanceof Element)) return null;
+  const tr = target.closest('tr');
+  if (!(tr instanceof HTMLTableRowElement)) return null;
+  if (fieldsInRow(tr).length === 0) return null;
+
+  const frame = tr.closest('[data-form-element-id]');
+  const sheet = tr.closest('[data-form-page-index]');
+  if (!(frame instanceof HTMLElement) || !(sheet instanceof HTMLElement)) return null;
+
+  const elementId = frame.dataset.formElementId?.trim();
+  const elementKind = frame.dataset.formElementKind?.trim() ?? '';
+  const pageIndex = Number(sheet.dataset.formPageIndex);
+  if (!elementId || !Number.isInteger(pageIndex) || pageIndex < 0) return null;
+
+  const rows = dataRowsInSection(tr);
+  const rowIndex = rows.indexOf(tr);
+  if (rowIndex < 0) return null;
+
+  const rect = tr.getBoundingClientRect();
+  return {
+    elementId,
+    elementKind,
+    pageIndex,
+    rowIndex,
+    anchor: { top: rect.top, left: rect.left, bottom: rect.bottom },
+  };
 }
 
 function orderedUniqueRows(fields: HTMLElement[]): HTMLTableRowElement[] {
@@ -310,6 +422,7 @@ function collapseRowsAfterCut(rows: HTMLTableRowElement[]): void {
 
 export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
   const [selectMode, setSelectMode] = useState<FormFieldSelectMode>('off');
+  const [insertTarget, setInsertTarget] = useState<InsertLineTarget | null>(null);
   const [actionFlash, setActionFlash] = useState<'copy' | 'paste' | 'cut' | null>(null);
   const selectedRef = useRef<Set<HTMLElement>>(new Set());
   const lastFocusedRef = useRef<HTMLElement | null>(null);
@@ -318,6 +431,18 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
   const madeSelectionRef = useRef(false);
   const flashTimerRef = useRef<number | null>(null);
   const sync = useCallback(() => bump((n) => n + 1), []);
+
+  const clearInsertTarget = useCallback(() => {
+    clearHighlights(selectedRef.current);
+    setInsertTarget(null);
+    sync();
+  }, [sync]);
+
+  const endInsertMode = useCallback(() => {
+    clearInsertTarget();
+    setSelectMode('off');
+    sync();
+  }, [clearInsertTarget, sync]);
 
   const flash = useCallback((action: 'copy' | 'paste' | 'cut') => {
     setActionFlash(action);
@@ -340,9 +465,7 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     const root = rootRef.current;
     if (!root) return [...selectedRef.current];
     const all = [
-      ...root.querySelectorAll(
-        'input, textarea, select, button.idr-choice-cell, button[class*="choice-cell"]',
-      ),
+      ...root.querySelectorAll(FIELD_SELECTOR),
     ].filter(isEditableField);
     return all.filter((el) => selectedRef.current.has(el));
   }, [rootRef]);
@@ -544,7 +667,7 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
 
   // Select-mode picking (cell or whole-line).
   useEffect(() => {
-    if (selectMode === 'off') return;
+    if (selectMode !== 'cell' && selectMode !== 'line') return;
 
     const root = rootRef.current;
     if (!root) return;
@@ -617,31 +740,87 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     };
   }, [selectMode, rootRef, addToSelection, selectEntireRow, markSelected, sync, endSelectMode]);
 
+  // Insert Line: click a table row → highlight + popup; miss → exit.
+  useEffect(() => {
+    if (selectMode !== 'insert') return;
+
+    const root = rootRef.current;
+    if (!root) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button !== 0) return;
+      const target = event.target;
+      if (target instanceof Element && target.closest(`[${CLIPBOARD_TOOLBAR_ATTR}]`)) return;
+      if (target instanceof Element && target.closest('[data-ba-insert-line-popup]')) return;
+
+      // Popup open: click outside cancels.
+      if (insertTarget) {
+        endInsertMode();
+        return;
+      }
+
+      const next = resolveInsertLineTargetFromEvent(event.target);
+      if (!next) {
+        endInsertMode();
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      clearHighlights(selectedRef.current);
+      const frame = root.querySelector(
+        `[data-form-element-id="${CSS.escape(next.elementId)}"]`,
+      );
+      const rows = frame
+        ? [...frame.querySelectorAll('tr')].filter(
+            (node): node is HTMLTableRowElement =>
+              node instanceof HTMLTableRowElement && fieldsInRow(node).length > 0,
+          )
+        : [];
+      const tr = rows[next.rowIndex];
+      if (tr) markSelected(fieldsInRow(tr), false);
+      setInsertTarget(next);
+    };
+
+    window.addEventListener('pointerdown', onPointerDown, true);
+    return () => window.removeEventListener('pointerdown', onPointerDown, true);
+  }, [selectMode, insertTarget, rootRef, endInsertMode, markSelected]);
+
   // Any click on the document (outside the clipboard toolbar) clears highlights.
   useEffect(() => {
     if (selectMode !== 'off') return;
+    if (insertTarget) return;
 
     const onPointerDown = (event: PointerEvent) => {
       if (selectedRef.current.size === 0) return;
       if (event.button !== 0) return;
       const target = event.target;
       if (target instanceof Element && target.closest(`[${CLIPBOARD_TOOLBAR_ATTR}]`)) return;
+      if (target instanceof Element && target.closest('[data-ba-insert-line-popup]')) return;
       clearHighlights(selectedRef.current);
       sync();
     };
 
     window.addEventListener('pointerdown', onPointerDown, true);
     return () => window.removeEventListener('pointerdown', onPointerDown, true);
-  }, [selectMode, sync]);
+  }, [selectMode, insertTarget, sync]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && (selectMode !== 'off' || selectedRef.current.size > 0)) {
-        clearHighlights(selectedRef.current);
-        setSelectMode('off');
-        sync();
+      if (event.key === 'Escape') {
+        if (insertTarget || selectMode === 'insert') {
+          endInsertMode();
+          return;
+        }
+        if (selectMode !== 'off' || selectedRef.current.size > 0) {
+          clearHighlights(selectedRef.current);
+          setSelectMode('off');
+          sync();
+        }
         return;
       }
+
+      if (selectMode === 'insert' || insertTarget) return;
 
       if (
         (event.key === 'Backspace' || event.key === 'Delete') &&
@@ -668,7 +847,16 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [selectMode, copySelected, cutSelected, pasteSelected, clearSelectedInPlace, sync]);
+  }, [
+    selectMode,
+    insertTarget,
+    endInsertMode,
+    sync,
+    clearSelectedInPlace,
+    copySelected,
+    cutSelected,
+    pasteSelected,
+  ]);
 
   useEffect(
     () => () => {
@@ -677,32 +865,34 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     [],
   );
 
-  const toggleSelectMode = useCallback(() => {
-    setSelectMode((prev) => {
+  const beginMode = useCallback(
+    (mode: Exclude<FormFieldSelectMode, 'off'>) => {
       clearHighlights(selectedRef.current);
+      setInsertTarget(null);
       madeSelectionRef.current = false;
-      return prev === 'cell' ? 'off' : 'cell';
-    });
-    sync();
-  }, [sync]);
+      setSelectMode((prev) => (prev === mode ? 'off' : mode));
+      sync();
+    },
+    [sync],
+  );
 
-  const toggleLineSelectMode = useCallback(() => {
-    setSelectMode((prev) => {
-      clearHighlights(selectedRef.current);
-      madeSelectionRef.current = false;
-      return prev === 'line' ? 'off' : 'line';
-    });
-    sync();
-  }, [sync]);
+  const toggleSelectMode = useCallback(() => beginMode('cell'), [beginMode]);
+  const toggleLineSelectMode = useCallback(() => beginMode('line'), [beginMode]);
+  const toggleInsertLineMode = useCallback(() => beginMode('insert'), [beginMode]);
 
   return {
     selectMode,
     cellSelectMode: selectMode === 'cell',
     lineSelectMode: selectMode === 'line',
+    insertLineMode: selectMode === 'insert',
+    insertTarget,
     selectedCount: selectedRef.current.size,
     actionFlash,
     toggleSelectMode,
     toggleLineSelectMode,
+    toggleInsertLineMode,
+    clearInsertTarget,
+    endInsertMode,
     copySelected,
     cutSelected,
     pasteSelected,
