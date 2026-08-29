@@ -5,6 +5,7 @@ import {
   ClipboardPaste,
   Copy,
   FileDown,
+  BetweenVerticalStart,
   MousePointer2,
   Rows3,
   Scissors,
@@ -35,7 +36,10 @@ import {
   migrateFormInspectionPowerSupplyLayout,
   migrateFormInspectionIdrRowGaps,
   normalizeUlcSection1Value,
+  insertEmptyTableRows,
+  supportsInsertTableRows,
   type FormInspectionDocument,
+  type FormElement,
   type RepeatableFormPageKind,
 } from '../../../shared/form';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
@@ -48,7 +52,11 @@ import { FormPageCanvas, type FormPageExtraControlsConfig } from '../form/FormPa
 import { FormPageViewport } from '../form/FormPageViewport';
 import { collectLinedNotesVisibleLines } from '../form/collectLinedNotesVisibleLines';
 import { LoadingOverlay } from '../../components/LoadingOverlay';
-import { useFormFieldClipboard } from './useFormFieldClipboard';
+import {
+  insertEmptyRowsViaDom,
+  useFormFieldClipboard,
+} from './useFormFieldClipboard';
+import { InsertLinePopup } from './InsertLinePopup';
 
 type PendingPageRemove =
   | { kind: 'idr'; pageIndex: number }
@@ -141,9 +149,13 @@ function FormInspectionEditorInner({
     selectMode,
     cellSelectMode,
     lineSelectMode,
+    insertLineMode,
+    insertTarget,
     actionFlash,
     toggleSelectMode,
     toggleLineSelectMode,
+    toggleInsertLineMode,
+    endInsertMode,
     copySelected,
     cutSelected,
     pasteSelected,
@@ -271,6 +283,47 @@ function FormInspectionEditorInner({
 
   const markDirtyRef = useRef(markDirty);
   markDirtyRef.current = markDirty;
+
+  const confirmInsertLines = useCallback(
+    (count: number) => {
+      if (!insertTarget) return;
+      recordUndo('insert-lines');
+
+      const kind = insertTarget.elementKind as FormElement['kind'];
+      if (supportsInsertTableRows(kind)) {
+        const next = insertEmptyTableRows(formDocRef.current, insertTarget, count);
+        if (next) {
+          setFormDoc(next);
+          markDirtyRef.current();
+          endInsertMode();
+          return;
+        }
+      }
+
+      // Generic tables (checklists, etc.): shift within the page via DOM.
+      const root = formStackRef.current;
+      const frame = root?.querySelector(
+        `[data-form-element-id="${CSS.escape(insertTarget.elementId)}"]`,
+      );
+      let tr: HTMLTableRowElement | null = null;
+      const selectedRow = frame?.querySelector('tr.ba-row-selected');
+      if (selectedRow instanceof HTMLTableRowElement) {
+        tr = selectedRow;
+      } else if (frame) {
+        const rows = [...frame.querySelectorAll('tr')].filter(
+          (node) =>
+            node instanceof HTMLTableRowElement &&
+            node.querySelector('input, textarea, select, button'),
+        );
+        const hit = rows[insertTarget.rowIndex];
+        if (hit instanceof HTMLTableRowElement) tr = hit;
+      }
+      if (tr) insertEmptyRowsViaDom(tr, count);
+      markDirtyRef.current();
+      endInsertMode();
+    },
+    [insertTarget, recordUndo, endInsertMode],
+  );
 
   const onValueChange = useCallback((elementId: string, value: unknown) => {
     if (typeof value === 'object' && value !== null && 'dateOfService' in value) {
@@ -749,6 +802,20 @@ function FormInspectionEditorInner({
           </button>
           <button
             type="button"
+            onClick={toggleInsertLineMode}
+            className={cn(toolbarBtnCls, insertLineMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
+            title={
+              insertLineMode
+                ? 'Exit insert line mode'
+                : 'Insert empty rows below a table line. Overflow adds pages when the sheet supports +.'
+            }
+            aria-pressed={insertLineMode}
+          >
+            <BetweenVerticalStart className="size-3" />
+            {insertLineMode ? 'Pick a line…' : 'Insert Line'}
+          </button>
+          <button
+            type="button"
             disabled={!canUndo}
             onClick={applyUndo}
             className={toolbarBtnCls}
@@ -793,6 +860,14 @@ function FormInspectionEditorInner({
           </div>
         </FormPageViewport>
       </div>
+
+      {insertTarget ? (
+        <InsertLinePopup
+          target={insertTarget}
+          onConfirm={confirmInsertLines}
+          onClose={endInsertMode}
+        />
+      ) : null}
     </div>
   );
 }

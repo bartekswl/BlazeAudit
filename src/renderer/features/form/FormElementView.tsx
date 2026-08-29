@@ -109,6 +109,8 @@ function FormElementViewInner({
 
   return (
     <div
+      data-form-element-id={element.id}
+      data-form-element-kind={element.kind}
       className={cn(
         'form-element-frame',
         flushFrame && 'form-element-frame--flush',
