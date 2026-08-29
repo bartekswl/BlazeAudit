@@ -25,7 +25,7 @@ const LOGO_SOFT_MASK = `url("data:image/svg+xml,${encodeURIComponent(
         <feGaussianBlur stdDeviation="6.5"/>
       </filter>
     </defs>
-    <rect x="8" y="8" width="84" height="84" rx="42" ry="42" fill="white" filter="url(#f)"/>
+    <rect x="4" y="4" width="92" height="92" rx="46" ry="46" fill="white" filter="url(#f)"/>
   </svg>`,
 )}")`;
 
@@ -86,7 +86,7 @@ export function CompanyLogoMark({
             aria-hidden
             style={{
               background:
-                'radial-gradient(ellipse 72% 72% at 50% 50%, transparent 0%, transparent 55%, color-mix(in srgb, var(--ba-logo-plate-fade) 35%, transparent) 78%, var(--ba-logo-plate-fade) 96%)',
+                'radial-gradient(ellipse 78% 78% at 50% 50%, transparent 0%, transparent 58%, color-mix(in srgb, var(--ba-logo-plate-fade) 30%, transparent) 82%, var(--ba-logo-plate-fade) 97%)',
             }}
           />
         </div>

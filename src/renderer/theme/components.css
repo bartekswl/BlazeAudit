@@ -895,8 +895,38 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   width: 2rem;
   height: 2rem;
   border-radius: 0.5rem;
-  background: rgb(255 255 255 / 0.08);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.15) inset;
+  border: 1px solid transparent;
+  background: rgb(255 255 255 / 0.12);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2) inset;
+}
+
+/* Dark: same presence as light — solid tinted plates, not washed-out chips */
+.ba-stat-icon--flame {
+  color: var(--ba-stat-flame-icon);
+  background: linear-gradient(145deg, rgb(249 115 22 / 0.38) 0%, rgb(249 115 22 / 0.18) 100%);
+  border-color: rgb(249 115 22 / 0.5);
+  box-shadow: 0 0 12px rgb(249 115 22 / 0.28);
+}
+
+.ba-stat-icon--emerald {
+  color: var(--ba-stat-emerald-icon);
+  background: linear-gradient(145deg, rgb(16 185 129 / 0.36) 0%, rgb(16 185 129 / 0.16) 100%);
+  border-color: rgb(16 185 129 / 0.48);
+  box-shadow: 0 0 12px rgb(16 185 129 / 0.22);
+}
+
+.ba-stat-icon--sky {
+  color: var(--ba-stat-sky-icon);
+  background: linear-gradient(145deg, rgb(14 165 233 / 0.36) 0%, rgb(14 165 233 / 0.16) 100%);
+  border-color: rgb(14 165 233 / 0.48);
+  box-shadow: 0 0 12px rgb(14 165 233 / 0.22);
+}
+
+.ba-stat-icon--violet {
+  color: var(--ba-stat-violet-icon);
+  background: linear-gradient(145deg, rgb(139 92 246 / 0.36) 0%, rgb(139 92 246 / 0.16) 100%);
+  border-color: rgb(139 92 246 / 0.48);
+  box-shadow: 0 0 12px rgb(139 92 246 / 0.22);
 }
 
 [data-theme='light'] .ba-stat-icon {
@@ -930,11 +960,6 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   border-color: rgb(139 92 246 / 0.35);
   box-shadow: 0 0 12px rgb(139 92 246 / 0.14);
 }
-
-.ba-stat-icon--flame { color: var(--ba-stat-flame-icon); }
-.ba-stat-icon--emerald { color: var(--ba-stat-emerald-icon); }
-.ba-stat-icon--sky { color: var(--ba-stat-sky-icon); }
-.ba-stat-icon--violet { color: var(--ba-stat-violet-icon); }
 
 .ba-nav-item {
   display: flex;
@@ -1055,7 +1080,9 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .ba-table-wrap {
-  overflow: hidden;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: auto;
   border-radius: 0.75rem;
   border: 1px solid var(--ba-panel-border);
   background: var(--ba-panel-bg);

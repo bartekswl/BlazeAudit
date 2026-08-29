@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
-import { FileDown, Undo2 } from 'lucide-react';
+import { Copy, FileDown, Undo2 } from 'lucide-react';
 
 import { CADENCE_PRESETS, cadenceLabel, type CadencePreset } from '../../../shared/cadence';
 
@@ -17,6 +17,7 @@ import { FormInspectionEditor } from './FormInspectionEditor';
 import { useRegisterDocumentOutline } from './DocumentOutlineContext';
 import { useDocumentAutosave } from './useDocumentAutosave';
 import { useDocumentUndoHotkey, useDocumentUndoStack } from './useDocumentUndoStack';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { LoadingOverlay } from '../../components/LoadingOverlay';
 
 const compactInputCls =
@@ -50,6 +51,7 @@ export function InspectionEditor({
   if (isFormInspectionDocument(inspection.document)) {
     return (
       <FormInspectionEditor
+        key={inspection.id}
         inspection={inspection}
         onSaved={onSaved}
         onBack={onBack}
@@ -59,7 +61,7 @@ export function InspectionEditor({
     );
   }
   return (
-    <BlockInspectionEditor inspection={inspection} onSaved={onSaved} onBack={onBack} />
+    <BlockInspectionEditor key={inspection.id} inspection={inspection} onSaved={onSaved} onBack={onBack} />
   );
 }
 
@@ -120,6 +122,10 @@ function BlockInspectionEditorInner({
   const [error, setError] = useState<string | null>(null);
 
   const [isDirty, setIsDirty] = useState(false);
+
+  const [pendingDuplicate, setPendingDuplicate] = useState(false);
+
+  const [duplicating, setDuplicating] = useState(false);
 
   const inspectionIdRef = useRef(inspection.id);
 
@@ -258,7 +264,7 @@ function BlockInspectionEditorInner({
 
   const save = useCallback(
 
-    async (overrides?: { status?: InspectionStatus }) => {
+    async (overrides?: { status?: InspectionStatus }): Promise<boolean> => {
 
       const payload = buildPayload(overrides);
 
@@ -268,7 +274,7 @@ function BlockInspectionEditorInner({
 
         setError('Title is required.');
 
-        return;
+        return false;
 
       }
 
@@ -304,11 +310,15 @@ function BlockInspectionEditorInner({
 
         onSaved(saved);
 
+        return true;
+
       } catch (e) {
 
         setSaveState('error');
 
         setError(e instanceof Error ? e.message : 'Save failed.');
+
+        return false;
 
       }
 
@@ -318,8 +328,28 @@ function BlockInspectionEditorInner({
 
   );
 
+  const confirmDuplicate = useCallback(async () => {
+    setPendingDuplicate(false);
+    setDuplicating(true);
+    setError(null);
+    try {
+      if (isDirty) {
+        const ok = await save();
+        if (!ok) return;
+      }
+      const created = await window.blazeaudit.inspections.duplicate(inspection.id);
+      onSaved(created);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to duplicate report.');
+    } finally {
+      setDuplicating(false);
+    }
+  }, [inspection.id, isDirty, onSaved, save]);
+
   useDocumentAutosave(
-    () => save(),
+    () => {
+      void save();
+    },
     isDirty,
     saveState === 'saving',
     inspection.id,
@@ -416,10 +446,38 @@ function BlockInspectionEditorInner({
       {exportingPdf ? (
         <LoadingOverlay label="Exporting PDF…" />
       ) : null}
+      {duplicating ? <LoadingOverlay label="Duplicating report…" /> : null}
+      {pendingDuplicate ? (
+        <ConfirmDialog
+          title="Duplicate report?"
+          icon={Copy}
+          confirmLabel="Duplicate"
+          onCancel={() => setPendingDuplicate(false)}
+          onConfirm={() => void confirmDuplicate()}
+        >
+          <p>
+            Create a copy of this report with today&apos;s date and{' '}
+            <span className="font-medium text-[var(--ba-text-primary)]">- duplicate</span> added to
+            the name.
+          </p>
+          <p>All other content stays the same.</p>
+        </ConfirmDialog>
+      ) : null}
 
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
 
         <div className="flex min-w-0 flex-wrap items-center gap-2 text-[11px] text-neutral-500">
+
+          <button
+            type="button"
+            disabled={duplicating || saveState === 'saving'}
+            onClick={() => setPendingDuplicate(true)}
+            className="inline-flex items-center gap-1.5 rounded-md border border-flame-500/30 bg-flame-500/10 px-2.5 py-1 text-xs text-flame-300 hover:bg-flame-500/20 disabled:opacity-50"
+            title="Create a copy of this report with today's date"
+          >
+            <Copy className="size-3.5" />
+            Duplicate Report
+          </button>
 
           <span
 

@@ -282,6 +282,7 @@ export function CustomersScreen({
           metaPinned={metaPinned}
           onToggleMetaPin={toggleMetaPin}
           onSaved={(saved) => {
+            setOpenInspectionId(saved.id);
             setOpenInspection(saved);
           }}
         />
@@ -328,8 +329,8 @@ export function CustomersScreen({
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex h-full min-h-0 flex-1 flex-col">
+      <div className="mb-4 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative min-w-0 flex-1 sm:max-w-md">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-500" />
           <input
@@ -361,45 +362,47 @@ export function CustomersScreen({
         </div>
       </div>
 
-      <p className="mb-4 text-sm text-neutral-400">
+      <p className="mb-4 shrink-0 text-sm text-neutral-400">
         {search.trim()
           ? `${filtered.length} of ${clients.length} ${clients.length === 1 ? 'client' : 'clients'}`
           : `${clients.length} ${clients.length === 1 ? 'client' : 'clients'}`}
       </p>
 
       {importMessage && (
-        <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
+        <div className="mb-4 shrink-0 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
           {importMessage}
         </div>
       )}
 
       {error && (
-        <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-300">
+        <div className="mb-4 shrink-0 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-300">
           {error}
         </div>
       )}
 
       {loading ? (
-        <InlineLoader />
+        <div className="flex min-h-0 flex-1 items-center justify-center">
+          <InlineLoader />
+        </div>
       ) : clients.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-center">
           <div className="grid size-14 place-items-center rounded-2xl bg-[var(--ba-flame-soft)] text-[var(--ba-flame)] shadow-md shadow-flame-500/15">
             <Users className="size-7" />
           </div>
           <p className="text-sm text-neutral-400">No clients yet. Add your first one.</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-center">
           <div className="grid size-14 place-items-center rounded-2xl bg-[var(--ba-flame-soft)] text-[var(--ba-flame)] shadow-md shadow-flame-500/15">
             <Search className="size-7" />
           </div>
           <p className="text-sm text-neutral-400">No clients match your search.</p>
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="ba-table-wrap min-h-0 flex-1 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col gap-0">
+          <div className="ba-table-wrap min-h-0 flex-1">
             <table className="w-full table-fixed text-left text-sm">
-              <thead className="ba-table-head sticky top-0 text-xs uppercase tracking-wide text-[var(--ba-text-secondary)]">
+              <thead className="ba-table-head sticky top-0 z-[1] text-xs uppercase tracking-wide text-[var(--ba-text-secondary)]">
                 <tr>
                   <th className="w-[28%] px-4 py-3 font-medium">Building name</th>
                   <th className="w-[14%] px-4 py-3 font-medium">Contact person</th>
@@ -465,6 +468,7 @@ export function CustomersScreen({
             startIndex={paged.startIndex}
             endIndex={paged.endIndex}
             onPageChange={setListPage}
+            className="shrink-0"
           />
         </div>
       )}

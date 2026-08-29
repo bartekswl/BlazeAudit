@@ -252,9 +252,9 @@ export function NameBadgesScreen() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-5 overflow-y-auto">
       {exporting ? <LoadingOverlay label="Generating PDF…" /> : null}
-      <section className="ba-panel flex flex-wrap items-center justify-between gap-4 p-4">
+      <section className="ba-panel flex shrink-0 flex-wrap items-center justify-between gap-4 p-4">
         <div>
           <h2 className="text-base font-semibold text-[var(--ba-text-primary)]">Print settings</h2>
           <p className="mt-1 text-sm text-[var(--ba-text-muted)]">
