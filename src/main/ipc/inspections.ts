@@ -14,6 +14,10 @@ export function registerInspectionsIpc(): void {
     inspections.createInspectionFromTemplate(input),
   );
 
+  ipcMain.handle(IpcChannels.inspectionsDuplicate, (_event, id: string) =>
+    inspections.duplicateInspection(id),
+  );
+
   ipcMain.handle(IpcChannels.inspectionsUpdate, (_event, id: string, input: InspectionInput) =>
     inspections.updateInspection(id, input),
   );

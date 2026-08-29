@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom';
 import {
   ClipboardCopy,
   ClipboardPaste,
+  Copy,
   FileDown,
   MousePointer2,
   Rows3,
@@ -55,6 +56,7 @@ type PendingPageRemove =
 
 type FormEditorSnapshot = {
   formDoc: FormInspectionDocument;
+  title: string;
   status: InspectionStatus;
   inspectedAt: string;
   projectNumber: string;
@@ -92,7 +94,7 @@ function FormInspectionEditorInner({
   metaPinned?: boolean;
   onToggleMetaPin?: () => void;
 }) {
-  const [title] = useState(inspection.title);
+  const [title, setTitle] = useState(inspection.title);
   const [status, setStatus] = useState<InspectionStatus>(inspection.status);
   const [inspectedAt, setInspectedAt] = useState(inspection.inspectedAt ?? '');
   const [projectNumber, setProjectNumber] = useState(() => {
@@ -130,6 +132,8 @@ function FormInspectionEditorInner({
     return synced !== formDocInitial;
   });
   const [pendingPageRemove, setPendingPageRemove] = useState<PendingPageRemove | null>(null);
+  const [pendingDuplicate, setPendingDuplicate] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
   const [pendingDateChange, setPendingDateChange] = useState<string | null>(null);
   const metaPinned = metaPinnedProp ?? true;
   const formStackRef = useRef<HTMLDivElement>(null);
@@ -150,12 +154,13 @@ function FormInspectionEditorInner({
 
   const snapshotRef = useRef<FormEditorSnapshot>({
     formDoc,
+    title,
     status,
     inspectedAt,
     projectNumber,
     cadence,
   });
-  snapshotRef.current = { formDoc, status, inspectedAt, projectNumber, cadence };
+  snapshotRef.current = { formDoc, title, status, inspectedAt, projectNumber, cadence };
 
   const { canUndo, push: pushUndo, undo: popUndo } = useDocumentUndoStack<FormEditorSnapshot>();
 
@@ -170,6 +175,7 @@ function FormInspectionEditorInner({
     const prev = popUndo();
     if (!prev) return;
     setFormDoc(prev.formDoc);
+    setTitle(prev.title);
     setStatus(prev.status);
     setInspectedAt(prev.inspectedAt);
     setProjectNumber(prev.projectNumber);
@@ -194,7 +200,13 @@ function FormInspectionEditorInner({
 
   useRegisterFormOutline(outlineTitle, formSections, handleOutlineNavigate);
 
-  const save = useCallback(async () => {
+  const save = useCallback(async (): Promise<boolean> => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      setError('Title is required.');
+      setSaveState('error');
+      return false;
+    }
     setSaveState('saving');
     setError(null);
     const trimmedProject = projectNumber.trim();
@@ -205,7 +217,7 @@ function FormInspectionEditorInner({
     }
     try {
       const saved = await window.blazeaudit.inspections.update(inspection.id, {
-        title,
+        title: trimmedTitle,
         status,
         inspector: '',
         document: documentToSave,
@@ -214,15 +226,43 @@ function FormInspectionEditorInner({
         cadence,
       });
       onSaved(saved);
+      setTitle(saved.title);
       setSaveState('saved');
       setIsDirty(false);
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Save failed.');
       setSaveState('error');
+      return false;
     }
   }, [inspection.id, title, status, formDoc, inspectedAt, projectNumber, cadence, onSaved]);
 
-  useDocumentAutosave(save, isDirty, saveState === 'saving', inspection.id);
+  useDocumentAutosave(
+    () => {
+      void save();
+    },
+    isDirty,
+    saveState === 'saving',
+    inspection.id,
+  );
+
+  const confirmDuplicate = useCallback(async () => {
+    setPendingDuplicate(false);
+    setDuplicating(true);
+    setError(null);
+    try {
+      if (isDirty) {
+        const ok = await save();
+        if (!ok) return;
+      }
+      const created = await window.blazeaudit.inspections.duplicate(inspection.id);
+      onSaved(created);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to duplicate report.');
+    } finally {
+      setDuplicating(false);
+    }
+  }, [inspection.id, isDirty, onSaved, save]);
 
   const markDirty = useCallback(() => {
     setIsDirty(true);
@@ -466,6 +506,23 @@ function FormInspectionEditorInner({
   return (
     <div className="relative flex h-full min-h-0 flex-col gap-2">
       {exportingPdf ? <LoadingOverlay label="Exporting PDF…" /> : null}
+      {duplicating ? <LoadingOverlay label="Duplicating report…" /> : null}
+      {pendingDuplicate ? (
+        <ConfirmDialog
+          title="Duplicate report?"
+          icon={Copy}
+          confirmLabel="Duplicate"
+          onCancel={() => setPendingDuplicate(false)}
+          onConfirm={() => void confirmDuplicate()}
+        >
+          <p>
+            Create a copy of this report with today&apos;s date and{' '}
+            <span className="font-medium text-[var(--ba-text-primary)]">- duplicate</span> added to
+            the name.
+          </p>
+          <p>All other content stays the same.</p>
+        </ConfirmDialog>
+      ) : null}
       {pendingDateChange != null ? (
         <ConfirmDialog
           title="Change date of service?"
@@ -510,14 +567,22 @@ function FormInspectionEditorInner({
       {metaPinned ? (
         <div className="relative shrink-0 rounded-md border border-[var(--ba-panel-border)] bg-[var(--ba-panel-bg)] px-2 py-1">
           <div className="grid grid-cols-[minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 gap-y-0.5">
-            <div className="min-w-0">
+            <label className="block min-w-0">
               <span className="mb-px block text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">
                 Title
               </span>
-              <p className={`${compactFieldCls} truncate font-medium text-[var(--ba-text-primary)]`}>
-                {title}
-              </p>
-            </div>
+              <input
+                type="text"
+                className={`${compactFieldCls} font-medium text-[var(--ba-text-primary)]`}
+                value={title}
+                onChange={(e) => {
+                  recordUndo('meta:title');
+                  setTitle(e.target.value);
+                  markDirty();
+                }}
+                placeholder="Report title"
+              />
+            </label>
             <label className="block min-w-0">
               <span className="mb-px block text-[11px] font-bold leading-none text-[var(--ba-text-muted)]">
                 Project Number
@@ -613,82 +678,94 @@ function FormInspectionEditorInner({
       ) : null}
 
       <div
-        className="flex shrink-0 flex-wrap items-center justify-end gap-1 py-0.5"
+        className="flex shrink-0 flex-wrap items-center justify-between gap-1 py-0.5"
         data-ba-clipboard-toolbar=""
       >
         <button
           type="button"
-          onClick={() => void copySelected()}
-          className={cn(toolbarBtnCls, actionFlash === 'copy' && 'ba-clipboard-btn--flash')}
-          title="Copy full cell(s) (Ctrl+C). Highlights stay until you click the form."
-        >
-          <ClipboardCopy className="size-3" />
-          Copy
-        </button>
-        <button
-          type="button"
-          onClick={() => void pasteSelected()}
-          className={cn(toolbarBtnCls, actionFlash === 'paste' && 'ba-clipboard-btn--flash')}
-          title="Paste into cell(s) / row (Ctrl+V)"
-        >
-          <ClipboardPaste className="size-3" />
-          Paste
-        </button>
-        <button
-          type="button"
-          onClick={() => void cutSelected()}
-          className={cn(toolbarBtnCls, actionFlash === 'cut' && 'ba-clipboard-btn--flash')}
-          title="Cut cell(s) or whole line(s) (Ctrl+X). Cutting a full line moves rows below up."
-        >
-          <Scissors className="size-3" />
-          Cut
-        </button>
-        <button
-          type="button"
-          onClick={toggleSelectMode}
-          className={cn(toolbarBtnCls, cellSelectMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
-          title={
-            cellSelectMode
-              ? 'Exit cell select mode'
-              : 'Select cells (drag / Ctrl+click). Alt+click or double-click = whole row'
-          }
-          aria-pressed={cellSelectMode}
-        >
-          <MousePointer2 className="size-3" />
-          {cellSelectMode ? 'Selecting' : 'Select'}
-        </button>
-        <button
-          type="button"
-          onClick={toggleLineSelectMode}
-          className={cn(toolbarBtnCls, lineSelectMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
-          title={
-            lineSelectMode
-              ? 'Exit line select mode'
-              : 'Select entire table rows (click / drag). Cut shifts rows up; Backspace clears in place.'
-          }
-          aria-pressed={lineSelectMode}
-        >
-          <Rows3 className="size-3" />
-          {lineSelectMode ? 'Line selecting' : 'Line Select'}
-        </button>
-        <button
-          type="button"
-          disabled={!canUndo}
-          onClick={applyUndo}
+          disabled={duplicating || saveState === 'saving'}
+          onClick={() => setPendingDuplicate(true)}
           className={toolbarBtnCls}
-          title="Undo last change (Ctrl+Z)"
+          title="Create a copy of this report with today's date"
         >
-          <Undo2 className="size-3" />
-          Undo
+          <Copy className="size-3" />
+          Duplicate Report
         </button>
-        <button
-          type="button"
-          disabled={saveState === 'saving'}
-          onClick={() => void save()}
-          className={toolbarBtnCls}
-        >
-          {saveLabel}
-        </button>
+        <div className="flex flex-wrap items-center justify-end gap-1">
+          <button
+            type="button"
+            onClick={() => void copySelected()}
+            className={cn(toolbarBtnCls, actionFlash === 'copy' && 'ba-clipboard-btn--flash')}
+            title="Copy full cell(s) (Ctrl+C). Highlights stay until you click the form."
+          >
+            <ClipboardCopy className="size-3" />
+            Copy
+          </button>
+          <button
+            type="button"
+            onClick={() => void pasteSelected()}
+            className={cn(toolbarBtnCls, actionFlash === 'paste' && 'ba-clipboard-btn--flash')}
+            title="Paste into cell(s) / row (Ctrl+V)"
+          >
+            <ClipboardPaste className="size-3" />
+            Paste
+          </button>
+          <button
+            type="button"
+            onClick={() => void cutSelected()}
+            className={cn(toolbarBtnCls, actionFlash === 'cut' && 'ba-clipboard-btn--flash')}
+            title="Cut cell(s) or whole line(s) (Ctrl+X). Cutting a full line moves rows below up."
+          >
+            <Scissors className="size-3" />
+            Cut
+          </button>
+          <button
+            type="button"
+            onClick={toggleSelectMode}
+            className={cn(toolbarBtnCls, cellSelectMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
+            title={
+              cellSelectMode
+                ? 'Exit cell select mode'
+                : 'Select cells (drag / Ctrl+click). Alt+click or double-click = whole row'
+            }
+            aria-pressed={cellSelectMode}
+          >
+            <MousePointer2 className="size-3" />
+            {cellSelectMode ? 'Selecting' : 'Select'}
+          </button>
+          <button
+            type="button"
+            onClick={toggleLineSelectMode}
+            className={cn(toolbarBtnCls, lineSelectMode && 'bg-flame-500/30 ring-1 ring-flame-400/50')}
+            title={
+              lineSelectMode
+                ? 'Exit line select mode'
+                : 'Select entire table rows (click / drag). Cut shifts rows up; Backspace clears in place.'
+            }
+            aria-pressed={lineSelectMode}
+          >
+            <Rows3 className="size-3" />
+            {lineSelectMode ? 'Line selecting' : 'Line Select'}
+          </button>
+          <button
+            type="button"
+            disabled={!canUndo}
+            onClick={applyUndo}
+            className={toolbarBtnCls}
+            title="Undo last change (Ctrl+Z)"
+          >
+            <Undo2 className="size-3" />
+            Undo
+          </button>
+          <button
+            type="button"
+            disabled={saveState === 'saving'}
+            onClick={() => void save()}
+            className={toolbarBtnCls}
+          >
+            {saveLabel}
+          </button>
+        </div>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">

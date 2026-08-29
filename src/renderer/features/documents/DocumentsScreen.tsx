@@ -234,16 +234,19 @@ export function DocumentsScreen({
     }
     return (
       <Suspense fallback={<InlineLoader label="Loading inspection editor…" />}>
-        <InspectionEditor
-          inspection={editingInspection}
-          onBack={goBackToList}
-          metaPinned={metaPinned}
-          onToggleMetaPin={toggleMetaPin}
-          onSaved={(saved) => {
-            setEditingInspection(saved);
-            void refresh();
-          }}
-        />
+        <div className="flex h-full min-h-0 flex-1 flex-col">
+          <InspectionEditor
+            inspection={editingInspection}
+            onBack={goBackToList}
+            metaPinned={metaPinned}
+            onToggleMetaPin={toggleMetaPin}
+            onSaved={(saved) => {
+              setEditingId(saved.id);
+              setEditingInspection(saved);
+              void refresh();
+            }}
+          />
+        </div>
       </Suspense>
     );
   }
@@ -251,8 +254,8 @@ export function DocumentsScreen({
   const hasAnyInspections = inspections.length > 0;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-3">
+      <div className="flex shrink-0 items-center justify-between gap-3">
         <p className="min-w-0 text-sm text-neutral-400">
           All inspections live here — drafts and completed reports attached to clients.
         </p>
@@ -281,7 +284,7 @@ export function DocumentsScreen({
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <div className="shrink-0 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
           {error}
         </div>
       )}
@@ -289,13 +292,13 @@ export function DocumentsScreen({
       {loading ? (
         <InlineLoader label="Loading documents…" />
       ) : !hasAnyInspections ? (
-        <div className="rounded-xl border border-dashed border-white/10 px-6 py-12 text-center">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 px-6 py-12 text-center">
           <FileText className="mx-auto mb-3 size-8 text-neutral-600" />
           <p className="text-sm text-neutral-400">No inspections yet.</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          <div className="flex shrink-0 flex-wrap items-center gap-1.5">
             <div className="relative w-44">
               <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-neutral-500" />
               <input
@@ -377,130 +380,131 @@ export function DocumentsScreen({
           </div>
 
           {filtered.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/10 px-6 py-12 text-center">
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 px-6 py-12 text-center">
               <FileText className="mx-auto mb-3 size-8 text-neutral-600" />
               <p className="text-sm text-neutral-400">No documents match your filters.</p>
             </div>
           ) : (
             <>
-          <div
-            className={cn(
-              'grid px-4 text-[10px] font-medium uppercase tracking-wide text-neutral-600',
-              docRowGrid,
-            )}
-          >
-            <span>Name</span>
-            <span className="text-center">Project #</span>
-            <span className="text-center">Date</span>
-            <span className="text-center">Status</span>
-            <div className={docMetaTailCls}>
-              <span className={docModifiedColCls}>Modified</span>
-              <span className={docDeleteColCls} aria-hidden="true" />
-            </div>
-          </div>
-          <ul className="space-y-2">
-            {paged.items.map((row) => {
-              const displayName = shortInspectionDisplayName(row.title, row.clientName);
-              const modified = formatDateTimeListParts(row.updatedAt);
-              const meta = [
-                row.clientName,
-                row.inspector ? row.inspector : '',
-                row.nextDueAt
-                  ? `due ${row.nextDueAt}${isOverdue(row.nextDueAt) ? ' (overdue)' : ''}`
-                  : '',
-                row.cadence ? cadenceLabel(row.cadence) : '',
-              ]
-                .filter(Boolean)
-                .join(' · ');
-              return (
-                <li
-                  key={row.id}
-                  className={cn(
-                    'grid items-center rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5',
-                    docRowGrid,
-                  )}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setEditingId(row.id)}
-                    className="min-w-0 text-left"
-                    title={[displayName, row.templateName, meta].filter(Boolean).join('\n')}
-                  >
-                    <p className="line-clamp-2 text-sm font-medium leading-tight text-neutral-100">
-                      {displayName}
-                    </p>
-                    {row.templateName ? (
-                      <p className="truncate text-[10px] leading-tight text-neutral-500">
-                        {row.templateName}
-                      </p>
-                    ) : null}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditingId(row.id)}
-                    className={cn(
-                      'min-w-0 truncate text-center text-xs leading-tight',
-                      row.projectNumber.trim() ? 'text-neutral-300' : 'text-neutral-600',
-                    )}
-                    title={row.projectNumber.trim() || undefined}
-                  >
-                    {row.projectNumber.trim() || '—'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditingId(row.id)}
-                    className="min-w-0 truncate text-center text-xs leading-tight text-neutral-400"
-                  >
-                    {row.inspectedAt || '—'}
-                  </button>
-                  <span
-                    className={cn(
-                      'justify-self-center rounded-full px-1.5 py-0.5 text-center text-[9px] leading-none capitalize',
-                      row.status === 'complete'
-                        ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                        : 'border border-amber-500/30 bg-amber-500/10 text-amber-300',
-                    )}
-                  >
-                    {row.status}
-                  </span>
-                  <div className={docMetaTailCls}>
-                    <button
-                      type="button"
-                      onClick={() => setEditingId(row.id)}
+              <div
+                className={cn(
+                  'grid shrink-0 px-4 text-[10px] font-medium uppercase tracking-wide text-neutral-600',
+                  docRowGrid,
+                )}
+              >
+                <span>Name</span>
+                <span className="text-center">Project #</span>
+                <span className="text-center">Date</span>
+                <span className="text-center">Status</span>
+                <div className={docMetaTailCls}>
+                  <span className={docModifiedColCls}>Modified</span>
+                  <span className={docDeleteColCls} aria-hidden="true" />
+                </div>
+              </div>
+              <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto">
+                {paged.items.map((row) => {
+                  const displayName = shortInspectionDisplayName(row.title, row.clientName);
+                  const modified = formatDateTimeListParts(row.updatedAt);
+                  const meta = [
+                    row.clientName,
+                    row.inspector ? row.inspector : '',
+                    row.nextDueAt
+                      ? `due ${row.nextDueAt}${isOverdue(row.nextDueAt) ? ' (overdue)' : ''}`
+                      : '',
+                    row.cadence ? cadenceLabel(row.cadence) : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' · ');
+                  return (
+                    <li
+                      key={row.id}
                       className={cn(
-                        docModifiedColCls,
-                        'text-[10px] leading-tight text-neutral-500',
+                        'grid items-center rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5',
+                        docRowGrid,
                       )}
-                      title={formatDateTimeCompact(row.updatedAt)}
                     >
-                      <span className="block truncate">{modified.date}</span>
-                      {modified.time ? (
-                        <span className="block truncate">{modified.time}</span>
-                      ) : null}
-                    </button>
-                    <div className={docDeleteColCls}>
                       <button
                         type="button"
-                        aria-label={`Delete ${row.title}`}
-                        onClick={() => setPendingDelete(row)}
-                        className="rounded-lg border border-white/10 p-1.5 text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
+                        onClick={() => setEditingId(row.id)}
+                        className="min-w-0 text-left"
+                        title={[displayName, row.templateName, meta].filter(Boolean).join('\n')}
                       >
-                        <Trash2 className="size-3.5" />
+                        <p className="line-clamp-2 text-sm font-medium leading-tight text-neutral-100">
+                          {displayName}
+                        </p>
+                        {row.templateName ? (
+                          <p className="truncate text-[10px] leading-tight text-neutral-500">
+                            {row.templateName}
+                          </p>
+                        ) : null}
                       </button>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-          <ListPagination
-            page={paged.page}
-            totalPages={paged.totalPages}
-            totalItems={paged.totalItems}
-            startIndex={paged.startIndex}
-            endIndex={paged.endIndex}
-            onPageChange={setListPage}
-          />
+                      <button
+                        type="button"
+                        onClick={() => setEditingId(row.id)}
+                        className={cn(
+                          'min-w-0 truncate text-center text-xs leading-tight',
+                          row.projectNumber.trim() ? 'text-neutral-300' : 'text-neutral-600',
+                        )}
+                        title={row.projectNumber.trim() || undefined}
+                      >
+                        {row.projectNumber.trim() || '—'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingId(row.id)}
+                        className="min-w-0 truncate text-center text-xs leading-tight text-neutral-400"
+                      >
+                        {row.inspectedAt || '—'}
+                      </button>
+                      <span
+                        className={cn(
+                          'justify-self-center rounded-full px-1.5 py-0.5 text-center text-[9px] leading-none capitalize',
+                          row.status === 'complete'
+                            ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                            : 'border border-amber-500/30 bg-amber-500/10 text-amber-300',
+                        )}
+                      >
+                        {row.status}
+                      </span>
+                      <div className={docMetaTailCls}>
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(row.id)}
+                          className={cn(
+                            docModifiedColCls,
+                            'text-[10px] leading-tight text-neutral-500',
+                          )}
+                          title={formatDateTimeCompact(row.updatedAt)}
+                        >
+                          <span className="block truncate">{modified.date}</span>
+                          {modified.time ? (
+                            <span className="block truncate">{modified.time}</span>
+                          ) : null}
+                        </button>
+                        <div className={docDeleteColCls}>
+                          <button
+                            type="button"
+                            aria-label={`Delete ${row.title}`}
+                            onClick={() => setPendingDelete(row)}
+                            className="rounded-lg border border-white/10 p-1.5 text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+              <ListPagination
+                page={paged.page}
+                totalPages={paged.totalPages}
+                totalItems={paged.totalItems}
+                startIndex={paged.startIndex}
+                endIndex={paged.endIndex}
+                onPageChange={setListPage}
+                className="shrink-0"
+              />
             </>
           )}
         </div>

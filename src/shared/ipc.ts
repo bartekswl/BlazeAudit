@@ -56,6 +56,7 @@ export const IpcChannels = {
   inspectionsList: 'inspections:list',
   inspectionsGet: 'inspections:get',
   inspectionsCreate: 'inspections:create',
+  inspectionsDuplicate: 'inspections:duplicate',
   inspectionsUpdate: 'inspections:update',
   inspectionsDelete: 'inspections:delete',
   inspectionsDashboard: 'inspections:dashboard',

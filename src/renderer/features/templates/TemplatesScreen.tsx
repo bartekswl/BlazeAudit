@@ -18,6 +18,8 @@ import type { BuiltinTemplate } from '../../../shared/form';
 import { cn } from '../../lib/cn';
 import { InlineLoader } from '../../components/LoadingOverlay';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { ListPagination } from '../../components/ListPagination';
+import { paginateItems } from '../../lib/pagination';
 import { BuiltinTemplateViewer } from './BuiltinTemplateViewer';
 import { TemplateEditor } from './TemplateEditor';
 
@@ -56,6 +58,7 @@ export function TemplatesScreen({
   const [editingId, setEditingId] = useState<string | 'new' | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [pendingDelete, setPendingDelete] = useState<CustomTemplateSummary | null>(null);
+  const [listPage, setListPage] = useState(1);
 
   const goBackToList = useCallback(() => {
     setViewingId(null);
@@ -135,6 +138,12 @@ export function TemplatesScreen({
     );
   }, [templates, search]);
 
+  useEffect(() => {
+    setListPage(1);
+  }, [search, variant]);
+
+  const paged = useMemo(() => paginateItems(filtered, listPage), [filtered, listPage]);
+
   const importJson = async () => {
     setMessage(null);
     setError(null);
@@ -162,17 +171,19 @@ export function TemplatesScreen({
       return <InlineLoader label="Loading template…" />;
     }
     return (
-      <TemplateEditor
-        templateId={editingId === 'new' ? null : editingId}
-        initial={editingId === 'new' ? undefined : editingTemplate ?? undefined}
-        onCancel={goBackToList}
-        onSaved={async (saved) => {
-          setEditingTemplate(saved);
-          setEditingId(saved.id);
-          setMessage('Template saved.');
-          await refresh();
-        }}
-      />
+      <div className="flex h-full min-h-0 flex-1 flex-col">
+        <TemplateEditor
+          templateId={editingId === 'new' ? null : editingId}
+          initial={editingId === 'new' ? undefined : editingTemplate ?? undefined}
+          onCancel={goBackToList}
+          onSaved={async (saved) => {
+            setEditingTemplate(saved);
+            setEditingId(saved.id);
+            setMessage('Template saved.');
+            await refresh();
+          }}
+        />
+      </div>
     );
   }
 
@@ -180,29 +191,33 @@ export function TemplatesScreen({
     if (!viewingTemplate) {
       return <InlineLoader label="Loading template…" />;
     }
-    return <BuiltinTemplateViewer template={viewingTemplate} />;
+    return (
+      <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto">
+        <BuiltinTemplateViewer template={viewingTemplate} />
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-neutral-400">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-3">
+      <p className="shrink-0 text-sm text-neutral-400">
         {isCustom
           ? 'Your own templates — create, import, edit, duplicate, export, or remove.'
           : 'Inspection definitions shipped with BlazeAudit. Use them as-is when creating documents.'}
       </p>
 
       {message && (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+        <div className="shrink-0 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
           {message}
         </div>
       )}
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        <div className="shrink-0 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
           {error}
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
         <div className="relative min-w-48 flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-500" />
           <input
@@ -239,7 +254,7 @@ export function TemplatesScreen({
       {loading ? (
         <InlineLoader label="Loading templates…" />
       ) : filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-white/10 px-6 py-12 text-center">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 px-6 py-12 text-center">
           <LayoutTemplate className="mx-auto mb-3 size-8 text-neutral-600" />
           <p className="text-sm text-neutral-400">
             {search
@@ -250,69 +265,80 @@ export function TemplatesScreen({
           </p>
         </div>
       ) : (
-        <ul className="space-y-2">
-          {filtered.map((template) => (
-            <li key={template.id}>
-              {isCustom ? (
-                <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-neutral-100">{template.name}</p>
-                    <p className="truncate text-xs text-neutral-500">
-                      {template.description || 'No description'} · {template.blockCount} block
-                      {template.blockCount === 1 ? '' : 's'} · v{template.version}
-                    </p>
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
+          <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto">
+            {paged.items.map((template) => (
+              <li key={template.id}>
+                {isCustom ? (
+                  <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-neutral-100">{template.name}</p>
+                      <p className="truncate text-xs text-neutral-500">
+                        {template.description || 'No description'} · {template.blockCount} block
+                        {template.blockCount === 1 ? '' : 's'} · v{template.version}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      <IconButton
+                        label="Edit"
+                        onClick={() => setEditingId(template.id)}
+                        icon={Pencil}
+                      />
+                      <IconButton
+                        label="Duplicate"
+                        onClick={async () => {
+                          await window.blazeaudit.templates.custom.duplicate(template.id);
+                          await refresh();
+                        }}
+                        icon={Copy}
+                      />
+                      <IconButton
+                        label="Export JSON"
+                        onClick={async () => {
+                          const result = await window.blazeaudit.templates.custom.exportJson(
+                            template.id,
+                          );
+                          if (result.saved) setMessage(`Exported to ${result.filePath}`);
+                        }}
+                        icon={Download}
+                      />
+                      <IconButton
+                        label="Delete"
+                        danger
+                        onClick={() => setPendingDelete(template as CustomTemplateSummary)}
+                        icon={Trash2}
+                      />
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    <IconButton
-                      label="Edit"
-                      onClick={() => setEditingId(template.id)}
-                      icon={Pencil}
-                    />
-                    <IconButton
-                      label="Duplicate"
-                      onClick={async () => {
-                        await window.blazeaudit.templates.custom.duplicate(template.id);
-                        await refresh();
-                      }}
-                      icon={Copy}
-                    />
-                    <IconButton
-                      label="Export JSON"
-                      onClick={async () => {
-                        const result = await window.blazeaudit.templates.custom.exportJson(
-                          template.id,
-                        );
-                        if (result.saved) setMessage(`Exported to ${result.filePath}`);
-                      }}
-                      icon={Download}
-                    />
-                    <IconButton
-                      label="Delete"
-                      danger
-                      onClick={() => setPendingDelete(template as CustomTemplateSummary)}
-                      icon={Trash2}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setViewingId(template.id)}
-                  className="flex w-full flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-left transition-colors hover:border-white/10 hover:bg-white/[0.04]"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-base font-semibold text-[var(--ba-text-primary)]">
-                      {template.name}
-                    </p>
-                    <p className="mt-0.5 truncate text-xs text-[var(--ba-text-muted)]">
-                      {builtinTemplateSubtitle(template as BuiltinTemplateSummary)}
-                    </p>
-                  </div>
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setViewingId(template.id)}
+                    className="flex w-full flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-left transition-colors hover:border-white/10 hover:bg-white/[0.04]"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-base font-semibold text-[var(--ba-text-primary)]">
+                        {template.name}
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-[var(--ba-text-muted)]">
+                        {builtinTemplateSubtitle(template as BuiltinTemplateSummary)}
+                      </p>
+                    </div>
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+          <ListPagination
+            page={paged.page}
+            totalPages={paged.totalPages}
+            totalItems={paged.totalItems}
+            startIndex={paged.startIndex}
+            endIndex={paged.endIndex}
+            onPageChange={setListPage}
+            className="shrink-0"
+          />
+        </div>
       )}
 
       {pendingDelete && (

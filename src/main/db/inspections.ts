@@ -416,6 +416,68 @@ export function createInspectionFromPdfExport(
   return getInspection(id)!;
 }
 
+/** Clone an inspection: same content, today's date, title + " - duplicate". */
+export function duplicateInspection(sourceId: string): Inspection {
+  const src = getInspection(sourceId);
+  if (!src) throw new Error(`Inspection not found: ${sourceId}`);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const baseTitle = src.title.trim() || 'Inspection';
+  const title = `${baseTitle} - duplicate`;
+  const now = new Date().toISOString();
+  const id = randomUUID();
+  const status = src.status;
+  const cadence = (src.cadence?.trim() || 'annual') as Cadence;
+  const nextDueAt = status === 'complete' ? computeNextDueAt(today, cadence) : null;
+
+  let document: InspectionDocument = JSON.parse(JSON.stringify(src.document)) as InspectionDocument;
+  if (isFormInspectionDocument(document)) {
+    const formResult = validateFormInspectionDocument(document);
+    if (!formResult.ok) throw new Error(formResult.errors.join(' '));
+    document = syncFormDocumentInspectionDate(formResult.document, today);
+  } else {
+    const docResult = validateDocument(document);
+    if (!docResult.ok) throw new Error(docResult.errors.join(' '));
+    document = {
+      ...docResult.document,
+      meta: {
+        ...docResult.document.meta,
+        title,
+        inspectionDate: today,
+      },
+    };
+  }
+
+  getDatabase()
+    .prepare(
+      `INSERT INTO inspections (
+         id, client_id, template_kind, template_id, title, status, inspector, document,
+         inspected_at, project_number, cadence, next_due_at, created_at, updated_at
+       ) VALUES (
+         @id, @clientId, @templateKind, @templateId, @title, @status, @inspector, @document,
+         @inspectedAt, @projectNumber, @cadence, @nextDueAt, @createdAt, @updatedAt
+       )`,
+    )
+    .run({
+      id,
+      clientId: src.clientId,
+      templateKind: src.templateKind,
+      templateId: src.templateId,
+      title,
+      status,
+      inspector: src.inspector?.trim() ?? '',
+      document: JSON.stringify(document),
+      inspectedAt: today,
+      projectNumber: src.projectNumber?.trim() ?? '',
+      cadence,
+      nextDueAt,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+  return getInspection(id)!;
+}
+
 export function updateInspection(id: string, input: InspectionInput): Inspection {
   const existing = getInspection(id);
   if (!existing) throw new Error(`Inspection not found: ${id}`);

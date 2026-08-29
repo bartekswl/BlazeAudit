@@ -125,50 +125,49 @@ export function Sidebar({
         >
           {expanded ? (
             <>
-              <div className="flex items-start gap-2.5">
-                <button
-                  type="button"
-                  onClick={onOpenUserProfile}
-                  title="User profile settings"
-                  className={cn(
-                    'flex min-w-0 flex-1 items-start gap-2.5 rounded-lg px-1 py-1 text-left transition-colors',
-                    activeId === 'settings'
-                      ? 'text-[var(--ba-nav-active-text)]'
-                      : 'hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]',
-                  )}
-                >
-                  <UserAvatar logoDataUrl={logoDataUrl} initial={initial} />
-                  <div className="min-w-0 flex-1 pt-0.5">
-                    <div
-                      className="truncate text-[11px] font-medium leading-tight text-[var(--ba-text-primary)]"
-                      title={email || 'Inspector'}
-                    >
-                      {email || 'Inspector'}
-                    </div>
-                    <div
-                      className={cn(
-                        'mt-0.5 truncate text-[10px] leading-tight',
-                        businessName.trim()
-                          ? 'text-[var(--ba-text-muted)]'
-                          : 'text-[var(--ba-text-faint)]',
-                      )}
-                      title={subtitle}
-                    >
-                      {subtitle}
-                    </div>
+              <button
+                type="button"
+                onClick={onOpenUserProfile}
+                title="User profile settings"
+                className={cn(
+                  'flex w-full min-w-0 items-start gap-2.5 rounded-lg px-1 py-1 text-left transition-colors',
+                  activeId === 'settings'
+                    ? 'text-[var(--ba-nav-active-text)]'
+                    : 'hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]',
+                )}
+              >
+                <UserAvatar logoDataUrl={logoDataUrl} initial={initial} />
+                <div className="min-w-0 flex-1 pt-0.5">
+                  <div
+                    className="break-all text-sm font-medium leading-snug text-[var(--ba-text-primary)]"
+                    title={email || 'Inspector'}
+                  >
+                    {email || 'Inspector'}
                   </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleLogOut}
-                  aria-label="Close and Log Out"
-                  title="Close and Log Out"
-                  className="mt-0.5 shrink-0 rounded-md p-1.5 text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
-                >
-                  <LogOut className="size-4" />
-                </button>
-              </div>
+                  <div
+                    className={cn(
+                      'mt-1 break-words text-xs leading-snug',
+                      businessName.trim()
+                        ? 'text-[var(--ba-text-muted)]'
+                        : 'text-[var(--ba-text-faint)]',
+                    )}
+                    title={subtitle}
+                  >
+                    {subtitle}
+                  </div>
+                </div>
+              </button>
               <ColorThemeToggle className="mt-2 px-0.5" />
+              <button
+                type="button"
+                onClick={handleLogOut}
+                aria-label="Close and Log Out"
+                title="Close and Log Out"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-md px-1 py-1.5 text-sm text-[var(--ba-text-muted)] transition-colors hover:bg-[var(--ba-hover-bg)] hover:text-[var(--ba-text-primary)]"
+              >
+                <LogOut className="size-4 shrink-0" />
+                Log out
+              </button>
             </>
           ) : (
             <div className="flex flex-col items-center gap-2">
@@ -186,6 +185,7 @@ export function Sidebar({
                 <UserAvatar logoDataUrl={logoDataUrl} initial={initial} />
                 <span className="sr-only">User profile settings</span>
               </button>
+              <ColorThemeToggle showLabel={false} className="justify-center" />
               <button
                 type="button"
                 onClick={handleLogOut}
@@ -195,7 +195,6 @@ export function Sidebar({
               >
                 <LogOut className="size-4" />
               </button>
-              <ColorThemeToggle showLabel={false} className="justify-center" />
             </div>
           )}
         </div>

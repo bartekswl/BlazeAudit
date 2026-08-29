@@ -176,6 +176,8 @@ const api = {
       ipcRenderer.invoke(IpcChannels.inspectionsGet, id),
     create: (input: CreateInspectionInput): Promise<Inspection> =>
       ipcRenderer.invoke(IpcChannels.inspectionsCreate, input),
+    duplicate: (id: string): Promise<Inspection> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsDuplicate, id),
     update: (id: string, input: InspectionInput): Promise<Inspection> =>
       ipcRenderer.invoke(IpcChannels.inspectionsUpdate, id, input),
     remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.inspectionsDelete, id),

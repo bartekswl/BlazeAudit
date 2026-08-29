@@ -545,38 +545,46 @@ export default function App() {
             {activeId === 'customers' ? (
 
               <Suspense fallback={screenModuleFallback}>
-                <CustomersScreen
-                  onDetailChange={handleCustomerDetailChange}
-                  onNewInspection={(clientId) => openDocuments({ openNew: true, clientId })}
-                />
+                <div className="flex h-full min-h-0 flex-1 flex-col">
+                  <CustomersScreen
+                    onDetailChange={handleCustomerDetailChange}
+                    onNewInspection={(clientId) => openDocuments({ openNew: true, clientId })}
+                  />
+                </div>
               </Suspense>
 
             ) : activeId === 'documents' ? (
 
               <Suspense fallback={screenModuleFallback}>
-                <DocumentsScreen
-                  boot={documentsBoot}
-                  onBootConsumed={() => setDocumentsBoot(null)}
-                  onDetailChange={handleDocumentDetailChange}
-                />
+                <div className="flex h-full min-h-0 flex-1 flex-col">
+                  <DocumentsScreen
+                    boot={documentsBoot}
+                    onBootConsumed={() => setDocumentsBoot(null)}
+                    onDetailChange={handleDocumentDetailChange}
+                  />
+                </div>
               </Suspense>
 
             ) : activeId === 'builtinTemplates' ? (
 
               <Suspense fallback={screenModuleFallback}>
-                <TemplatesScreen
-                  variant="built-in"
-                  onDetailChange={handleTemplateDetailChange}
-                />
+                <div className="flex h-full min-h-0 flex-1 flex-col">
+                  <TemplatesScreen
+                    variant="built-in"
+                    onDetailChange={handleTemplateDetailChange}
+                  />
+                </div>
               </Suspense>
 
             ) : activeId === 'customTemplates' ? (
 
               <Suspense fallback={screenModuleFallback}>
-                <TemplatesScreen
-                  variant="custom"
-                  onDetailChange={handleTemplateDetailChange}
-                />
+                <div className="flex h-full min-h-0 flex-1 flex-col">
+                  <TemplatesScreen
+                    variant="custom"
+                    onDetailChange={handleTemplateDetailChange}
+                  />
+                </div>
               </Suspense>
 
             ) : activeId === 'nameBadges' ? (
