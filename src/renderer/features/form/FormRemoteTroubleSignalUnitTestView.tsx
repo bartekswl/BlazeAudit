@@ -13,7 +13,9 @@ import {
   type RemoteTroubleSignalUnitTestChoice,
   type RemoteTroubleSignalUnitTestValue,
 } from '../../../shared/form/remoteTroubleSignalUnitTest';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -150,8 +152,19 @@ export function FormRemoteTroubleSignalUnitTestView({
   onChange?: (next: RemoteTroubleSignalUnitTestValue) => void;
 }) {
   const data = normalizeRemoteTroubleSignalUnitTestValue(value);
+  const choosableIds = REMOTE_TROUBLE_SIGNAL_UNIT_TEST_ROWS.map((row) => row.id);
 
   const emit = (next: RemoteTroubleSignalUnitTestValue) => onChange?.(next);
+
+  const applyColumn = (variant: RemoteTroubleSignalUnitTestChoice) => {
+    const values = choosableIds.map((id) => data.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of choosableIds) {
+      nextData = setRemoteTroubleSignalUnitTestChoice(nextData, id, next);
+    }
+    emit(nextData);
+  };
 
   return (
     <div className="rtsu-panel">
@@ -199,9 +212,30 @@ export function FormRemoteTroubleSignalUnitTestView({
             <tr>
               <th className="rtsu-th rtsu-th--letter" aria-hidden="true" />
               <th className="rtsu-th rtsu-th--intro" aria-hidden="true" />
-              <th className="rtsu-th rtsu-th--yes">Yes</th>
-              <th className="rtsu-th rtsu-th--no">No</th>
-              <th className="rtsu-th rtsu-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="rtsu-th rtsu-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="rtsu-th rtsu-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="rtsu-th rtsu-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>

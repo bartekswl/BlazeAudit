@@ -6,8 +6,10 @@ import type {
   SignatureElementValue,
   TableElementValue,
 } from '../../../shared/form';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { LazyCommitInput } from '../../components/LazyCommitInput';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { FormAffirmationView } from './FormAffirmationView';
 import { FormAttendanceLogView } from './FormAttendanceLogView';
@@ -273,9 +275,24 @@ function FormElementBody({
               <tr>
                 <th className={cn(tableHeadCls, 'text-left')}>Item</th>
                 {options.map((opt) => (
-                  <th key={opt.id} className={cn(tableHeadCls, 'w-14 text-center')}>
+                  <ChoiceColumnHeader
+                    key={opt.id}
+                    className={cn(tableHeadCls, 'w-14 text-center')}
+                    readOnly={readOnly}
+                    applyLabel={`Set all rows to ${opt.label}`}
+                    onApply={() => {
+                      const ids = element.items.map((item) => item.id);
+                      const values = ids.map((id) => checklistValue[id] ?? null);
+                      const next = nextRadioColumnChoice(values, opt.id);
+                      const nextValue = { ...checklistValue };
+                      for (const id of ids) {
+                        nextValue[id] = next;
+                      }
+                      onChange?.(nextValue);
+                    }}
+                  >
                     {opt.label}
-                  </th>
+                  </ChoiceColumnHeader>
                 ))}
               </tr>
             </thead>

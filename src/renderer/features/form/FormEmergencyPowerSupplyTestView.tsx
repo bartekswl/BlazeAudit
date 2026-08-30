@@ -35,9 +35,11 @@ import {
   type EmergencyPowerSupplyTestChoice,
   type EmergencyPowerSupplyTestValue,
 } from '../../../shared/form/emergencyPowerSupplyTest';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -333,6 +335,31 @@ export function FormEmergencyPowerSupplyTestView({
 }) {
   const data = normalizeEmergencyPowerSupplyTestValue(rawValue);
 
+  const mainTableChecklistIds = EMERGENCY_POWER_SUPPLY_TEST_ROWS.filter(
+    (row) =>
+      row.kind !== 'batteryMeasure' &&
+      row.kind !== 'textFill' &&
+      row.kind !== 'valueFill' &&
+      row.kind !== 'testType',
+  ).map((row) => row.id);
+  const testTypeKeys = EMERGENCY_POWER_SUPPLY_TEST_TYPE_OPTIONS.map((opt) => opt.key);
+
+  const applyColumn = (variant: EmergencyPowerSupplyTestChoice) => {
+    const values = [
+      ...mainTableChecklistIds.map((id) => data.checklist[id]?.choice ?? null),
+      ...testTypeKeys.map((key) => data.testType[key] ?? null),
+    ];
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of mainTableChecklistIds) {
+      nextData = setEmergencyPowerSupplyTestChoice(nextData, id, next);
+    }
+    for (const key of testTypeKeys) {
+      nextData = setEmergencyPowerSupplyTestTypeChoice(nextData, key, next);
+    }
+    onChange?.(nextData);
+  };
+
   const renderMainRow = (
     row: (typeof EMERGENCY_POWER_SUPPLY_TEST_ROWS)[number],
     rowIndex: number,
@@ -562,9 +589,30 @@ export function FormEmergencyPowerSupplyTestView({
             <tr>
               <th className="epst-th epst-th--letter" aria-hidden="true" />
               <th className="epst-th epst-th--intro" aria-hidden="true" />
-              <th className="epst-th epst-th--yes">Yes</th>
-              <th className="epst-th epst-th--no">No</th>
-              <th className="epst-th epst-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="epst-th epst-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="epst-th epst-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="epst-th epst-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>

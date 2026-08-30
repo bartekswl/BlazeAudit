@@ -1,5 +1,6 @@
 import {
   addressContextExtras,
+  inferBuiltinSeedIdFromForm,
   inspectorSliceFromName,
   inspectorSliceFromRecord,
   type DocumentContext,
@@ -10,6 +11,27 @@ import * as builtinTemplates from './builtinTemplates';
 import * as clients from './clients';
 import * as profile from './profile';
 import * as templateRegistry from './templateRegistry';
+
+function resolveBuiltinTemplateMeta(inspection: Inspection) {
+  if (!inspection.templateId) return null;
+
+  const byId = builtinTemplates.getBuiltinTemplateMeta(inspection.templateId);
+  if (byId) return byId;
+
+  // Imported PDFs keep the source machine's template UUID — remap via form shape → seed.
+  if (!isFormInspectionDocument(inspection.document)) return null;
+  const seedId = inferBuiltinSeedIdFromForm(inspection.document.form);
+  if (!seedId) return null;
+  const bySeed = builtinTemplates.getBuiltinTemplateBySeedId(seedId);
+  if (!bySeed) return null;
+  return {
+    seedId: bySeed.seedId,
+    name: bySeed.name,
+    description: bySeed.description,
+    code: bySeed.code,
+    title: bySeed.title,
+  };
+}
 
 export function resolveDocumentContext(inspection: Inspection): DocumentContext {
   const clientRow = clients.getClient(inspection.clientId);
@@ -24,7 +46,7 @@ export function resolveDocumentContext(inspection: Inspection): DocumentContext 
   let template: DocumentContext['template'] = null;
   if (inspection.templateKind && inspection.templateId) {
     if (inspection.templateKind === 'builtin') {
-      const builtin = builtinTemplates.getBuiltinTemplateMeta(inspection.templateId);
+      const builtin = resolveBuiltinTemplateMeta(inspection);
       if (builtin) {
         template = {
           kind: 'builtin',
@@ -89,5 +111,8 @@ export function resolveDocumentContext(inspection: Inspection): DocumentContext 
 
 export function resolveBuiltinSeedId(inspection: Inspection): string | null {
   if (inspection.templateKind !== 'builtin' || !inspection.templateId) return null;
-  return builtinTemplates.getBuiltinSeedId(inspection.templateId);
+  const direct = builtinTemplates.getBuiltinSeedId(inspection.templateId);
+  if (direct) return direct;
+  if (!isFormInspectionDocument(inspection.document)) return null;
+  return inferBuiltinSeedIdFromForm(inspection.document.form);
 }

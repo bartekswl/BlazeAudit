@@ -242,6 +242,16 @@ export function setIndividualDeviceRecordChoice(
   };
 }
 
+export function setIndividualDeviceRecordColumnChoice(
+  value: IndividualDeviceRecordValue,
+  key: Extract<keyof IndividualDeviceRecordRow, string>,
+  next: IndividualDeviceRecordChoice | null,
+): IndividualDeviceRecordValue {
+  return {
+    rows: value.rows.map((row) => ({ ...row, [key]: next })),
+  };
+}
+
 export function cycleIndividualDeviceRecordChoice(
   current: IndividualDeviceRecordChoice | null,
 ): IndividualDeviceRecordChoice | null {

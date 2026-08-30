@@ -22,7 +22,9 @@ import {
   type AncillaryDeviceCircuitOperationChoice,
   type AncillaryDeviceCircuitTestValue,
 } from '../../../shared/form/ancillaryDeviceCircuitTest';
+import { nextCheckboxColumnValue, nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { handleFixedRowGridTextInputKeyDown } from './formGridTableKeyboard';
@@ -106,6 +108,26 @@ export function FormAncillaryDeviceCircuitTestView({
 
   const emit = (next: AncillaryDeviceCircuitTestValue) => onChange?.(next);
 
+  const applyOperationColumn = (variant: AncillaryDeviceCircuitOperationChoice) => {
+    const values = data.rows.map((row) => row.operationConfirmed);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (let rowIndex = 0; rowIndex < data.rows.length; rowIndex++) {
+      nextData = setAncillaryDeviceCircuitOperationConfirmed(nextData, rowIndex, next);
+    }
+    emit(nextData);
+  };
+
+  const applyFacuColumn = () => {
+    const values = data.rows.map((row) => row.poweredByFacu);
+    const next = nextCheckboxColumnValue(values);
+    let nextData = data;
+    for (let rowIndex = 0; rowIndex < data.rows.length; rowIndex++) {
+      nextData = setAncillaryDeviceCircuitPoweredByFacu(nextData, rowIndex, next);
+    }
+    emit(nextData);
+  };
+
   return (
     <div
       className="adc-panel"
@@ -142,10 +164,31 @@ export function FormAncillaryDeviceCircuitTestView({
               </th>
             </tr>
             <tr>
-              <th className="adc-th adc-th--facu">{ANCILLARY_DEVICE_CIRCUIT_TEST_FACU_HEADER}</th>
+              <ChoiceColumnHeader
+                className="adc-th adc-th--facu"
+                readOnly={readOnly}
+                applyLabel="Set all rows to FACU"
+                onApply={applyFacuColumn}
+              >
+                {ANCILLARY_DEVICE_CIRCUIT_TEST_FACU_HEADER}
+              </ChoiceColumnHeader>
               <th className="adc-th adc-th--other">{ANCILLARY_DEVICE_CIRCUIT_TEST_OTHER_HEADER}</th>
-              <th className="adc-th adc-th--yes">{ANCILLARY_DEVICE_CIRCUIT_TEST_YES_HEADER}</th>
-              <th className="adc-th adc-th--no">{ANCILLARY_DEVICE_CIRCUIT_TEST_NO_HEADER}</th>
+              <ChoiceColumnHeader
+                className="adc-th adc-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyOperationColumn('yes')}
+              >
+                {ANCILLARY_DEVICE_CIRCUIT_TEST_YES_HEADER}
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="adc-th adc-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyOperationColumn('no')}
+              >
+                {ANCILLARY_DEVICE_CIRCUIT_TEST_NO_HEADER}
+              </ChoiceColumnHeader>
               <th className="adc-th adc-th--method">{ANCILLARY_DEVICE_CIRCUIT_TEST_METHOD_HEADER}</th>
             </tr>
           </thead>

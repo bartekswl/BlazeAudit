@@ -1,3 +1,4 @@
+export * from './columnChoiceFill';
 export * from './types';
 export * from './layout';
 export * from './disclaimer';

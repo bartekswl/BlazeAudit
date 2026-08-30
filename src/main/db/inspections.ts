@@ -5,7 +5,7 @@ import {
   isOverdue,
   type Cadence,
 } from '../../shared/cadence';
-import { inspectionSnapshotFromTemplate, validateDocument } from '../../shared/document';
+import { inspectionSnapshotFromTemplate, inferBuiltinSeedIdFromForm, validateDocument } from '../../shared/document';
 import {
   createFormInspectionDocument,
   isFormInspectionDocument,
@@ -14,6 +14,7 @@ import {
   syncFormDocumentInspectionDate,
   syncFormDocumentProjectNumber,
   validateFormInspectionDocument,
+  type FormDefinition,
   type FormInspectionDocument,
 } from '../../shared/form';
 import type { InspectionDocument } from '../../shared/form/guards';
@@ -288,6 +289,28 @@ export function createInspectionFromTemplate(input: CreateInspectionInput): Insp
   return getInspection(id)!;
 }
 
+/** Remap exported builtin template UUIDs onto this machine's seed-backed rows. */
+function resolveImportedTemplateId(
+  templateKind: TemplateKind | null,
+  exportedTemplateId: string | null | undefined,
+  form: FormDefinition | null,
+): string | null {
+  const exported = exportedTemplateId?.trim() || null;
+  if (templateKind === 'builtin') {
+    if (exported && builtinTemplates.getBuiltinTemplate(exported)) return exported;
+    if (form) {
+      const seedId = inferBuiltinSeedIdFromForm(form);
+      if (seedId) {
+        const local = builtinTemplates.getBuiltinTemplateBySeedId(seedId);
+        if (local) return local.id;
+      }
+    }
+    return exported;
+  }
+  if (templateKind === 'custom' && exported) return exported;
+  return exported;
+}
+
 export function createInspectionFromPdfExport(
   payload: PdfInspectionExport,
   options: { replaceExisting?: boolean } = {},
@@ -345,6 +368,11 @@ export function createInspectionFromPdfExport(
 
   const templateKind: TemplateKind | null =
     src.templateKind === 'builtin' || src.templateKind === 'custom' ? src.templateKind : null;
+  const templateId = resolveImportedTemplateId(
+    templateKind,
+    src.templateId,
+    isFormInspectionDocument(document) ? document.form : null,
+  );
 
   if (existingByPreferredId && options.replaceExisting) {
     const id = existingByPreferredId.id;
@@ -369,7 +397,7 @@ export function createInspectionFromPdfExport(
         id,
         clientId,
         templateKind,
-        templateId: src.templateId,
+        templateId,
         title,
         status,
         inspector: src.inspector?.trim() ?? '',
@@ -400,7 +428,7 @@ export function createInspectionFromPdfExport(
       id,
       clientId,
       templateKind,
-      templateId: src.templateId,
+      templateId,
       title,
       status,
       inspector: src.inspector?.trim() ?? '',

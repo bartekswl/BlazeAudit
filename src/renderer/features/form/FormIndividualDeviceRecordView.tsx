@@ -8,12 +8,15 @@ import {
   individualDeviceRecordChoiceSymbol,
   normalizeIndividualDeviceRecordValue,
   setIndividualDeviceRecordChoice,
+  setIndividualDeviceRecordColumnChoice,
   setIndividualDeviceRecordText,
   type IndividualDeviceRecordChoice,
   type IndividualDeviceRecordRow,
   type IndividualDeviceRecordValue,
 } from '../../../shared/form/individualDeviceRecord';
+import { nextUniformCycledChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { handleFixedRowGridTextInputKeyDown } from './formGridTableKeyboard';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
@@ -145,16 +148,8 @@ export function FormIndividualDeviceRecordView({
           </colgroup>
           <thead>
             <tr>
-              {INDIVIDUAL_DEVICE_RECORD_COLUMNS.map((col) => (
-                <th
-                  key={col.key}
-                  className={cn(
-                    'idr-th',
-                    `idr-th--${col.key}`,
-                    col.orientation === 'vertical' ? 'idr-th--vertical' : 'idr-th--horizontal',
-                  )}
-                  style={{ width: `${col.widthPercent}%` }}
-                >
+              {INDIVIDUAL_DEVICE_RECORD_COLUMNS.map((col) => {
+                const headerBody = (
                   <span className="idr-th-text">
                     {col.title.split('\n').map((line, lineIndex) => (
                       <span key={`${col.key}-${lineIndex}`}>
@@ -163,8 +158,41 @@ export function FormIndividualDeviceRecordView({
                       </span>
                     ))}
                   </span>
-                </th>
-              ))}
+                );
+                const thClass = cn(
+                  'idr-th',
+                  `idr-th--${col.key}`,
+                  col.orientation === 'vertical' ? 'idr-th--vertical' : 'idr-th--horizontal',
+                );
+                const thStyle = { width: `${col.widthPercent}%` };
+
+                if (col.kind !== 'choice') {
+                  return (
+                    <th key={col.key} className={thClass} style={thStyle}>
+                      {headerBody}
+                    </th>
+                  );
+                }
+
+                return (
+                  <ChoiceColumnHeader
+                    key={col.key}
+                    className={thClass}
+                    style={thStyle}
+                    readOnly={readOnly}
+                    applyLabel={`Cycle all “${col.title.replace(/\n/g, ' ')}” cells on this page`}
+                    onApply={() => {
+                      const values = data.rows.map(
+                        (row) => row[col.key] as IndividualDeviceRecordChoice | null,
+                      );
+                      const next = nextUniformCycledChoice(values, cycleIndividualDeviceRecordChoice);
+                      onChange?.(setIndividualDeviceRecordColumnChoice(data, col.key, next));
+                    }}
+                  >
+                    {headerBody}
+                  </ChoiceColumnHeader>
+                );
+              })}
             </tr>
           </thead>
           <tbody>

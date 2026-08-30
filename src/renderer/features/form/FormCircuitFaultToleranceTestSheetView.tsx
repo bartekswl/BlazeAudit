@@ -10,12 +10,15 @@ import {
   cycleCircuitFaultToleranceTestSheetChoice,
   normalizeCircuitFaultToleranceTestSheetValue,
   setCircuitFaultToleranceTestSheetChoice,
+  setCircuitFaultToleranceTestSheetColumnChoice,
   setCircuitFaultToleranceTestSheetText,
   type CircuitFaultToleranceTestSheetChoice,
   type CircuitFaultToleranceTestSheetDataColumnKey,
   type CircuitFaultToleranceTestSheetValue,
 } from '../../../shared/form/circuitFaultToleranceTestSheet';
+import { nextUniformCycledChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { handleFixedRowGridTextInputKeyDown } from './formGridTableKeyboard';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
@@ -187,9 +190,21 @@ export function FormCircuitFaultToleranceTestSheetView({
               <th className="cfts-th cfts-th--sub cfts-th--non-faulted-device">
                 {CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_HEADER_ROW2.nonFaultedDevice}
               </th>
-              <th className="cfts-th cfts-th--sub cfts-th--pass-fail">
+              <ChoiceColumnHeader
+                className="cfts-th cfts-th--sub cfts-th--pass-fail"
+                readOnly={readOnly}
+                applyLabel="Cycle all Pass or Fail cells on this page"
+                onApply={() => {
+                  const values = data.rows.map((row) => row.passOrFail);
+                  const next = nextUniformCycledChoice(
+                    values,
+                    cycleCircuitFaultToleranceTestSheetChoice,
+                  );
+                  onChange?.(setCircuitFaultToleranceTestSheetColumnChoice(data, next));
+                }}
+              >
                 {CIRCUIT_FAULT_TOLERANCE_TEST_SHEET_HEADER_ROW2.passOrFail}
-              </th>
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>

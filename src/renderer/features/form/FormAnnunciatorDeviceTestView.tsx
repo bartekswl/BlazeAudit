@@ -13,7 +13,9 @@ import {
   type AnnunciatorDeviceTestChoice,
   type AnnunciatorDeviceTestValue,
 } from '../../../shared/form/annunciatorDeviceTest';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -150,8 +152,19 @@ export function FormAnnunciatorDeviceTestView({
   onChange?: (next: AnnunciatorDeviceTestValue) => void;
 }) {
   const data = normalizeAnnunciatorDeviceTestValue(value);
+  const choosableIds = ANNUNCIATOR_DEVICE_TEST_ROWS.map((row) => row.id);
 
   const emit = (next: AnnunciatorDeviceTestValue) => onChange?.(next);
+
+  const applyColumn = (variant: AnnunciatorDeviceTestChoice) => {
+    const values = choosableIds.map((id) => data.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of choosableIds) {
+      nextData = setAnnunciatorDeviceTestChoice(nextData, id, next);
+    }
+    emit(nextData);
+  };
 
   return (
     <div className="artu-panel">
@@ -206,9 +219,30 @@ export function FormAnnunciatorDeviceTestView({
             <tr>
               <th className="artu-th artu-th--letter" aria-hidden="true" />
               <th className="artu-th artu-th--intro" aria-hidden="true" />
-              <th className="artu-th artu-th--yes">Yes</th>
-              <th className="artu-th artu-th--no">No</th>
-              <th className="artu-th artu-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="artu-th artu-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="artu-th artu-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="artu-th artu-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>

@@ -469,6 +469,40 @@ tr.ba-row-selected > td {
   transform: scale(0.96);
 }
 
+/* Tickbox column header — click fills / cycles the whole page column. */
+.ba-choice-col-th {
+  padding: 0 !important;
+  vertical-align: middle;
+}
+
+.ba-choice-col-th-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  margin: 0;
+  padding: inherit;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.ba-choice-col-th-btn:hover {
+  background-color: rgb(249 115 22 / 0.12);
+}
+
+.ba-choice-col-th-btn:focus-visible {
+  outline: 2px solid rgb(249 115 22 / 0.7);
+  outline-offset: -2px;
+}
+
 [data-theme='light'] .ba-main-header {
   border-bottom-color: var(--ba-chrome-border);
 }

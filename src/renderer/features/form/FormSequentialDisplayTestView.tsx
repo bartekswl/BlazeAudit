@@ -13,7 +13,9 @@ import {
   type SequentialDisplayTestChoice,
   type SequentialDisplayTestValue,
 } from '../../../shared/form/sequentialDisplayTest';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -150,8 +152,19 @@ export function FormSequentialDisplayTestView({
   onChange?: (next: SequentialDisplayTestValue) => void;
 }) {
   const data = normalizeSequentialDisplayTestValue(value);
+  const choosableIds = SEQUENTIAL_DISPLAY_TEST_ROWS.map((row) => row.id);
 
   const emit = (next: SequentialDisplayTestValue) => onChange?.(next);
+
+  const applyColumn = (variant: SequentialDisplayTestChoice) => {
+    const values = choosableIds.map((id) => data.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of choosableIds) {
+      nextData = setSequentialDisplayTestChoice(nextData, id, next);
+    }
+    emit(nextData);
+  };
 
   return (
     <div className="asd-panel">
@@ -205,9 +218,30 @@ export function FormSequentialDisplayTestView({
             <tr>
               <th className="asd-th asd-th--letter" aria-hidden="true" />
               <th className="asd-th asd-th--intro" aria-hidden="true" />
-              <th className="asd-th asd-th--yes">Yes</th>
-              <th className="asd-th asd-th--no">No</th>
-              <th className="asd-th asd-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="asd-th asd-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="asd-th asd-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="asd-th asd-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>

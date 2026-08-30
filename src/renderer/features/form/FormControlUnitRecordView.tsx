@@ -12,9 +12,11 @@ import {
   type ControlUnitRecordChoice,
   type ControlUnitRecordValue,
 } from '../../../shared/form/controlUnitRecord';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -167,6 +169,24 @@ export function FormControlUnitRecordView({
 }) {
   const data = normalizeControlUnitRecordValue(rawValue);
 
+  const choosableIdsFor = (variant: ControlUnitRecordChoice) =>
+    CONTROL_UNIT_RECORD_ROWS.filter((row) => {
+      if (variant === 'yes') return !row.yesDisabled;
+      if (variant === 'no') return !row.noDisabled;
+      return true;
+    }).map((row) => row.id);
+
+  const applyColumn = (variant: ControlUnitRecordChoice) => {
+    const ids = choosableIdsFor(variant);
+    const values = ids.map((id) => data.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of ids) {
+      nextData = setControlUnitRecordChoice(nextData, id, next);
+    }
+    onChange?.(nextData);
+  };
+
   return (
     <div className="cur-panel">
       <div className="cur-title-bar" aria-hidden="true">
@@ -195,9 +215,30 @@ export function FormControlUnitRecordView({
             <tr>
               <th className="cur-th cur-th--letter" aria-hidden="true" />
               <th className="cur-th cur-th--intro" aria-hidden="true" />
-              <th className="cur-th cur-th--yes">Yes</th>
-              <th className="cur-th cur-th--no">No</th>
-              <th className="cur-th cur-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="cur-th cur-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="cur-th cur-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="cur-th cur-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>
