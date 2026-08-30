@@ -13,7 +13,9 @@ import {
   type PrinterTestChoice,
   type PrinterTestValue,
 } from '../../../shared/form/printerTest';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -150,8 +152,19 @@ export function FormPrinterTestView({
   onChange?: (next: PrinterTestValue) => void;
 }) {
   const data = normalizePrinterTestValue(value);
+  const choosableIds = PRINTER_TEST_ROWS.map((row) => row.id);
 
   const emit = (next: PrinterTestValue) => onChange?.(next);
+
+  const applyColumn = (variant: PrinterTestChoice) => {
+    const values = choosableIds.map((id) => data.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of choosableIds) {
+      nextData = setPrinterTestChoice(nextData, id, next);
+    }
+    emit(nextData);
+  };
 
   return (
     <div className="prt-panel">
@@ -199,9 +212,30 @@ export function FormPrinterTestView({
             <tr>
               <th className="prt-th prt-th--letter" aria-hidden="true" />
               <th className="prt-th prt-th--intro" aria-hidden="true" />
-              <th className="prt-th prt-th--yes">Yes</th>
-              <th className="prt-th prt-th--no">No</th>
-              <th className="prt-th prt-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="prt-th prt-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="prt-th prt-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="prt-th prt-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>

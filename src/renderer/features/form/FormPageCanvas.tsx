@@ -236,11 +236,7 @@ function FormPageCanvasInner({
                         region.content.align === 'right' && 'text-right',
                       )}
                     >
-                      {text || (
-                        <span className="text-[var(--ba-text-muted)]">
-                          {region.content.binding}
-                        </span>
-                      )}
+                      {text || '\u00a0'}
                     </div>
                   );
                 });

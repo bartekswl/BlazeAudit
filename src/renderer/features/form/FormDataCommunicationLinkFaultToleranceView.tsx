@@ -17,7 +17,9 @@ import {
   type DclftBlockValue,
   type DclftChoice,
 } from '../../../shared/form/dataCommunicationLinkFaultTolerance';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -116,6 +118,19 @@ function DclftPanel({
     ) => DataCommunicationLinkFaultToleranceValue,
   ) => void;
 }) {
+  const applyColumn = (variant: DclftChoice) => {
+    const ids = DCLFT_ROWS.map((row) => row.id);
+    const values = ids.map((id) => block.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    onEmit((value) => {
+      let nextValue = value;
+      for (const id of ids) {
+        nextValue = setDclftChoice(nextValue, blockId, id, next);
+      }
+      return nextValue;
+    });
+  };
+
   return (
     <div className="dclft-panel">
       <div className="dclft-na-bar">
@@ -174,9 +189,30 @@ function DclftPanel({
             <tr>
               <th className="dclft-th dclft-th--letter" aria-hidden="true" />
               <th className="dclft-th dclft-th--intro" aria-hidden="true" />
-              <th className="dclft-th dclft-th--yes">Yes</th>
-              <th className="dclft-th dclft-th--no">No</th>
-              <th className="dclft-th dclft-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="dclft-th dclft-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="dclft-th dclft-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="dclft-th dclft-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>

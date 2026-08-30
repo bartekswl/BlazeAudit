@@ -15,9 +15,11 @@ import {
   type PowerSupplyInspectionChoice,
   type PowerSupplyInspectionValue,
 } from '../../../shared/form/powerSupplyInspection';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -106,6 +108,17 @@ export function FormPowerSupplyInspectionView({
   onChange?: (value: PowerSupplyInspectionValue) => void;
 }) {
   const data = normalizePowerSupplyInspectionValue(rawValue);
+  const choosableIds = POWER_SUPPLY_INSPECTION_ROWS.map((row) => row.id);
+
+  const applyColumn = (variant: PowerSupplyInspectionChoice) => {
+    const values = choosableIds.map((id) => data.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of choosableIds) {
+      nextData = setPowerSupplyInspectionChoice(nextData, id, next);
+    }
+    onChange?.(nextData);
+  };
 
   return (
     <div className="psi-panel">
@@ -147,9 +160,30 @@ export function FormPowerSupplyInspectionView({
             <tr>
               <th className="psi-th psi-th--letter" aria-hidden="true" />
               <th className="psi-th psi-th--intro" aria-hidden="true" />
-              <th className="psi-th psi-th--yes">Yes</th>
-              <th className="psi-th psi-th--no">No</th>
-              <th className="psi-th psi-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="psi-th psi-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="psi-th psi-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="psi-th psi-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>

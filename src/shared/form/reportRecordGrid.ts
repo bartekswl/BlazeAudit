@@ -100,6 +100,16 @@ export function setReportGridChoiceCell(
   };
 }
 
+export function setReportGridChoiceColumn(
+  value: ReportGridValue,
+  columnKey: string,
+  next: ReportGridChoice,
+): ReportGridValue {
+  return {
+    rows: value.rows.map((row) => ({ ...row, [columnKey]: next })),
+  };
+}
+
 /** True when any text cell is non-empty or any choice is set. */
 export function reportGridHasContent(
   value: ReportGridValue,

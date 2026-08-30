@@ -13,9 +13,11 @@ import {
   type VoiceCommunicationTestChoice,
   type VoiceCommunicationTestValue,
 } from '../../../shared/form/voiceCommunicationTest';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -147,6 +149,17 @@ export function FormVoiceCommunicationTestView({
   onChange?: (value: VoiceCommunicationTestValue) => void;
 }) {
   const data = normalizeVoiceCommunicationTestValue(rawValue);
+  const choosableIds = VOICE_COMMUNICATION_TEST_ROWS.map((row) => row.id);
+
+  const applyColumn = (variant: VoiceCommunicationTestChoice) => {
+    const values = choosableIds.map((id) => data.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of choosableIds) {
+      nextData = setVoiceCommunicationTestChoice(nextData, id, next);
+    }
+    onChange?.(nextData);
+  };
 
   return (
     <div className="vct-panel">
@@ -197,9 +210,30 @@ export function FormVoiceCommunicationTestView({
             <tr>
               <th className="vct-th vct-th--letter" aria-hidden="true" />
               <th className="vct-th vct-th--intro" aria-hidden="true" />
-              <th className="vct-th vct-th--yes">Yes</th>
-              <th className="vct-th vct-th--no">No</th>
-              <th className="vct-th vct-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="vct-th vct-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="vct-th vct-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="vct-th vct-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>

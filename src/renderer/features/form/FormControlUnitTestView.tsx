@@ -16,9 +16,11 @@ import {
   type ControlUnitTestValue,
   type ControlUnitTestVersionFields,
 } from '../../../shared/form/controlUnitTest';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -189,6 +191,19 @@ export function FormControlUnitTestView({
   onChange?: (value: ControlUnitTestValue) => void;
 }) {
   const data = normalizeControlUnitTestValue(rawValue);
+  const choosableIds = CONTROL_UNIT_TEST_ROWS.filter((row) => row.kind !== 'firmware').map(
+    (row) => row.id,
+  );
+
+  const applyColumn = (variant: ControlUnitTestChoice) => {
+    const values = choosableIds.map((id) => data.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of choosableIds) {
+      nextData = setControlUnitTestChoice(nextData, id, next);
+    }
+    onChange?.(nextData);
+  };
 
   return (
     <div className="cut-panel">
@@ -229,9 +244,30 @@ export function FormControlUnitTestView({
             <tr>
               <th className="cut-th cut-th--letter" aria-hidden="true" />
               <th className="cut-th cut-th--intro">{CONTROL_UNIT_TEST_INTRO}</th>
-              <th className="cut-th cut-th--yes">Yes</th>
-              <th className="cut-th cut-th--no">No</th>
-              <th className="cut-th cut-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="cut-th cut-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="cut-th cut-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="cut-th cut-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>

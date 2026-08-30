@@ -2,12 +2,15 @@ import { type CSSProperties } from 'react';
 import {
   cycleReportGridChoice,
   setReportGridChoiceCell,
+  setReportGridChoiceColumn,
   setReportGridTextCell,
   type ReportGridChoice,
   type ReportGridColumnDef,
   type ReportGridValue,
 } from '../../../shared/form/reportRecordGrid';
+import { nextUniformCycledChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { handleFixedRowGridTextInputKeyDown } from './formGridTableKeyboard';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
@@ -88,19 +91,42 @@ export function FormReportRecordGridView({
       <table className="rrg-table" data-row-count={value.rows.length}>
         <thead>
           <tr>
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className={cn(
-                  'rrg-th',
-                  col.orientation === 'vertical' && 'rrg-th--vertical',
-                  col.kind === 'choice' && 'rrg-th--choice',
-                )}
-                style={{ width: `${col.widthPercent}%` }}
-              >
-                <span className="rrg-th-label">{col.title}</span>
-              </th>
-            ))}
+            {columns.map((col) => {
+              const thClass = cn(
+                'rrg-th',
+                col.orientation === 'vertical' && 'rrg-th--vertical',
+                col.kind === 'choice' && 'rrg-th--choice',
+              );
+              const thStyle = { width: `${col.widthPercent}%` };
+              const label = <span className="rrg-th-label">{col.title}</span>;
+
+              if (col.kind !== 'choice') {
+                return (
+                  <th key={col.key} className={thClass} style={thStyle}>
+                    {label}
+                  </th>
+                );
+              }
+
+              return (
+                <ChoiceColumnHeader
+                  key={col.key}
+                  className={thClass}
+                  style={thStyle}
+                  readOnly={readOnly}
+                  applyLabel={`Cycle all “${col.title.replace(/\n/g, ' ')}” cells on this page`}
+                  onApply={() => {
+                    const values = value.rows.map(
+                      (row) => (row[col.key] as ReportGridChoice) ?? null,
+                    );
+                    const next = nextUniformCycledChoice(values, cycleReportGridChoice);
+                    onChange?.(setReportGridChoiceColumn(value, col.key, next));
+                  }}
+                >
+                  {label}
+                </ChoiceColumnHeader>
+              );
+            })}
           </tr>
         </thead>
         <tbody>

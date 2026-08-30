@@ -18,7 +18,9 @@ import {
   type FsrcRowDef,
   type FireSignalReceivingCentreInterconnectionValue,
 } from '../../../shared/form/fireSignalReceivingCentreInterconnection';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -211,6 +213,22 @@ function DescCell({ row }: { row: FsrcRowDef }) {
   return <span className="fsrc-desc-text">{row.text}</span>;
 }
 
+function fsrcChoosableIds(variant: FsrcChoice): string[] {
+  const ids: string[] = [];
+  for (const row of FSRC_ROWS) {
+    if (row.choiceMode === 'record-fields') continue;
+    if (variant === 'na' && row.choiceMode === 'yes-no-na-blocked') continue;
+    if (row.subItems?.length) {
+      for (const subItem of row.subItems) {
+        ids.push(subItem.id);
+      }
+    } else {
+      ids.push(row.id);
+    }
+  }
+  return ids;
+}
+
 function renderFsrcTableRows(
   data: FireSignalReceivingCentreInterconnectionValue,
   readOnly: boolean | undefined,
@@ -295,6 +313,17 @@ export function FormFireSignalReceivingCentreInterconnectionView({
 
   const emit = (next: FireSignalReceivingCentreInterconnectionValue) => onChange?.(next);
 
+  const applyColumn = (variant: FsrcChoice) => {
+    const ids = fsrcChoosableIds(variant);
+    const values = ids.map((id) => data.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of ids) {
+      nextData = setFsrcChoice(nextData, id, next);
+    }
+    emit(nextData);
+  };
+
   return (
     <div className="fsrc-panel">
       <div className="fsrc-na-bar">
@@ -347,9 +376,30 @@ export function FormFireSignalReceivingCentreInterconnectionView({
             <tr>
               <th className="fsrc-th fsrc-th--letter" aria-hidden="true" />
               <th className="fsrc-th fsrc-th--intro" aria-hidden="true" />
-              <th className="fsrc-th fsrc-th--yes">Yes</th>
-              <th className="fsrc-th fsrc-th--no">No</th>
-              <th className="fsrc-th fsrc-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="fsrc-th fsrc-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="fsrc-th fsrc-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="fsrc-th fsrc-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>{renderFsrcTableRows(data, readOnly, emit)}</tbody>

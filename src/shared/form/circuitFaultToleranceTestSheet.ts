@@ -150,6 +150,15 @@ export function setCircuitFaultToleranceTestSheetChoice(
   };
 }
 
+export function setCircuitFaultToleranceTestSheetColumnChoice(
+  value: CircuitFaultToleranceTestSheetValue,
+  next: CircuitFaultToleranceTestSheetChoice | null,
+): CircuitFaultToleranceTestSheetValue {
+  return {
+    rows: value.rows.map((row) => ({ ...row, passOrFail: next })),
+  };
+}
+
 export function cycleCircuitFaultToleranceTestSheetChoice(
   current: CircuitFaultToleranceTestSheetChoice | null,
 ): CircuitFaultToleranceTestSheetChoice | null {

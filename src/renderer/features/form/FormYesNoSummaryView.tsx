@@ -4,7 +4,9 @@ import {
   setYesNoSummaryChoice,
   setYesNoSummaryFillIn,
 } from '../../../shared/form/yesNoSummary';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -103,14 +105,39 @@ export function FormYesNoSummaryView({
   onChange?: (value: YesNoSummaryValue) => void;
 }) {
   const value = normalizeYesNoSummaryValue(rawValue, items);
+  const choosableIds = items.map((item) => item.id);
+
+  const applyColumn = (variant: 'yes' | 'no') => {
+    const values = choosableIds.map((id) => value[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextValue = value;
+    for (const id of choosableIds) {
+      nextValue = setYesNoSummaryChoice(nextValue, id, next);
+    }
+    onChange?.(nextValue);
+  };
 
   return (
     <div className="yns-table-wrap">
       <table className="yns-table">
         <thead>
           <tr>
-            <th className="yns-th yns-th--yes">Yes</th>
-            <th className="yns-th yns-th--no">No</th>
+            <ChoiceColumnHeader
+              className="yns-th yns-th--yes"
+              readOnly={readOnly}
+              applyLabel="Set all rows to Yes"
+              onApply={() => applyColumn('yes')}
+            >
+              Yes
+            </ChoiceColumnHeader>
+            <ChoiceColumnHeader
+              className="yns-th yns-th--no"
+              readOnly={readOnly}
+              applyLabel="Set all rows to No"
+              onApply={() => applyColumn('no')}
+            >
+              No
+            </ChoiceColumnHeader>
             <th className="yns-th yns-th--summary">Summary</th>
           </tr>
         </thead>

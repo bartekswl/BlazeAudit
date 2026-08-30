@@ -6,6 +6,7 @@ export type { BlockPath } from './mutations';
 export * from './validate';
 export * from './context';
 export { DEFAULT_TEMPLATE_SEEDS } from './defaults';
+export { inferBuiltinSeedIdFromForm } from './inferBuiltinSeed';
 export { inspectionSnapshotFromTemplate } from './snapshot';
 export {
   buildDocumentOutline,

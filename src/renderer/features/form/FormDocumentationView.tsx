@@ -18,10 +18,12 @@ import {
   type DocumentationRowDef,
   type DocumentationValue,
 } from '../../../shared/form/documentation';
+import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { clampLinedNotesToMaxLines } from '../../../shared/form/linedNotes';
 import { DocRuleRows } from './DocRuleRows';
 import { cn } from '../../lib/cn';
 
+import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -271,8 +273,26 @@ export function FormDocumentationView({
 }) {
   const data = normalizeDocumentationValue(rawValue);
 
+  const choosableRows = [
+    ...DOCUMENTATION_MAIN_ROWS.map((row) => ({ id: row.id, naDisabled: row.naDisabled })),
+    ...DOCUMENTATION_I_SUBITEMS.map((item) => ({ id: item.id, naDisabled: item.naDisabled })),
+  ];
+
   const setChoice = (rowId: string, choice: DocumentationChoice | null) => {
     onChange?.(setDocumentationChoice(data, rowId, choice));
+  };
+
+  const applyColumn = (variant: DocumentationChoice) => {
+    const targetRows =
+      variant === 'na' ? choosableRows.filter((row) => !row.naDisabled) : choosableRows;
+    const ids = targetRows.map((row) => row.id);
+    const values = ids.map((id) => data.checklist[id]?.choice ?? null);
+    const next = nextRadioColumnChoice(values, variant);
+    let nextData = data;
+    for (const id of ids) {
+      nextData = setDocumentationChoice(nextData, id, next);
+    }
+    onChange?.(nextData);
   };
 
   return (
@@ -299,9 +319,30 @@ export function FormDocumentationView({
             <tr>
               <th className="doc-th doc-th--letter" aria-hidden="true" />
               <th className="doc-th doc-th--intro">{DOCUMENTATION_INTRO}</th>
-              <th className="doc-th doc-th--yes">Yes</th>
-              <th className="doc-th doc-th--no">No</th>
-              <th className="doc-th doc-th--na">N/A</th>
+              <ChoiceColumnHeader
+                className="doc-th doc-th--yes"
+                readOnly={readOnly}
+                applyLabel="Set all rows to Yes"
+                onApply={() => applyColumn('yes')}
+              >
+                Yes
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="doc-th doc-th--no"
+                readOnly={readOnly}
+                applyLabel="Set all rows to No"
+                onApply={() => applyColumn('no')}
+              >
+                No
+              </ChoiceColumnHeader>
+              <ChoiceColumnHeader
+                className="doc-th doc-th--na"
+                readOnly={readOnly}
+                applyLabel="Set all rows to N/A"
+                onApply={() => applyColumn('na')}
+              >
+                N/A
+              </ChoiceColumnHeader>
             </tr>
           </thead>
           <tbody>
