@@ -1,19 +1,13 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ArrowDownUp,
-  FileText,
-  Plus,
-  Search,
-  Trash2,
-  Upload,
-  X,
-} from 'lucide-react';
+import { FileText, Plus, Search, Trash2, Upload, X } from 'lucide-react';
 import { cadenceLabel, isOverdue } from '../../../shared/cadence';
 import { formatDateTimeCompact, formatDateTimeListParts } from '../../../shared/dates';
 import {
+  DEFAULT_INSPECTION_LIST_SORT,
   shortInspectionDisplayName,
-  sortInspectionsByDate,
+  sortInspectionSummaries,
   type Inspection,
+  type InspectionListSort,
   type InspectionSummary,
 } from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
@@ -21,23 +15,19 @@ import type { TemplatePickerItem } from '../../../shared/document';
 import { cn } from '../../lib/cn';
 import { InlineLoader } from '../../components/LoadingOverlay';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
+import {
+  docDeleteColCls,
+  docMetaTailCls,
+  docModifiedColCls,
+  docRowGrid,
+  InspectionListColumnHeaders,
+} from '../../components/InspectionListColumnHeaders';
 import { ListPagination } from '../../components/ListPagination';
 import { paginateItems } from '../../lib/pagination';
 import { useInspectionPdfImport } from './useInspectionPdfImport';
 
 const filterInputCls =
   'rounded-md border border-white/10 bg-neutral-950/60 text-[11px] text-neutral-300 placeholder:text-neutral-600 focus:border-flame-500/40 focus:outline-none';
-
-/**
- * Shared track sizes for header + rows (must match exactly).
- * Modified + delete share the last track so they stay close; fixed cols are centered.
- */
-const docRowGrid =
-  'grid-cols-[minmax(0,1fr)_5.5rem_5.5rem_3.75rem_auto] gap-x-3';
-
-const docMetaTailCls = 'flex items-center justify-end gap-1.5';
-const docModifiedColCls = 'w-[4.75rem] shrink-0 text-center';
-const docDeleteColCls = 'grid w-7 shrink-0 place-items-center';
 
 const InspectionEditor = lazy(() =>
   import('./InspectionEditor').then((module) => ({ default: module.InspectionEditor })),
@@ -78,7 +68,7 @@ export function DocumentsScreen({
   const [yearFilter, setYearFilter] = useState<'all' | string>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [dateSort, setDateSort] = useState<'newest' | 'oldest'>('newest');
+  const [listSort, setListSort] = useState<InspectionListSort>(DEFAULT_INSPECTION_LIST_SORT);
   const [listPage, setListPage] = useState(1);
   const [showNew, setShowNew] = useState(false);
   const [newClientId, setNewClientId] = useState<string | undefined>();
@@ -194,12 +184,12 @@ export function DocumentsScreen({
       if (dateTo && (!row.inspectedAt || row.inspectedAt > dateTo)) return false;
       return true;
     });
-    return sortInspectionsByDate(rows, dateSort);
-  }, [inspections, search, statusFilter, yearFilter, dateFrom, dateTo, dateSort]);
+    return sortInspectionSummaries(rows, listSort);
+  }, [inspections, search, statusFilter, yearFilter, dateFrom, dateTo, listSort]);
 
   useEffect(() => {
     setListPage(1);
-  }, [search, statusFilter, yearFilter, dateFrom, dateTo, dateSort]);
+  }, [search, statusFilter, yearFilter, dateFrom, dateTo, listSort]);
 
   const paged = useMemo(() => paginateItems(filtered, listPage), [filtered, listPage]);
 
@@ -364,19 +354,6 @@ export function DocumentsScreen({
                 <X className="size-3.5" />
               </button>
             ) : null}
-            <button
-              type="button"
-              onClick={() => setDateSort((prev) => (prev === 'newest' ? 'oldest' : 'newest'))}
-              className="ml-auto inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[11px] text-neutral-400 transition-colors hover:bg-white/5 hover:text-neutral-200"
-              title={
-                dateSort === 'newest'
-                  ? 'Showing newest first — click for oldest first'
-                  : 'Showing oldest first — click for newest first'
-              }
-            >
-              <ArrowDownUp className="size-3.5" />
-              {dateSort === 'newest' ? 'Newest first' : 'Oldest first'}
-            </button>
           </div>
 
           {filtered.length === 0 ? (
@@ -386,21 +363,7 @@ export function DocumentsScreen({
             </div>
           ) : (
             <>
-              <div
-                className={cn(
-                  'grid shrink-0 px-4 text-[10px] font-medium uppercase tracking-wide text-neutral-600',
-                  docRowGrid,
-                )}
-              >
-                <span>Name</span>
-                <span className="text-center">Project #</span>
-                <span className="text-center">Date</span>
-                <span className="text-center">Status</span>
-                <div className={docMetaTailCls}>
-                  <span className={docModifiedColCls}>Modified</span>
-                  <span className={docDeleteColCls} aria-hidden="true" />
-                </div>
-              </div>
+              <InspectionListColumnHeaders sort={listSort} onSortChange={setListSort} />
               <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto">
                 {paged.items.map((row) => {
                   const displayName = shortInspectionDisplayName(row.title, row.clientName);

@@ -1,33 +1,31 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowDownUp, FileText, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
+import { FileText, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import { formatAddress } from '../../../shared/address';
 import { isOverdue } from '../../../shared/cadence';
 import { formatDateTimeCompact, formatDateTimeListParts } from '../../../shared/dates';
 import {
+  DEFAULT_INSPECTION_LIST_SORT,
   shortInspectionDisplayName,
-  sortInspectionsByDate,
+  sortInspectionSummaries,
+  type InspectionListSort,
   type InspectionSummary,
 } from '../../../shared/inspection';
 import type { Client } from '../../../shared/types';
 import { cn } from '../../lib/cn';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { InlineLoader } from '../../components/LoadingOverlay';
+import {
+  docDeleteColCls,
+  docMetaTailCls,
+  docModifiedColCls,
+  docRowGrid,
+  InspectionListColumnHeaders,
+} from '../../components/InspectionListColumnHeaders';
 import { ListPagination } from '../../components/ListPagination';
 import { paginateItems } from '../../lib/pagination';
 
 const filterInputCls =
   'rounded-md border border-white/10 bg-neutral-950/60 text-[11px] text-neutral-300 placeholder:text-neutral-600 focus:border-flame-500/40 focus:outline-none';
-
-/**
- * Shared track sizes for header + rows (must match exactly).
- * Modified + delete share the last track so they stay close; fixed cols are centered.
- */
-const docRowGrid =
-  'grid-cols-[minmax(0,1fr)_5.5rem_5.5rem_3.75rem_auto] gap-x-3';
-
-const docMetaTailCls = 'flex items-center justify-end gap-1.5';
-const docModifiedColCls = 'w-[4.75rem] shrink-0 text-center';
-const docDeleteColCls = 'grid w-7 shrink-0 place-items-center';
 
 export function CustomerDetailScreen({
   clientId,
@@ -52,7 +50,7 @@ export function CustomerDetailScreen({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [listPage, setListPage] = useState(1);
-  const [dateSort, setDateSort] = useState<'newest' | 'oldest'>('newest');
+  const [listSort, setListSort] = useState<InspectionListSort>(DEFAULT_INSPECTION_LIST_SORT);
   const [docSearch, setDocSearch] = useState('');
   const [yearFilter, setYearFilter] = useState<'all' | string>('all');
   const [dateFrom, setDateFrom] = useState('');
@@ -96,7 +94,7 @@ export function CustomerDetailScreen({
 
   useEffect(() => {
     setListPage(1);
-  }, [dateSort, docSearch, yearFilter, dateFrom, dateTo]);
+  }, [listSort, docSearch, yearFilter, dateFrom, dateTo]);
 
   const yearOptions = useMemo(() => {
     const years = new Set<number>();
@@ -129,8 +127,8 @@ export function CustomerDetailScreen({
   const hasActiveFilters = Boolean(docSearch || yearFilter !== 'all' || dateFrom || dateTo);
 
   const sortedInspections = useMemo(
-    () => sortInspectionsByDate(filteredInspections, dateSort),
-    [filteredInspections, dateSort],
+    () => sortInspectionSummaries(filteredInspections, listSort),
+    [filteredInspections, listSort],
   );
 
   const pagedInspections = useMemo(
@@ -296,19 +294,6 @@ export function CustomerDetailScreen({
                   <X className="size-3.5" />
                 </button>
               ) : null}
-              <button
-                type="button"
-                onClick={() => setDateSort((prev) => (prev === 'newest' ? 'oldest' : 'newest'))}
-                className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[11px] text-neutral-400 transition-colors hover:bg-white/5 hover:text-neutral-200"
-                title={
-                  dateSort === 'newest'
-                    ? 'Showing newest first — click for oldest first'
-                    : 'Showing oldest first — click for newest first'
-                }
-              >
-                <ArrowDownUp className="size-3.5" />
-                {dateSort === 'newest' ? 'Newest first' : 'Oldest first'}
-              </button>
             </div>
           ) : null}
         </div>
@@ -335,21 +320,11 @@ export function CustomerDetailScreen({
           </div>
         ) : (
           <>
-            <div
-              className={cn(
-                'mb-1 grid shrink-0 px-4 text-[10px] font-medium uppercase tracking-wide text-neutral-600',
-                docRowGrid,
-              )}
-            >
-              <span>Name</span>
-              <span className="text-center">Project #</span>
-              <span className="text-center">Date</span>
-              <span className="text-center">Status</span>
-              <div className={docMetaTailCls}>
-                <span className={docModifiedColCls}>Modified</span>
-                <span className={docDeleteColCls} aria-hidden="true" />
-              </div>
-            </div>
+            <InspectionListColumnHeaders
+              sort={listSort}
+              onSortChange={setListSort}
+              className="mb-1"
+            />
             <ul className="min-h-0 flex-1 space-y-1.5 overflow-y-auto">
               {pagedInspections.items.map((row) => {
                 const displayName = shortInspectionDisplayName(row.title, row.clientName);

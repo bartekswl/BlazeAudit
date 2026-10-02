@@ -94,23 +94,62 @@ export function shortInspectionDisplayName(
   return testName;
 }
 
-/** Sort document lists by inspection date (blank dates sort last). */
-export function sortInspectionsByDate<T extends { inspectedAt: string | null; updatedAt: string }>(
-  items: T[],
-  direction: 'newest' | 'oldest',
-): T[] {
-  const factor = direction === 'newest' ? -1 : 1;
+export type InspectionListSortKey = 'name' | 'inspectedAt' | 'modified';
+export type InspectionListSortDirection = 'asc' | 'desc';
+
+export type InspectionListSort = {
+  key: InspectionListSortKey;
+  direction: InspectionListSortDirection;
+};
+
+export const DEFAULT_INSPECTION_LIST_SORT: InspectionListSort = {
+  key: 'modified',
+  direction: 'desc',
+};
+
+function compareOptionalDateStrings(a: string | null | undefined, b: string | null | undefined): number {
+  const as = a?.trim() ?? '';
+  const bs = b?.trim() ?? '';
+  if (!as && !bs) return 0;
+  if (!as) return 1;
+  if (!bs) return -1;
+  return as.localeCompare(bs);
+}
+
+/** Click same column toggles direction; new column uses a sensible default. */
+export function nextInspectionListSort(
+  current: InspectionListSort,
+  key: InspectionListSortKey,
+): InspectionListSort {
+  if (current.key === key) {
+    return { key, direction: current.direction === 'asc' ? 'desc' : 'asc' };
+  }
+  if (key === 'name') return { key, direction: 'asc' };
+  return { key, direction: 'desc' };
+}
+
+export function sortInspectionSummaries<
+  T extends {
+    title: string;
+    clientName?: string;
+    inspectedAt: string | null;
+    updatedAt: string;
+  },
+>(items: T[], sort: InspectionListSort): T[] {
+  const factor = sort.direction === 'asc' ? 1 : -1;
   return [...items].sort((a, b) => {
-    const aDate = a.inspectedAt?.trim() ?? '';
-    const bDate = b.inspectedAt?.trim() ?? '';
-    if (aDate && bDate && aDate !== bDate) {
-      return aDate < bDate ? -factor : factor;
+    let cmp = 0;
+    if (sort.key === 'name') {
+      const aName = shortInspectionDisplayName(a.title, a.clientName ?? '').toLowerCase();
+      const bName = shortInspectionDisplayName(b.title, b.clientName ?? '').toLowerCase();
+      cmp = aName.localeCompare(bName);
+    } else if (sort.key === 'inspectedAt') {
+      cmp = compareOptionalDateStrings(a.inspectedAt, b.inspectedAt);
+    } else {
+      cmp = a.updatedAt.localeCompare(b.updatedAt);
     }
-    if (aDate && !bDate) return -1;
-    if (!aDate && bDate) return 1;
-    return factor === -1
-      ? b.updatedAt.localeCompare(a.updatedAt)
-      : a.updatedAt.localeCompare(b.updatedAt);
+    if (cmp !== 0) return cmp * factor;
+    return b.updatedAt.localeCompare(a.updatedAt);
   });
 }
 
