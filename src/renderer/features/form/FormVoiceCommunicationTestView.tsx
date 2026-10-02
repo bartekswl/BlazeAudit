@@ -18,6 +18,7 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -243,7 +244,7 @@ export function FormVoiceCommunicationTestView({
                 <tr key={row.id} className="vct-row">
                   <td className="vct-td vct-td--letter">{row.letter}</td>
                   <td className="vct-td vct-td--desc">
-                    <span className="vct-desc-text">{row.text}</span>
+                    <EditableRowText rowId={row.id} text={row.text} className="vct-desc-text" />
                   </td>
                   <ChoiceCells
                     rowId={row.id}

@@ -21,7 +21,10 @@ const PRINT_OVERRIDES = `
     print-color-adjust: exact;
   }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .form-page-header-line--title { color: #b91c1c !important; }
+  .form-page-header-line--title,
+  .form-print-root .form-page-sheet--inspection-report .form-page-header-line--title {
+    color: #b91c1c !important;
+  }
   .form-print-root { display: block; box-sizing: border-box; }
   .form-print-root *,
   .form-print-root *::before,
@@ -2642,7 +2645,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .idr-panel,
   .form-print-root .cfts-panel,
   .form-print-root .irc-panel,
-  .form-print-root .rrg-panel {
+  .form-print-root .rrg-panel,
+  .form-print-root .spr-panel {
     border: 2pt solid #000000 !important;
     border-radius: 0.625rem !important;
   }
@@ -2664,7 +2668,8 @@ const PRINT_OVERRIDES = `
   .form-print-root .idr-panel,
   .form-print-root .cfts-panel,
   .form-print-root .irc-panel,
-  .form-print-root .rrg-panel {
+  .form-print-root .rrg-panel,
+  .form-print-root .spr-panel {
     overflow: hidden !important;
   }
 
@@ -2717,19 +2722,47 @@ const PRINT_OVERRIDES = `
   .form-print-root .form-page-sheet--inspection-report .form-page-header--meta {
     margin-bottom: 0.85rem !important;
   }
-  .form-print-root .form-page-sheet--inspection-report .form-page-meta-table {
-    width: 88% !important;
-    max-width: 88% !important;
+  .form-print-root .form-page-header--meta .form-page-meta-table {
+    width: max-content !important;
+    max-width: 100% !important;
   }
-  .form-print-root .form-page-sheet--inspection-report .form-page-meta-value {
+  .form-print-root .form-page-header--meta .form-page-meta-value {
     max-width: none !important;
-    white-space: normal !important;
+    white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
+  }
+  .form-print-root .form-page-header--meta .form-page-meta-value--expand {
+    white-space: normal !important;
     word-break: break-word !important;
+  }
+  .form-print-root .form-page-sheet--inspection-report .form-page-meta-value {
+    font-size: 8.25pt !important;
+    line-height: 1.15 !important;
+  }
+  .form-print-root .form-page-header--meta-enlarged .form-page-meta-value {
+    font-size: 8.25pt !important;
+    line-height: 1.15 !important;
   }
   .form-print-root .rrg-td {
     height: 1% !important;
+  }
+  .form-print-root .rrg-panel--spr .rrg-table {
+    height: auto !important;
+  }
+  .form-print-root .rrg-panel--spr .rrg-th,
+  .form-print-root .rrg-panel--spr .rrg-th--vertical {
+    height: 2.35rem !important;
+  }
+  .form-print-root .rrg-panel--spr .rrg-td {
+    height: 1.45rem !important;
+  }
+  .form-print-root .rrg-panel--spr .rrg-accent-bar {
+    background: #b91c1c !important;
+  }
+  .form-print-root .spr-td,
+  .form-print-root .spr-th {
+    border-color: #64748b !important;
   }
   .form-print-root .irc-notes-stack {
     --ln-line: 1px solid rgb(148 163 184 / 0.55) !important;

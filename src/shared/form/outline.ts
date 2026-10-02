@@ -64,6 +64,7 @@ function outlineEntryForSection(section: FormSection): { label: string; depth: n
   if (only?.kind === 'emergencyLightingDeviceLegend') return { label: 'Device Legend', depth: 1 };
   if (only?.kind === 'emergencyLightingInspectionRecord')
     return { label: 'Inspection Record', depth: 1 };
+  if (only?.kind === 'sprinklerCover') return { label: 'Sprinkler Inspection Cover', depth: 1 };
 
   const title = section.title?.trim();
   if (title) return { label: title, depth: 0 };

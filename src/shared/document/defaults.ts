@@ -9,7 +9,9 @@ import {
   portableExtinguishersDefinition,
   PORTABLE_EXTINGUISHERS_SEED_ID,
 } from '../form/seeds/portable-extinguishers';
+import { annualSprinklerDefinition, ANNUAL_SPRINKLER_SEED_ID } from '../form/seeds/annual-sprinkler';
 
+export { ANNUAL_SPRINKLER_SEED_ID, annualSprinklerDefinition } from '../form/seeds/annual-sprinkler';
 export { FORM_PROTOTYPE_SEED_ID, formPrototypeDefinition } from '../form/seeds/form-prototype';
 export {
   EMERGENCY_LIGHTING_SEED_ID,
@@ -51,5 +53,13 @@ export const DEFAULT_TEMPLATE_SEEDS: DefaultTemplateSeed[] = [
     title: 'Emergency Lighting Inspection Report',
     description: 'Cover, comments/recommendations/device legend, and Inspection Record.',
     form: emergencyLightingDefinition(),
+  },
+  {
+    seedId: ANNUAL_SPRINKLER_SEED_ID,
+    name: 'Annual Sprinkler',
+    code: '',
+    title: 'Annual Sprinkler Inspection Report',
+    description: 'General, valves, water supplies, wet/dry systems, alarms, piping, and recommendations.',
+    form: annualSprinklerDefinition(),
   },
 ];

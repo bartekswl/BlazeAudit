@@ -83,7 +83,8 @@ function FormPageCanvasInner({
           element.kind === 'fireExtinguisherTestRecord' ||
           element.kind === 'emergencyLightingCover' ||
           element.kind === 'emergencyLightingDeviceLegend' ||
-          element.kind === 'emergencyLightingInspectionRecord',
+          element.kind === 'emergencyLightingInspectionRecord' ||
+          element.kind === 'sprinklerCover',
       ),
     ),
   );
@@ -207,7 +208,12 @@ function FormPageCanvasInner({
         style={fixedPageLayout ? { minHeight: `${bodyPercent}%` } : undefined}
       >
         {useMetaHeader ? (
-          <FormPageMetaHeader context={context} template={template} branded={useHeaderBranding} />
+          <FormPageMetaHeader
+            context={context}
+            template={template}
+            branded={useHeaderBranding}
+            enlargeValues={isUlc536 && !isInspectionReportForm}
+          />
         ) : (
           page.regions.length > 0 && (
             <div className="form-page-header">

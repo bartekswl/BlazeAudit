@@ -1,4 +1,5 @@
 import {
+  ANNUAL_SPRINKLER_SEED_ID,
   EMERGENCY_LIGHTING_SEED_ID,
   FORM_PROTOTYPE_SEED_ID,
   PORTABLE_EXTINGUISHERS_SEED_ID,
@@ -27,6 +28,9 @@ export function inferBuiltinSeedIdFromForm(form: FormDefinition): string | null 
     formHasKind(form, 'emergencyLightingInspectionRecord')
   ) {
     return EMERGENCY_LIGHTING_SEED_ID;
+  }
+  if (formHasKind(form, 'sprinklerCover') || formHasKind(form, 'sprinklerChecklist')) {
+    return ANNUAL_SPRINKLER_SEED_ID;
   }
   if (formHasKind(form, 'ulcSection1') || formHasKind(form, 'individualDeviceRecord')) {
     return FORM_PROTOTYPE_SEED_ID;

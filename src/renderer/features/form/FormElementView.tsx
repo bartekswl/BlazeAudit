@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import type { DocumentContext } from '../../../shared/document';
 import type {
   ChecklistElementValue,
@@ -7,6 +7,13 @@ import type {
   TableElementValue,
 } from '../../../shared/form';
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
+import {
+  ROW_TEXT_EDITABLE_KINDS,
+  readRowTextOverrides,
+  setRowTextOverride,
+  withRowTextOverrides,
+} from '../../../shared/form/rowTextOverrides';
+import { RowTextEditingContext, type RowTextEditing } from './EditableRowText';
 import { LazyCommitInput } from '../../components/LazyCommitInput';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
@@ -39,6 +46,9 @@ import { FormFireExtinguisherTestRecordView } from './FormFireExtinguisherTestRe
 import { FormEmergencyLightingCoverView } from './FormEmergencyLightingCoverView';
 import { FormEmergencyLightingDeviceLegendView } from './FormEmergencyLightingDeviceLegendView';
 import { FormEmergencyLightingInspectionRecordView } from './FormEmergencyLightingInspectionRecordView';
+import { FormSprinklerCoverView } from './FormSprinklerCoverView';
+import { FormSprinklerChecklistView } from './FormSprinklerChecklistView';
+import { FormSprinklerTableView } from './FormSprinklerTableView';
 
 const inputCls = 'ba-input !px-2 !py-1.5 !text-xs';
 
@@ -78,6 +88,33 @@ function FormElementViewInner({
     [element.id, onElementValueChange, onChange],
   );
 
+  const rowTextEditable = ROW_TEXT_EDITABLE_KINDS.has(element.kind);
+  const rowTextOverrides = useMemo(
+    () => (rowTextEditable ? readRowTextOverrides(value) : null),
+    [rowTextEditable, value],
+  );
+  const publishBodyChange = useCallback(
+    (next: unknown) => {
+      publishChange(rowTextOverrides ? withRowTextOverrides(next, rowTextOverrides) : next);
+    },
+    [publishChange, rowTextOverrides],
+  );
+  const canEdit = !readOnly && Boolean(onElementValueChange || onChange);
+  const rowTextEditing = useMemo<RowTextEditing | null>(
+    () =>
+      rowTextOverrides
+        ? {
+            overrides: rowTextOverrides,
+            editable: canEdit,
+            onSet: (rowId, text) =>
+              publishChange(
+                withRowTextOverrides(value, setRowTextOverride(rowTextOverrides, rowId, text)),
+              ),
+          }
+        : null,
+    [rowTextOverrides, canEdit, publishChange, value],
+  );
+
   const flushFrame =
     element.kind === 'ulcSection1' ||
     element.kind === 'yesNoSummary' ||
@@ -107,7 +144,19 @@ function FormElementViewInner({
     element.kind === 'fireExtinguisherTestRecord' ||
     element.kind === 'emergencyLightingCover' ||
     element.kind === 'emergencyLightingDeviceLegend' ||
-    element.kind === 'emergencyLightingInspectionRecord';
+    element.kind === 'emergencyLightingInspectionRecord' ||
+    element.kind === 'sprinklerCover' ||
+    element.kind === 'sprinklerChecklist' ||
+    element.kind === 'sprinklerTable';
+  const stretchFrame =
+    flushFrame &&
+    element.kind !== 'ancillaryDeviceCircuitTest' &&
+    element.kind !== 'fireSignalReceivingCentreInterconnection' &&
+    element.kind !== 'dataCommunicationLinkFaultTolerance' &&
+    element.kind !== 'fieldDeviceTestingLegend' &&
+    element.kind !== 'fieldDeviceTestingNotes' &&
+    element.kind !== 'sprinklerChecklist' &&
+    element.kind !== 'sprinklerTable';
 
   return (
     <div
@@ -116,26 +165,22 @@ function FormElementViewInner({
       className={cn(
         'form-element-frame',
         flushFrame && 'form-element-frame--flush',
-        flushFrame &&
-          element.kind !== 'ancillaryDeviceCircuitTest' &&
-          element.kind !== 'fireSignalReceivingCentreInterconnection' &&
-          element.kind !== 'dataCommunicationLinkFaultTolerance' &&
-          element.kind !== 'fieldDeviceTestingLegend' &&
-          element.kind !== 'fieldDeviceTestingNotes' &&
-          'flex min-h-0 flex-1 flex-col',
+        stretchFrame && 'flex min-h-0 flex-1 flex-col',
       )}
     >
-      <FormElementBody
-        element={element}
-        value={value}
-        readOnly={readOnly}
-        bindingText={bindingText}
-        context={context ?? null}
-        totalPages={totalPages ?? 1}
-        linedNotesVisibleLines={linedNotesVisibleLines}
-        linedNotesRowHeights={linedNotesRowHeights}
-        onChange={publishChange}
-      />
+      <RowTextEditingContext.Provider value={rowTextEditing}>
+        <FormElementBody
+          element={element}
+          value={value}
+          readOnly={readOnly}
+          bindingText={bindingText}
+          context={context ?? null}
+          totalPages={totalPages ?? 1}
+          linedNotesVisibleLines={linedNotesVisibleLines}
+          linedNotesRowHeights={linedNotesRowHeights}
+          onChange={publishBodyChange}
+        />
+      </RowTextEditingContext.Provider>
     </div>
   );
 }
@@ -426,6 +471,7 @@ function FormElementBody({
         <FormLinedNotesView
           elementId={element.id}
           variant="blue"
+          intro={element.intro}
           value={value}
           readOnly={readOnly}
           visibleLineCount={linedNotesVisibleLines?.[element.id]}
@@ -608,6 +654,34 @@ function FormElementBody({
     case 'emergencyLightingInspectionRecord':
       return (
         <FormEmergencyLightingInspectionRecordView
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'sprinklerCover':
+      return (
+        <FormSprinklerCoverView
+          value={value}
+          context={context ?? null}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'sprinklerChecklist':
+      return (
+        <FormSprinklerChecklistView
+          elementId={element.id}
+          group={element.group}
+          value={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      );
+    case 'sprinklerTable':
+      return (
+        <FormSprinklerTableView
+          table={element.table}
           value={value}
           readOnly={readOnly}
           onChange={onChange}

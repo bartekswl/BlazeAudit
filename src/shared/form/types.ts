@@ -1,4 +1,6 @@
 import type { BindingPath } from '../document/context';
+import type { SprinklerChecklistGroupId } from './sprinklerChecklist';
+import type { SprinklerTableId } from './sprinklerTables';
 
 export const FORM_SCHEMA_VERSION = 2 as const;
 
@@ -74,6 +76,8 @@ export type FormElement =
   | {
       kind: 'testingNotes';
       id: string;
+      /** Static sentence shown under the header bar, above the ruled lines. */
+      intro?: string;
     }
   | {
       kind: 'attendanceLog';
@@ -166,6 +170,20 @@ export type FormElement =
   | {
       kind: 'emergencyLightingInspectionRecord';
       id: string;
+    }
+  | {
+      kind: 'sprinklerCover';
+      id: string;
+    }
+  | {
+      kind: 'sprinklerChecklist';
+      id: string;
+      group: SprinklerChecklistGroupId;
+    }
+  | {
+      kind: 'sprinklerTable';
+      id: string;
+      table: SprinklerTableId;
     };
 
 export type FormPageOrientation = 'portrait' | 'landscape';

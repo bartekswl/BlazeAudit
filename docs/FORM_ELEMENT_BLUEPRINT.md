@@ -58,6 +58,7 @@ Do **not** hand-maintain a parallel PDF layout unless you are only adding a **fa
 - `circuitFaultToleranceTestSheet` — 23.3 Circuit Fault Tolerance Test Sheet landscape grid (`.cfts-*`)
 - `portableExtinguisherCover` / `fireExtinguisherTestRecord` — portable extinguisher cover + test record (`.irc-*` / `.rrg-*`)
 - `emergencyLightingCover` / `emergencyLightingDeviceLegend` / `emergencyLightingInspectionRecord` — emergency lighting pages (`.irc-*` / `.rrg-*`)
+- `sprinklerCover` / `sprinklerChecklist` / `sprinklerTable` — annual sprinkler pages (`.irc-*` / `.spr-*` / `.rrg-panel--spr` fixed-height rows)
 
 ---
 
@@ -516,6 +517,8 @@ Yes / No / N/A checklist tables (`.doc-table`, `.cut-table`, `.cur-table`, `.vct
 | **PDF** | `7pt` (`.doc-panel`, `.cut-panel`, `.vct-panel`) or `6.5pt` (`.cur-panel` compact) | Panel print size **+ 1pt** on the table (`8pt`, `8pt`, `8pt`, `7.5pt`) |
 | **Check marks** | — | Fixed size via `--form-check-mark-size` / `--form-check-input-size` on `.form-page-sheet` — same for `.doc-check`, `.cut-check`, `.cur-check`, `.vct-check`, `.psi-check`, `.epst-check`, `.artu-check`, `.asd-check`, `.yns-check` and their `*-check-input` radios (do **not** use `1em` / table-relative sizing) |
 | **PDF checked glyph** | — | Read-only ticks use `form-check-glyph--checked` (`FormCheckGlyph` / `renderCheckGlyphHtml`) — print rule bumps **checked** glyph to `11.5pt`; unchecked stays `8.5pt`; radio/checkbox **input** size unchanged |
+
+**Editable row wording:** row descriptions in ULC Yes/No/N/A panels (Summary, 21, 22.1–22.9, 22.11, 22.12) and the 23.1 legend (Device code + Description + smoke sub-labels) render through `EditableRowText` — double-click in the document → confirm dialog → inline edit (Enter saves, Esc cancels, empty restores default). Overrides live on the element value as `rowText: { [rowId]: text }`; `FormElementView` re-attaches the map on every view `onChange`, so `normalize*` functions need no changes. Headers, bars, and info labels stay fixed. New checklist kinds: add to `ROW_TEXT_EDITABLE_KINDS` in `rowTextOverrides.ts`.
 
 **Editable Yes/No/N/A cells:** one control only — `<label class="…-check-cell">` wrapping a **`type="radio"`** (or section N/A `checkbox`) with `sr-only` label. **Never** stack a native input and a visible `☐`/`☑` character in the same cell.
 

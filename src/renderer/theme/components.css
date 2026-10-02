@@ -21,7 +21,7 @@
   box-shadow: var(--ba-chrome-shadow);
 }
 
-/* Auth / login — theme-aware (dedicated classes so light-overrides never crush text) */
+/* Auth / login ? theme-aware (dedicated classes so light-overrides never crush text) */
 .ba-auth-shell {
   background: #070708;
   color: #f5f5f5;
@@ -220,7 +220,7 @@
   animation-delay: 1.8s;
 }
 
-/* Light auth — orange / blue (matches app light theme) */
+/* Light auth ? orange / blue (matches app light theme) */
 [data-theme='light'] .ba-auth-shell {
   background: #f8f4ec;
   color: #1c1917;
@@ -426,7 +426,7 @@
   box-shadow: var(--ba-chrome-shadow);
 }
 
-/* Compact chrome when a document editor is open — reclaim vertical space. */
+/* Compact chrome when a document editor is open ? reclaim vertical space. */
 .ba-main-header.ba-main-header--doc {
   min-height: 1.75rem;
   padding: 0.2rem 1rem;
@@ -443,7 +443,7 @@
   font-size: 0.7rem;
 }
 
-/* Form field select mode — white hand cursor + selected cell highlight. */
+/* Form field select mode ? white hand cursor + selected cell highlight. */
 .ba-form-field-select-mode,
 .ba-form-field-select-mode * {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' stroke='%23111111' stroke-width='1.2' d='M8 2.5v11.2l-1.7-1.4-1.5 1.8L9.6 21h8.2l2.2-7.2c.3-1 .1-2-.6-2.6L16 8.5V2.5H8z'/%3E%3C/svg%3E")
@@ -469,7 +469,7 @@ tr.ba-row-selected > td {
   transform: scale(0.96);
 }
 
-/* Tickbox column header — click fills / cycles the whole page column. */
+/* Tickbox column header ? click fills / cycles the whole page column. */
 .ba-choice-col-th {
   padding: 0 !important;
   vertical-align: middle;
@@ -507,7 +507,7 @@ tr.ba-row-selected > td {
   border-bottom-color: var(--ba-chrome-border);
 }
 
-/* PDF / export loading overlay — full login graphic via AuthBackground */
+/* PDF / export loading overlay ? full login graphic via AuthBackground */
 .ba-loading-overlay {
   overflow: hidden;
   backdrop-filter: blur(6px);
@@ -934,7 +934,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.2) inset;
 }
 
-/* Dark: same presence as light — solid tinted plates, not washed-out chips */
+/* Dark: same presence as light ? solid tinted plates, not washed-out chips */
 .ba-stat-icon--flame {
   color: var(--ba-stat-flame-icon);
   background: linear-gradient(145deg, rgb(249 115 22 / 0.38) 0%, rgb(249 115 22 / 0.18) 100%);
@@ -1134,7 +1134,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   box-shadow: 0 4px 16px var(--ba-flame-glow);
 }
 
-/* Built-in form page sheet — themed in app; PDF export stays white */
+/* Built-in form page sheet ? themed in app; PDF export stays white */
 .form-page-viewport-scroll {
   padding-bottom: 2.75rem;
 }
@@ -1478,7 +1478,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   }
 }
 
-/* Template preview — all pages in one vertical scroll. */
+/* Template preview ? all pages in one vertical scroll. */
 .form-page-viewport--continuous .form-page-viewport-scroll {
   overflow-x: hidden;
 }
@@ -1506,14 +1506,14 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   flex-shrink: 0;
 }
 
-/* Portrait — narrower than window, more side margin than landscape. */
+/* Portrait ? narrower than window, more side margin than landscape. */
 .form-page-viewport--continuous .form-page-sheet:not(.form-page-sheet--landscape) {
   width: 86%;
   max-width: 44rem;
   margin-inline: auto;
 }
 
-/* Landscape — full width of viewport (minimal outer pad), height hugs content. */
+/* Landscape ? full width of viewport (minimal outer pad), height hugs content. */
 .form-page-viewport--continuous .form-page-sheet--landscape {
   width: 100%;
   max-width: 100%;
@@ -1554,7 +1554,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   padding: 0.625rem 0.5rem 0 !important;
 }
 
-/* Page 3 — always full A4 portrait tile (same visual weight as page 1). */
+/* Page 3 ? always full A4 portrait tile (same visual weight as page 1). */
 .form-page-viewport--continuous .form-page-sheet--lined-notes:not(.form-page-sheet--landscape) {
   aspect-ratio: 210 / 297 !important;
 }
@@ -1898,6 +1898,32 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   text-overflow: clip;
 }
 
+/* Meta header table: width follows content (all reports); cap at branding column, no extra cell padding. */
+.form-page-header--meta .form-page-meta-table {
+  width: max-content;
+  max-width: 100%;
+}
+
+.form-page-header--meta .form-page-meta-value {
+  max-width: none;
+  min-width: 0;
+  width: auto;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.form-page-header--meta .form-page-meta-value--expand {
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* ULC 536 pages 2+: larger value text only ? layout unchanged. */
+.form-page-header--meta-enlarged .form-page-meta-value {
+  font-size: 0.6875rem;
+  line-height: 1.15;
+}
+
 [data-theme='dark'] .form-page-meta-code,
 [data-theme='dark'] .form-page-meta-table td {
   color: var(--ba-text-primary);
@@ -1916,8 +1942,9 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   font-size: 0.5625rem;
 }
 
-.form-page-sheet--landscape .form-page-meta-table {
-  width: 45%;
+.form-page-sheet--landscape .form-page-header--meta .form-page-meta-table {
+  width: max-content;
+  max-width: 100%;
 }
 
 .form-page-body {
@@ -2051,7 +2078,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: var(--ba-form-page-footer-disclaimer);
 }
 
-/* App-only floater — not part of the printable page */
+/* App-only floater ? not part of the printable page */
 .form-page-indicator {
   display: inline-flex;
   align-items: center;
@@ -2702,7 +2729,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-sheet .idr-panel,
 .form-page-sheet .cfts-panel,
 .form-page-sheet .irc-panel,
-.form-page-sheet .rrg-panel {
+.form-page-sheet .rrg-panel,
+.form-page-sheet .spr-panel {
   border: var(--form-panel-frame);
   box-shadow: none;
   outline: none;
@@ -2902,7 +2930,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: var(--ba-text-primary);
 }
 
-/* Lined notes tables — 20.3 Recommendations (green) + Technician's Testing Notes (blue) */
+/* Lined notes tables ? 20.3 Recommendations (green) + Technician's Testing Notes (blue) */
 .ln-panel {
   --ln-line: 1px solid rgb(148 163 184 / 0.45);
   --ln-line-height: 1.375rem;
@@ -2960,7 +2988,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   box-sizing: border-box;
 }
 
-/* PDF export — stretch N ruled rows to fill the panel body (same count as document). */
+/* PDF export ? stretch N ruled rows to fill the panel body (same count as document). */
 .ln-body-stack--fill {
   height: 100%;
 }
@@ -3025,7 +3053,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   background-color: rgb(239 246 255 / 0.35);
 }
 
-/* Page 3 — A4 portrait tile; panels split remaining body 10:17. */
+/* Page 3 ? A4 portrait tile; panels split remaining body 10:17. */
 .form-page-sheet--lined-notes {
   display: flex;
   flex-direction: column;
@@ -3106,7 +3134,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   min-height: 0;
 }
 
-/* Emergency lighting page 2 — Comments and Recommendations split the page evenly with denser rules. */
+/* Emergency lighting page 2 ? Comments and Recommendations split the page evenly with denser rules. */
 .form-page-sheet--inspection-report.form-page-sheet--lined-notes .form-page-section:has(.ln-panel--green),
 .form-page-sheet--inspection-report.form-page-sheet--lined-notes .form-page-section:has(.ln-panel--blue) {
   flex-grow: 1;
@@ -3144,7 +3172,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   padding-top: 0;
 }
 
-/* Attendance log table — 20.4 Technician Attendance Log */
+/* Attendance log table ? 20.4 Technician Attendance Log */
 .att-table-wrap {
   --att-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -3389,7 +3417,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .irc-building-name .irc-label,
-.irc-building-name .irc-value {
+.irc-building-name .irc-value,
+.irc-building-name .irc-input {
   font-weight: 700;
 }
 
@@ -3792,26 +3821,18 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   line-height: 1.3;
 }
 
+.form-page-sheet--inspection-report .form-page-header-line--title {
+  color: #b91c1c;
+}
+
 .form-page-sheet--inspection-report .form-page-meta-code {
   font-size: 0.8rem;
   margin-bottom: 0.45rem;
 }
 
-.form-page-sheet--inspection-report .form-page-meta-table {
-  width: 88%;
-  max-width: 88%;
-}
-
 .form-page-sheet--inspection-report .form-page-meta-value {
-  max-width: none;
-  min-width: 4.5rem;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  word-break: break-word;
-  /* Line-height offsets the larger font so row height stays at the 9px/1.25 baseline. */
   font-size: 0.6875rem;
-  line-height: 1;
+  line-height: 1.15;
 }
 
 .form-page-sheet--inspection-report .form-page-section-title {
@@ -3875,7 +3896,317 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   padding-top: 0;
 }
 
-/* Documentation checklist — 21 Documentation (editor; PDF fill-height lives in print CSS) */
+/* Annual sprinkler ? compact cover + fixed-row data tables (rows hug content, not page-fill). */
+.irc-panel--sprinkler {
+  gap: 0.55rem;
+  padding: 0.7rem 0.85rem;
+}
+
+.irc-panel--sprinkler .irc-meta-grid {
+  gap: 0.45rem 0.85rem;
+}
+
+.irc-textarea {
+  display: block;
+  resize: none;
+  overflow: hidden;
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.irc-address .irc-textarea {
+  min-height: 3rem;
+}
+
+.irc-company-address .irc-value {
+  white-space: pre-wrap;
+}
+
+.rrg-panel--spr .rrg-accent-bar {
+  background: #b91c1c;
+  min-height: 0.4rem;
+}
+
+.rrg-panel--spr .rrg-table {
+  height: auto;
+}
+
+.rrg-panel--spr .rrg-th,
+.rrg-panel--spr .rrg-th--vertical {
+  height: 2.35rem;
+}
+
+.rrg-panel--spr .rrg-td {
+  height: 1.45rem;
+}
+
+/* Annual sprinkler ? Y / N / N/A question groups */
+.spr-panel {
+  --spr-line: 1px solid rgb(148 163 184 / 0.45);
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.625rem;
+  background: var(--ba-input-bg, #ffffff);
+  font-size: 0.6875rem;
+  line-height: 1.25;
+  color: var(--ba-text-primary);
+}
+
+.spr-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.spr-col--letter {
+  width: 1.75rem;
+}
+
+.spr-col--choice {
+  width: 2.5rem;
+}
+
+.spr-th {
+  padding: 0.125rem 0.1875rem;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: middle;
+  border-right: var(--spr-line);
+  border-bottom: var(--spr-line);
+  background: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%);
+  color: #334155;
+}
+
+.spr-th:last-child {
+  border-right: none;
+}
+
+.spr-th--yes {
+  background: #1b6b2f;
+  color: #ffffff;
+}
+
+.spr-th--no {
+  background: #9b1c1c;
+  color: #ffffff;
+}
+
+.spr-th--na {
+  background: #334155;
+  color: #ffffff;
+}
+
+.spr-td {
+  vertical-align: middle;
+  border-right: var(--spr-line);
+  padding: 0.125rem 0.25rem;
+  background: #fff7ed;
+}
+
+.spr-td:last-child {
+  border-right: none;
+}
+
+.spr-row:not(:last-child) .spr-td {
+  border-bottom: var(--spr-line);
+}
+
+.spr-td--letter {
+  text-align: center;
+  font-weight: 700;
+}
+
+.spr-td--desc {
+  text-align: left;
+}
+
+.spr-td--indent {
+  padding-left: 1.25rem;
+}
+
+.spr-td--heading {
+  padding: 0.1875rem 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: linear-gradient(180deg, #b91c1c 0%, #991b1b 100%);
+}
+
+.spr-td--yes,
+.spr-td--no,
+.spr-td--na {
+  padding: 0;
+  text-align: center;
+}
+
+.spr-td--yes {
+  background: #edf7ef;
+}
+
+.spr-td--no {
+  background: #ffedd5;
+}
+
+.spr-td--na {
+  background: #f8fafc;
+}
+
+.spr-td--blocked {
+  padding: 0;
+  background: #e2e8f0;
+}
+
+.spr-th--bar {
+  height: 1.125rem;
+  padding: 0;
+  background: #cfe2f3;
+}
+
+.spr-td--blocked-blue {
+  background: #cfe2f3;
+}
+
+.spr-check-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 1.125rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.spr-check-cell:not(.spr-check-cell--readonly):hover {
+  background: #ffffff;
+}
+
+.spr-check-cell--readonly {
+  cursor: default;
+}
+
+.spr-check {
+  font-size: var(--form-check-mark-size);
+  line-height: 1;
+}
+
+.spr-check-input {
+  width: var(--form-check-input-size);
+  height: var(--form-check-input-size);
+  margin: 0;
+  accent-color: var(--ba-flame, #2563eb);
+}
+
+.spr-extras {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  margin-top: 0.125rem;
+}
+
+.spr-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+
+.spr-field {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.spr-field--wide {
+  flex: 1 1 100%;
+}
+
+.spr-field-label {
+  white-space: nowrap;
+}
+
+.spr-fill-input,
+.spr-fill-value {
+  display: inline-block;
+  width: 9rem;
+  border: none;
+  border-bottom: 1px solid rgb(148 163 184 / 0.75);
+  background: transparent;
+  padding: 0 0.125rem 0.0625rem;
+  font: inherit;
+  color: inherit;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+  box-sizing: border-box;
+}
+
+.spr-field--wide .spr-fill-input,
+.spr-field--wide .spr-fill-value {
+  width: 100%;
+}
+
+.spr-fill-input:focus {
+  outline: none;
+  box-shadow: inset 0 -1px 0 0 #2563eb;
+}
+
+.ln-intro {
+  margin: 0;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.625rem;
+  line-height: 1.3;
+  font-style: italic;
+  color: #334155;
+  border-bottom: 1px solid rgb(148 163 184 / 0.45);
+}
+
+[data-theme='dark'] .spr-panel {
+  --spr-line: 1px solid rgb(148 163 184 / 0.3);
+  background: var(--ba-input-bg);
+}
+
+[data-theme='dark'] .spr-th:not(.spr-th--yes):not(.spr-th--no):not(.spr-th--na) {
+  background: linear-gradient(180deg, rgb(30 41 59 / 0.95) 0%, rgb(15 23 42 / 0.9) 100%);
+  color: var(--ba-text-secondary);
+}
+
+[data-theme='dark'] .spr-td {
+  background: rgb(67 20 7 / 0.25);
+}
+
+[data-theme='dark'] .spr-td--yes {
+  background: rgb(20 83 45 / 0.3);
+}
+
+[data-theme='dark'] .spr-td--no {
+  background: rgb(127 29 29 / 0.3);
+}
+
+[data-theme='dark'] .spr-td--na {
+  background: rgb(30 41 59 / 0.45);
+}
+
+[data-theme='dark'] .spr-td--blocked {
+  background: rgb(51 65 85 / 0.6);
+}
+
+[data-theme='dark'] .spr-th--bar,
+[data-theme='dark'] .spr-td--blocked-blue {
+  background: rgb(30 58 138 / 0.45);
+}
+
+[data-theme='dark'] .spr-check-cell:not(.spr-check-cell--readonly):hover {
+  background: rgb(30 41 59 / 0.7);
+}
+
+[data-theme='dark'] .ln-intro {
+  color: var(--ba-text-secondary);
+}
+
+/* Documentation checklist ? 21 Documentation (editor; PDF fill-height lives in print CSS) */
 .doc-panel {
   --doc-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -4319,7 +4650,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   padding-top: 0;
 }
 
-/* Control unit / transponder test record — 22 */
+/* Control unit / transponder test record ? 22 */
 .cut-panel {
   --cut-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -4787,7 +5118,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   padding-top: 0;
 }
 
-/* Control unit / transponder record — 22.2 */
+/* Control unit / transponder record ? 22.2 */
 .cur-panel {
   --cur-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -5191,7 +5522,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   padding-top: 0;
 }
 
-/* Voice communication test — 22.3 */
+/* Voice communication test ? 22.3 */
 .vct-panel {
   --vct-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -5483,7 +5814,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: inherit;
 }
 
-/* Annunciator device test — 22.6 */
+/* Annunciator device test ? 22.6 */
 .artu-panel {
   --artu-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -5779,7 +6110,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: inherit;
 }
 
-/* Sequential display test — 22.7 */
+/* Sequential display test ? 22.7 */
 .asd-panel {
   --asd-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -6076,7 +6407,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: inherit;
 }
 
-/* Remote trouble signal unit test — 22.8 */
+/* Remote trouble signal unit test ? 22.8 */
 .rtsu-panel {
   --rtsu-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -6367,7 +6698,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: inherit;
 }
 
-/* Fire signal receiving centre interconnection — 22.11 */
+/* Fire signal receiving centre interconnection ? 22.11 */
 .fsrc-panel {
   --fsrc-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -6690,7 +7021,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   background: #ffffff;
 }
 
-/* Data communication link fault tolerance — 22.12 */
+/* Data communication link fault tolerance ? 22.12 */
 .dclft-stack {
   display: flex;
   flex-direction: column;
@@ -6975,7 +7306,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: inherit;
 }
 
-/* Field device testing legend — 23.1 */
+/* Field device testing legend ? 23.1 */
 .fdtl-panel {
   --fdtl-line: 1px solid rgb(148 163 184 / 0.45);
   --fdtl-field-height: 1.125rem;
@@ -7183,7 +7514,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   vertical-align: middle;
 }
 
-/* Field device testing notes — 23.1.1 (static prose) */
+/* Field device testing notes ? 23.1.1 (static prose) */
 .fdtn-panel {
   width: 100%;
   font-size: calc(0.5625rem + 2pt);
@@ -7291,7 +7622,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: #000000;
 }
 
-/* Individual device record — 23.2 */
+/* Individual device record ? 23.2 */
 .idr-panel {
   --idr-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -7611,7 +7942,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   overflow: visible;
 }
 
-/* EL / extinguisher (portrait) — pin controls to the page’s right edge */
+/* EL / extinguisher (portrait) ? pin controls to the page?s right edge */
 .form-page-sheet--inspection-report .idr-page-controls {
   right: 0.5rem;
 }
@@ -7792,7 +8123,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: var(--ba-text-secondary);
 }
 
-/* Circuit fault tolerance test sheet — 23.3 */
+/* Circuit fault tolerance test sheet ? 23.3 */
 .cfts-panel {
   --cfts-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -8101,7 +8432,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: var(--ba-text-secondary);
 }
 
-/* Printer test — 22.9 */
+/* Printer test ? 22.9 */
 .prt-panel {
   --prt-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -8392,7 +8723,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: inherit;
 }
 
-/* Ancillary device circuit test — 22.10 */
+/* Ancillary device circuit test ? 22.10 */
 .adc-panel {
   --adc-line: 1px solid rgb(148 163 184 / 0.45);
   --adc-body-row-height: 1.0625rem;
@@ -8664,7 +8995,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   margin-top: 0.25rem;
 }
 
-/* 22.3 alone — content-hug; do not stretch into empty page space */
+/* 22.3 alone ? content-hug; do not stretch into empty page space */
 .form-page-sheet--voice-communication-test .form-page-section:has(.vct-panel) {
   display: flex;
   flex-direction: column;
@@ -8799,7 +9130,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   padding-top: 0;
 }
 
-/* Power supply inspection — 22.4 */
+/* Power supply inspection ? 22.4 */
 .psi-panel {
   --psi-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -9025,7 +9356,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   accent-color: var(--ba-flame, #2563eb);
 }
 
-/* Emergency power supply test — 22.5 */
+/* Emergency power supply test ? 22.5 */
 .epst-panel {
   --epst-line: 1px solid rgb(148 163 184 / 0.45);
   display: flex;
@@ -9556,7 +9887,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   accent-color: var(--ba-flame, #2563eb);
 }
 
-/* Page 9 — 22.4 only: 30% slot between meta header and footer */
+/* Page 9 ? 22.4 only: 30% slot between meta header and footer */
 .form-page-sheet--power-supply-inspection {
   display: flex;
   flex-direction: column;
@@ -9665,7 +9996,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   height: 12.5%;
 }
 
-/* Page 9 — 22.5 emergency power supply test (full page) */
+/* Page 9 ? 22.5 emergency power supply test (full page) */
 .form-page-sheet--emergency-power-supply-test {
   display: flex;
   flex-direction: column;
@@ -9761,7 +10092,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   flex-shrink: 0;
 }
 
-/* Page 9 — 22.4 + 22.5 stacked; every checklist row must remain visible */
+/* Page 9 ? 22.4 + 22.5 stacked; every checklist row must remain visible */
 .form-page-sheet--power-supplies {
   display: flex;
   flex-direction: column;
@@ -10382,7 +10713,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: var(--ba-text-primary);
 }
 
-/* Landscape form pages (A4 horizontal) — tighter horizontal padding. */
+/* Landscape form pages (A4 horizontal) ? tighter horizontal padding. */
 .form-page-sheet--landscape {
   aspect-ratio: 297 / 210;
   min-height: 0;
@@ -11194,7 +11525,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   print-color-adjust: exact;
 }
 
-/* Ancillary device circuit test page — 22.10 (natural height — table ends at row 48) */
+/* Ancillary device circuit test page ? 22.10 (natural height ? table ends at row 48) */
 .form-page-sheet--ancillary-device-circuit-test {
   display: flex;
   flex-direction: column;
@@ -11257,7 +11588,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: #171717;
 }
 
-/* Fire signal receiving centre interconnection page — 22.11 (single table, top offset) */
+/* Fire signal receiving centre interconnection page ? 22.11 (single table, top offset) */
 .form-page-sheet--fsrc-interconnection {
   display: flex;
   flex-direction: column;
@@ -11315,7 +11646,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: #171717;
 }
 
-/* Data communication link fault tolerance page — 22.12 (dual stacked panels) */
+/* Data communication link fault tolerance page ? 22.12 (dual stacked panels) */
 .form-page-sheet--dcl-fault-tolerance {
   display: flex;
   flex-direction: column;
@@ -11372,7 +11703,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: #171717;
 }
 
-/* Field device testing legend page — 23.1 */
+/* Field device testing legend page ? 23.1 */
 .form-page-sheet--field-device-legend {
   display: flex;
   flex-direction: column;
@@ -11454,7 +11785,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   padding: 0;
 }
 
-/* Remote trouble signal unit + printer test page — 22.8 + 22.9 (stacked, natural height) */
+/* Remote trouble signal unit + printer test page ? 22.8 + 22.9 (stacked, natural height) */
 .form-page-sheet--rtsu-printer-test {
   display: flex;
   flex-direction: column;
@@ -11664,7 +11995,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   color: var(--ba-text-primary);
 }
 
-/* 22.10–22.12 + 23.1: kill remaining white/bright field fills in dark mode */
+/* 22.10?22.12 + 23.1: kill remaining white/bright field fills in dark mode */
 [data-theme='dark'] .adc-cell-input,
 [data-theme='dark'] .adc-cell-input:focus {
   background: rgb(15 23 42 / 0.72);
@@ -11757,4 +12088,44 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 [data-theme='dark'] .form-page-sheet--field-device-legend .fdtl-td--type,
 [data-theme='dark'] .form-page-sheet--field-device-legend .fdtl-td--model {
   background: rgb(15 23 42 / 0.45);
+}
+
+/* Checklist row wording: double-click to reword per document (EditableRowText). */
+.form-row-text--editable {
+  cursor: text;
+  border-radius: 2px;
+}
+
+.form-row-text--editable:hover {
+  background: rgb(59 130 246 / 0.1);
+  box-shadow: 0 0 0 1px rgb(59 130 246 / 0.35);
+}
+
+.form-row-text-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0 2px;
+  border: 1px solid rgb(59 130 246 / 0.7);
+  border-radius: 2px;
+  background: #ffffff;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  resize: none;
+  overflow: hidden;
+  outline: none;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .form-row-text--editable:hover {
+  background: rgb(96 165 250 / 0.14);
+  box-shadow: 0 0 0 1px rgb(96 165 250 / 0.4);
+}
+
+[data-theme='dark'] .form-row-text-input {
+  background: rgb(15 23 42 / 0.85);
+  border-color: rgb(96 165 250 / 0.7);
 }

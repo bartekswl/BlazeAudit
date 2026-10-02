@@ -16,10 +16,13 @@ export function FormPageMetaHeader({
   context,
   template,
   branded = false,
+  enlargeValues = false,
 }: {
   context?: DocumentContext | null;
   template?: Pick<BuiltinTemplate, 'code' | 'title' | 'name'>;
   branded?: boolean;
+  /** ULC 536 pages 2+: slightly larger value text (table flex is always on for meta headers). */
+  enlargeValues?: boolean;
 }) {
   const meta = resolveFormPageMetaHeader(context ?? null);
   const codeName =
@@ -50,7 +53,12 @@ export function FormPageMetaHeader({
   );
 
   return (
-    <div className="form-page-header form-page-header--meta">
+    <div
+      className={cn(
+        'form-page-header form-page-header--meta',
+        enlargeValues && 'form-page-header--meta-enlarged',
+      )}
+    >
       {branded ? <FormPageHeaderBranding context={context}>{content}</FormPageHeaderBranding> : content}
     </div>
   );

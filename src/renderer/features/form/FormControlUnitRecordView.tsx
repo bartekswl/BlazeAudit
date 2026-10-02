@@ -17,6 +17,7 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -250,7 +251,7 @@ export function FormControlUnitRecordView({
                 <tr key={row.id} className="cur-row">
                   <td className="cur-td cur-td--letter">{row.letter}</td>
                   <td className="cur-td cur-td--desc">
-                    <span className="cur-desc-text">{row.text}</span>
+                    <EditableRowText rowId={row.id} text={row.text} className="cur-desc-text" />
                     {row.kind === 'timeFill' && (
                       <span className="cur-time-suffix">
                         {' '}

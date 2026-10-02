@@ -16,6 +16,7 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -252,7 +253,7 @@ export function FormAnnunciatorDeviceTestView({
                 <tr key={row.id} className="artu-row">
                   <td className="artu-td artu-td--letter">{row.letter}</td>
                   <td className="artu-td artu-td--desc">
-                    <span className="artu-desc-text">{row.text}</span>
+                    <EditableRowText rowId={row.id} text={row.text} className="artu-desc-text" />
                   </td>
                   <ChoiceCells
                     rowId={row.id}

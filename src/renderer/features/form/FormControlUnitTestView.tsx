@@ -21,6 +21,7 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -304,7 +305,7 @@ export function FormControlUnitTestView({
                 <tr key={row.id} className="cut-row">
                   <td className="cut-td cut-td--letter">{row.letter}</td>
                   <td className="cut-td cut-td--desc">
-                    <span className="cut-desc-text">{row.text}</span>
+                    <EditableRowText rowId={row.id} text={row.text} className="cut-desc-text" />
                   </td>
                   <ChoiceCells
                     rowId={row.id}

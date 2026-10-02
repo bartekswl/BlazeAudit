@@ -16,6 +16,7 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -245,7 +246,7 @@ export function FormPrinterTestView({
                 <tr key={row.id} className={cn('prt-row', index % 2 === 1 && 'prt-row--alt')}>
                   <td className="prt-td prt-td--letter">{row.letter}</td>
                   <td className="prt-td prt-td--desc">
-                    <span className="prt-desc-text">{row.text}</span>
+                    <EditableRowText rowId={row.id} text={row.text} className="prt-desc-text" />
                   </td>
                   <ChoiceCells
                     rowId={row.id}

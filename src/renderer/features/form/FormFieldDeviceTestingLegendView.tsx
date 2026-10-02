@@ -11,6 +11,7 @@ import {
   type FdtlTableItem,
 } from '../../../shared/form/fieldDeviceTestingLegend';
 import { cn } from '../../lib/cn';
+import { EditableRowText } from './EditableRowText';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 function FieldCell({
@@ -87,8 +88,12 @@ function SimpleRow({
 }) {
   return (
     <tr className={cn('fdtl-row', zebra % 2 === 0 ? 'fdtl-row--yellow' : 'fdtl-row--white')}>
-      <td className="fdtl-td fdtl-td--device">{item.device}</td>
-      <td className="fdtl-td fdtl-td--desc">{item.description}</td>
+      <td className="fdtl-td fdtl-td--device">
+        <EditableRowText rowId={`${item.id}.device`} text={item.device} />
+      </td>
+      <td className="fdtl-td fdtl-td--desc">
+        <EditableRowText rowId={item.id} text={item.description} />
+      </td>
       <TypeModelCells
         entry={entry}
         editing={editing}
@@ -120,7 +125,7 @@ function SmokeSubRow({
     <tr className={cn('fdtl-row fdtl-row--sub', zebra % 2 === 0 ? 'fdtl-row--yellow' : 'fdtl-row--white')}>
       <td className="fdtl-td fdtl-td--desc fdtl-td--sub">
         <div className="fdtl-sub-field">
-          <span className="fdtl-sub-label">{label}</span>
+          <EditableRowText rowId={`${deviceId}.${field}`} text={label} className="fdtl-sub-label" />
           <div className="fdtl-sub-input">
             <FieldCell
               value={value}
@@ -154,9 +159,11 @@ function SmokeRows({
     <Fragment key={item.id}>
       <tr className={cn('fdtl-row fdtl-row--smoke-main', rowCls)}>
         <td className="fdtl-td fdtl-td--device" rowSpan={3}>
-          {item.device}
+          <EditableRowText rowId={`${item.id}.device`} text={item.device} />
         </td>
-        <td className="fdtl-td fdtl-td--desc">{item.description}</td>
+        <td className="fdtl-td fdtl-td--desc">
+          <EditableRowText rowId={item.id} text={item.description} />
+        </td>
         <TypeModelCells
           entry={entry}
           editing={editing}

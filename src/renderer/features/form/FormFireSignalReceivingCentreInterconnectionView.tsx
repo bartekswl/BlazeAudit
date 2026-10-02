@@ -21,6 +21,7 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -210,7 +211,7 @@ function RecordField({
 }
 
 function DescCell({ row }: { row: FsrcRowDef }) {
-  return <span className="fsrc-desc-text">{row.text}</span>;
+  return <EditableRowText rowId={row.id} text={row.text ?? ''} className="fsrc-desc-text" />;
 }
 
 function fsrcChoosableIds(variant: FsrcChoice): string[] {
@@ -246,7 +247,7 @@ function renderFsrcTableRows(
             </td>
           ) : null}
           <td className="fsrc-td fsrc-td--desc">
-            <span className="fsrc-desc-text">{subItem.text}</span>
+            <EditableRowText rowId={subItem.id} text={subItem.text} className="fsrc-desc-text" />
           </td>
           <ChoiceCells
             rowId={subItem.id}

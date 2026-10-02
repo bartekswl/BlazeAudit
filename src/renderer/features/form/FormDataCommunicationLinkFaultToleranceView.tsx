@@ -20,6 +20,7 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -223,7 +224,11 @@ function DclftPanel({
                 <tr key={row.id} className={cn('dclft-row', index % 2 === 1 && 'dclft-row--alt')}>
                   <td className="dclft-td dclft-td--letter">{row.letter}</td>
                   <td className="dclft-td dclft-td--desc">
-                    <span className="dclft-desc-text">{row.text}</span>
+                    <EditableRowText
+                      rowId={`${blockId}.${row.id}`}
+                      text={row.text}
+                      className="dclft-desc-text"
+                    />
                   </td>
                   <ChoiceCell
                     choice={rowValue.choice}

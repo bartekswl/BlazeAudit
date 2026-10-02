@@ -41,6 +41,9 @@ import {
 } from './emergencyLightingCover';
 import { emptyEmergencyLightingDeviceLegendValue } from './emergencyLightingDeviceLegend';
 import { emptyEmergencyLightingInspectionRecordValue } from './emergencyLightingInspectionRecord';
+import { emptySprinklerCoverValue, normalizeSprinklerCoverValue } from './sprinklerCover';
+import { emptySprinklerChecklistValue } from './sprinklerChecklist';
+import { emptySprinklerTableValue } from './sprinklerTables';
 
 function emptyTableValue(element: Extract<FormElement, { kind: 'table' }>): TableElementValue {
   const rowCount = Math.max(1, element.minRows ?? element.rowLabels?.length ?? 1);
@@ -130,6 +133,12 @@ export function initialValueForElement(element: FormElement): unknown {
       return emptyEmergencyLightingDeviceLegendValue();
     case 'emergencyLightingInspectionRecord':
       return emptyEmergencyLightingInspectionRecordValue();
+    case 'sprinklerCover':
+      return emptySprinklerCoverValue();
+    case 'sprinklerChecklist':
+      return emptySprinklerChecklistValue();
+    case 'sprinklerTable':
+      return emptySprinklerTableValue(element.table);
     default: {
       const _exhaustive: never = element;
       return _exhaustive;
@@ -204,6 +213,12 @@ export function syncFormDocumentInspectionDate(
       const current = normalizeEmergencyLightingCoverValue(nextValues[element.id]);
       if (current.date === inspectedAt) return;
       nextValues = setElementValue(nextValues, element.id, { ...current, date: inspectedAt });
+      return;
+    }
+    if (element.kind === 'sprinklerCover') {
+      const current = normalizeSprinklerCoverValue(nextValues[element.id]);
+      if (current.date === inspectedAt) return;
+      nextValues = setElementValue(nextValues, element.id, { ...current, date: inspectedAt });
     }
   });
 
@@ -240,6 +255,13 @@ export function syncFormDocumentProjectNumber(
     }
     if (element.kind === 'emergencyLightingCover') {
       const current = normalizeEmergencyLightingCoverValue(nextValues[element.id]);
+      if (current.jobContactNo === next) return;
+      nextValues = setElementValue(nextValues, element.id, { ...current, jobContactNo: next });
+      changed = true;
+      return;
+    }
+    if (element.kind === 'sprinklerCover') {
+      const current = normalizeSprinklerCoverValue(nextValues[element.id]);
       if (current.jobContactNo === next) return;
       nextValues = setElementValue(nextValues, element.id, { ...current, jobContactNo: next });
       changed = true;

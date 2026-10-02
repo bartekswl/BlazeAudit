@@ -241,6 +241,16 @@ Region example (page 1 header):
 - **PDF notes:** same panel frame treatment as extinguisher forms
 - **Reuse notes:** Device legend + inspection record use shared report grid
 
+### Annual Sprinkler (`annual-sprinkler`)
+
+- **Code:** (blank)
+- **Title:** Annual Sprinkler Inspection Report
+- **Added:** 2026-10-02
+- **Pages:** 5 — cover (`sprinklerCover`) + 1 General; 2 Control Valves + 3 Water Supplies; 4 Tanks/FDC + 5 Wet Systems + alarm valve table; paddle flow switch table + 6 Dry Systems + 7 Alarms; 8 Sprinkler Piping + 9 NO-answer explanations (`recommendations`) + 10 Inspector Recommendations (`testingNotes` with `intro`)
+- **Bindings used:** same client/business pattern as portable extinguishers
+- **PDF notes:** `.spr-panel` + `.rrg-panel--spr` in print frame lists; sprinkler grids use fixed row heights (not page-fill)
+- **Reuse notes:** `sprinklerChecklist` groups live in `sprinklerChecklist.ts` (heading / item rows, optional fields + options); tables in `sprinklerTables.ts` on the shared report grid
+
 ### Template section template (copy when adding)
 
 ```markdown

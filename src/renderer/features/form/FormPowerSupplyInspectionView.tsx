@@ -20,6 +20,7 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -193,7 +194,7 @@ export function FormPowerSupplyInspectionView({
                 <tr key={row.id} className={cn('psi-row', index % 2 === 1 && 'psi-row--alt')}>
                   <td className="psi-td psi-td--letter">{row.letter}</td>
                   <td className="psi-td psi-td--desc">
-                    <span className="psi-desc-text">{row.text}</span>
+                    <EditableRowText rowId={row.id} text={row.text} className="psi-desc-text" />
                   </td>
                   {(['yes', 'no', 'na'] as const).map((variant) => (
                     <ChoiceCell

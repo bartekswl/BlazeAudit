@@ -40,6 +40,7 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -246,6 +247,7 @@ function CheckboxOption({
 }
 
 function DescLine({
+  rowId,
   label,
   value,
   unit,
@@ -254,6 +256,7 @@ function DescLine({
   wideInput = false,
   onChange,
 }: {
+  rowId: string;
   label: string;
   value?: string;
   unit?: string;
@@ -264,7 +267,7 @@ function DescLine({
 }) {
   return (
     <div className={cn('epst-desc-line', wideInput && 'epst-desc-line--wide')}>
-      <span className="epst-desc-text">{label}</span>
+      <EditableRowText rowId={rowId} text={label} className="epst-desc-text" />
       {value !== undefined ? (
         <>
           <FieldInput
@@ -310,6 +313,7 @@ function MeasureRows({
           <td className={cn('epst-td', 'epst-td--letter', measureBg)}>{index === 0 ? letter : ''}</td>
           <td className={cn('epst-td', 'epst-td--desc', measureBg)}>
             <DescLine
+              rowId={`measure-${variant}-${line.field}`}
               label={line.label}
               value={fields[line.field]}
               unit={line.unit}
@@ -387,6 +391,7 @@ export function FormEmergencyPowerSupplyTestView({
           <td className="epst-td epst-td--letter">{row.letter}</td>
           <td className="epst-td epst-td--desc epst-td--text-fill">
             <DescLine
+              rowId={row.id}
               label={row.text}
               value={data.dateCode}
               readOnly={readOnly}
@@ -407,6 +412,7 @@ export function FormEmergencyPowerSupplyTestView({
           <td className="epst-td epst-td--letter">{row.letter}</td>
           <td className="epst-td epst-td--desc epst-td--value-fill">
             <DescLine
+              rowId={row.id}
               label={row.text}
               value={data.valueFills[key]}
               unit={row.valueUnit}
@@ -425,7 +431,7 @@ export function FormEmergencyPowerSupplyTestView({
           <tr key={row.id} className="epst-row epst-row--group-head">
             <td className="epst-td epst-td--letter">{row.letter}</td>
             <td className="epst-td epst-td--desc" colSpan={4}>
-              <span className="epst-desc-text">{row.text}</span>
+              <EditableRowText rowId={row.id} text={row.text} className="epst-desc-text" />
             </td>
           </tr>
           {EMERGENCY_POWER_SUPPLY_TEST_TYPE_OPTIONS.map((opt) => {
@@ -435,7 +441,7 @@ export function FormEmergencyPowerSupplyTestView({
                 <td className="epst-td epst-td--letter" aria-hidden="true" />
                 <td className="epst-td epst-td--desc epst-td--sub">
                   <span className="epst-desc-text epst-desc-text--sub">
-                    ({opt.id}) {opt.label}
+                    ({opt.id}) <EditableRowText rowId={`test-${opt.id}`} text={opt.label} />
                   </span>
                   {opt.key === 'iii' ? (
                     <FieldInput
@@ -468,7 +474,7 @@ export function FormEmergencyPowerSupplyTestView({
       <tr key={row.id} className={cn('epst-row', altRow)}>
         <td className="epst-td epst-td--letter">{row.letter}</td>
         <td className="epst-td epst-td--desc">
-          <span className="epst-desc-text">{row.text}</span>
+          <EditableRowText rowId={row.id} text={row.text} className="epst-desc-text" />
         </td>
         <ChoiceCells
           rowId={row.id}
@@ -638,7 +644,7 @@ export function FormEmergencyPowerSupplyTestView({
                 <tr key={row.id} className={cn('epst-row', index % 2 === 1 && 'epst-row--alt')}>
                   <td className="epst-td epst-td--letter">{row.letter}</td>
                   <td className="epst-td epst-td--desc">
-                    <span className="epst-desc-text">{row.text}</span>
+                    <EditableRowText rowId={row.id} text={row.text} className="epst-desc-text" />
                   </td>
                   <ChoiceCells
                     rowId={row.id}

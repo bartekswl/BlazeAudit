@@ -8,6 +8,7 @@ import { cn } from '../../lib/cn';
 export function FormLinedNotesView({
   elementId,
   variant,
+  intro,
   value: rawValue,
   readOnly,
   visibleLineCount,
@@ -16,6 +17,7 @@ export function FormLinedNotesView({
 }: {
   elementId: string;
   variant: 'green' | 'blue';
+  intro?: string;
   value: unknown;
   readOnly?: boolean;
   /** PDF export — line counts measured from the document editor. */
@@ -50,6 +52,7 @@ export function FormLinedNotesView({
       )}
     >
       <div className="ln-head-bar shrink-0" aria-hidden="true" />
+      {intro ? <p className="ln-intro shrink-0">{intro}</p> : null}
       <div
         ref={stackRef}
         className={cn(

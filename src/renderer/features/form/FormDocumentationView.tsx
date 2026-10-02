@@ -24,6 +24,7 @@ import { DocRuleRows } from './DocRuleRows';
 import { cn } from '../../lib/cn';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -167,7 +168,7 @@ function DescriptionCell({
 
   return (
     <td className="doc-td doc-td--desc">
-      <span className="doc-desc-text">{row.text}</span>
+      <EditableRowText rowId={row.id} text={row.text ?? ''} className="doc-desc-text" />
     </td>
   );
 }
@@ -176,7 +177,8 @@ function SubitemDescription({ item }: { item: DocumentationISubitem }) {
   return (
     <td className="doc-td doc-td--desc doc-td--sub">
       <span className="doc-desc-text">
-        <span className="doc-sub-letter">{item.letter}.</span> {item.text}
+        <span className="doc-sub-letter">{item.letter}.</span>{' '}
+        <EditableRowText rowId={item.id} text={item.text} />
       </span>
     </td>
   );

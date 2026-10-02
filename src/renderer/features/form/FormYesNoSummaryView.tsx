@@ -7,6 +7,7 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -23,12 +24,12 @@ function SummaryText({
   onFillChange?: (next: string) => void;
 }) {
   if (!item.fillIn) {
-    return <span className="yns-summary-text">{item.text}</span>;
+    return <EditableRowText rowId={item.id} text={item.text} className="yns-summary-text" />;
   }
 
   return (
     <span className="yns-summary-inline">
-      <span className="yns-summary-text">{item.text}</span>
+      <EditableRowText rowId={item.id} text={item.text} className="yns-summary-text" />
       {readOnly ? (
         row.fillIn?.trim() ? (
           <span className="yns-fill-value">{row.fillIn}</span>

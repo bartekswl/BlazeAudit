@@ -16,6 +16,7 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -245,7 +246,7 @@ export function FormRemoteTroubleSignalUnitTestView({
                 <tr key={row.id} className={cn('rtsu-row', index % 2 === 1 && 'rtsu-row--alt')}>
                   <td className="rtsu-td rtsu-td--letter">{row.letter}</td>
                   <td className="rtsu-td rtsu-td--desc">
-                    <span className="rtsu-desc-text">{row.text}</span>
+                    <EditableRowText rowId={row.id} text={row.text} className="rtsu-desc-text" />
                   </td>
                   <ChoiceCells
                     rowId={row.id}

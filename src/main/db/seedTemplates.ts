@@ -4,7 +4,7 @@ import * as builtin from './builtinTemplates';
 
 const SEED_META_KEY = 'templates_seeded_v1';
 /** Bump when built-in template seeds change so sync runs once after an app update. */
-const TEMPLATE_SEED_REVISION = '2026-07-23-ext-el-polish';
+const TEMPLATE_SEED_REVISION = '2026-10-02-sprinkler-el-legend';
 
 export function seedDefaultTemplates(): void {
   const db = getDatabase();
