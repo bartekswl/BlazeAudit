@@ -41,7 +41,6 @@ export function emergencyLightingDefinition(): FormDefinition {
           {
             id: 'section-comments',
             heading: 'Inspection Comments',
-            heightPercent: 26,
             elements: [
               {
                 kind: 'recommendations',
@@ -52,7 +51,6 @@ export function emergencyLightingDefinition(): FormDefinition {
           {
             id: 'section-recommendations',
             heading: 'Inspection Recommendations',
-            heightPercent: 26,
             elements: [
               {
                 kind: 'testingNotes',
@@ -60,10 +58,17 @@ export function emergencyLightingDefinition(): FormDefinition {
               },
             ],
           },
+        ],
+      },
+      {
+        id: 'page-device-legend',
+        label: 'Page 3',
+        header: 'codeNameMeta',
+        regions: [],
+        sections: [
           {
             id: 'section-device-legend',
             heading: 'Device Legend',
-            heightPercent: 32,
             elements: [
               {
                 kind: 'emergencyLightingDeviceLegend',
@@ -75,7 +80,7 @@ export function emergencyLightingDefinition(): FormDefinition {
       },
       {
         id: 'page-3',
-        label: 'Page 3',
+        label: 'Page 4',
         header: 'codeNameMeta',
         regions: [],
         sections: [

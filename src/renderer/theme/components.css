@@ -3106,6 +3106,21 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   min-height: 0;
 }
 
+/* Emergency lighting page 2 — Comments and Recommendations split the page evenly with denser rules. */
+.form-page-sheet--inspection-report.form-page-sheet--lined-notes .form-page-section:has(.ln-panel--green),
+.form-page-sheet--inspection-report.form-page-sheet--lined-notes .form-page-section:has(.ln-panel--blue) {
+  flex-grow: 1;
+}
+
+.form-page-sheet--inspection-report .ln-panel,
+.form-page-sheet--inspection-report .ln-panel .ln-body {
+  --ln-line-height: 1rem;
+}
+
+.form-page-sheet--inspection-report .ln-panel {
+  font-size: 0.625rem;
+}
+
 [data-theme='light'] .form-page-sheet .ln-panel,
 [data-theme='light'] .form-page-sheet .ln-body {
   color: #171717;
@@ -3371,6 +3386,11 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .irc-address .irc-value {
   min-height: 3rem;
   white-space: pre-wrap;
+}
+
+.irc-building-name .irc-label,
+.irc-building-name .irc-value {
+  font-weight: 700;
 }
 
 .irc-date-field {
@@ -3789,6 +3809,9 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   overflow: visible;
   text-overflow: clip;
   word-break: break-word;
+  /* Line-height offsets the larger font so row height stays at the 9px/1.25 baseline. */
+  font-size: 0.6875rem;
+  line-height: 1;
 }
 
 .form-page-sheet--inspection-report .form-page-section-title {

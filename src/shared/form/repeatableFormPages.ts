@@ -8,6 +8,11 @@ import {
 } from './annunciatorDeviceTest';
 import { emptyDeficienciesValue, normalizeDeficienciesValue } from './deficiencies';
 import {
+  emptyEmergencyLightingDeviceLegendValue,
+  EMERGENCY_LIGHTING_DEVICE_LEGEND_COLUMNS,
+  normalizeEmergencyLightingDeviceLegendValue,
+} from './emergencyLightingDeviceLegend';
+import {
   emptyEmergencyLightingInspectionRecordValue,
   EMERGENCY_LIGHTING_INSPECTION_RECORD_COLUMNS,
   normalizeEmergencyLightingInspectionRecordValue,
@@ -56,6 +61,7 @@ export type RepeatableFormPageKind =
   | 'deficiencies'
   | 'ancillaryDeviceCircuitTest'
   | 'fireExtinguisherTestRecord'
+  | 'emergencyLightingDeviceLegend'
   | 'emergencyLightingInspectionRecord';
 
 function pageHasKind(page: FormPage, kind: FormElement['kind']): boolean {
@@ -90,6 +96,10 @@ export function pageIsFireExtinguisherTestRecord(page: FormPage): boolean {
   return pageHasKind(page, 'fireExtinguisherTestRecord');
 }
 
+export function pageIsEmergencyLightingDeviceLegend(page: FormPage): boolean {
+  return pageHasKind(page, 'emergencyLightingDeviceLegend');
+}
+
 export function pageIsEmergencyLightingInspectionRecord(page: FormPage): boolean {
   return pageHasKind(page, 'emergencyLightingInspectionRecord');
 }
@@ -106,6 +116,8 @@ function predicateForKind(kind: RepeatableFormPageKind): (page: FormPage) => boo
       return pageIsAncillaryDeviceCircuitTest;
     case 'fireExtinguisherTestRecord':
       return pageIsFireExtinguisherTestRecord;
+    case 'emergencyLightingDeviceLegend':
+      return pageIsEmergencyLightingDeviceLegend;
     case 'emergencyLightingInspectionRecord':
       return pageIsEmergencyLightingInspectionRecord;
   }
@@ -149,6 +161,7 @@ export function resolveRepeatableFormPageKind(
   if (pageIsDeficiencies(page)) return 'deficiencies';
   if (pageIsAncillaryDeviceCircuitTest(page)) return 'ancillaryDeviceCircuitTest';
   if (pageIsFireExtinguisherTestRecord(page)) return 'fireExtinguisherTestRecord';
+  if (pageIsEmergencyLightingDeviceLegend(page)) return 'emergencyLightingDeviceLegend';
   if (pageIsEmergencyLightingInspectionRecord(page)) return 'emergencyLightingInspectionRecord';
   return null;
 }
@@ -308,6 +321,24 @@ function createFireExtinguisherTestRecordPage(form: FormDefinition): FormPage {
   };
 }
 
+function createEmergencyLightingDeviceLegendPage(form: FormDefinition): FormPage {
+  const n = nextSuffix(form, 'page-eld', (suffix) => [
+    `emergency-lighting-device-legend-${suffix}`,
+  ]);
+  return {
+    id: `page-eld-${n}`,
+    label: '',
+    header: 'codeNameMeta',
+    regions: [],
+    sections: [
+      section(`section-device-legend-${n}`, 'Device Legend', {
+        kind: 'emergencyLightingDeviceLegend',
+        id: `emergency-lighting-device-legend-${n}`,
+      }),
+    ],
+  };
+}
+
 function createEmergencyLightingInspectionRecordPage(form: FormDefinition): FormPage {
   const n = nextSuffix(form, 'page-elr', (suffix) => [
     `emergency-lighting-inspection-record-${suffix}`,
@@ -338,6 +369,8 @@ function createPageForKind(form: FormDefinition, kind: RepeatableFormPageKind): 
       return createAncillaryDeviceCircuitTestPage(form);
     case 'fireExtinguisherTestRecord':
       return createFireExtinguisherTestRecordPage(form);
+    case 'emergencyLightingDeviceLegend':
+      return createEmergencyLightingDeviceLegendPage(form);
     case 'emergencyLightingInspectionRecord':
       return createEmergencyLightingInspectionRecordPage(form);
   }
@@ -371,6 +404,9 @@ function initValuesForPage(
           break;
         case 'fireExtinguisherTestRecord':
           next = setElementValue(next, element.id, emptyFireExtinguisherTestRecordValue());
+          break;
+        case 'emergencyLightingDeviceLegend':
+          next = setElementValue(next, element.id, emptyEmergencyLightingDeviceLegendValue());
           break;
         case 'emergencyLightingInspectionRecord':
           next = setElementValue(next, element.id, emptyEmergencyLightingInspectionRecordValue());
@@ -495,6 +531,13 @@ function fireExtinguisherTestRecordHasContent(raw: unknown): boolean {
   );
 }
 
+function emergencyLightingDeviceLegendHasContent(raw: unknown): boolean {
+  return reportGridHasContent(
+    normalizeEmergencyLightingDeviceLegendValue(raw),
+    EMERGENCY_LIGHTING_DEVICE_LEGEND_COLUMNS,
+  );
+}
+
 function emergencyLightingInspectionRecordHasContent(raw: unknown): boolean {
   return reportGridHasContent(
     normalizeEmergencyLightingInspectionRecordValue(raw),
@@ -533,6 +576,9 @@ export function repeatablePageHasContent(
           break;
         case 'fireExtinguisherTestRecord':
           if (fireExtinguisherTestRecordHasContent(value)) return true;
+          break;
+        case 'emergencyLightingDeviceLegend':
+          if (emergencyLightingDeviceLegendHasContent(value)) return true;
           break;
         case 'emergencyLightingInspectionRecord':
           if (emergencyLightingInspectionRecordHasContent(value)) return true;
@@ -588,6 +634,12 @@ export const REPEATABLE_PAGE_LABELS: Record<
     removeTooltip:
       'Remove this Fire Extinguisher Test Record page. At least one such page must remain.',
     removeTitle: 'Remove Fire Extinguisher Test Record page?',
+  },
+  emergencyLightingDeviceLegend: {
+    short: 'Device Legend',
+    addTooltip: 'Add another Device Legend page after this one. The new page starts empty.',
+    removeTooltip: 'Remove this Device Legend page. At least one Device Legend page must remain.',
+    removeTitle: 'Remove Device Legend page?',
   },
   emergencyLightingInspectionRecord: {
     short: 'EL Inspection Record',

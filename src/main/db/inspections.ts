@@ -9,6 +9,7 @@ import { inspectionSnapshotFromTemplate, inferBuiltinSeedIdFromForm, validateDoc
 import {
   createFormInspectionDocument,
   isFormInspectionDocument,
+  migrateFormInspectionEmergencyLightingLegendPage,
   migrateFormInspectionIdrRowGaps,
   migrateFormInspectionPowerSupplyLayout,
   syncFormDocumentInspectionDate,
@@ -66,8 +67,8 @@ function parseInspectionDocument(json: string, requireClient = true): Inspection
     if (requireClient && !result.document.clientId) {
       throw new Error('Inspection document must reference a client.');
     }
-    return migrateFormInspectionIdrRowGaps(
-      migrateFormInspectionPowerSupplyLayout(result.document),
+    return migrateFormInspectionEmergencyLightingLegendPage(
+      migrateFormInspectionIdrRowGaps(migrateFormInspectionPowerSupplyLayout(result.document)),
     );
   }
   const result = validateDocument(parsed);

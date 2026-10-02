@@ -31,7 +31,11 @@ export function FormLinedNotesInput({
   }, [local, value, lineCount]);
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    setLocal(clampLinedNotesToMaxLines(event.target.value, lineCount));
+    const next = clampLinedNotesToMaxLines(event.target.value, lineCount);
+    const el = event.target;
+    // Wrapped text can spill below the last ruled row even with the newline cap; reject growth there.
+    if (next.length > local.length && el.scrollHeight > el.clientHeight + 2) return;
+    setLocal(next);
   };
 
   const handleBlur = () => {

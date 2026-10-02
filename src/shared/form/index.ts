@@ -6,6 +6,7 @@ export * from './validate';
 export * from './values';
 export * from './guards';
 export * from './migratePowerSupplyPageLayout';
+export * from './migrateEmergencyLightingLegendPage';
 export * from './migrateIndividualDeviceRecordRows';
 export * from './insertFormTableRows';
 export * from './resolveBinding';

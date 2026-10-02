@@ -260,7 +260,9 @@ function renderPageHtml(
       const align = region.content.align ?? 'left';
       const alignClass =
         align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left';
-      return `<div class="form-page-header-line ${alignClass}">${headerValue(text)}</div>`;
+      const titleClass =
+        region.content.binding === 'template.title' ? ' form-page-header-line--title' : '';
+      return `<div class="form-page-header-line ${alignClass}${titleClass}">${headerValue(text)}</div>`;
     })
     .join('');
 

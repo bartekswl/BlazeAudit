@@ -34,6 +34,7 @@ const PDF_PRINT_OVERRIDES = `
   .form-page-header-line.text-center { text-align: center; }
   .form-page-header-line.text-right { text-align: right; }
   .form-page-header-line.text-left { text-align: left; }
+  .form-page-header-line--title { color: #b91c1c !important; }
   .form-page-content {
     margin-top: 0.65rem !important;
     gap: 0.4875rem !important;

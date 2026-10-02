@@ -15,6 +15,11 @@ import {
   type CircuitFaultToleranceTestSheetRow,
 } from './circuitFaultToleranceTestSheet';
 import {
+  EMERGENCY_LIGHTING_DEVICE_LEGEND_COLUMNS,
+  EMERGENCY_LIGHTING_DEVICE_LEGEND_ROW_COUNT,
+  normalizeEmergencyLightingDeviceLegendValue,
+} from './emergencyLightingDeviceLegend';
+import {
   EMERGENCY_LIGHTING_INSPECTION_RECORD_COLUMNS,
   EMERGENCY_LIGHTING_INSPECTION_RECORD_ROW_COUNT,
   normalizeEmergencyLightingInspectionRecordValue,
@@ -261,6 +266,18 @@ export function insertEmptyTableRows(
         () => emptyReportGridRow(FIRE_EXTINGUISHER_TEST_RECORD_COLUMNS),
         (raw) => normalizeFireExtinguisherTestRecordValue(raw).rows,
       );
+    case 'emergencyLightingDeviceLegend':
+      return insertRepeatableGridRows(
+        document,
+        'emergencyLightingDeviceLegend',
+        'emergencyLightingDeviceLegend',
+        target.pageIndex,
+        target.rowIndex,
+        count,
+        EMERGENCY_LIGHTING_DEVICE_LEGEND_ROW_COUNT,
+        () => emptyReportGridRow(EMERGENCY_LIGHTING_DEVICE_LEGEND_COLUMNS),
+        (raw) => normalizeEmergencyLightingDeviceLegendValue(raw).rows,
+      );
     case 'emergencyLightingInspectionRecord':
       return insertRepeatableGridRows(
         document,
@@ -297,6 +314,7 @@ export function supportsInsertTableRows(kind: FormElement['kind']): boolean {
     kind === 'circuitFaultToleranceTestSheet' ||
     kind === 'attendanceLog' ||
     kind === 'fireExtinguisherTestRecord' ||
+    kind === 'emergencyLightingDeviceLegend' ||
     kind === 'emergencyLightingInspectionRecord' ||
     kind === 'ancillaryDeviceCircuitTest'
   );

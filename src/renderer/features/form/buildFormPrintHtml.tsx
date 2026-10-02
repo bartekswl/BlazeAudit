@@ -21,6 +21,7 @@ const PRINT_OVERRIDES = `
     print-color-adjust: exact;
   }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .form-page-header-line--title { color: #b91c1c !important; }
   .form-print-root { display: block; box-sizing: border-box; }
   .form-print-root *,
   .form-print-root *::before,
@@ -459,6 +460,10 @@ const PRINT_OVERRIDES = `
     min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
+  }
+  .form-print-root .form-page-sheet--inspection-report.form-page-sheet--lined-notes.form-page-sheet--fixed .form-page-section:has(.ln-panel--green),
+  .form-print-root .form-page-sheet--inspection-report.form-page-sheet--lined-notes.form-page-sheet--fixed .form-page-section:has(.ln-panel--blue) {
+    flex: 1 1 0 !important;
   }
   .form-print-root .form-page-sheet--lined-notes .form-page-section:has(.ln-panel--blue) .form-page-section-title {
     margin: 0.5pt 0 1pt !important;

@@ -35,6 +35,7 @@ import {
   extractFormDocumentProjectNumber,
   migrateFormInspectionPowerSupplyLayout,
   migrateFormInspectionIdrRowGaps,
+  migrateFormInspectionEmergencyLightingLegendPage,
   normalizeUlcSection1Value,
   insertEmptyTableRows,
   supportsInsertTableRows,
@@ -116,8 +117,8 @@ function FormInspectionEditorInner({
       : 'annual') as CadencePreset,
   );
   const [formDoc, setFormDoc] = useState<FormInspectionDocument>(() => {
-    const migrated = migrateFormInspectionIdrRowGaps(
-      migrateFormInspectionPowerSupplyLayout(formDocInitial),
+    const migrated = migrateFormInspectionEmergencyLightingLegendPage(
+      migrateFormInspectionIdrRowGaps(migrateFormInspectionPowerSupplyLayout(formDocInitial)),
     );
     const withDate = syncFormDocumentInspectionDate(migrated, inspection.inspectedAt ?? null);
     const initialProject =
@@ -130,8 +131,8 @@ function FormInspectionEditorInner({
   const [pdfMessage, setPdfMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(() => {
-    const migrated = migrateFormInspectionIdrRowGaps(
-      migrateFormInspectionPowerSupplyLayout(formDocInitial),
+    const migrated = migrateFormInspectionEmergencyLightingLegendPage(
+      migrateFormInspectionIdrRowGaps(migrateFormInspectionPowerSupplyLayout(formDocInitial)),
     );
     const withDate = syncFormDocumentInspectionDate(migrated, inspection.inspectedAt ?? null);
     const initialProject =

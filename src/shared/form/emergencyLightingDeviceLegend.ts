@@ -5,7 +5,7 @@ import {
   type ReportGridValue,
 } from './reportRecordGrid';
 
-export const EMERGENCY_LIGHTING_DEVICE_LEGEND_ROW_COUNT = 10;
+export const EMERGENCY_LIGHTING_DEVICE_LEGEND_ROW_COUNT = 28;
 
 export const EMERGENCY_LIGHTING_DEVICE_LEGEND_COLUMNS: readonly ReportGridColumnDef[] = [
   { key: 'device', title: 'DEVICE', widthPercent: 18, orientation: 'horizontal', kind: 'text' },

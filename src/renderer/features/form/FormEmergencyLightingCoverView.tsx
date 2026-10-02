@@ -160,7 +160,11 @@ export function FormEmergencyLightingCoverView({
   return (
     <div className="irc-panel">
       <div className="irc-meta-grid">
-        <BoundLine label="Building Name" value={buildingName} className="irc-span-2" />
+        <BoundLine
+          label="Building Name"
+          value={buildingName}
+          className="irc-span-2 irc-building-name"
+        />
         <div className="irc-field">
           <span className={labelCls}>Date</span>
           {readOnly ? (

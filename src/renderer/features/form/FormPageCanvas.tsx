@@ -232,6 +232,8 @@ function FormPageCanvasInner({
                       key={region.id}
                       className={cn(
                         'form-page-header-line font-semibold text-[var(--ba-text-primary)]',
+                        region.content.binding === 'template.title' &&
+                          'form-page-header-line--title',
                         region.content.align === 'center' && 'text-center',
                         region.content.align === 'right' && 'text-right',
                       )}
