@@ -43,6 +43,10 @@ import {
   type FormElement,
   type RepeatableFormPageKind,
 } from '../../../shared/form';
+import {
+  applyTemplateLineRemove,
+  type TemplateLineClearRequest,
+} from '../../../shared/form/formLineSelect';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
 import { formatDateTimeCompact } from '../../../shared/dates';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -144,23 +148,11 @@ function FormInspectionEditorInner({
   const [pendingDuplicate, setPendingDuplicate] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
   const [pendingDateChange, setPendingDateChange] = useState<string | null>(null);
+  const [pendingTemplateLineClear, setPendingTemplateLineClear] =
+    useState<TemplateLineClearRequest | null>(null);
   const metaPinned = metaPinnedProp ?? true;
   const formStackRef = useRef<HTMLDivElement>(null);
-  const {
-    selectMode,
-    cellSelectMode,
-    lineSelectMode,
-    insertLineMode,
-    insertTarget,
-    actionFlash,
-    toggleSelectMode,
-    toggleLineSelectMode,
-    toggleInsertLineMode,
-    endInsertMode,
-    copySelected,
-    cutSelected,
-    pasteSelected,
-  } = useFormFieldClipboard(formStackRef);
+  const applyTemplateLineClearRef = useRef<(request: TemplateLineClearRequest) => void>(() => {});
 
   const formDocRef = useRef(formDoc);
   formDocRef.current = formDoc;
@@ -183,6 +175,63 @@ function FormInspectionEditorInner({
     },
     [pushUndo],
   );
+
+  const {
+    selectMode,
+    cellSelectMode,
+    lineSelectMode,
+    insertLineMode,
+    insertTarget,
+    actionFlash,
+    toggleSelectMode,
+    toggleLineSelectMode,
+    toggleInsertLineMode,
+    endInsertMode,
+    copySelected,
+    cutSelected,
+    pasteSelected,
+    clearTemplateLineSelection,
+    endLineSelectMode,
+  } = useFormFieldClipboard(formStackRef, {
+    onPromptClearTemplateLines: (request) => setPendingTemplateLineClear(request),
+    onApplyClearTemplateLines: (request) => applyTemplateLineClearRef.current(request),
+  });
+
+  const applyTemplateLineClear = useCallback(
+    (request: TemplateLineClearRequest) => {
+      recordUndo('template-line');
+      setFormDoc((prev) => {
+        const element = (() => {
+          for (const page of prev.form.pages) {
+            for (const section of page.sections) {
+              for (const el of section.elements) {
+                if (el.id === request.elementId) return el;
+              }
+            }
+          }
+          return undefined;
+        })();
+        const nextValue = applyTemplateLineRemove(
+          prev.values[request.elementId],
+          request,
+          element?.kind,
+        );
+        return {
+          ...prev,
+          values: setElementValue(prev.values, request.elementId, nextValue),
+        };
+      });
+      setPendingTemplateLineClear(null);
+      endLineSelectMode();
+      setIsDirty(true);
+      setSaveState((s) => (s === 'saved' ? 'idle' : s));
+    },
+    [recordUndo, endLineSelectMode],
+  );
+
+  useEffect(() => {
+    applyTemplateLineClearRef.current = applyTemplateLineClear;
+  }, [applyTemplateLineClear]);
 
   const applyUndo = useCallback(() => {
     const prev = popUndo();
@@ -575,6 +624,24 @@ function FormInspectionEditorInner({
             the name.
           </p>
           <p>All other content stays the same.</p>
+        </ConfirmDialog>
+      ) : null}
+      {pendingTemplateLineClear != null ? (
+        <ConfirmDialog
+          title="Remove checklist line?"
+          icon={TriangleAlert}
+          confirmLabel="Remove line"
+          onCancel={() => {
+            setPendingTemplateLineClear(null);
+            clearTemplateLineSelection();
+          }}
+          onConfirm={() => applyTemplateLineClear(pendingTemplateLineClear)}
+        >
+          <p>
+            This clears the row wording (and related fields on 23.1) for this document only. The
+            built-in template is unchanged.
+          </p>
+          <p>You can also press Delete after selecting the line to remove it without this dialog.</p>
         </ConfirmDialog>
       ) : null}
       {pendingDateChange != null ? (

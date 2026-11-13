@@ -7,6 +7,7 @@ import {
   type DeficiencyRepairFields,
 } from '../../../shared/form/deficiencies';
 import { cn } from '../../lib/cn';
+import { FormGridDateCell } from './FormGridDateCell';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 function CellInput({
@@ -47,11 +48,17 @@ function RepairFields({
   return (
     <>
       <div className="def-cell def-cell--repair">
-        <CellInput
-          value={repair.dateCorrected}
-          readOnly={readOnly}
-          onChange={(v) => set('dateCorrected', v)}
-        />
+        {readOnly ? (
+          <span className="def-cell-value">{repair.dateCorrected || '\u00a0'}</span>
+        ) : (
+          <FormGridDateCell
+            value={repair.dateCorrected}
+            storeFormat="mmddyy"
+            wrapClassName="def-repair-date-wrap"
+            valueClassName="def-cell-value"
+            onChange={(v) => set('dateCorrected', v)}
+          />
+        )}
       </div>
       <div className="def-cell def-cell--repair">
         <CellInput value={repair.workOrder} readOnly={readOnly} onChange={(v) => set('workOrder', v)} />

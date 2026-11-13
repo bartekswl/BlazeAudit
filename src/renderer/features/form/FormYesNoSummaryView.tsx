@@ -7,6 +7,8 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
 import { EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
@@ -29,7 +31,12 @@ function SummaryText({
 
   return (
     <span className="yns-summary-inline">
-      <EditableRowText rowId={item.id} text={item.text} className="yns-summary-text" />
+      <EditableRowText
+        rowId={item.id}
+        text={item.text}
+        className="yns-summary-text"
+        fillCell={false}
+      />
       {readOnly ? (
         row.fillIn?.trim() ? (
           <span className="yns-fill-value">{row.fillIn}</span>
@@ -144,11 +151,18 @@ export function FormYesNoSummaryView({
         </thead>
         <tbody>
           {items.map((item) => {
+            if (isLogicalTemplateLineCollapsed(rawValue, item.id)) return null;
             const row = value[item.id] ?? { choice: null };
             const groupName = `yns-${item.id}`;
             const choice = row.choice;
             return (
-              <tr className="yns-row" key={item.id}>
+              <tr
+                className="yns-row"
+                key={item.id}
+                data-ba-line-row=""
+                data-ba-line-row-hide={item.id}
+                data-ba-line-row-clear={checklistLineClearIds(item.id)}
+              >
                 <ChoiceCell
                   choice={choice}
                   groupName={groupName}

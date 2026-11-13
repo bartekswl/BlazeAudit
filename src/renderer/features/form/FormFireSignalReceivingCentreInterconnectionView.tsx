@@ -21,7 +21,9 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -231,6 +233,7 @@ function fsrcChoosableIds(variant: FsrcChoice): string[] {
 }
 
 function renderFsrcTableRows(
+  documentValue: unknown,
   data: FireSignalReceivingCentreInterconnectionValue,
   readOnly: boolean | undefined,
   emit: (next: FireSignalReceivingCentreInterconnectionValue) => void,
@@ -239,11 +242,23 @@ function renderFsrcTableRows(
     const alt = index % 2 === 1;
 
     if (row.subItems?.length) {
-      return row.subItems.map((subItem, subIndex) => (
-        <tr key={subItem.id} className={cn('fsrc-row', alt && 'fsrc-row--alt')}>
+      if (isLogicalTemplateLineCollapsed(documentValue, row.id)) return [];
+      const visibleSubs = row.subItems.filter(
+        (subItem) => !isLogicalTemplateLineCollapsed(documentValue, subItem.id),
+      );
+      if (visibleSubs.length === 0) return [];
+      return visibleSubs.map((subItem, subIndex) => (
+        <tr
+          key={subItem.id}
+          className={cn('fsrc-row', alt && 'fsrc-row--alt')}
+          data-ba-line-row=""
+          data-ba-line-row-group={subItem.id}
+          data-ba-line-row-hide={subItem.id}
+          data-ba-line-row-clear={checklistLineClearIds(subItem.id)}
+        >
           {subIndex === 0 ? (
-            <td rowSpan={row.subItems!.length} className="fsrc-td fsrc-td--letter">
-              {row.letter}
+            <td rowSpan={visibleSubs.length} className="fsrc-td fsrc-td--letter">
+              <EditableRowLetter rowId={row.id} letter={row.letter} className="fsrc-letter-text" />
             </td>
           ) : null}
           <td className="fsrc-td fsrc-td--desc">
@@ -260,10 +275,19 @@ function renderFsrcTableRows(
       ));
     }
 
+    if (isLogicalTemplateLineCollapsed(documentValue, row.id)) return [];
     const rowValue = data.checklist[row.id] ?? { choice: null };
     return (
-      <tr key={row.id} className={cn('fsrc-row', alt && 'fsrc-row--alt')}>
-        <td className="fsrc-td fsrc-td--letter">{row.letter}</td>
+      <tr
+        key={row.id}
+        className={cn('fsrc-row', alt && 'fsrc-row--alt')}
+        data-ba-line-row=""
+        data-ba-line-row-hide={row.id}
+        data-ba-line-row-clear={checklistLineClearIds(row.id)}
+      >
+        <td className="fsrc-td fsrc-td--letter">
+          <EditableRowLetter rowId={row.id} letter={row.letter} className="fsrc-letter-text" />
+        </td>
         <td className="fsrc-td fsrc-td--desc">
           <DescCell row={row} />
           {row.choiceMode === 'record-fields' ? (
@@ -403,7 +427,7 @@ export function FormFireSignalReceivingCentreInterconnectionView({
               </ChoiceColumnHeader>
             </tr>
           </thead>
-          <tbody>{renderFsrcTableRows(data, readOnly, emit)}</tbody>
+          <tbody>{renderFsrcTableRows(rawValue, data, readOnly, emit)}</tbody>
         </table>
       </div>
 

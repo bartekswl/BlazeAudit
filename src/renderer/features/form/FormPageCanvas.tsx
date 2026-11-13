@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef } from 'react';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import type { DocumentContext } from '../../../shared/document';
 import {
   FORM_FOOTER_HEIGHT_PERCENT,
@@ -18,6 +18,8 @@ import { FormPageMetaHeader } from './FormPageMetaHeader';
 import { FormPageHeaderBranding } from './FormPageHeaderBranding';
 import { FormElementView } from './FormElementView';
 import { FormExtraPageControlsBar } from './IndividualDeviceRecordPageControls';
+import { pageHasHiddenTemplateLines, pageHasRowTextEditableElements } from '../../../shared/form/templateLinePage';
+import { useFormPageSheetFloorLock } from './useFormPageSheetFloorLock';
 
 export type FormPageExtraControlsConfig = {
   mode: FormExtraPageControls;
@@ -161,8 +163,22 @@ function FormPageCanvasInner({
     section.elements.some((element) => element.kind === 'circuitFaultToleranceTestSheet'),
   );
 
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const templateLinePage = pageHasRowTextEditableElements(page);
+  const hasTemplateLineRemovals = useMemo(
+    () => pageHasHiddenTemplateLines(page, values),
+    [page, values],
+  );
+  useFormPageSheetFloorLock(
+    sheetRef,
+    templateLinePage && !fixedPageLayout,
+    hasTemplateLineRemovals,
+    values,
+  );
+
   return (
     <div
+      ref={sheetRef}
       data-form-page-index={pageIndex}
       className={cn(
         'form-page-sheet',

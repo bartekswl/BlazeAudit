@@ -20,7 +20,9 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -189,10 +191,19 @@ export function FormPowerSupplyInspectionView({
           </thead>
           <tbody>
             {POWER_SUPPLY_INSPECTION_ROWS.map((row, index) => {
+              if (isLogicalTemplateLineCollapsed(rawValue, row.id)) return null;
               const rowValue = data.checklist[row.id] ?? { choice: null };
               return (
-                <tr key={row.id} className={cn('psi-row', index % 2 === 1 && 'psi-row--alt')}>
-                  <td className="psi-td psi-td--letter">{row.letter}</td>
+                <tr
+                  key={row.id}
+                  className={cn('psi-row', index % 2 === 1 && 'psi-row--alt')}
+                  data-ba-line-row=""
+                  data-ba-line-row-hide={row.id}
+                  data-ba-line-row-clear={checklistLineClearIds(row.id)}
+                >
+                  <td className="psi-td psi-td--letter">
+                    <EditableRowLetter rowId={row.id} letter={row.letter} className="psi-letter-text" />
+                  </td>
                   <td className="psi-td psi-td--desc">
                     <EditableRowText rowId={row.id} text={row.text} className="psi-desc-text" />
                   </td>

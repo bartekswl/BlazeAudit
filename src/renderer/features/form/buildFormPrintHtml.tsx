@@ -2709,6 +2709,30 @@ const PRINT_OVERRIDES = `
   .form-print-root .rrg-panel--elr .rrg-accent-bar {
     background: #1e3a8a !important;
   }
+  .form-print-root .rrg-panel--elr .rrg-th {
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    font-size: 0.5rem !important;
+    letter-spacing: 0.01em !important;
+  }
+  .form-print-root .rrg-panel--elr .rrg-th .rrg-th-label {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding-left: 0.12rem !important;
+    padding-right: 0.12rem !important;
+    overflow: hidden !important;
+    overflow-wrap: anywhere !important;
+  }
+  .form-print-root .rrg-panel--elr .rrg-th[data-col='deviceOperation'] {
+    padding-left: 0.24rem !important;
+    padding-right: 0.24rem !important;
+  }
+  .form-print-root .rrg-panel--elr .rrg-th[data-col='deviceOperation'] .rrg-th-label {
+    letter-spacing: 0 !important;
+    padding-left: 0.08rem !important;
+    padding-right: 0.08rem !important;
+    overflow: hidden !important;
+  }
   .form-print-root .rrg-table {
     height: 100% !important;
   }

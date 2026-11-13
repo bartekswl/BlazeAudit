@@ -9,8 +9,10 @@ import type {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import {
   ROW_TEXT_EDITABLE_KINDS,
+  applyRowTextOverride,
+  readHiddenTemplateLineIds,
   readRowTextOverrides,
-  setRowTextOverride,
+  withHiddenTemplateLineIds,
   withRowTextOverrides,
 } from '../../../shared/form/rowTextOverrides';
 import { RowTextEditingContext, type RowTextEditing } from './EditableRowText';
@@ -93,26 +95,38 @@ function FormElementViewInner({
     () => (rowTextEditable ? readRowTextOverrides(value) : null),
     [rowTextEditable, value],
   );
+  const hiddenTemplateLineIds = useMemo(
+    () => (rowTextEditable ? readHiddenTemplateLineIds(value) : null),
+    [rowTextEditable, value],
+  );
   const publishBodyChange = useCallback(
     (next: unknown) => {
-      publishChange(rowTextOverrides ? withRowTextOverrides(next, rowTextOverrides) : next);
+      let merged = next;
+      if (rowTextOverrides) merged = withRowTextOverrides(merged, rowTextOverrides);
+      if (hiddenTemplateLineIds && hiddenTemplateLineIds.size > 0) {
+        merged = withHiddenTemplateLineIds(merged, hiddenTemplateLineIds);
+      }
+      publishChange(merged);
     },
-    [publishChange, rowTextOverrides],
+    [publishChange, rowTextOverrides, hiddenTemplateLineIds],
   );
   const canEdit = !readOnly && Boolean(onElementValueChange || onChange);
   const rowTextEditing = useMemo<RowTextEditing | null>(
     () =>
-      rowTextOverrides
+      rowTextEditable
         ? {
-            overrides: rowTextOverrides,
+            overrides: rowTextOverrides ?? {},
             editable: canEdit,
             onSet: (rowId, text) =>
               publishChange(
-                withRowTextOverrides(value, setRowTextOverride(rowTextOverrides, rowId, text)),
+                withRowTextOverrides(
+                  value,
+                  applyRowTextOverride(rowTextOverrides ?? {}, rowId, text),
+                ),
               ),
           }
         : null,
-    [rowTextOverrides, canEdit, publishChange, value],
+    [rowTextEditable, rowTextOverrides, canEdit, publishChange, value],
   );
 
   const flushFrame =

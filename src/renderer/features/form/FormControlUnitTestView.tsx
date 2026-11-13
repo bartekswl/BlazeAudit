@@ -17,11 +17,15 @@ import {
   type ControlUnitTestVersionFields,
 } from '../../../shared/form/controlUnitTest';
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { datePickerValueFromStored, formatMmDdYyFromIso } from '../../../shared/dates';
 import { cn } from '../../lib/cn';
+import { InspectionDateField } from '../../components/InspectionDateField';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -138,10 +142,19 @@ function VersionFields({
   return (
     <div className="cut-version-fields">
       {items.map(({ key, label }) => (
-        <span key={key} className="cut-version-field">
+        <span key={key} className={cn('cut-version-field', key === 'date' && 'cut-version-field--date')}>
           <span className="cut-version-label">{label}</span>
           {readOnly ? (
             <span className="cut-version-value">{fields[key] || '\u00a0'}</span>
+          ) : key === 'date' ? (
+            <span className="cut-version-date-wrap">
+              <InspectionDateField
+                compact
+                value={datePickerValueFromStored(fields.date)}
+                onChange={(iso) => update('date', iso ? formatMmDdYyFromIso(iso) : '')}
+                className="cut-version-date-field"
+              />
+            </span>
           ) : (
             <VisibleWidthInput
               className="cut-version-input"
@@ -273,10 +286,19 @@ export function FormControlUnitTestView({
           </thead>
           <tbody>
             {CONTROL_UNIT_TEST_ROWS.map((row) => {
+              if (isLogicalTemplateLineCollapsed(rawValue, row.id)) return null;
               if (row.kind === 'firmware') {
                 return (
-                  <tr key={row.id} className="cut-row cut-row--f">
-                    <td className="cut-td cut-td--letter">{row.letter}</td>
+                  <tr
+                    key={row.id}
+                    className="cut-row cut-row--f"
+                    data-ba-line-row=""
+                    data-ba-line-row-hide={row.id}
+                    data-ba-line-row-clear={checklistLineClearIds(row.id)}
+                  >
+                    <td className="cut-td cut-td--letter">
+                      <EditableRowLetter rowId={row.id} letter={row.letter} className="cut-letter-text" />
+                    </td>
                     <td className="cut-td cut-td--desc cut-td--f">
                       <div className="cut-f-section">
                         <p className="cut-f-prompt">{CONTROL_UNIT_TEST_FIRMWARE_PROMPT}</p>
@@ -302,8 +324,16 @@ export function FormControlUnitTestView({
 
               const rowValue = data.checklist[row.id] ?? { choice: null };
               return (
-                <tr key={row.id} className="cut-row">
-                  <td className="cut-td cut-td--letter">{row.letter}</td>
+                <tr
+                  key={row.id}
+                  className="cut-row"
+                  data-ba-line-row=""
+                  data-ba-line-row-hide={row.id}
+                  data-ba-line-row-clear={checklistLineClearIds(row.id)}
+                >
+                  <td className="cut-td cut-td--letter">
+                    <EditableRowLetter rowId={row.id} letter={row.letter} className="cut-letter-text" />
+                  </td>
                   <td className="cut-td cut-td--desc">
                     <EditableRowText rowId={row.id} text={row.text} className="cut-desc-text" />
                   </td>

@@ -16,7 +16,9 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -241,10 +243,19 @@ export function FormRemoteTroubleSignalUnitTestView({
           </thead>
           <tbody>
             {REMOTE_TROUBLE_SIGNAL_UNIT_TEST_ROWS.map((row, index) => {
+              if (isLogicalTemplateLineCollapsed(value, row.id)) return null;
               const rowValue = data.checklist[row.id] ?? { choice: null };
               return (
-                <tr key={row.id} className={cn('rtsu-row', index % 2 === 1 && 'rtsu-row--alt')}>
-                  <td className="rtsu-td rtsu-td--letter">{row.letter}</td>
+                <tr
+                  key={row.id}
+                  className={cn('rtsu-row', index % 2 === 1 && 'rtsu-row--alt')}
+                  data-ba-line-row=""
+                  data-ba-line-row-hide={row.id}
+                  data-ba-line-row-clear={checklistLineClearIds(row.id)}
+                >
+                  <td className="rtsu-td rtsu-td--letter">
+                    <EditableRowLetter rowId={row.id} letter={row.letter} className="rtsu-letter-text" />
+                  </td>
                   <td className="rtsu-td rtsu-td--desc">
                     <EditableRowText rowId={row.id} text={row.text} className="rtsu-desc-text" />
                   </td>

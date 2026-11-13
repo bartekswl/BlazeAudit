@@ -96,13 +96,14 @@ export function FormReportRecordGridView({
                 'rrg-th',
                 col.orientation === 'vertical' && 'rrg-th--vertical',
                 col.kind === 'choice' && 'rrg-th--choice',
+                col.align === 'center' && 'rrg-th--center',
               );
               const thStyle = { width: `${col.widthPercent}%` };
               const label = <span className="rrg-th-label">{col.title}</span>;
 
               if (col.kind !== 'choice') {
                 return (
-                  <th key={col.key} className={thClass} style={thStyle}>
+                  <th key={col.key} className={thClass} style={thStyle} data-col={col.key}>
                     {label}
                   </th>
                 );
@@ -113,6 +114,7 @@ export function FormReportRecordGridView({
                   key={col.key}
                   className={thClass}
                   style={thStyle}
+                  data-col={col.key}
                   readOnly={readOnly}
                   applyLabel={`Cycle all “${col.title.replace(/\n/g, ' ')}” cells on this page`}
                   onApply={() => {
@@ -135,7 +137,12 @@ export function FormReportRecordGridView({
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={cn('rrg-td', col.kind === 'choice' && 'rrg-td--choice')}
+                  data-col={col.key}
+                  className={cn(
+                    'rrg-td',
+                    col.kind === 'choice' && 'rrg-td--choice',
+                    col.align === 'center' && 'rrg-td--center',
+                  )}
                 >
                   {col.kind === 'choice' ? (
                     <ChoiceCell

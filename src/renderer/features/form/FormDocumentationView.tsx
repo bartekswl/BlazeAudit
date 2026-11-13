@@ -23,8 +23,10 @@ import { clampLinedNotesToMaxLines } from '../../../shared/form/linedNotes';
 import { DocRuleRows } from './DocRuleRows';
 import { cn } from '../../lib/cn';
 
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -178,7 +180,7 @@ function SubitemDescription({ item }: { item: DocumentationISubitem }) {
     <td className="doc-td doc-td--desc doc-td--sub">
       <span className="doc-desc-text">
         <span className="doc-sub-letter">{item.letter}.</span>{' '}
-        <EditableRowText rowId={item.id} text={item.text} />
+        <EditableRowText rowId={item.id} text={item.text} className="doc-desc-text" />
       </span>
     </td>
   );
@@ -225,15 +227,21 @@ function DocRuledNotes({
 }
 
 function DocumentationISection({
+  documentValue,
   data,
   readOnly,
   onChoice,
 }: {
+  documentValue: unknown;
   data: DocumentationValue;
   readOnly?: boolean;
   onChoice: (rowId: string, choice: DocumentationChoice | null) => void;
 }) {
-  const rowSpan = 1 + DOCUMENTATION_I_SUBITEMS.length;
+  const visibleSubs = DOCUMENTATION_I_SUBITEMS.filter(
+    (item) => !isLogicalTemplateLineCollapsed(documentValue, item.id),
+  );
+  if (visibleSubs.length === 0) return null;
+  const rowSpan = 1 + visibleSubs.length;
 
   return (
     <>
@@ -245,10 +253,16 @@ function DocumentationISection({
           <span className="doc-desc-text">{DOCUMENTATION_I_HEADER}</span>
         </td>
       </tr>
-      {DOCUMENTATION_I_SUBITEMS.map((item) => {
+      {visibleSubs.map((item) => {
         const rowValue = data.checklist[item.id] ?? { choice: null };
         return (
-          <tr key={item.id} className="doc-row">
+          <tr
+            key={item.id}
+            className="doc-row"
+            data-ba-line-row=""
+            data-ba-line-row-hide={item.id}
+            data-ba-line-row-clear={checklistLineClearIds(item.id)}
+          >
             <SubitemDescription item={item} />
             <ChoiceCells
               rowId={item.id}
@@ -349,10 +363,19 @@ export function FormDocumentationView({
           </thead>
           <tbody>
             {DOCUMENTATION_MAIN_ROWS.map((row) => {
+              if (isLogicalTemplateLineCollapsed(rawValue, row.id)) return null;
               const rowValue = data.checklist[row.id] ?? { choice: null };
               return (
-                <tr key={row.id} className="doc-row">
-                  <td className="doc-td doc-td--letter">{row.letter}</td>
+                <tr
+                  key={row.id}
+                  className="doc-row"
+                  data-ba-line-row=""
+                  data-ba-line-row-hide={row.id}
+                  data-ba-line-row-clear={checklistLineClearIds(row.id)}
+                >
+                  <td className="doc-td doc-td--letter">
+                    <EditableRowLetter rowId={row.id} letter={row.letter} className="doc-letter-text" />
+                  </td>
                   <DescriptionCell
                     row={row}
                     rowValue={rowValue}
@@ -370,7 +393,12 @@ export function FormDocumentationView({
               );
             })}
 
-            <DocumentationISection data={data} readOnly={readOnly} onChoice={setChoice} />
+            <DocumentationISection
+              documentValue={rawValue}
+              data={data}
+              readOnly={readOnly}
+              onChoice={setChoice}
+            />
 
             <tr className="doc-row doc-row--notes">
               <td className="doc-td doc-td--letter">{DOCUMENTATION_J_ROW.letter}</td>

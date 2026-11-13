@@ -20,7 +20,9 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -107,11 +109,13 @@ function InfoRow({
 function DclftPanel({
   blockId,
   block,
+  documentValue,
   readOnly,
   onEmit,
 }: {
   blockId: DclftBlockId;
   block: DclftBlockValue;
+  documentValue: unknown;
   readOnly?: boolean;
   onEmit: (
     updater: (
@@ -218,11 +222,25 @@ function DclftPanel({
           </thead>
           <tbody>
             {DCLFT_ROWS.map((row, index) => {
+              const lineId = `${blockId}.${row.id}`;
+              if (isLogicalTemplateLineCollapsed(documentValue, lineId)) return null;
               const rowValue = block.checklist[row.id] ?? { choice: null };
               const groupName = `dclft-${blockId}-${row.id}`;
               return (
-                <tr key={row.id} className={cn('dclft-row', index % 2 === 1 && 'dclft-row--alt')}>
-                  <td className="dclft-td dclft-td--letter">{row.letter}</td>
+                <tr
+                  key={row.id}
+                  className={cn('dclft-row', index % 2 === 1 && 'dclft-row--alt')}
+                  data-ba-line-row=""
+                  data-ba-line-row-hide={`${blockId}.${row.id}`}
+                  data-ba-line-row-clear={checklistLineClearIds(`${blockId}.${row.id}`)}
+                >
+                  <td className="dclft-td dclft-td--letter">
+                    <EditableRowLetter
+                      rowId={`${blockId}.${row.id}`}
+                      letter={row.letter}
+                      className="dclft-letter-text"
+                    />
+                  </td>
                   <td className="dclft-td dclft-td--desc">
                     <EditableRowText
                       rowId={`${blockId}.${row.id}`}
@@ -289,12 +307,14 @@ export function FormDataCommunicationLinkFaultToleranceView({
       <DclftPanel
         blockId="primary"
         block={value.primary}
+        documentValue={rawValue}
         readOnly={readOnly}
         onEmit={emit}
       />
       <DclftPanel
         blockId="additional"
         block={value.additional}
+        documentValue={rawValue}
         readOnly={readOnly}
         onEmit={emit}
       />

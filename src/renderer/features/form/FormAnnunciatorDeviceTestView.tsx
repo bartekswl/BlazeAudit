@@ -16,7 +16,9 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -248,10 +250,19 @@ export function FormAnnunciatorDeviceTestView({
           </thead>
           <tbody>
             {ANNUNCIATOR_DEVICE_TEST_ROWS.map((row) => {
+              if (isLogicalTemplateLineCollapsed(value, row.id)) return null;
               const rowValue = data.checklist[row.id] ?? { choice: null };
               return (
-                <tr key={row.id} className="artu-row">
-                  <td className="artu-td artu-td--letter">{row.letter}</td>
+                <tr
+                  key={row.id}
+                  className="artu-row"
+                  data-ba-line-row=""
+                  data-ba-line-row-hide={row.id}
+                  data-ba-line-row-clear={checklistLineClearIds(row.id)}
+                >
+                  <td className="artu-td artu-td--letter">
+                    <EditableRowLetter rowId={row.id} letter={row.letter} className="artu-letter-text" />
+                  </td>
                   <td className="artu-td artu-td--desc">
                     <EditableRowText rowId={row.id} text={row.text} className="artu-desc-text" />
                   </td>

@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { flushSync } from 'react-dom';
+import {
+  BA_TEMPLATE_LINE_HIDE,
+  type TemplateLineClearRequest,
+} from '../../../shared/form/formLineSelect';
 
 const SELECTED_CLASS = 'ba-field-selected';
 const ROW_SELECTED_CLASS = 'ba-row-selected';
@@ -15,6 +19,48 @@ const FIELD_SELECTOR =
   'input, textarea, select, button.idr-choice-cell, button.cfts-choice-cell, button.rrg-choice-btn, button[class*="choice-cell"]';
 
 export type FormFieldSelectMode = 'off' | 'cell' | 'line' | 'insert';
+
+const BA_LINE_ROW = 'data-ba-line-row';
+const BA_LINE_ROW_CLEAR = 'data-ba-line-row-clear';
+const BA_LINE_ROW_GROUP = 'data-ba-line-row-group';
+const BA_LINE_ROW_DEVICE = 'data-ba-line-row-device';
+
+function clearLineRowHighlights(selected: Set<HTMLTableRowElement>): void {
+  for (const tr of selected) tr.classList.remove(ROW_SELECTED_CLASS);
+  selected.clear();
+}
+
+function resolveTemplateLineRow(target: EventTarget | null): HTMLTableRowElement | null {
+  if (!(target instanceof Element)) return null;
+  const tr = target.closest(`tr[${BA_LINE_ROW}]`);
+  return tr instanceof HTMLTableRowElement ? tr : null;
+}
+
+function templateLineRowsInGroup(tr: HTMLTableRowElement): HTMLTableRowElement[] {
+  const group = tr.getAttribute(BA_LINE_ROW_GROUP);
+  const table = tr.closest('table');
+  if (group && table) {
+    return [...table.querySelectorAll(`tr[${BA_LINE_ROW_GROUP}="${CSS.escape(group)}"]`)].filter(
+      (node): node is HTMLTableRowElement => node instanceof HTMLTableRowElement,
+    );
+  }
+  return [tr];
+}
+
+function templateLineClearRequest(tr: HTMLTableRowElement): TemplateLineClearRequest | null {
+  const frame = tr.closest('[data-form-element-id]');
+  if (!(frame instanceof HTMLElement)) return null;
+  const elementId = frame.dataset.formElementId?.trim();
+  if (!elementId) return null;
+  const clearIds = (tr.getAttribute(BA_LINE_ROW_CLEAR) ?? '')
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (clearIds.length === 0) return null;
+  const deviceId = tr.getAttribute(BA_LINE_ROW_DEVICE)?.trim() || undefined;
+  const hideLineId = tr.getAttribute(BA_TEMPLATE_LINE_HIDE)?.trim() || undefined;
+  return { elementId, clearIds, deviceId, hideLineId };
+}
 
 export type InsertLineTarget = {
   elementId: string;
@@ -420,11 +466,20 @@ function collapseRowsAfterCut(rows: HTMLTableRowElement[]): void {
   }
 }
 
-export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
+export function useFormFieldClipboard(
+  rootRef: RefObject<HTMLElement | null>,
+  options?: {
+    /** Line Select: user clicked a template row — show remove/edit warning. */
+    onPromptClearTemplateLines?: (request: TemplateLineClearRequest) => void;
+    /** Line Select: Delete/Backspace on highlighted template row(s). */
+    onApplyClearTemplateLines?: (request: TemplateLineClearRequest) => void;
+  },
+) {
   const [selectMode, setSelectMode] = useState<FormFieldSelectMode>('off');
   const [insertTarget, setInsertTarget] = useState<InsertLineTarget | null>(null);
   const [actionFlash, setActionFlash] = useState<'copy' | 'paste' | 'cut' | null>(null);
   const selectedRef = useRef<Set<HTMLElement>>(new Set());
+  const selectedLineRowsRef = useRef<Set<HTMLTableRowElement>>(new Set());
   const lastFocusedRef = useRef<HTMLElement | null>(null);
   const [, bump] = useState(0);
   const dragRef = useRef(false);
@@ -721,7 +776,7 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
 
     const onPointerUp = () => {
       dragRef.current = false;
-      if (madeSelectionRef.current && selectedRef.current.size > 0) {
+      if (selectMode === 'cell' && madeSelectionRef.current && selectedRef.current.size > 0) {
         endSelectMode();
       }
     };
@@ -739,6 +794,46 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
       dragRef.current = false;
     };
   }, [selectMode, rootRef, addToSelection, selectEntireRow, markSelected, sync, endSelectMode]);
+
+  // Line select: template / legend rows (inputs + fixed row text).
+  useEffect(() => {
+    if (selectMode !== 'line') return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button !== 0) return;
+      const target = event.target;
+      if (target instanceof Element && target.closest(`[${CLIPBOARD_TOOLBAR_ATTR}]`)) return;
+      if (target instanceof Element && target.closest('.ba-modal-overlay')) return;
+
+      const templateTr = resolveTemplateLineRow(target);
+      if (templateTr) {
+        event.preventDefault();
+        event.stopPropagation();
+        clearHighlights(selectedRef.current);
+        clearLineRowHighlights(selectedLineRowsRef.current);
+        const rows = templateLineRowsInGroup(templateTr);
+        for (const tr of rows) {
+          selectedLineRowsRef.current.add(tr);
+          tr.classList.add(ROW_SELECTED_CLASS);
+        }
+        madeSelectionRef.current = true;
+        sync();
+        const req = templateLineClearRequest(templateTr);
+        if (req) options?.onPromptClearTemplateLines?.(req);
+        return;
+      }
+
+      if (resolveField(target)) return;
+
+      clearHighlights(selectedRef.current);
+      clearLineRowHighlights(selectedLineRowsRef.current);
+      setSelectMode('off');
+      sync();
+    };
+
+    window.addEventListener('pointerdown', onPointerDown, true);
+    return () => window.removeEventListener('pointerdown', onPointerDown, true);
+  }, [selectMode, sync, options]);
 
   // Insert Line: click a table row → highlight + popup; miss → exit.
   useEffect(() => {
@@ -805,6 +900,24 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     return () => window.removeEventListener('pointerdown', onPointerDown, true);
   }, [selectMode, insertTarget, sync]);
 
+  const applyClearSelectedTemplateLines = useCallback(() => {
+    const rows = [...selectedLineRowsRef.current];
+    if (rows.length === 0) return false;
+    const seen = new Set<string>();
+    for (const tr of rows) {
+      const req = templateLineClearRequest(tr);
+      if (!req) continue;
+      const key = `${req.elementId}\0${req.clearIds.join(',')}\0${req.deviceId ?? ''}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      options?.onApplyClearTemplateLines?.(req);
+    }
+    clearLineRowHighlights(selectedLineRowsRef.current);
+    clearHighlights(selectedRef.current);
+    sync();
+    return true;
+  }, [options, sync]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -812,8 +925,9 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
           endInsertMode();
           return;
         }
-        if (selectMode !== 'off' || selectedRef.current.size > 0) {
+        if (selectMode !== 'off' || selectedRef.current.size > 0 || selectedLineRowsRef.current.size > 0) {
           clearHighlights(selectedRef.current);
+          clearLineRowHighlights(selectedLineRowsRef.current);
           setSelectMode('off');
           sync();
         }
@@ -824,12 +938,18 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
 
       if (
         (event.key === 'Backspace' || event.key === 'Delete') &&
-        selectedRef.current.size > 0 &&
         !(event.ctrlKey || event.metaKey || event.altKey)
       ) {
-        event.preventDefault();
-        clearSelectedInPlace();
-        return;
+        if (selectedLineRowsRef.current.size > 0) {
+          event.preventDefault();
+          applyClearSelectedTemplateLines();
+          return;
+        }
+        if (selectedRef.current.size > 0) {
+          event.preventDefault();
+          clearSelectedInPlace();
+          return;
+        }
       }
 
       if (!(event.ctrlKey || event.metaKey)) return;
@@ -853,6 +973,7 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     endInsertMode,
     sync,
     clearSelectedInPlace,
+    applyClearSelectedTemplateLines,
     copySelected,
     cutSelected,
     pasteSelected,
@@ -868,6 +989,7 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
   const beginMode = useCallback(
     (mode: Exclude<FormFieldSelectMode, 'off'>) => {
       clearHighlights(selectedRef.current);
+      clearLineRowHighlights(selectedLineRowsRef.current);
       setInsertTarget(null);
       madeSelectionRef.current = false;
       setSelectMode((prev) => (prev === mode ? 'off' : mode));
@@ -880,6 +1002,15 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
   const toggleLineSelectMode = useCallback(() => beginMode('line'), [beginMode]);
   const toggleInsertLineMode = useCallback(() => beginMode('insert'), [beginMode]);
 
+  const endLineSelectMode = useCallback(() => {
+    clearHighlights(selectedRef.current);
+    clearLineRowHighlights(selectedLineRowsRef.current);
+    setInsertTarget(null);
+    madeSelectionRef.current = false;
+    setSelectMode('off');
+    sync();
+  }, [sync]);
+
   return {
     selectMode,
     cellSelectMode: selectMode === 'cell',
@@ -890,11 +1021,16 @@ export function useFormFieldClipboard(rootRef: RefObject<HTMLElement | null>) {
     actionFlash,
     toggleSelectMode,
     toggleLineSelectMode,
+    endLineSelectMode,
     toggleInsertLineMode,
     clearInsertTarget,
     endInsertMode,
     copySelected,
     cutSelected,
     pasteSelected,
+    clearTemplateLineSelection: () => {
+      clearLineRowHighlights(selectedLineRowsRef.current);
+      sync();
+    },
   };
 }

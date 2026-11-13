@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DocumentContext } from '../../../shared/document';
-import { formatInspectionDateLabel } from '../../../shared/dates';
+import { formatInspectionDateLabel, formatMmDdYyFromIso } from '../../../shared/dates';
 import {
   AFFIRMATION_CONDUCTING_LABELS,
   AFFIRMATION_PRIMARY_LABELS,
@@ -143,7 +143,7 @@ function TechnicianBlock({
             <span className="aff-cell-value">{'\u00a0'}</span>
           ) : readOnly ? (
             <span className="aff-cell-value">
-              {tech.date ? formatInspectionDateLabel(tech.date) : '\u00a0'}
+              {tech.date ? formatMmDdYyFromIso(tech.date) || formatInspectionDateLabel(tech.date) : '\u00a0'}
             </span>
           ) : (
             <div className="aff-date-wrap">

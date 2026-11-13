@@ -10,6 +10,8 @@ import {
   type FdtlDeviceEntry,
   type FdtlTableItem,
 } from '../../../shared/form/fieldDeviceTestingLegend';
+import { fdtlLegendLineClearIds } from '../../../shared/form/formLineSelect';
+import { isFdtlDeviceRowHidden } from '../../../shared/form/rowTextOverrides';
 import { cn } from '../../lib/cn';
 import { EditableRowText } from './EditableRowText';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -87,7 +89,14 @@ function SimpleRow({
   onFieldChange: (deviceId: string, field: keyof FdtlDeviceEntry, next: string) => void;
 }) {
   return (
-    <tr className={cn('fdtl-row', zebra % 2 === 0 ? 'fdtl-row--yellow' : 'fdtl-row--white')}>
+    <tr
+      className={cn('fdtl-row', zebra % 2 === 0 ? 'fdtl-row--yellow' : 'fdtl-row--white')}
+      data-ba-line-row=""
+      data-ba-line-row-group={item.id}
+      data-ba-line-row-device={item.id}
+      data-ba-line-row-hide={item.id}
+      data-ba-line-row-clear={fdtlLegendLineClearIds(item.id)}
+    >
       <td className="fdtl-td fdtl-td--device">
         <EditableRowText rowId={`${item.id}.device`} text={item.device} />
       </td>
@@ -122,10 +131,22 @@ function SmokeSubRow({
   onFieldChange: (deviceId: string, field: keyof FdtlDeviceEntry, next: string) => void;
 }) {
   return (
-    <tr className={cn('fdtl-row fdtl-row--sub', zebra % 2 === 0 ? 'fdtl-row--yellow' : 'fdtl-row--white')}>
+    <tr
+      className={cn('fdtl-row fdtl-row--sub', zebra % 2 === 0 ? 'fdtl-row--yellow' : 'fdtl-row--white')}
+      data-ba-line-row=""
+      data-ba-line-row-group={deviceId}
+      data-ba-line-row-device={deviceId}
+      data-ba-line-row-hide={deviceId}
+      data-ba-line-row-clear={fdtlLegendLineClearIds(deviceId)}
+    >
       <td className="fdtl-td fdtl-td--desc fdtl-td--sub">
         <div className="fdtl-sub-field">
-          <EditableRowText rowId={`${deviceId}.${field}`} text={label} className="fdtl-sub-label" />
+          <EditableRowText
+            rowId={`${deviceId}.${field}`}
+            text={label}
+            className="fdtl-sub-label"
+            fillCell={false}
+          />
           <div className="fdtl-sub-input">
             <FieldCell
               value={value}
@@ -157,7 +178,14 @@ function SmokeRows({
   const rowCls = zebra % 2 === 0 ? 'fdtl-row--yellow' : 'fdtl-row--white';
   return (
     <Fragment key={item.id}>
-      <tr className={cn('fdtl-row fdtl-row--smoke-main', rowCls)}>
+      <tr
+        className={cn('fdtl-row fdtl-row--smoke-main', rowCls)}
+        data-ba-line-row=""
+        data-ba-line-row-group={item.id}
+        data-ba-line-row-device={item.id}
+        data-ba-line-row-hide={item.id}
+        data-ba-line-row-clear={fdtlLegendLineClearIds(item.id)}
+      >
         <td className="fdtl-td fdtl-td--device" rowSpan={3}>
           <EditableRowText rowId={`${item.id}.device`} text={item.device} />
         </td>
@@ -205,7 +233,6 @@ export function FormFieldDeviceTestingLegendView({
   const value = normalizeFieldDeviceTestingLegendValue(rawValue);
   const zebraMap = fdtlDataRowZebraIndexes();
   const editing = !readOnly && Boolean(onChange);
-
   const onFieldChange = (deviceId: string, field: keyof FdtlDeviceEntry, next: string) => {
     if (!onChange) return;
     onChange(setFdtlDeviceField(value, deviceId, field, next));
@@ -231,6 +258,9 @@ export function FormFieldDeviceTestingLegendView({
           </thead>
           <tbody>
             {FDTL_TABLE_ITEMS.map((item) => {
+              if (item.kind !== 'section' && isFdtlDeviceRowHidden(rawValue, item.id)) {
+                return null;
+              }
               if (item.kind === 'section') {
                 return (
                   <tr key={item.id} className="fdtl-row fdtl-row--section">

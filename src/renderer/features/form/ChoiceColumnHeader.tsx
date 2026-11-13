@@ -9,9 +9,11 @@ export function ChoiceColumnHeader({
   applyLabel,
   readOnly,
   onApply,
+  'data-col': dataCol,
 }: {
   className?: string;
   style?: CSSProperties;
+  'data-col'?: string;
   children: ReactNode;
   /** Tooltip / aria — e.g. "Set all rows to Yes". */
   applyLabel: string;
@@ -20,14 +22,14 @@ export function ChoiceColumnHeader({
 }) {
   if (readOnly || !onApply) {
     return (
-      <th className={className} style={style}>
+      <th className={className} style={style} data-col={dataCol}>
         {children}
       </th>
     );
   }
 
   return (
-    <th className={cn(className, 'ba-choice-col-th')} style={style}>
+    <th className={cn(className, 'ba-choice-col-th')} style={style} data-col={dataCol}>
       <button
         type="button"
         className="ba-choice-col-th-btn"

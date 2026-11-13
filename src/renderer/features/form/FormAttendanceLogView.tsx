@@ -9,6 +9,7 @@ import {
 } from '../../../shared/form/attendanceLog';
 import { cn } from '../../lib/cn';
 import { handleFixedRowGridTextInputKeyDown } from './formGridTableKeyboard';
+import { FormGridDateCell } from './FormGridDateCell';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 function AttendanceCell({
@@ -72,12 +73,26 @@ export function FormAttendanceLogView({
           {data.rows.map((row, rowIndex) => (
             <tr key={rowIndex} className="att-row">
               {ATTENDANCE_LOG_COLUMNS.map((col) => (
-                <td key={col.key} className={cn('att-td', col.align === 'center' && 'att-td--center')}>
-                  <AttendanceCell
-                    value={row[col.key]}
-                    readOnly={readOnly}
-                    onChange={(next) => setCell(rowIndex, col.key, next)}
-                  />
+                <td
+                  key={col.key}
+                  className={cn('att-td', col.align === 'center' && 'att-td--center')}
+                >
+                  {col.key === 'date' ? (
+                    <FormGridDateCell
+                      value={row.date}
+                      readOnly={readOnly}
+                      storeFormat="mmddyy"
+                      wrapClassName="att-grid-date-wrap"
+                      valueClassName="att-cell-value"
+                      onChange={(next) => setCell(rowIndex, 'date', next)}
+                    />
+                  ) : (
+                    <AttendanceCell
+                      value={row[col.key]}
+                      readOnly={readOnly}
+                      onChange={(next) => setCell(rowIndex, col.key, next)}
+                    />
+                  )}
                 </td>
               ))}
             </tr>

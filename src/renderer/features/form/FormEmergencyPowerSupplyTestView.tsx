@@ -40,7 +40,9 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -267,7 +269,7 @@ function DescLine({
 }) {
   return (
     <div className={cn('epst-desc-line', wideInput && 'epst-desc-line--wide')}>
-      <EditableRowText rowId={rowId} text={label} className="epst-desc-text" />
+      <EditableRowText rowId={rowId} text={label} className="epst-desc-text" fillCell={false} />
       {value !== undefined ? (
         <>
           <FieldInput
@@ -284,12 +286,14 @@ function DescLine({
 }
 
 function MeasureRows({
+  rowId,
   variant,
   letter,
   fields,
   readOnly,
   onChange,
 }: {
+  rowId: string;
   variant: EmergencyPowerSupplyMeasureVariant;
   letter: string;
   fields: { voltage: string; current: string };
@@ -309,7 +313,14 @@ function MeasureRows({
   return (
     <>
       {lines.map((line, index) => (
-        <tr key={`${variant}-${line.field}`} className={cn('epst-row', `epst-row--measure-${variant}`)}>
+        <tr
+          key={`${variant}-${line.field}`}
+          className={cn('epst-row', `epst-row--measure-${variant}`)}
+          data-ba-line-row=""
+          data-ba-line-row-group={rowId}
+          data-ba-line-row-hide={rowId}
+          data-ba-line-row-clear={checklistLineClearIds(rowId)}
+        >
           <td className={cn('epst-td', 'epst-td--letter', measureBg)}>{index === 0 ? letter : ''}</td>
           <td className={cn('epst-td', 'epst-td--desc', measureBg)}>
             <DescLine
@@ -364,16 +375,24 @@ export function FormEmergencyPowerSupplyTestView({
     onChange?.(nextData);
   };
 
+  const letterCell = (rowId: string, letter: string) => (
+    <td className="epst-td epst-td--letter">
+      <EditableRowLetter rowId={rowId} letter={letter} className="epst-letter-text" />
+    </td>
+  );
+
   const renderMainRow = (
     row: (typeof EMERGENCY_POWER_SUPPLY_TEST_ROWS)[number],
     rowIndex: number,
   ) => {
+    if (isLogicalTemplateLineCollapsed(rawValue, row.id)) return null;
     const altRow = rowIndex % 2 === 1 ? 'epst-row--alt' : '';
     if (row.kind === 'batteryMeasure' && row.measureVariant) {
       const variant = row.measureVariant;
       return (
         <MeasureRows
           key={row.id}
+          rowId={row.id}
           variant={variant}
           letter={row.letter}
           fields={data.measures[variant]}
@@ -387,8 +406,14 @@ export function FormEmergencyPowerSupplyTestView({
 
     if (row.kind === 'textFill' && row.id === 'epst-m') {
       return (
-        <tr key={row.id} className={cn('epst-row', altRow)}>
-          <td className="epst-td epst-td--letter">{row.letter}</td>
+        <tr
+          key={row.id}
+          className={cn('epst-row', altRow)}
+          data-ba-line-row=""
+          data-ba-line-row-hide={row.id}
+          data-ba-line-row-clear={checklistLineClearIds(row.id)}
+        >
+          {letterCell(row.id, row.letter)}
           <td className="epst-td epst-td--desc epst-td--text-fill">
             <DescLine
               rowId={row.id}
@@ -408,8 +433,14 @@ export function FormEmergencyPowerSupplyTestView({
     if (row.kind === 'valueFill') {
       const key = row.valueKey ?? (row.id === 'epst-p' ? 'p' : row.id === 'epst-q' ? 'q' : 's');
       return (
-        <tr key={row.id} className={cn('epst-row', altRow)}>
-          <td className="epst-td epst-td--letter">{row.letter}</td>
+        <tr
+          key={row.id}
+          className={cn('epst-row', altRow)}
+          data-ba-line-row=""
+          data-ba-line-row-hide={row.id}
+          data-ba-line-row-clear={checklistLineClearIds(row.id)}
+        >
+          {letterCell(row.id, row.letter)}
           <td className="epst-td epst-td--desc epst-td--value-fill">
             <DescLine
               rowId={row.id}
@@ -426,10 +457,18 @@ export function FormEmergencyPowerSupplyTestView({
     }
 
     if (row.kind === 'testType') {
+      if (isLogicalTemplateLineCollapsed(rawValue, row.id)) return null;
       return (
         <>
-          <tr key={row.id} className="epst-row epst-row--group-head">
-            <td className="epst-td epst-td--letter">{row.letter}</td>
+          <tr
+            key={row.id}
+            className="epst-row epst-row--group-head"
+            data-ba-line-row=""
+            data-ba-line-row-group={row.id}
+            data-ba-line-row-hide={row.id}
+            data-ba-line-row-clear={checklistLineClearIds(row.id)}
+          >
+            {letterCell(row.id, row.letter)}
             <td className="epst-td epst-td--desc" colSpan={4}>
               <EditableRowText rowId={row.id} text={row.text} className="epst-desc-text" />
             </td>
@@ -437,11 +476,19 @@ export function FormEmergencyPowerSupplyTestView({
           {EMERGENCY_POWER_SUPPLY_TEST_TYPE_OPTIONS.map((opt) => {
             const choice = data.testType[opt.key];
             return (
-              <tr key={opt.id} className="epst-row epst-row--sub">
+              <tr
+                key={opt.id}
+                className="epst-row epst-row--sub"
+                data-ba-line-row=""
+                data-ba-line-row-group={row.id}
+                data-ba-line-row-hide={row.id}
+                data-ba-line-row-clear={checklistLineClearIds(row.id)}
+              >
                 <td className="epst-td epst-td--letter" aria-hidden="true" />
                 <td className="epst-td epst-td--desc epst-td--sub">
                   <span className="epst-desc-text epst-desc-text--sub">
-                    ({opt.id}) <EditableRowText rowId={`test-${opt.id}`} text={opt.label} />
+                    ({opt.id}){' '}
+                    <EditableRowText rowId={`test-${opt.id}`} text={opt.label} fillCell={false} />
                   </span>
                   {opt.key === 'iii' ? (
                     <FieldInput
@@ -471,8 +518,14 @@ export function FormEmergencyPowerSupplyTestView({
 
     const rowValue = data.checklist[row.id] ?? { choice: null };
     return (
-      <tr key={row.id} className={cn('epst-row', altRow)}>
-        <td className="epst-td epst-td--letter">{row.letter}</td>
+      <tr
+        key={row.id}
+        className={cn('epst-row', altRow)}
+        data-ba-line-row=""
+        data-ba-line-row-hide={row.id}
+        data-ba-line-row-clear={checklistLineClearIds(row.id)}
+      >
+        {letterCell(row.id, row.letter)}
         <td className="epst-td epst-td--desc">
           <EditableRowText rowId={row.id} text={row.text} className="epst-desc-text" />
         </td>
@@ -639,9 +692,16 @@ export function FormEmergencyPowerSupplyTestView({
           </colgroup>
           <tbody>
             {EMERGENCY_POWER_SUPPLY_GENERATOR_ROWS.map((row, index) => {
+              if (isLogicalTemplateLineCollapsed(rawValue, row.id)) return null;
               const rowValue = data.checklist[row.id] ?? { choice: null };
               return (
-                <tr key={row.id} className={cn('epst-row', index % 2 === 1 && 'epst-row--alt')}>
+                <tr
+                  key={row.id}
+                  className={cn('epst-row', index % 2 === 1 && 'epst-row--alt')}
+                  data-ba-line-row=""
+                  data-ba-line-row-hide={row.id}
+                  data-ba-line-row-clear={checklistLineClearIds(row.id)}
+                >
                   <td className="epst-td epst-td--letter">{row.letter}</td>
                   <td className="epst-td epst-td--desc">
                     <EditableRowText rowId={row.id} text={row.text} className="epst-desc-text" />

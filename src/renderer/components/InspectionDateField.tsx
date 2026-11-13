@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   formatInspectionDateLabel,
+  formatMmDdYyFromIso,
   formatIsoDateLocal,
   inspectionDateBounds,
   isoDateInRange,
@@ -248,14 +249,27 @@ export function InspectionDateField({
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
           inputCls,
-          'flex w-full cursor-pointer items-center justify-between gap-2 text-left',
-          compact && 'min-h-0 rounded-none border-0 bg-transparent px-2 py-1 text-xs shadow-none',
+          'flex w-full cursor-pointer items-center gap-1',
+          compact
+            ? 'min-h-0 justify-center rounded-none border-0 bg-transparent px-1 py-0 text-center text-xs shadow-none'
+            : 'justify-between text-left',
           disabled && 'cursor-not-allowed opacity-50',
           className,
         )}
       >
-        <span className={compact ? 'truncate text-[var(--ba-text-primary)]' : undefined}>
-          {value ? formatInspectionDateLabel(value) : 'Select date'}
+        <span
+          className={cn(
+            compact && 'min-w-0 truncate text-[var(--ba-text-primary)]',
+            !value && compact && 'text-transparent',
+          )}
+        >
+          {value
+            ? compact
+              ? formatMmDdYyFromIso(value) || value
+              : formatInspectionDateLabel(value)
+            : compact
+              ? '\u00a0'
+              : 'Select date'}
         </span>
         <Calendar className={cn('shrink-0 text-neutral-500', compact ? 'size-3' : 'size-4')} />
       </button>

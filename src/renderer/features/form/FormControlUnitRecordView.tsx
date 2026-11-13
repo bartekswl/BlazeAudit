@@ -17,7 +17,9 @@ import { cn } from '../../lib/cn';
 import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 
@@ -244,12 +246,21 @@ export function FormControlUnitRecordView({
           </thead>
           <tbody>
             {CONTROL_UNIT_RECORD_ROWS.map((row) => {
+              if (isLogicalTemplateLineCollapsed(rawValue, row.id)) return null;
               const rowValue = data.checklist[row.id] ?? { choice: null };
               const time = rowValue.time ?? '';
 
               return (
-                <tr key={row.id} className="cur-row">
-                  <td className="cur-td cur-td--letter">{row.letter}</td>
+                <tr
+                  key={row.id}
+                  className="cur-row"
+                  data-ba-line-row=""
+                  data-ba-line-row-hide={row.id}
+                  data-ba-line-row-clear={checklistLineClearIds(row.id)}
+                >
+                  <td className="cur-td cur-td--letter">
+                    <EditableRowLetter rowId={row.id} letter={row.letter} className="cur-letter-text" />
+                  </td>
                   <td className="cur-td cur-td--desc">
                     <EditableRowText rowId={row.id} text={row.text} className="cur-desc-text" />
                     {row.kind === 'timeFill' && (

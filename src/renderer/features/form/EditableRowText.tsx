@@ -8,7 +8,11 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { PencilLine } from 'lucide-react';
-import type { RowTextOverrides } from '../../../shared/form/rowTextOverrides';
+import {
+  rowLetterOverrideId,
+  resolveRowText,
+  type RowTextOverrides,
+} from '../../../shared/form/rowTextOverrides';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { cn } from '../../lib/cn';
 
@@ -47,6 +51,18 @@ function RowTextEditor({
     if (!el) return;
     el.focus();
     el.setSelectionRange(el.value.length, el.value.length);
+  }, []);
+
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      const el = ref.current;
+      if (!el) return;
+      const target = event.target;
+      if (target instanceof Node && el.contains(target)) return;
+      el.blur();
+    };
+    document.addEventListener('pointerdown', onPointerDown, true);
+    return () => document.removeEventListener('pointerdown', onPointerDown, true);
   }, []);
 
   const finish = (commit: boolean) => {
@@ -88,15 +104,18 @@ export function EditableRowText({
   rowId,
   text,
   className,
+  fillCell = true,
 }: {
   rowId: string;
   text: string;
   className?: string;
+  /** When true, the whole table cell (and letter column where applicable) accepts double-click. */
+  fillCell?: boolean;
 }) {
   const editing = useContext(RowTextEditingContext);
   const [confirming, setConfirming] = useState(false);
   const [active, setActive] = useState(false);
-  const shown = editing?.overrides[rowId] ?? text;
+  const shown = editing ? resolveRowText(editing.overrides, rowId, text) : text;
 
   if (!editing?.editable) {
     return <span className={className}>{shown}</span>;
@@ -111,7 +130,13 @@ export function EditableRowText({
         onCommit={(next) => {
           setActive(false);
           const trimmed = next.trim();
-          editing.onSet(rowId, trimmed === '' || trimmed === text ? null : trimmed);
+          if (trimmed === text) {
+            editing.onSet(rowId, null);
+          } else if (trimmed === '') {
+            editing.onSet(rowId, '');
+          } else {
+            editing.onSet(rowId, trimmed);
+          }
         }}
       />
     );
@@ -120,15 +145,19 @@ export function EditableRowText({
   return (
     <>
       <span
-        className={cn(className, 'form-row-text--editable')}
-        title="Double-click to edit this row's text"
+        className={cn(
+          className,
+          'form-row-text--editable',
+          fillCell && 'form-row-text--fill-cell',
+        )}
+        title="Double-click anywhere in this row to edit the wording"
         onDoubleClick={(event) => {
           event.preventDefault();
           window.getSelection()?.removeAllRanges();
           setConfirming(true);
         }}
       >
-        {shown}
+        {shown || (fillCell ? '\u00a0' : '')}
       </span>
       {confirming &&
         createPortal(
@@ -143,13 +172,36 @@ export function EditableRowText({
             }}
           >
             <p>
-              You are about to change the standard wording of this row. The change applies to this
-              document only.
+              You are about to change standard checklist wording. The change applies to this
+              document only; the built-in template is unchanged.
             </p>
-            <p>Press Enter to save, Esc to cancel. Clear the text to restore the original wording.</p>
+            <p>
+              Press Enter to save, Esc to cancel. Clear the letter or text to remove the whole row
+              line. Match the original wording exactly to drop your override.
+            </p>
           </ConfirmDialog>,
           document.body,
         )}
     </>
+  );
+}
+
+/** Row letter column (A., B., …) — same edit flow as description; uses <code>{`${rowId}.letter`}</code>. */
+export function EditableRowLetter({
+  rowId,
+  letter,
+  className,
+}: {
+  rowId: string;
+  letter: string;
+  className?: string;
+}) {
+  return (
+    <EditableRowText
+      rowId={rowLetterOverrideId(rowId)}
+      text={letter}
+      className={className}
+      fillCell
+    />
   );
 }

@@ -3270,6 +3270,67 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   background: rgb(239 246 255 / 0.35);
 }
 
+.att-grid-date-wrap,
+.def-data-strip--repair .def-cell {
+  justify-content: center;
+  align-items: center;
+}
+
+.def-repair-date-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+  min-width: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.att-td--center .att-grid-date-wrap {
+  justify-content: center;
+}
+
+.form-page-sheet .att-grid-date-wrap button.form-grid-date-field,
+.form-page-sheet .def-repair-date-wrap button.form-grid-date-field {
+  min-height: 0;
+  height: auto;
+  width: 100%;
+  padding: 0.0625rem 0.125rem;
+  line-height: 1.15;
+  font-size: 0.5625rem;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  border-radius: 0;
+  cursor: pointer;
+  justify-content: center;
+  gap: 0.125rem;
+}
+
+.form-page-sheet .def-repair-date-wrap button.form-grid-date-field {
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  padding: 0.125rem 0.1875rem;
+  width: 100%;
+  max-width: 100%;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.form-page-sheet .att-grid-date-wrap button.form-grid-date-field:focus,
+.form-page-sheet .def-repair-date-wrap button.form-grid-date-field:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgb(37 99 235 / 0.35);
+  background: rgb(239 246 255 / 0.35);
+}
+
+.form-page-sheet .att-grid-date-wrap button.form-grid-date-field svg,
+.form-page-sheet .def-repair-date-wrap button.form-grid-date-field svg {
+  width: 0.6875rem;
+  height: 0.6875rem;
+}
+
 .form-page-sheet--attendance-log {
   display: flex;
   flex-direction: column;
@@ -3654,6 +3715,36 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   background: #1b6b2f;
 }
 
+.rrg-panel--elr .rrg-th {
+  padding-left: 0.22rem;
+  padding-right: 0.22rem;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-size: 0.5rem;
+  letter-spacing: 0.01em;
+}
+
+.rrg-panel--elr .rrg-th .rrg-th-label {
+  box-sizing: border-box;
+  max-width: 100%;
+  padding-left: 0.12rem;
+  padding-right: 0.12rem;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.rrg-panel--elr .rrg-th[data-col='deviceOperation'] {
+  padding-left: 0.24rem;
+  padding-right: 0.24rem;
+}
+
+.rrg-panel--elr .rrg-th[data-col='deviceOperation'] .rrg-th-label {
+  letter-spacing: 0;
+  line-height: 1.08;
+  padding-left: 0.08rem;
+  padding-right: 0.08rem;
+}
+
 .rrg-panel--elr .rrg-accent-bar {
   background: #1e3a8a;
 }
@@ -3730,6 +3821,17 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 .rrg-row:last-child .rrg-td {
   border-bottom: none;
+}
+
+.rrg-th--center,
+.rrg-td--center {
+  text-align: center;
+}
+
+.rrg-td--center .rrg-cell-input,
+.rrg-td--center .rrg-cell-value {
+  text-align: center;
+  justify-content: center;
 }
 
 .rrg-td--choice {
@@ -4986,6 +5088,36 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   background: #ffffff;
   padding: 0 0.125rem;
   border-bottom: 1px solid rgb(148 163 184 / 0.45);
+}
+
+.cut-version-date-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 7rem;
+  max-width: 7rem;
+  min-width: 7rem;
+  vertical-align: baseline;
+  border-bottom: 1px solid rgb(148 163 184 / 0.75);
+}
+
+.form-page-sheet .cut-version-date-wrap button.cut-version-date-field {
+  min-height: 0;
+  width: 100%;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 0 0.125rem 0.0625rem !important;
+  font-size: inherit !important;
+  line-height: 1.25;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.form-page-sheet .cut-version-date-wrap button.cut-version-date-field svg {
+  width: 0.6875rem;
+  height: 0.6875rem;
 }
 
 .form-page-sheet--control-unit-test {
@@ -10541,7 +10673,13 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .aff-cell--sig {
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+}
+
+.aff-cell--sig .aff-cell-input,
+.aff-cell--sig .aff-cell-value {
+  text-align: center;
 }
 
 .aff-cell--identification {
@@ -10796,6 +10934,14 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 
 .def-grid-right {
   min-width: 0;
+}
+
+.def-grid > .def-grid-left {
+  grid-column: 1;
+}
+
+.def-grid > .def-grid-right {
+  grid-column: 2;
 }
 
 .def-grid-row {
@@ -11761,6 +11907,18 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   flex: 0 1 auto;
 }
 
+/* Template checklist pages: after line remove, sheet keeps last full layout height. */
+.form-page-sheet[data-form-page-floor-locked] {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--form-page-floor-height) !important;
+}
+
+.form-page-sheet[data-form-page-floor-locked] .form-page-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .form-page-section:has(.fdtl-panel) .form-element-frame--flush {
   margin-top: 0;
   padding-top: 0;
@@ -12094,11 +12252,118 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-row-text--editable {
   cursor: text;
   border-radius: 2px;
+  user-select: none;
 }
 
 .form-row-text--editable:hover {
   background: rgb(59 130 246 / 0.1);
   box-shadow: 0 0 0 1px rgb(59 130 246 / 0.35);
+}
+
+/* Full-cell double-click for checklist row text (no text selection highlight). */
+.form-row-text--fill-cell {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.form-page-sheet :is(.dclft-td--desc, .cut-td--desc, .cur-td--desc, .vct-td--desc, .artu-td--desc, .asd-td--desc, .rtsu-td--desc, .fsrc-td--desc, .prt-td--desc, .psi-td--desc, .epst-td--desc, .doc-td--desc, .yns-td--summary):has(> .form-row-text--fill-cell) {
+  padding: 0;
+  vertical-align: middle;
+}
+
+.dclft-table {
+  --form-row-letter-span: 1.5rem;
+}
+
+.cut-table {
+  --form-row-letter-span: 1.75rem;
+}
+
+.fsrc-table,
+.cur-table,
+.vct-table,
+.artu-table,
+.asd-table,
+.rtsu-table,
+.prt-table {
+  --form-row-letter-span: 1.75rem;
+}
+
+.psi-table,
+.epst-table {
+  --form-row-letter-span: 1.5rem;
+}
+
+.form-page-sheet .dclft-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .cut-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .cur-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .vct-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .artu-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .asd-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .rtsu-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .fsrc-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .prt-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .psi-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .epst-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell {
+  padding: 0.125rem 0.25rem;
+}
+
+.form-page-sheet
+  :is(
+    .dclft-td--letter,
+    .cut-td--letter,
+    .cur-td--letter,
+    .vct-td--letter,
+    .artu-td--letter,
+    .asd-td--letter,
+    .rtsu-td--letter,
+    .fsrc-td--letter,
+    .prt-td--letter,
+    .psi-td--letter,
+    .doc-td--letter,
+    .epst-td--letter
+  ):has(> .form-row-text--fill-cell) {
+  padding: 0;
+  vertical-align: middle;
+}
+
+.form-page-sheet
+  :is(
+    .dclft-td--letter,
+    .cut-td--letter,
+    .cur-td--letter,
+    .vct-td--letter,
+    .artu-td--letter,
+    .asd-td--letter,
+    .rtsu-td--letter,
+    .fsrc-td--letter,
+    .prt-td--letter,
+    .psi-td--letter,
+    .doc-td--letter,
+    .epst-td--letter
+  ):has(> .form-row-text--fill-cell)
+  > .form-row-text--fill-cell {
+  justify-content: center;
+  padding: 0.125rem 0.0625rem;
+  font-weight: 700;
+}
+
+.form-page-sheet .doc-td--desc:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell,
+.form-page-sheet .yns-td--summary:has(> .form-row-text--fill-cell) > .form-row-text--fill-cell {
+  padding: 0.125rem 0.25rem;
+}
+
+.yns-summary-inline .form-row-text--fill-cell {
+  display: inline;
+  width: auto;
+  min-height: 0;
+  padding: 0;
+  user-select: text;
 }
 
 .form-row-text-input {
@@ -12107,6 +12372,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   min-width: 0;
   margin: 0;
   padding: 0 2px;
+  user-select: text;
   border: 1px solid rgb(59 130 246 / 0.7);
   border-radius: 2px;
   background: #ffffff;

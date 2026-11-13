@@ -16,7 +16,9 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -241,10 +243,19 @@ export function FormPrinterTestView({
           </thead>
           <tbody>
             {PRINTER_TEST_ROWS.map((row, index) => {
+              if (isLogicalTemplateLineCollapsed(value, row.id)) return null;
               const rowValue = data.checklist[row.id] ?? { choice: null };
               return (
-                <tr key={row.id} className={cn('prt-row', index % 2 === 1 && 'prt-row--alt')}>
-                  <td className="prt-td prt-td--letter">{row.letter}</td>
+                <tr
+                  key={row.id}
+                  className={cn('prt-row', index % 2 === 1 && 'prt-row--alt')}
+                  data-ba-line-row=""
+                  data-ba-line-row-hide={row.id}
+                  data-ba-line-row-clear={checklistLineClearIds(row.id)}
+                >
+                  <td className="prt-td prt-td--letter">
+                    <EditableRowLetter rowId={row.id} letter={row.letter} className="prt-letter-text" />
+                  </td>
                   <td className="prt-td prt-td--desc">
                     <EditableRowText rowId={row.id} text={row.text} className="prt-desc-text" />
                   </td>

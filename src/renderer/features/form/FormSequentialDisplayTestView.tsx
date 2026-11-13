@@ -16,7 +16,9 @@ import {
 import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
-import { EditableRowText } from './EditableRowText';
+import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
+import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
@@ -247,10 +249,19 @@ export function FormSequentialDisplayTestView({
           </thead>
           <tbody>
             {SEQUENTIAL_DISPLAY_TEST_ROWS.map((row, index) => {
+              if (isLogicalTemplateLineCollapsed(value, row.id)) return null;
               const rowValue = data.checklist[row.id] ?? { choice: null };
               return (
-                <tr key={row.id} className={cn('asd-row', index % 2 === 1 && 'asd-row--alt')}>
-                  <td className="asd-td asd-td--letter">{row.letter}</td>
+                <tr
+                  key={row.id}
+                  className={cn('asd-row', index % 2 === 1 && 'asd-row--alt')}
+                  data-ba-line-row=""
+                  data-ba-line-row-hide={row.id}
+                  data-ba-line-row-clear={checklistLineClearIds(row.id)}
+                >
+                  <td className="asd-td asd-td--letter">
+                    <EditableRowLetter rowId={row.id} letter={row.letter} className="asd-letter-text" />
+                  </td>
                   <td className="asd-td asd-td--desc">
                     <EditableRowText rowId={row.id} text={row.text} className="asd-desc-text" />
                   </td>
