@@ -7,17 +7,20 @@ import {
 
 export const FIRE_EXTINGUISHER_TEST_RECORD_ROW_COUNT = 28;
 
+const fetCenter = { align: 'center' as const };
+
 export const FIRE_EXTINGUISHER_TEST_RECORD_COLUMNS: readonly ReportGridColumnDef[] = [
-  { key: 'location', title: 'LOCATION', widthPercent: 22, orientation: 'horizontal', kind: 'text' },
-  { key: 'type', title: 'TYPE', widthPercent: 8, orientation: 'horizontal', kind: 'text' },
-  { key: 'make', title: 'MAKE', widthPercent: 10, orientation: 'horizontal', kind: 'text' },
-  { key: 'size', title: 'SIZE', widthPercent: 8, orientation: 'horizontal', kind: 'text' },
+  { key: 'location', title: 'LOCATION', widthPercent: 26, orientation: 'horizontal', kind: 'text', ...fetCenter },
+  { key: 'type', title: 'TYPE', widthPercent: 8, orientation: 'horizontal', kind: 'text', ...fetCenter },
+  { key: 'make', title: 'MAKE', widthPercent: 10, orientation: 'horizontal', kind: 'text', ...fetCenter },
+  { key: 'size', title: 'SIZE', widthPercent: 8, orientation: 'horizontal', kind: 'text', ...fetCenter },
   {
     key: 'requires6YearMaintenance',
     title: 'REQUIRES 6 YEAR\nMAINTENANCE',
     widthPercent: 10,
     orientation: 'horizontal',
     kind: 'choice',
+    ...fetCenter,
   },
   {
     key: 'requiresHydrostaticTesting',
@@ -25,6 +28,7 @@ export const FIRE_EXTINGUISHER_TEST_RECORD_COLUMNS: readonly ReportGridColumnDef
     widthPercent: 10,
     orientation: 'horizontal',
     kind: 'choice',
+    ...fetCenter,
   },
   {
     key: 'requiresRecharging',
@@ -32,8 +36,9 @@ export const FIRE_EXTINGUISHER_TEST_RECORD_COLUMNS: readonly ReportGridColumnDef
     widthPercent: 9,
     orientation: 'horizontal',
     kind: 'choice',
+    ...fetCenter,
   },
-  { key: 'deficiency', title: 'DEFICIENCY', widthPercent: 23, orientation: 'horizontal', kind: 'text' },
+  { key: 'deficiency', title: 'NOTES', widthPercent: 19, orientation: 'horizontal', kind: 'text', ...fetCenter },
 ];
 
 export type FireExtinguisherTestRecordValue = ReportGridValue;

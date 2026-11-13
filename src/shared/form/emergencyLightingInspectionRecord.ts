@@ -8,17 +8,20 @@ import {
 export const EMERGENCY_LIGHTING_INSPECTION_RECORD_ROW_COUNT = 28;
 
 /** Columns from the paper form — crossed-out columns omitted. */
+const elrCenter = { align: 'center' as const };
+
 export const EMERGENCY_LIGHTING_INSPECTION_RECORD_COLUMNS: readonly ReportGridColumnDef[] = [
-  { key: 'unitNumber', title: 'UNIT\nNUMBER', widthPercent: 7, orientation: 'horizontal', kind: 'text' },
-  { key: 'floorNumber', title: 'FLOOR\nNUMBER', widthPercent: 7, orientation: 'horizontal', kind: 'text' },
-  { key: 'location', title: 'LOCATION', widthPercent: 16, orientation: 'horizontal', kind: 'text' },
-  { key: 'deviceType', title: 'DEVICE\nTYPE', widthPercent: 8, orientation: 'horizontal', kind: 'text' },
+  { key: 'unitNumber', title: 'UNIT\nNUMBER', widthPercent: 13, orientation: 'horizontal', kind: 'text', ...elrCenter },
+  { key: 'floorNumber', title: 'FLOOR\nNUMBER', widthPercent: 6, orientation: 'horizontal', kind: 'text', ...elrCenter },
+  { key: 'location', title: 'LOCATION', widthPercent: 23, orientation: 'horizontal', kind: 'text' },
+  { key: 'deviceType', title: 'DEVICE\nTYPE', widthPercent: 8, orientation: 'horizontal', kind: 'text', ...elrCenter },
   {
     key: 'deviceOperation',
     title: 'DEVICE\nOPERATION',
-    widthPercent: 8,
+    widthPercent: 9,
     orientation: 'horizontal',
     kind: 'text',
+    ...elrCenter,
   },
   {
     key: 'batterySizeAmpHr',
@@ -26,23 +29,18 @@ export const EMERGENCY_LIGHTING_INSPECTION_RECORD_COLUMNS: readonly ReportGridCo
     widthPercent: 8,
     orientation: 'horizontal',
     kind: 'text',
+    ...elrCenter,
   },
-  { key: 'voltage', title: 'VOLTAGE', widthPercent: 7, orientation: 'horizontal', kind: 'text' },
-  {
-    key: 'chargingVoltageAfterTest',
-    title: 'CHARGING VOLTAGE\nAFTER TEST',
-    widthPercent: 9,
-    orientation: 'horizontal',
-    kind: 'text',
-  },
+  { key: 'voltage', title: 'VOLTAGE', widthPercent: 7, orientation: 'horizontal', kind: 'text', ...elrCenter },
   {
     key: 'serviceRequired',
     title: 'SERVICE\nREQUIRED',
     widthPercent: 8,
     orientation: 'horizontal',
     kind: 'choice',
+    ...elrCenter,
   },
-  { key: 'remarks', title: 'REMARKS', widthPercent: 22, orientation: 'horizontal', kind: 'text' },
+  { key: 'remarks', title: 'REMARKS', widthPercent: 18, orientation: 'horizontal', kind: 'text', align: 'center' },
 ];
 
 export type EmergencyLightingInspectionRecordValue = ReportGridValue;

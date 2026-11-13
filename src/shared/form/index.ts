@@ -11,6 +11,7 @@ export * from './migrateIndividualDeviceRecordRows';
 export * from './insertFormTableRows';
 export * from './resolveBinding';
 export * from './outline';
+export * from './templateLinePage';
 export * from './ulcSection1';
 export * from './yesNoSummary';
 export * from './yesNoSummaryHtml';

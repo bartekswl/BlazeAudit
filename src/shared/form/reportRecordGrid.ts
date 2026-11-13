@@ -10,6 +10,8 @@ export type ReportGridColumnDef = {
   widthPercent: number;
   orientation: 'horizontal' | 'vertical';
   kind: ReportGridColumnKind;
+  /** Cell alignment (default left). */
+  align?: 'left' | 'center';
 };
 
 export type ReportGridRow = Record<string, string | ReportGridChoice>;

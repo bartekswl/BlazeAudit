@@ -5,8 +5,8 @@ import {
   fdtlDataRowZebraIndexes,
   normalizeFieldDeviceTestingLegendValue,
   type FdtlDeviceEntry,
-  type FdtlTableItem,
 } from './fieldDeviceTestingLegend';
+import { isFdtlDeviceRowHidden, readRowTextOverrides, resolveRowText } from './rowTextOverrides';
 
 function escapeHtml(value: string): string {
   return value
@@ -49,30 +49,42 @@ function renderSmokeSubRow(
   </tr>`;
 }
 
-function renderSimpleRow(item: Extract<FdtlTableItem, { kind: 'simple' }>, entry: FdtlDeviceEntry, zebra: number): string {
+function renderSimpleRow(
+  entry: FdtlDeviceEntry,
+  zebra: number,
+  deviceLabel: string,
+  description: string,
+): string {
   return `<tr class="fdtl-row ${zebraClass(zebra)}">
-    <td class="fdtl-td fdtl-td--device">${escapeHtml(item.device)}</td>
-    <td class="fdtl-td fdtl-td--desc">${escapeHtml(item.description)}</td>
+    <td class="fdtl-td fdtl-td--device">${escapeHtml(deviceLabel)}</td>
+    <td class="fdtl-td fdtl-td--desc">${escapeHtml(description)}</td>
     ${renderTypeModelCells(entry)}
   </tr>`;
 }
 
-function renderSmokeRows(item: Extract<FdtlTableItem, { kind: 'smoke' }>, entry: FdtlDeviceEntry, zebra: number): string {
+function renderSmokeRows(
+  entry: FdtlDeviceEntry,
+  zebra: number,
+  deviceLabel: string,
+  description: string,
+): string {
   return `<tr class="fdtl-row ${zebraClass(zebra)} fdtl-row--smoke-main">
-    <td class="fdtl-td fdtl-td--device" rowspan="3">${escapeHtml(item.device)}</td>
-    <td class="fdtl-td fdtl-td--desc">${escapeHtml(item.description)}</td>
+    <td class="fdtl-td fdtl-td--device" rowspan="3">${escapeHtml(deviceLabel)}</td>
+    <td class="fdtl-td fdtl-td--desc">${escapeHtml(description)}</td>
     ${renderTypeModelCells(entry)}
   </tr>${renderSmokeSubRow(FDTL_SENSITIVITY_METHOD_LABEL, entry.sensitivityTestMethod, zebra)}${renderSmokeSubRow(FDTL_SENSITIVITY_RANGE_LABEL, entry.manufacturerSensitivityRange, zebra)}`;
 }
 
 function renderTableBody(value: unknown): string {
   const data = normalizeFieldDeviceTestingLegendValue(value);
+  const overrides = readRowTextOverrides(value);
   const zebraMap = fdtlDataRowZebraIndexes();
 
   return FDTL_TABLE_ITEMS.map((item) => {
     if (item.kind === 'section') {
       return `<tr class="fdtl-row fdtl-row--section"><td class="fdtl-td fdtl-td--section" colspan="4">${escapeHtml(item.title)}</td></tr>`;
     }
+    if (isFdtlDeviceRowHidden(value, item.id)) return '';
     const entry = data.devices[item.id] ?? {
       type: '',
       modelNumber: '',
@@ -80,9 +92,11 @@ function renderTableBody(value: unknown): string {
       manufacturerSensitivityRange: '',
     };
     const zebra = zebraMap.get(item.id) ?? 0;
+    const deviceLabel = resolveRowText(overrides, `${item.id}.device`, item.device);
+    const description = resolveRowText(overrides, item.id, item.description);
     return item.kind === 'smoke'
-      ? renderSmokeRows(item, entry, zebra)
-      : renderSimpleRow(item, entry, zebra);
+      ? renderSmokeRows(entry, zebra, deviceLabel, description)
+      : renderSimpleRow(entry, zebra, deviceLabel, description);
   }).join('');
 }
 

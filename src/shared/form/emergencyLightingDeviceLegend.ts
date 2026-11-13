@@ -8,10 +8,23 @@ import {
 export const EMERGENCY_LIGHTING_DEVICE_LEGEND_ROW_COUNT = 28;
 
 export const EMERGENCY_LIGHTING_DEVICE_LEGEND_COLUMNS: readonly ReportGridColumnDef[] = [
-  { key: 'device', title: 'DEVICE', widthPercent: 18, orientation: 'horizontal', kind: 'text' },
-  { key: 'description', title: 'DESCRIPTION', widthPercent: 34, orientation: 'horizontal', kind: 'text' },
-  { key: 'manufacturer', title: 'MANUFACTURER', widthPercent: 24, orientation: 'horizontal', kind: 'text' },
-  { key: 'model', title: 'MODEL', widthPercent: 24, orientation: 'horizontal', kind: 'text' },
+  { key: 'device', title: 'DEVICE', widthPercent: 18, orientation: 'horizontal', kind: 'text', align: 'center' },
+  {
+    key: 'description',
+    title: 'DESCRIPTION',
+    widthPercent: 34,
+    orientation: 'horizontal',
+    kind: 'text',
+  },
+  {
+    key: 'manufacturer',
+    title: 'MANUFACTURER',
+    widthPercent: 24,
+    orientation: 'horizontal',
+    kind: 'text',
+    align: 'center',
+  },
+  { key: 'model', title: 'MODEL', widthPercent: 24, orientation: 'horizontal', kind: 'text', align: 'center' },
 ];
 
 export type EmergencyLightingDeviceLegendValue = ReportGridValue;
