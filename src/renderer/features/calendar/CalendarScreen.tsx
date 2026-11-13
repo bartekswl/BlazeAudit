@@ -4,7 +4,13 @@ import { formatIsoDateLocal } from '../../../shared/dates';
 import { cn } from '../../lib/cn';
 import { DayScheduleDialog } from './DayScheduleDialog';
 
-const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+
+/** Monday = 0 … Sunday = 6 */
+function weekdayMondayFirst(date: Date): number {
+  const d = date.getDay();
+  return d === 0 ? 6 : d - 1;
+}
 const MONTH_NAMES = [
   'January',
   'February',
@@ -36,7 +42,7 @@ function isSameDay(a: Date, b: Date): boolean {
 
 function buildMonthGrid(viewYear: number, viewMonth: number): Date[] {
   const firstOfMonth = new Date(viewYear, viewMonth, 1);
-  const startOffset = firstOfMonth.getDay();
+  const startOffset = weekdayMondayFirst(firstOfMonth);
   const gridStart = new Date(viewYear, viewMonth, 1 - startOffset);
 
   return Array.from({ length: 42 }, (_, index) => {
@@ -213,7 +219,6 @@ export function CalendarScreen() {
   });
 
   const selectedIso = formatIsoDateLocal(selectedDate);
-  const selectedCount = taskCounts.get(selectedIso) ?? 0;
 
   const openDay = (day: Date) => {
     setSelectedDate(day);
@@ -354,27 +359,6 @@ export function CalendarScreen() {
             })}
           </div>
         )}
-      </section>
-
-      <section className="ba-panel flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-2.5">
-        <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ba-text-faint)]">
-            Selected date
-          </p>
-          <p className="mt-0.5 text-sm font-semibold text-[var(--ba-text-primary)]">{selectedLabel}</p>
-          {selectedCount > 0 ? (
-            <p className="mt-0.5 text-xs text-[var(--ba-text-muted)]">
-              {selectedCount} scheduled task{selectedCount === 1 ? '' : 's'}
-            </p>
-          ) : null}
-        </div>
-        <button
-          type="button"
-          onClick={() => setScheduleOpen(true)}
-          className="ba-btn ba-btn--secondary px-3 py-1.5 text-xs"
-        >
-          Open schedule
-        </button>
       </section>
 
       {scheduleOpen ? (
