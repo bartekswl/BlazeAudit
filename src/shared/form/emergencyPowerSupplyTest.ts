@@ -208,6 +208,12 @@ export const EMERGENCY_POWER_SUPPLY_TEST_TYPE_OPTIONS = [
 export const EMERGENCY_POWER_SUPPLY_GENERATOR_TITLE =
   'Emergency Power Generator Tests (Reference 9.3)';
 
+/** Page 9 main checklist: tbody tr count (measure lines + O sub-rows). */
+export const EPST_POWER_SUPPLIES_MAIN_ROW_SLOTS = 25;
+
+/** Tbody rows plus Yes/No/N/A header and border slack so the last row (S) is not clipped. */
+export const EPST_POWER_SUPPLIES_TABLE_ROW_SLOTS = EPST_POWER_SUPPLIES_MAIN_ROW_SLOTS + 5;
+
 export const EMERGENCY_POWER_SUPPLY_GENERATOR_ROWS = [
   {
     id: 'epst-gen-a',

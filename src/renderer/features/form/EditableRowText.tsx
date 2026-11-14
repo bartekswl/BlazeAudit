@@ -115,7 +115,30 @@ export function EditableRowText({
   const editing = useContext(RowTextEditingContext);
   const [confirming, setConfirming] = useState(false);
   const [active, setActive] = useState(false);
+  const spanRef = useRef<HTMLSpanElement>(null);
   const shown = editing ? resolveRowText(editing.overrides, rowId, text) : text;
+
+  const openEditConfirm = () => {
+    window.getSelection()?.removeAllRanges();
+    setConfirming(true);
+  };
+
+  useEffect(() => {
+    if (!fillCell || !editing?.editable || active || confirming) return;
+    const span = spanRef.current;
+    if (!span) return;
+    const cell = span.closest('td, th');
+    if (!cell) return;
+    const onCellDblClick = (event: Event) => {
+      if (!(event instanceof MouseEvent)) return;
+      if (event.target instanceof Node && span.contains(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      openEditConfirm();
+    };
+    cell.addEventListener('dblclick', onCellDblClick);
+    return () => cell.removeEventListener('dblclick', onCellDblClick);
+  }, [fillCell, editing?.editable, active, confirming]);
 
   if (!editing?.editable) {
     return <span className={className}>{shown}</span>;
@@ -145,16 +168,17 @@ export function EditableRowText({
   return (
     <>
       <span
+        ref={spanRef}
         className={cn(
           className,
           'form-row-text--editable',
           fillCell && 'form-row-text--fill-cell',
         )}
-        title="Double-click anywhere in this row to edit the wording"
+        title="Double-click anywhere in this cell to edit the wording"
         onDoubleClick={(event) => {
           event.preventDefault();
-          window.getSelection()?.removeAllRanges();
-          setConfirming(true);
+          event.stopPropagation();
+          openEditConfirm();
         }}
       >
         {shown || (fillCell ? '\u00a0' : '')}

@@ -1161,6 +1161,14 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   aspect-ratio: auto !important;
 }
 
+/* Fixed A4 portrait cards do not shrink when checklist content is removed on that page only. */
+.form-page-scale-inner
+  .form-page-sheet:not(.form-page-sheet--landscape):not(.form-page-sheet--ancillary-device-circuit-test):not(
+    .form-page-sheet--emergency-power-supply-test
+  )[class*='form-page-sheet--'] {
+  flex-shrink: 0;
+}
+
 .form-page-scale-inner .form-page-sheet--landscape {
   aspect-ratio: 297 / 210 !important;
 }
@@ -1192,9 +1200,11 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-scale-inner .form-page-sheet--documentation:not(.form-page-sheet--landscape) {
-  aspect-ratio: 210 / 297 !important;
+  aspect-ratio: 210 / 314 !important;
+  flex-shrink: 0 !important;
   display: flex !important;
   flex-direction: column !important;
+  overflow: hidden !important;
 }
 
 .form-page-scale-inner .form-page-sheet--control-unit-test:not(.form-page-sheet--landscape) {
@@ -1216,9 +1226,11 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-scale-inner .form-page-sheet--annunciator-device-test:not(.form-page-sheet--landscape) {
-  aspect-ratio: 210 / 297 !important;
+  aspect-ratio: 210 / 314 !important;
+  flex-shrink: 0 !important;
   display: flex !important;
   flex-direction: column !important;
+  overflow: hidden !important;
 }
 
 .form-page-scale-inner .form-page-sheet--rtsu-printer-test:not(.form-page-sheet--landscape) {
@@ -1242,7 +1254,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-scale-inner .form-page-sheet--power-supplies:not(.form-page-sheet--landscape) {
-  aspect-ratio: 210 / 297 !important;
+  aspect-ratio: 210 / 328 !important;
+  flex-shrink: 0 !important;
   display: flex !important;
   flex-direction: column !important;
 }
@@ -1423,7 +1436,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
-  padding: 0.75rem 1rem 0 !important;
+  padding: 0.15rem 1rem 0 !important;
 }
 
 .form-page-scale-inner .form-page-sheet--power-supplies .form-page-content--power-supplies {
@@ -1564,7 +1577,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-viewport--continuous .form-page-sheet--documentation:not(.form-page-sheet--landscape) {
-  aspect-ratio: 210 / 297 !important;
+  aspect-ratio: 210 / 314 !important;
+  flex-shrink: 0 !important;
 }
 
 .form-page-viewport--continuous .form-page-sheet--control-unit-test:not(.form-page-sheet--landscape) {
@@ -1580,7 +1594,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-viewport--continuous .form-page-sheet--annunciator-device-test:not(.form-page-sheet--landscape) {
-  aspect-ratio: 210 / 297 !important;
+  aspect-ratio: 210 / 314 !important;
+  flex-shrink: 0 !important;
 }
 
 .form-page-viewport--continuous .form-page-sheet--rtsu-printer-test:not(.form-page-sheet--landscape) {
@@ -1597,7 +1612,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-viewport--continuous .form-page-sheet--power-supplies:not(.form-page-sheet--landscape) {
-  aspect-ratio: 210 / 297 !important;
+  aspect-ratio: 210 / 328 !important;
+  flex-shrink: 0 !important;
 }
 
 .form-page-viewport--continuous .form-page-sheet--power-supply-inspection:not(.form-page-sheet--landscape) {
@@ -4651,8 +4667,17 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .doc-ruled-stack--annex {
-  --doc-ruled-line-count: 11;
-  --doc-ruled-line-height: calc(1.15em * 1.3);
+  --doc-ruled-line-count: 10;
+  --doc-ruled-line-height: 1.15em;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.doc-ruled-stack--annex .doc-ruled-body {
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
+  overflow: hidden;
 }
 
 .doc-ruled-stack--annex .doc-ruled-line:last-child {
@@ -7532,6 +7557,13 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   white-space: nowrap;
 }
 
+.fdtl-td--device .form-row-text--fill-cell {
+  justify-content: center;
+  width: 100%;
+  padding: 0 0.125rem;
+  box-sizing: border-box;
+}
+
 .fdtl-td--desc {
   text-align: left;
   vertical-align: middle;
@@ -9675,6 +9707,11 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   overflow: visible;
 }
 
+.epst-table-main {
+  min-height: 0;
+}
+
+.epst-table-main > .epst-table,
 .epst-table-wrap > .epst-table {
   height: auto;
   width: 100%;
@@ -10202,15 +10239,23 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-sheet--emergency-power-supply-test .epst-table-wrap {
+  display: flex;
+  flex-direction: column;
   flex: 0 1 auto;
   overflow: visible;
 }
 
+.form-page-sheet--emergency-power-supply-test .epst-table-wrap > .epst-generator {
+  flex-shrink: 0;
+}
+
+.form-page-sheet--emergency-power-supply-test .epst-table-main > .epst-table,
 .form-page-sheet--emergency-power-supply-test .epst-table-wrap > .epst-table,
 .form-page-sheet--emergency-power-supply-test .epst-table--generator {
   height: auto;
 }
 
+.form-page-sheet--emergency-power-supply-test .epst-table-main > .epst-table tbody tr,
 .form-page-sheet--emergency-power-supply-test .epst-table-wrap > .epst-table tbody tr,
 .form-page-sheet--emergency-power-supply-test .epst-table--generator tbody tr {
   height: auto;
@@ -10224,28 +10269,30 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   flex-shrink: 0;
 }
 
-/* Page 9 ? 22.4 + 22.5 stacked; every checklist row must remain visible */
+/* Page 9 — 22.4 + 22.5 stacked. Sheet size and row layout are locked; do not change unless asked. */
 .form-page-sheet--power-supplies {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   --form-check-mark-size: 0.75rem;
   --form-check-input-size: 0.75rem;
+  --power-supplies-checklist-font: calc(clamp(0.35rem, 3.2cqh, 0.525rem) + 1.5pt);
 }
 
 .form-page-sheet--power-supplies .form-page-body {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
-  padding: 0.75rem 1rem 0;
+  padding: 0.15rem 1rem 0;
 }
 
 .form-page-content--power-supplies {
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
-  grid-template-rows: minmax(0, 0.28fr) minmax(0, 0.72fr);
-  gap: 0.15rem;
-  margin-top: 0.125rem;
+  grid-template-rows: minmax(0, 0.3fr) minmax(0, 0.7fr);
+  gap: 0.06rem;
+  margin-top: 0;
   overflow: hidden;
 }
 
@@ -10267,7 +10314,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   margin-top: 0;
   padding-bottom: 0;
   line-height: 1.1;
-  font-size: calc(0.875rem + 1pt);
+  font-size: 0.875rem;
 }
 
 .form-page-sheet--power-supplies .form-page-section--emergency-power-supply-test > div,
@@ -10296,12 +10343,12 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   overflow: hidden;
   box-sizing: border-box;
   padding-bottom: 0;
-  font-size: calc(clamp(0.35rem, 3.2cqh, 0.525rem) + 1.5pt);
+  font-size: var(--power-supplies-checklist-font);
   line-height: 1;
 }
 
 .form-page-sheet--power-supplies .psi-banner {
-  padding: 0 0.15rem;
+  padding: 0 0.1rem;
   line-height: 1;
 }
 
@@ -10312,14 +10359,15 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-sheet--power-supplies .psi-info-row {
   min-height: 0 !important;
   height: auto;
-  gap: 0.125rem;
-  padding: 0 0.15rem;
+  gap: 0.0625rem;
+  padding: 0.015625rem 0.1rem;
+  line-height: 1;
 }
 
 .form-page-sheet--power-supplies .psi-info-input,
 .form-page-sheet--power-supplies .psi-info-value {
   min-height: 0 !important;
-  padding: 0 0.1rem;
+  padding: 0 0.06rem;
   line-height: 1;
 }
 
@@ -10352,6 +10400,7 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-sheet--power-supplies .psi-table {
+  --psi-row-slots: 9;
   flex: 1 1 auto;
   width: 100%;
   height: 100%;
@@ -10370,12 +10419,11 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 }
 
 .form-page-sheet--power-supplies .psi-table tbody tr {
-  /* Equal-share trick: zero height lets the table distribute remaining space */
   height: 0;
 }
 
 .form-page-sheet--power-supplies .psi-table tbody td {
-  height: 12.5%;
+  height: calc(100% / var(--psi-row-slots));
   overflow: hidden;
   vertical-align: middle;
   padding-top: 0 !important;
@@ -10393,13 +10441,13 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   overflow: hidden;
   box-sizing: border-box;
   padding-bottom: 0;
-  font-size: calc(clamp(0.375rem, 2.35cqh, 0.6rem) + 1pt);
+  font-size: calc(clamp(0.35rem, 2.2cqh, 0.55rem) + 1.5pt);
   line-height: 1;
 }
 
 .form-page-sheet--power-supplies .epst-banner {
-  padding: 0.03125rem 0.25rem;
-  line-height: 1.05;
+  padding: 0 0.15rem;
+  line-height: 1;
 }
 
 .form-page-sheet--power-supplies .epst-banner-line + .epst-banner-line {
@@ -10410,8 +10458,17 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-sheet--power-supplies .epst-spec-row {
   min-height: 0 !important;
   height: auto;
-  gap: 0.2rem;
-  padding: 0 0.15rem;
+  gap: 0.04rem 0.12rem;
+  padding: 0 0.06rem;
+  line-height: 1;
+}
+
+.form-page-sheet--power-supplies .epst-spec-options {
+  gap: 0.08rem 0.22rem;
+}
+
+.form-page-sheet--power-supplies .epst-spec-option {
+  gap: 0.15rem;
 }
 
 .form-page-sheet--power-supplies .epst-info-input,
@@ -10419,14 +10476,14 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-sheet--power-supplies .epst-field-input,
 .form-page-sheet--power-supplies .epst-field-value {
   min-height: 0 !important;
-  padding: 0 0.1rem;
+  padding: 0 0.06rem;
   line-height: 1;
 }
 
 .form-page-sheet--power-supplies .epst-th,
 .form-page-sheet--power-supplies .epst-td,
 .form-page-sheet--power-supplies .epst-td--measure {
-  padding: 0 0.05rem !important;
+  padding: 0 0.04rem !important;
   line-height: 1 !important;
 }
 
@@ -10439,50 +10496,84 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   line-height: 1;
 }
 
+.form-page-sheet--power-supplies .epst-spec-strip {
+  flex: 0 0 auto;
+  font-size: 0.93em;
+}
+
+.form-page-sheet--power-supplies .epst-banner,
+.form-page-sheet--power-supplies .epst-info-strip {
+  flex: 0 0 auto;
+}
+
+/* Row 4: main checklist only. Row 5: generator (sibling). */
 .form-page-sheet--power-supplies .epst-table-wrap {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
+  max-height: 100%;
   overflow: hidden;
   box-sizing: border-box;
 }
 
-.form-page-sheet--power-supplies .epst-table-wrap > .epst-table {
+.form-page-sheet--power-supplies .epst-table-wrap > .epst-table,
+.form-page-sheet--power-supplies .epst-table-main > .epst-table {
+  --epst-row-slots: 30;
   flex: 1 1 auto;
   width: 100%;
+  min-height: 0;
   height: 100%;
   max-height: 100%;
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 1em;
+  overflow: hidden;
 }
 
-.form-page-sheet--power-supplies .epst-table-wrap > .epst-table thead th {
-  padding: 0 0.05rem !important;
+.form-page-sheet--power-supplies .epst-panel > .epst-generator {
+  flex-shrink: 0;
+  min-height: 0;
+}
+
+.form-page-sheet--power-supplies .epst-table-wrap > .epst-table thead th,
+.form-page-sheet--power-supplies .epst-table-main > .epst-table thead th {
+  padding: 0 !important;
   line-height: 1 !important;
+  height: auto;
 }
 
-.form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody tr {
+.form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody tr,
+.form-page-sheet--power-supplies .epst-table-main > .epst-table tbody tr {
   height: 0;
 }
 
-.form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody td {
-  height: calc(100% / 25);
+.form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody td,
+.form-page-sheet--power-supplies .epst-table-main > .epst-table tbody td {
+  height: calc(100% / var(--epst-row-slots));
   overflow: hidden;
   vertical-align: middle;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
+  line-height: 1;
+}
+
+.form-page-sheet--power-supplies .epst-table-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  height: 100%;
 }
 
 .form-page-sheet--power-supplies .epst-generator {
-  flex-shrink: 0;
   margin-top: 0;
+  border-top: var(--epst-line);
 }
 
 .form-page-sheet--power-supplies .epst-generator-title {
-  padding: 0.015625rem 0.2rem 0.1875rem;
+  padding: 0 0.15rem;
   font-size: 0.95em;
-  line-height: 1.05;
+  line-height: 1;
 }
 
 .form-page-sheet--power-supplies .epst-table--generator {
@@ -10494,18 +10585,22 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   height: auto;
 }
 
-.form-page-sheet--power-supplies .epst-table--generator tbody td {
+.form-page-sheet--power-supplies .epst-table--generator tbody td,
+.form-page-sheet--power-supplies .epst-table--generator tbody tr:last-child td {
   height: auto;
-  padding: 0 0.05rem !important;
+  padding: 0 !important;
   line-height: 1 !important;
+  vertical-align: middle;
 }
 
-.form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-td--yes,
-.form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-td--no,
-.form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-td--na,
-.form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-check-cell {
-  padding-top: 0.1875rem !important;
-  padding-bottom: 0.1875rem !important;
+.form-page-sheet--power-supplies .epst-table--generator .epst-desc-text {
+  line-height: 1;
+}
+
+.form-page-sheet--power-supplies .epst-table--generator .epst-check-cell {
+  min-height: 0 !important;
+  height: auto;
+  padding: 0 !important;
 }
 
 .form-page-sheet .psi-panel,
@@ -11911,11 +12006,33 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
 .form-page-sheet[data-form-page-floor-locked] {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   min-height: var(--form-page-floor-height) !important;
+  overflow: visible;
+}
+
+.form-page-scale-inner .form-page-sheet[data-form-page-floor-locked] {
+  min-height: var(--form-page-floor-height) !important;
+  flex-shrink: 0 !important;
+  overflow: visible !important;
 }
 
 .form-page-sheet[data-form-page-floor-locked] .form-page-body {
   flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* 23.1: floor lock adds whitespace below — do not stretch the legend table. */
+.form-page-sheet--field-device-legend[data-form-page-floor-locked] .form-page-content--field-device-legend,
+.form-page-sheet--field-device-legend[data-form-page-floor-locked] .form-page-section--field-device-legend-sub,
+.form-page-sheet--field-device-legend[data-form-page-floor-locked] .form-page-section--field-device-legend-sub > div,
+.form-page-sheet--field-device-legend[data-form-page-floor-locked]
+  .form-page-section--field-device-legend-sub
+  .form-element-frame--flush,
+.form-page-sheet--field-device-legend[data-form-page-floor-locked] .fdtl-panel,
+.form-page-sheet--field-device-legend[data-form-page-floor-locked] .fdtl-table-wrap {
+  flex: 0 1 auto !important;
+  height: auto !important;
   min-height: 0;
 }
 
@@ -12326,7 +12443,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
     .prt-td--letter,
     .psi-td--letter,
     .doc-td--letter,
-    .epst-td--letter
+    .epst-td--letter,
+    .fdtl-td--device
   ):has(> .form-row-text--fill-cell) {
   padding: 0;
   vertical-align: middle;
@@ -12345,7 +12463,8 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
     .prt-td--letter,
     .psi-td--letter,
     .doc-td--letter,
-    .epst-td--letter
+    .epst-td--letter,
+    .fdtl-td--device
   ):has(> .form-row-text--fill-cell)
   > .form-row-text--fill-cell {
   justify-content: center;

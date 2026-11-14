@@ -32,6 +32,38 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value);
 }
 
+/** Keeps `rowText` / `hiddenTemplateLines` when persisting normalized checklist payloads. */
+export function mergeElementValuePatch(raw: unknown, patch: unknown): unknown {
+  if (!isPlainObject(patch)) return patch;
+  if (!isPlainObject(raw)) return patch;
+
+  const merged: Record<string, unknown> = { ...raw, ...patch };
+
+  const rawOverrides = readRowTextOverrides(raw);
+  const patchOverrides = readRowTextOverrides(patch);
+  const mergedOverrides =
+    Object.keys(rawOverrides).length > 0 || Object.keys(patchOverrides).length > 0
+      ? { ...rawOverrides, ...patchOverrides }
+      : null;
+  if (mergedOverrides && Object.keys(mergedOverrides).length > 0) {
+    merged[ROW_TEXT_OVERRIDES_KEY] = mergedOverrides;
+  } else if (!(ROW_TEXT_OVERRIDES_KEY in patch)) {
+    delete merged[ROW_TEXT_OVERRIDES_KEY];
+  }
+
+  const hidden = new Set([
+    ...readHiddenTemplateLineIds(raw),
+    ...readHiddenTemplateLineIds(patch),
+  ]);
+  if (hidden.size > 0) {
+    merged[HIDDEN_TEMPLATE_LINES_KEY] = [...hidden];
+  } else if (!(HIDDEN_TEMPLATE_LINES_KEY in patch)) {
+    delete merged[HIDDEN_TEMPLATE_LINES_KEY];
+  }
+
+  return merged;
+}
+
 export function readRowTextOverrides(value: unknown): RowTextOverrides {
   if (!isPlainObject(value)) return EMPTY_OVERRIDES;
   const raw = value[ROW_TEXT_OVERRIDES_KEY];

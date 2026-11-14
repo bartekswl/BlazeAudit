@@ -3,7 +3,7 @@ import { FORM_PRINT_APP_CSS } from '../../shared/form/formPrintAppCss.generated'
 /** Page shell + print tweaks — layout/CSS comes from bundled components.css extract. */
 const PDF_PRINT_OVERRIDES = `
   html { font-size: 16px; }
-  @page { size: A4; margin: 0; }
+  @page { size: 210mm 328mm; margin: 0; }
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -13,9 +13,9 @@ const PDF_PRINT_OVERRIDES = `
   }
   .form-page.form-page-sheet {
     width: 210mm;
-    height: 297mm;
-    min-height: 297mm;
-    max-height: 297mm;
+    height: 328mm;
+    min-height: 328mm;
+    max-height: 328mm;
     aspect-ratio: unset;
     page-break-after: always;
     border: none;

@@ -720,13 +720,12 @@ export function useFormFieldClipboard(
     if (el) setFieldText(el, value);
   }, [orderedSelected, flash, targetEditable, markSelected]);
 
-  // Select-mode picking (cell or whole-line).
+  // Select-mode picking (cells only — template lines use the dedicated line handler).
   useEffect(() => {
-    if (selectMode !== 'cell' && selectMode !== 'line') return;
+    if (selectMode !== 'cell') return;
 
     const root = rootRef.current;
     if (!root) return;
-    const lineMode = selectMode === 'line';
 
     madeSelectionRef.current = false;
 
@@ -736,7 +735,7 @@ export function useFormFieldClipboard(
       event.preventDefault();
       dragRef.current = true;
       const additive = event.ctrlKey || event.metaKey;
-      if (lineMode || event.altKey) {
+      if (event.altKey) {
         selectEntireRow(field, additive);
         return;
       }
@@ -758,14 +757,6 @@ export function useFormFieldClipboard(
       }
       const field = resolveField(event.target);
       if (!field) return;
-      if (lineMode) {
-        const tr = rowOf(field);
-        if (!tr) return;
-        const rowFields = fieldsInRow(tr);
-        if (rowFields.every((f) => selectedRef.current.has(f))) return;
-        markSelected(rowFields, true);
-        return;
-      }
       if (selectedRef.current.has(field)) return;
       selectedRef.current.add(field);
       field.classList.add(SELECTED_CLASS);
@@ -805,7 +796,20 @@ export function useFormFieldClipboard(
       if (target instanceof Element && target.closest(`[${CLIPBOARD_TOOLBAR_ATTR}]`)) return;
       if (target instanceof Element && target.closest('.ba-modal-overlay')) return;
 
-      const templateTr = resolveTemplateLineRow(target);
+      let templateTr = resolveTemplateLineRow(target);
+      if (!templateTr && target instanceof Element) {
+        const field = resolveField(target);
+        if (field) {
+          const tr = rowOf(field);
+          if (tr?.hasAttribute(BA_LINE_ROW)) templateTr = tr;
+        }
+      }
+      if (!templateTr && target instanceof Element) {
+        const row = target.closest('tr');
+        if (row instanceof HTMLTableRowElement && row.hasAttribute(BA_LINE_ROW)) {
+          templateTr = row;
+        }
+      }
       if (templateTr) {
         event.preventDefault();
         event.stopPropagation();
@@ -824,6 +828,11 @@ export function useFormFieldClipboard(
       }
 
       if (resolveField(target)) return;
+
+      const insideFormPage =
+        target instanceof Element &&
+        Boolean(target.closest('.form-page-sheet, .form-page-viewport'));
+      if (insideFormPage) return;
 
       clearHighlights(selectedRef.current);
       clearLineRowHighlights(selectedLineRowsRef.current);

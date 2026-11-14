@@ -47,6 +47,7 @@ import {
   applyTemplateLineRemove,
   type TemplateLineClearRequest,
 } from '../../../shared/form/formLineSelect';
+import { mergeElementValuePatch } from '../../../shared/form/rowTextOverrides';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
 import { formatDateTimeCompact } from '../../../shared/dates';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -395,7 +396,11 @@ function FormInspectionEditorInner({
     }
     setFormDoc((prev) => ({
       ...prev,
-      values: setElementValue(prev.values, elementId, value),
+      values: setElementValue(
+        prev.values,
+        elementId,
+        mergeElementValuePatch(prev.values[elementId], value),
+      ),
     }));
     markDirtyRef.current();
   }, [recordUndo]);

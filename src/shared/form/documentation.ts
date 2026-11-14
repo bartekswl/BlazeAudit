@@ -26,7 +26,7 @@ export const DOCUMENTATION_NOTE = '(Note: Reference Section 7 Documentation)';
 
 export const DOCUMENTATION_LOCATION_LINES = 3;
 
-export const DOCUMENTATION_ANNEX_LINES = 11;
+export const DOCUMENTATION_ANNEX_LINES = 10;
 
 export const DOCUMENTATION_I_HEADER = 'Description of fire alarm system:';
 

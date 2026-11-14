@@ -21,7 +21,7 @@ import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import { cn } from '../../lib/cn';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
-import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { isLogicalTemplateLineCollapsed, mergeElementValuePatch } from '../../../shared/form/rowTextOverrides';
 import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
@@ -295,12 +295,15 @@ export function FormDataCommunicationLinkFaultToleranceView({
 }: {
   value: unknown;
   readOnly?: boolean;
-  onChange?: (next: DataCommunicationLinkFaultToleranceValue) => void;
+  onChange?: (next: unknown) => void;
 }) {
   const value = normalizeDataCommunicationLinkFaultToleranceValue(rawValue);
   const emit = (
     updater: (current: DataCommunicationLinkFaultToleranceValue) => DataCommunicationLinkFaultToleranceValue,
-  ) => onChange?.(updater(value));
+  ) => {
+    const next = updater(value);
+    onChange?.(mergeElementValuePatch(rawValue, next));
+  };
 
   return (
     <div className="dclft-stack">

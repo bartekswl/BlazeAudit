@@ -98,7 +98,7 @@ function SimpleRow({
       data-ba-line-row-clear={fdtlLegendLineClearIds(item.id)}
     >
       <td className="fdtl-td fdtl-td--device">
-        <EditableRowText rowId={`${item.id}.device`} text={item.device} />
+        <EditableRowText rowId={`${item.id}.device`} text={item.device} fillCell />
       </td>
       <td className="fdtl-td fdtl-td--desc">
         <EditableRowText rowId={item.id} text={item.description} />
@@ -187,7 +187,7 @@ function SmokeRows({
         data-ba-line-row-clear={fdtlLegendLineClearIds(item.id)}
       >
         <td className="fdtl-td fdtl-td--device" rowSpan={3}>
-          <EditableRowText rowId={`${item.id}.device`} text={item.device} />
+          <EditableRowText rowId={`${item.id}.device`} text={item.device} fillCell />
         </td>
         <td className="fdtl-td fdtl-td--desc">
           <EditableRowText rowId={item.id} text={item.description} />

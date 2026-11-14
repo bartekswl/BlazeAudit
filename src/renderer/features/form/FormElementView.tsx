@@ -10,9 +10,8 @@ import { nextRadioColumnChoice } from '../../../shared/form/columnChoiceFill';
 import {
   ROW_TEXT_EDITABLE_KINDS,
   applyRowTextOverride,
-  readHiddenTemplateLineIds,
+  mergeElementValuePatch,
   readRowTextOverrides,
-  withHiddenTemplateLineIds,
   withRowTextOverrides,
 } from '../../../shared/form/rowTextOverrides';
 import { RowTextEditingContext, type RowTextEditing } from './EditableRowText';
@@ -67,6 +66,7 @@ function FormElementViewInner({
   totalPages,
   linedNotesVisibleLines,
   linedNotesRowHeights,
+  powerSuppliesStacked,
   onChange,
   onElementValueChange,
 }: {
@@ -78,6 +78,7 @@ function FormElementViewInner({
   totalPages?: number;
   linedNotesVisibleLines?: Record<string, number>;
   linedNotesRowHeights?: Record<string, number>;
+  powerSuppliesStacked?: boolean;
   onChange?: (value: unknown) => void;
   /** Stable dispatcher from FormPageCanvas — avoids per-element callback closures. */
   onElementValueChange?: (elementId: string, value: unknown) => void;
@@ -95,20 +96,12 @@ function FormElementViewInner({
     () => (rowTextEditable ? readRowTextOverrides(value) : null),
     [rowTextEditable, value],
   );
-  const hiddenTemplateLineIds = useMemo(
-    () => (rowTextEditable ? readHiddenTemplateLineIds(value) : null),
-    [rowTextEditable, value],
-  );
   const publishBodyChange = useCallback(
     (next: unknown) => {
-      let merged = next;
-      if (rowTextOverrides) merged = withRowTextOverrides(merged, rowTextOverrides);
-      if (hiddenTemplateLineIds && hiddenTemplateLineIds.size > 0) {
-        merged = withHiddenTemplateLineIds(merged, hiddenTemplateLineIds);
-      }
+      const merged = mergeElementValuePatch(value, next);
       publishChange(merged);
     },
-    [publishChange, rowTextOverrides, hiddenTemplateLineIds],
+    [publishChange, value],
   );
   const canEdit = !readOnly && Boolean(onElementValueChange || onChange);
   const rowTextEditing = useMemo<RowTextEditing | null>(
@@ -192,6 +185,7 @@ function FormElementViewInner({
           totalPages={totalPages ?? 1}
           linedNotesVisibleLines={linedNotesVisibleLines}
           linedNotesRowHeights={linedNotesRowHeights}
+          powerSuppliesStacked={powerSuppliesStacked}
           onChange={publishBodyChange}
         />
       </RowTextEditingContext.Provider>
@@ -208,6 +202,7 @@ function FormElementBody({
   totalPages,
   linedNotesVisibleLines,
   linedNotesRowHeights,
+  powerSuppliesStacked,
   onChange,
 }: {
   element: FormElement;
@@ -218,6 +213,7 @@ function FormElementBody({
   totalPages: number;
   linedNotesVisibleLines?: Record<string, number>;
   linedNotesRowHeights?: Record<string, number>;
+  powerSuppliesStacked?: boolean;
   onChange?: (value: unknown) => void;
 }) {
   switch (element.kind) {
@@ -546,6 +542,7 @@ function FormElementBody({
         <FormEmergencyPowerSupplyTestView
           value={value}
           readOnly={readOnly}
+          powerSuppliesStacked={powerSuppliesStacked}
           onChange={onChange}
         />
       );
@@ -717,7 +714,8 @@ const MemoFormElementView = memo(FormElementViewInner, (prev, next) => {
     prev.onChange === next.onChange &&
     prev.onElementValueChange === next.onElementValueChange &&
     prev.linedNotesVisibleLines === next.linedNotesVisibleLines &&
-    prev.linedNotesRowHeights === next.linedNotesRowHeights
+    prev.linedNotesRowHeights === next.linedNotesRowHeights &&
+    prev.powerSuppliesStacked === next.powerSuppliesStacked
   );
 });
 

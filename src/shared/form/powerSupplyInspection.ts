@@ -22,6 +22,9 @@ export const POWER_SUPPLY_INSPECTION_DISCONNECT_LOCATION_LABEL =
 
 export const POWER_SUPPLY_INSPECTION_BREAKER_LABEL = 'Circuit Panel/Breaker Identification:';
 
+/** Page 9 checklist rows A–H plus Yes/No/N/A header in the height budget. */
+export const PSI_POWER_SUPPLIES_TABLE_ROW_SLOTS = 9;
+
 export const POWER_SUPPLY_INSPECTION_ROWS: PowerSupplyInspectionRowDef[] = [
   {
     id: 'psi-a',

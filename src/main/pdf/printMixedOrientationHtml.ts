@@ -15,7 +15,7 @@ const { PDFDocument } = require('pdf-lib') as {
 };
 
 /** A4 in inches (Electron `pageSize` object uses inches). */
-const A4_PORTRAIT_IN = { width: 8.2677165354, height: 11.6929133858 } as const;
+const A4_PORTRAIT_IN = { width: 8.2677165354, height: 12.9133858268 } as const;
 const A4_LANDSCAPE_IN = { width: 11.6929133858, height: 8.2677165354 } as const;
 
 type Orientation = 'portrait' | 'landscape';
@@ -134,13 +134,13 @@ export async function printMixedOrientationHtmlToPdf(html: string): Promise<Buff
   min-height: 210mm;
   max-height: 210mm;
 }`
-                : `@page { size: A4 portrait; margin: 0; }
+                : `@page { size: 210mm 328mm; margin: 0; }
 .form-page-sheet, .form-page {
   page: auto;
   width: 210mm;
-  height: 297mm;
-  min-height: 297mm;
-  max-height: 297mm;
+  height: 328mm;
+  min-height: 328mm;
+  max-height: 328mm;
 }`,
             )};
           })()

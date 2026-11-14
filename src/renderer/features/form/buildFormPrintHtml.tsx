@@ -31,9 +31,9 @@ const PRINT_OVERRIDES = `
   .form-print-root *::after { box-sizing: border-box; }
   .form-print-root .form-page-sheet {
     width: 210mm;
-    height: 297mm;
-    min-height: 297mm;
-    max-height: 297mm;
+    height: 328mm;
+    min-height: 328mm;
+    max-height: 328mm;
     aspect-ratio: auto;
     border: none;
     border-radius: 0;
@@ -1400,13 +1400,18 @@ const PRINT_OVERRIDES = `
   }
   /* Keep annex notes at a fixed ruled height so the last line is never clipped. */
   .form-print-root .doc-ruled-stack--annex {
-    --doc-ruled-line-count: 11 !important;
-    --doc-ruled-line-height: 1.3em !important;
+    --doc-ruled-line-count: 10 !important;
+    --doc-ruled-line-height: 1.15em !important;
+    overflow: hidden !important;
     flex: 0 0 auto !important;
     flex-shrink: 0 !important;
-    height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 11)) !important;
-    min-height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 11)) !important;
-    max-height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 11)) !important;
+    height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 10)) !important;
+    min-height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 10)) !important;
+    max-height: calc(var(--doc-ruled-line-height) * var(--doc-ruled-line-count, 10)) !important;
+  }
+  .form-print-root .doc-ruled-stack--annex .doc-ruled-body {
+    white-space: pre !important;
+    overflow: hidden !important;
   }
   .form-print-root .doc-ruled-stack--annex .doc-ruled-line:last-child {
     border-bottom: 0.5px solid #64748b !important;
@@ -1908,12 +1913,14 @@ const PRINT_OVERRIDES = `
     flex: 0 1 auto !important;
     overflow: visible !important;
   }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table-main > .epst-table,
   .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table-wrap > .epst-table,
   .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table--generator {
     height: auto !important;
     table-layout: fixed !important;
     font-size: 8pt !important;
   }
+  .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table-main > .epst-table tbody tr,
   .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table-wrap > .epst-table tbody tr,
   .form-print-root .form-page-sheet--emergency-power-supply-test .epst-table--generator tbody tr {
     height: auto !important;
@@ -1960,16 +1967,16 @@ const PRINT_OVERRIDES = `
     box-sizing: border-box !important;
   }
   .form-print-root .form-page-sheet--power-supplies .form-page-body {
-    padding: 8pt 10pt 0 !important;
+    padding: 3pt 10pt 0 !important;
     overflow: hidden !important;
   }
   .form-print-root .form-page-content--power-supplies {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     display: grid !important;
-    grid-template-rows: minmax(0, 0.28fr) minmax(0, 0.72fr) !important;
-    gap: 1.5pt !important;
-    margin-top: 1pt !important;
+    grid-template-rows: minmax(0, 0.3fr) minmax(0, 0.7fr) !important;
+    gap: 1pt !important;
+    margin-top: 0.5pt !important;
     overflow: hidden !important;
   }
   .form-print-root .form-page-sheet--power-supplies .form-page-section:has(.psi-panel),
@@ -1988,7 +1995,7 @@ const PRINT_OVERRIDES = `
     margin-top: 0 !important;
     padding-bottom: 0 !important;
     line-height: 1.1 !important;
-    font-size: 10pt !important;
+    font-size: 9pt !important;
   }
   .form-print-root .form-page-sheet--power-supplies .form-page-section:has(.psi-panel) > div,
   .form-print-root .form-page-sheet--power-supplies .form-page-section:has(.epst-panel) > div,
@@ -2029,6 +2036,18 @@ const PRINT_OVERRIDES = `
     padding: 0 0.5pt !important;
     line-height: 1 !important;
   }
+  .form-print-root .form-page-sheet--power-supplies .psi-info-row {
+    min-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    gap: 0.5pt !important;
+  }
+  .form-print-root .form-page-sheet--power-supplies .psi-info-input,
+  .form-print-root .form-page-sheet--power-supplies .psi-info-value {
+    min-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
   .form-print-root .form-page-sheet--power-supplies .psi-table-wrap {
     display: flex !important;
     flex-direction: column !important;
@@ -2036,6 +2055,7 @@ const PRINT_OVERRIDES = `
     overflow: hidden !important;
   }
   .form-print-root .form-page-sheet--power-supplies .psi-table {
+    --psi-row-slots: 9 !important;
     flex: 1 1 auto !important;
     width: 100% !important;
     height: 100% !important;
@@ -2047,7 +2067,7 @@ const PRINT_OVERRIDES = `
     height: 0 !important;
   }
   .form-print-root .form-page-sheet--power-supplies .psi-table tbody td {
-    height: 12.5% !important;
+    height: calc(100% / var(--psi-row-slots)) !important;
     overflow: hidden !important;
     vertical-align: middle !important;
     padding-top: 0 !important;
@@ -2081,9 +2101,13 @@ const PRINT_OVERRIDES = `
     display: flex !important;
     flex-direction: column !important;
     min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
     overflow: hidden !important;
   }
-  .form-print-root .form-page-sheet--power-supplies .epst-table-wrap > .epst-table {
+  .form-print-root .form-page-sheet--power-supplies .epst-table-wrap > .epst-table,
+  .form-print-root .form-page-sheet--power-supplies .epst-table-main > .epst-table {
+  --epst-row-slots: 30 !important;
     flex: 1 1 auto !important;
     width: 100% !important;
     height: 100% !important;
@@ -2091,29 +2115,31 @@ const PRINT_OVERRIDES = `
     table-layout: fixed !important;
     border-collapse: collapse !important;
     font-size: 1em !important;
+    overflow: hidden !important;
   }
-  .form-print-root .form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody tr {
+  .form-print-root .form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody tr,
+  .form-print-root .form-page-sheet--power-supplies .epst-table-main > .epst-table tbody tr {
     height: 0 !important;
   }
-  .form-print-root .form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody td {
-    height: calc(100% / 25) !important;
+  .form-print-root .form-page-sheet--power-supplies .epst-table-wrap > .epst-table tbody td,
+  .form-print-root .form-page-sheet--power-supplies .epst-table-main > .epst-table tbody td {
+    height: calc(100% / var(--epst-row-slots)) !important;
     overflow: hidden !important;
     vertical-align: middle !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
   }
-  .form-print-root .form-page-sheet--power-supplies .epst-generator {
+  .form-print-root .form-page-sheet--power-supplies .epst-panel > .epst-generator {
+    flex-shrink: 0 !important;
     margin-top: 0 !important;
   }
   .form-print-root .form-page-sheet--power-supplies .epst-generator-title {
     padding: 0.5pt 2pt 2pt !important;
   }
-  .form-print-root .form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-td--yes,
-  .form-print-root .form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-td--no,
-  .form-print-root .form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-td--na,
-  .form-print-root .form-page-sheet--power-supplies .epst-table--generator tbody tr:first-child .epst-check-cell {
-    padding-top: 2pt !important;
-    padding-bottom: 2pt !important;
+  .form-print-root .form-page-sheet--power-supplies .epst-table--generator tbody td,
+  .form-print-root .form-page-sheet--power-supplies .epst-table--generator tbody tr:last-child td {
+    padding: 0 !important;
+    line-height: 1 !important;
   }
   .form-print-root .form-page-sheet--power-supplies .epst-desc-line {
     display: grid !important;

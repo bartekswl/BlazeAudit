@@ -41,7 +41,7 @@ import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
-import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { isLogicalTemplateLineCollapsed, mergeElementValuePatch } from '../../../shared/form/rowTextOverrides';
 import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
@@ -342,13 +342,20 @@ function MeasureRows({
 export function FormEmergencyPowerSupplyTestView({
   value: rawValue,
   readOnly,
+  powerSuppliesStacked,
   onChange,
 }: {
   value: unknown;
   readOnly?: boolean;
+  /** Page 9: 22.4 + 22.5 share one sheet — compact row O so P–S and generator stay visible. */
+  powerSuppliesStacked?: boolean;
   onChange?: (value: EmergencyPowerSupplyTestValue) => void;
 }) {
   const data = normalizeEmergencyPowerSupplyTestValue(rawValue);
+
+  const publish = (next: EmergencyPowerSupplyTestValue) => {
+    onChange?.(mergeElementValuePatch(rawValue, next) as EmergencyPowerSupplyTestValue);
+  };
 
   const mainTableChecklistIds = EMERGENCY_POWER_SUPPLY_TEST_ROWS.filter(
     (row) =>
@@ -372,7 +379,7 @@ export function FormEmergencyPowerSupplyTestView({
     for (const key of testTypeKeys) {
       nextData = setEmergencyPowerSupplyTestTypeChoice(nextData, key, next);
     }
-    onChange?.(nextData);
+    publish(nextData);
   };
 
   const letterCell = (rowId: string, letter: string) => (
@@ -398,7 +405,7 @@ export function FormEmergencyPowerSupplyTestView({
           fields={data.measures[variant]}
           readOnly={readOnly}
           onChange={(field, value) =>
-            onChange?.(setEmergencyPowerSupplyMeasure(data, variant, field, value))
+            publish(setEmergencyPowerSupplyMeasure(data, variant, field, value))
           }
         />
       );
@@ -422,7 +429,7 @@ export function FormEmergencyPowerSupplyTestView({
               readOnly={readOnly}
               fixedWidth={false}
               wideInput
-              onChange={(next) => onChange?.(setEmergencyPowerSupplyDateCode(data, next))}
+              onChange={(next) => publish(setEmergencyPowerSupplyDateCode(data, next))}
             />
           </td>
           <OliveChoiceBlock />
@@ -448,7 +455,7 @@ export function FormEmergencyPowerSupplyTestView({
               value={data.valueFills[key]}
               unit={row.valueUnit}
               readOnly={readOnly}
-              onChange={(next) => onChange?.(setEmergencyPowerSupplyValueFill(data, key, next))}
+              onChange={(next) => publish(setEmergencyPowerSupplyValueFill(data, key, next))}
             />
           </td>
           <OliveChoiceBlock />
@@ -496,7 +503,7 @@ export function FormEmergencyPowerSupplyTestView({
                       value={data.testType.specify}
                       readOnly={readOnly}
                       onChange={(next) =>
-                        onChange?.(setEmergencyPowerSupplyTestTypeSpecify(data, next))
+                        publish(setEmergencyPowerSupplyTestTypeSpecify(data, next))
                       }
                     />
                   ) : null}
@@ -506,7 +513,7 @@ export function FormEmergencyPowerSupplyTestView({
                   choice={choice}
                   readOnly={readOnly}
                   onChoice={(next) =>
-                    onChange?.(setEmergencyPowerSupplyTestTypeChoice(data, opt.key, next))
+                    publish(setEmergencyPowerSupplyTestTypeChoice(data, opt.key, next))
                   }
                 />
               </tr>
@@ -533,14 +540,102 @@ export function FormEmergencyPowerSupplyTestView({
           rowId={row.id}
           choice={rowValue.choice}
           readOnly={readOnly}
-          onChoice={(choice) => onChange?.(setEmergencyPowerSupplyTestChoice(data, row.id, choice))}
+          onChoice={(choice) => publish(setEmergencyPowerSupplyTestChoice(data, row.id, choice))}
         />
       </tr>
     );
   };
 
+  const generatorSection = (
+    <div className="epst-generator">
+      <div className="epst-generator-title">{EMERGENCY_POWER_SUPPLY_GENERATOR_TITLE}</div>
+      <table className="epst-table epst-table--generator">
+        <colgroup>
+          <col className="epst-col-letter" />
+          <col className="epst-col-desc" />
+          <col className="epst-col-yes" />
+          <col className="epst-col-no" />
+          <col className="epst-col-na" />
+        </colgroup>
+        <tbody>
+          {EMERGENCY_POWER_SUPPLY_GENERATOR_ROWS.map((row, index) => {
+            if (isLogicalTemplateLineCollapsed(rawValue, row.id)) return null;
+            const rowValue = data.checklist[row.id] ?? { choice: null };
+            return (
+              <tr
+                key={row.id}
+                className={cn('epst-row', index % 2 === 1 && 'epst-row--alt')}
+                data-ba-line-row=""
+                data-ba-line-row-hide={row.id}
+                data-ba-line-row-clear={checklistLineClearIds(row.id)}
+              >
+                <td className="epst-td epst-td--letter">{row.letter}</td>
+                <td className="epst-td epst-td--desc">
+                  <EditableRowText rowId={row.id} text={row.text} className="epst-desc-text" />
+                </td>
+                <ChoiceCells
+                  rowId={row.id}
+                  choice={rowValue.choice}
+                  readOnly={readOnly}
+                  onChoice={(choice) =>
+                    publish(setEmergencyPowerSupplyTestChoice(data, row.id, choice))
+                  }
+                />
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const mainChecklistTable = (
+    <table className="epst-table">
+      <colgroup>
+        <col className="epst-col-letter" />
+        <col className="epst-col-desc" />
+        <col className="epst-col-yes" />
+        <col className="epst-col-no" />
+        <col className="epst-col-na" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th className="epst-th epst-th--letter" aria-hidden="true" />
+          <th className="epst-th epst-th--intro" aria-hidden="true" />
+          <ChoiceColumnHeader
+            className="epst-th epst-th--yes"
+            readOnly={readOnly}
+            applyLabel="Set all rows to Yes"
+            onApply={() => applyColumn('yes')}
+          >
+            Yes
+          </ChoiceColumnHeader>
+          <ChoiceColumnHeader
+            className="epst-th epst-th--no"
+            readOnly={readOnly}
+            applyLabel="Set all rows to No"
+            onApply={() => applyColumn('no')}
+          >
+            No
+          </ChoiceColumnHeader>
+          <ChoiceColumnHeader
+            className="epst-th epst-th--na"
+            readOnly={readOnly}
+            applyLabel="Set all rows to N/A"
+            onApply={() => applyColumn('na')}
+          >
+            N/A
+          </ChoiceColumnHeader>
+        </tr>
+      </thead>
+      <tbody>
+        {EMERGENCY_POWER_SUPPLY_TEST_ROWS.map((row, index) => renderMainRow(row, index))}
+      </tbody>
+    </table>
+  );
+
   return (
-    <div className="epst-panel">
+    <div className={cn('epst-panel', powerSuppliesStacked && 'epst-panel--stacked')}>
       <div className="epst-banner">
         <div className="epst-banner-line">{EMERGENCY_POWER_SUPPLY_TEST_SUBTITLE}</div>
         <div className="epst-banner-line">{EMERGENCY_POWER_SUPPLY_TEST_REF}</div>
@@ -551,13 +646,13 @@ export function FormEmergencyPowerSupplyTestView({
           label={EMERGENCY_POWER_SUPPLY_TEST_FIELD_LOCATION_LABEL}
           value={data.fieldLocation}
           readOnly={readOnly}
-          onChange={(next) => onChange?.(setEmergencyPowerSupplyTestFieldLocation(data, next))}
+          onChange={(next) => publish(setEmergencyPowerSupplyTestFieldLocation(data, next))}
         />
         <InfoRow
           label={EMERGENCY_POWER_SUPPLY_TEST_IDENTIFICATION_LABEL}
           value={data.identification}
           readOnly={readOnly}
-          onChange={(next) => onChange?.(setEmergencyPowerSupplyTestIdentification(data, next))}
+          onChange={(next) => publish(setEmergencyPowerSupplyTestIdentification(data, next))}
         />
       </div>
 
@@ -572,7 +667,7 @@ export function FormEmergencyPowerSupplyTestView({
                 checked={data.providedBy[opt.id] ?? false}
                 readOnly={readOnly}
                 onChange={(checked) =>
-                  onChange?.(toggleEmergencyPowerSupplyProvidedBy(data, opt.id, checked))
+                  publish(toggleEmergencyPowerSupplyProvidedBy(data, opt.id, checked))
                 }
               />
             ))}
@@ -588,7 +683,7 @@ export function FormEmergencyPowerSupplyTestView({
                 checked={data.batteryType[opt.id] ?? false}
                 readOnly={readOnly}
                 onChange={(checked) =>
-                  onChange?.(toggleEmergencyPowerSupplyBatteryType(data, opt.id, checked))
+                  publish(toggleEmergencyPowerSupplyBatteryType(data, opt.id, checked))
                 }
               />
             ))}
@@ -601,7 +696,7 @@ export function FormEmergencyPowerSupplyTestView({
               className="epst-spec-input"
               value={data.batteryCapacity}
               readOnly={readOnly}
-              onChange={(next) => onChange?.(setEmergencyPowerSupplyBatteryCapacity(data, next))}
+              onChange={(next) => publish(setEmergencyPowerSupplyBatteryCapacity(data, next))}
             />
             <span className="epst-spec-unit">AH</span>
           </span>
@@ -625,7 +720,7 @@ export function FormEmergencyPowerSupplyTestView({
                     className="epst-spec-radio"
                     name="epst-nbc-time"
                     checked={data.nbcAlarmTime === opt.id}
-                    onChange={() => onChange?.(setEmergencyPowerSupplyNbcAlarmTime(data, opt.id))}
+                    onChange={() => publish(setEmergencyPowerSupplyNbcAlarmTime(data, opt.id))}
                   />
                   <span>{opt.label}</span>
                 </label>
@@ -635,91 +730,17 @@ export function FormEmergencyPowerSupplyTestView({
         </div>
       </div>
 
-      <div className="epst-table-wrap">
-        <table className="epst-table">
-          <colgroup>
-            <col className="epst-col-letter" />
-            <col className="epst-col-desc" />
-            <col className="epst-col-yes" />
-            <col className="epst-col-no" />
-            <col className="epst-col-na" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th className="epst-th epst-th--letter" aria-hidden="true" />
-              <th className="epst-th epst-th--intro" aria-hidden="true" />
-              <ChoiceColumnHeader
-                className="epst-th epst-th--yes"
-                readOnly={readOnly}
-                applyLabel="Set all rows to Yes"
-                onApply={() => applyColumn('yes')}
-              >
-                Yes
-              </ChoiceColumnHeader>
-              <ChoiceColumnHeader
-                className="epst-th epst-th--no"
-                readOnly={readOnly}
-                applyLabel="Set all rows to No"
-                onApply={() => applyColumn('no')}
-              >
-                No
-              </ChoiceColumnHeader>
-              <ChoiceColumnHeader
-                className="epst-th epst-th--na"
-                readOnly={readOnly}
-                applyLabel="Set all rows to N/A"
-                onApply={() => applyColumn('na')}
-              >
-                N/A
-              </ChoiceColumnHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {EMERGENCY_POWER_SUPPLY_TEST_ROWS.map((row, index) => renderMainRow(row, index))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="epst-generator">
-        <div className="epst-generator-title">{EMERGENCY_POWER_SUPPLY_GENERATOR_TITLE}</div>
-        <table className="epst-table epst-table--generator">
-          <colgroup>
-            <col className="epst-col-letter" />
-            <col className="epst-col-desc" />
-            <col className="epst-col-yes" />
-            <col className="epst-col-no" />
-            <col className="epst-col-na" />
-          </colgroup>
-          <tbody>
-            {EMERGENCY_POWER_SUPPLY_GENERATOR_ROWS.map((row, index) => {
-              if (isLogicalTemplateLineCollapsed(rawValue, row.id)) return null;
-              const rowValue = data.checklist[row.id] ?? { choice: null };
-              return (
-                <tr
-                  key={row.id}
-                  className={cn('epst-row', index % 2 === 1 && 'epst-row--alt')}
-                  data-ba-line-row=""
-                  data-ba-line-row-hide={row.id}
-                  data-ba-line-row-clear={checklistLineClearIds(row.id)}
-                >
-                  <td className="epst-td epst-td--letter">{row.letter}</td>
-                  <td className="epst-td epst-td--desc">
-                    <EditableRowText rowId={row.id} text={row.text} className="epst-desc-text" />
-                  </td>
-                  <ChoiceCells
-                    rowId={row.id}
-                    choice={rowValue.choice}
-                    readOnly={readOnly}
-                    onChoice={(choice) =>
-                      onChange?.(setEmergencyPowerSupplyTestChoice(data, row.id, choice))
-                    }
-                  />
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      {powerSuppliesStacked ? (
+        <>
+          <div className="epst-table-wrap">{mainChecklistTable}</div>
+          {generatorSection}
+        </>
+      ) : (
+        <div className="epst-table-wrap">
+          <div className="epst-table-main">{mainChecklistTable}</div>
+          {generatorSection}
+        </div>
+      )}
     </div>
   );
 }

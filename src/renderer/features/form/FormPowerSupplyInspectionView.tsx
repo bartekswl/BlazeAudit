@@ -21,7 +21,7 @@ import { VisibleWidthInput } from './VisibleWidthInput';
 
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
-import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import { isLogicalTemplateLineCollapsed, mergeElementValuePatch } from '../../../shared/form/rowTextOverrides';
 import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
@@ -108,9 +108,11 @@ export function FormPowerSupplyInspectionView({
 }: {
   value: unknown;
   readOnly?: boolean;
-  onChange?: (value: PowerSupplyInspectionValue) => void;
+  onChange?: (value: unknown) => void;
 }) {
   const data = normalizePowerSupplyInspectionValue(rawValue);
+  const publish = (next: PowerSupplyInspectionValue) =>
+    onChange?.(mergeElementValuePatch(rawValue, next));
   const choosableIds = POWER_SUPPLY_INSPECTION_ROWS.map((row) => row.id);
 
   const applyColumn = (variant: PowerSupplyInspectionChoice) => {
@@ -120,7 +122,7 @@ export function FormPowerSupplyInspectionView({
     for (const id of choosableIds) {
       nextData = setPowerSupplyInspectionChoice(nextData, id, next);
     }
-    onChange?.(nextData);
+    publish(nextData);
   };
 
   return (
@@ -135,25 +137,25 @@ export function FormPowerSupplyInspectionView({
           label={POWER_SUPPLY_INSPECTION_FIELD_LOCATION_LABEL}
           value={data.fieldLocation}
           readOnly={readOnly}
-          onChange={(next) => onChange?.(setPowerSupplyInspectionFieldLocation(data, next))}
+          onChange={(next) => publish(setPowerSupplyInspectionFieldLocation(data, next))}
         />
         <InfoRow
           label={POWER_SUPPLY_INSPECTION_IDENTIFICATION_LABEL}
           value={data.identification}
           readOnly={readOnly}
-          onChange={(next) => onChange?.(setPowerSupplyInspectionIdentification(data, next))}
+          onChange={(next) => publish(setPowerSupplyInspectionIdentification(data, next))}
         />
         <InfoRow
           label={POWER_SUPPLY_INSPECTION_DISCONNECT_LOCATION_LABEL}
           value={data.disconnectLocation}
           readOnly={readOnly}
-          onChange={(next) => onChange?.(setPowerSupplyInspectionDisconnectLocation(data, next))}
+          onChange={(next) => publish(setPowerSupplyInspectionDisconnectLocation(data, next))}
         />
         <InfoRow
           label={POWER_SUPPLY_INSPECTION_BREAKER_LABEL}
           value={data.breakerIdentification}
           readOnly={readOnly}
-          onChange={(next) => onChange?.(setPowerSupplyInspectionBreakerIdentification(data, next))}
+          onChange={(next) => publish(setPowerSupplyInspectionBreakerIdentification(data, next))}
         />
       </div>
 
@@ -214,8 +216,8 @@ export function FormPowerSupplyInspectionView({
                       groupName={`psi-${row.id}`}
                       readOnly={readOnly}
                       variant={variant}
-                      onSelect={() => onChange?.(setPowerSupplyInspectionChoice(data, row.id, variant))}
-                      onClear={() => onChange?.(setPowerSupplyInspectionChoice(data, row.id, null))}
+                      onSelect={() => publish(setPowerSupplyInspectionChoice(data, row.id, variant))}
+                      onClear={() => publish(setPowerSupplyInspectionChoice(data, row.id, null))}
                     />
                   ))}
                 </tr>

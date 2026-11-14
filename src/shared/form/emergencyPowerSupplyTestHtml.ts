@@ -173,7 +173,6 @@ export function renderEmergencyPowerSupplyTestHtml(value: unknown): string {
       <div class="epst-spec-row"><span class="epst-spec-label">${escapeHtml(EMERGENCY_POWER_SUPPLY_BATTERY_CAPACITY_LABEL)}</span><span class="epst-spec-inline">${renderFieldValue(data.batteryCapacity, false, true)}<span class="epst-spec-unit">AH</span></span></div>
       <div class="epst-spec-row"><span class="epst-spec-label">${escapeHtml(EMERGENCY_POWER_SUPPLY_NBC_TIME_LABEL)}</span><span class="epst-spec-options">${specNbc}</span></div>
     </div>
-    <div class="epst-table-wrap"><table class="epst-table">${EPST_COLGROUP}<thead><tr><th class="epst-th epst-th--letter"></th><th class="epst-th epst-th--intro"></th><th class="epst-th epst-th--yes">Yes</th><th class="epst-th epst-th--no">No</th><th class="epst-th epst-th--na">N/A</th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="epst-generator"><div class="epst-generator-title">${escapeHtml(EMERGENCY_POWER_SUPPLY_GENERATOR_TITLE)}</div><table class="epst-table epst-table--generator">${EPST_COLGROUP}<tbody>${generator}</tbody></table></div>
+    <div class="epst-table-wrap"><table class="epst-table">${EPST_COLGROUP}<thead><tr><th class="epst-th epst-th--letter"></th><th class="epst-th epst-th--intro"></th><th class="epst-th epst-th--yes">Yes</th><th class="epst-th epst-th--no">No</th><th class="epst-th epst-th--na">N/A</th></tr></thead><tbody>${body}</tbody></table></div><div class="epst-generator"><div class="epst-generator-title">${escapeHtml(EMERGENCY_POWER_SUPPLY_GENERATOR_TITLE)}</div><table class="epst-table epst-table--generator">${EPST_COLGROUP}<tbody>${generator}</tbody></table></div>
   </div>`;
 }

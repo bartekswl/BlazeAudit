@@ -4,6 +4,7 @@ export * from './layout';
 export * from './disclaimer';
 export * from './validate';
 export * from './values';
+export * from './reconcileBuiltinForm';
 export * from './guards';
 export * from './migratePowerSupplyPageLayout';
 export * from './migrateEmergencyLightingLegendPage';

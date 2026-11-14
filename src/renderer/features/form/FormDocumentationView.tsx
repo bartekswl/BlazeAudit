@@ -24,12 +24,24 @@ import { DocRuleRows } from './DocRuleRows';
 import { cn } from '../../lib/cn';
 
 import { checklistLineClearIds } from '../../../shared/form/formLineSelect';
-import { isLogicalTemplateLineCollapsed } from '../../../shared/form/rowTextOverrides';
+import {
+  isLogicalTemplateLineCollapsed,
+  mergeElementValuePatch,
+} from '../../../shared/form/rowTextOverrides';
 import { ChoiceColumnHeader } from './ChoiceColumnHeader';
 import { EditableRowLetter, EditableRowText } from './EditableRowText';
 import { FormCheckGlyph } from './FormCheckGlyph';
 import { formToggleRadioInputProps } from './formToggleRadioInputProps';
 import { VisibleWidthInput } from './VisibleWidthInput';
+
+function publishDocumentationValue(
+  rawValue: unknown,
+  data: DocumentationValue,
+  onChange?: (value: unknown) => void,
+): void {
+  if (!onChange) return;
+  onChange(mergeElementValuePatch(rawValue, data));
+}
 
 function ChoiceCell({
   choice,
@@ -215,6 +227,7 @@ function DocRuledNotes({
           value={clamped}
           spellCheck={false}
           onChange={(e) => onChange?.(clampLinedNotesToMaxLines(e.target.value, lineCount))}
+          rows={lineCount}
           onKeyDown={(e) => {
             if (e.key !== 'Enter') return;
             const lines = clamped.split('\n').length;
@@ -285,7 +298,7 @@ export function FormDocumentationView({
 }: {
   value: unknown;
   readOnly?: boolean;
-  onChange?: (value: DocumentationValue) => void;
+  onChange?: (value: unknown) => void;
 }) {
   const data = normalizeDocumentationValue(rawValue);
 
@@ -295,7 +308,7 @@ export function FormDocumentationView({
   ];
 
   const setChoice = (rowId: string, choice: DocumentationChoice | null) => {
-    onChange?.(setDocumentationChoice(data, rowId, choice));
+    publishDocumentationValue(rawValue, setDocumentationChoice(data, rowId, choice), onChange);
   };
 
   const applyColumn = (variant: DocumentationChoice) => {
@@ -308,7 +321,7 @@ export function FormDocumentationView({
     for (const id of ids) {
       nextData = setDocumentationChoice(nextData, id, next);
     }
-    onChange?.(nextData);
+    publishDocumentationValue(rawValue, nextData, onChange);
   };
 
   return (
@@ -380,7 +393,9 @@ export function FormDocumentationView({
                     row={row}
                     rowValue={rowValue}
                     readOnly={readOnly}
-                    onMeasure={(next) => onChange?.(setDocumentationMeasure(data, next))}
+                    onMeasure={(next) =>
+                      publishDocumentationValue(rawValue, setDocumentationMeasure(data, next), onChange)
+                    }
                   />
                   <ChoiceCells
                     rowId={row.id}
@@ -400,7 +415,13 @@ export function FormDocumentationView({
               onChoice={setChoice}
             />
 
-            <tr className="doc-row doc-row--notes">
+            {isLogicalTemplateLineCollapsed(rawValue, DOCUMENTATION_J_ROW.id) ? null : (
+            <tr
+              className="doc-row doc-row--notes"
+              data-ba-line-row=""
+              data-ba-line-row-hide={DOCUMENTATION_J_ROW.id}
+              data-ba-line-row-clear={checklistLineClearIds(DOCUMENTATION_J_ROW.id)}
+            >
               <td className="doc-td doc-td--letter">{DOCUMENTATION_J_ROW.letter}</td>
               <td className="doc-td doc-td--desc doc-td--notes" colSpan={4}>
                 <span className="doc-desc-text">{DOCUMENTATION_J_ROW.text}</span>
@@ -409,10 +430,13 @@ export function FormDocumentationView({
                   className="doc-ruled-stack--location"
                   value={data.locationNotes}
                   readOnly={readOnly}
-                  onChange={(next) => onChange?.(setDocumentationLocationNotes(data, next))}
+                  onChange={(next) =>
+                    publishDocumentationValue(rawValue, setDocumentationLocationNotes(data, next), onChange)
+                  }
                 />
               </td>
             </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -425,7 +449,9 @@ export function FormDocumentationView({
             className="doc-ruled-stack--annex"
             value={data.annexContents}
             readOnly={readOnly}
-            onChange={(next) => onChange?.(setDocumentationAnnexContents(data, next))}
+            onChange={(next) =>
+              publishDocumentationValue(rawValue, setDocumentationAnnexContents(data, next), onChange)
+            }
           />
         </div>
       </div>

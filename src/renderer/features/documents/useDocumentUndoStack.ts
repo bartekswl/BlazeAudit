@@ -25,6 +25,7 @@ export function useDocumentUndoStack<T>() {
     const now = Date.now();
     if (
       coalesceKey &&
+      coalesceKey !== 'template-line' &&
       coalesceRef.current?.key === coalesceKey &&
       now - coalesceRef.current.at < COALESCE_MS
     ) {

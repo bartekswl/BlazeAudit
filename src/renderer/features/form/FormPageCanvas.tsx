@@ -18,7 +18,10 @@ import { FormPageMetaHeader } from './FormPageMetaHeader';
 import { FormPageHeaderBranding } from './FormPageHeaderBranding';
 import { FormElementView } from './FormElementView';
 import { FormExtraPageControlsBar } from './IndividualDeviceRecordPageControls';
-import { pageHasHiddenTemplateLines, pageHasRowTextEditableElements } from '../../../shared/form/templateLinePage';
+import {
+  pageHasHiddenTemplateLines,
+  pageShouldUseSheetFloorLock,
+} from '../../../shared/form/templateLinePage';
 import { useFormPageSheetFloorLock } from './useFormPageSheetFloorLock';
 
 export type FormPageExtraControlsConfig = {
@@ -164,14 +167,14 @@ function FormPageCanvasInner({
   );
 
   const sheetRef = useRef<HTMLDivElement>(null);
-  const templateLinePage = pageHasRowTextEditableElements(page);
+  const sheetFloorLock = pageShouldUseSheetFloorLock(page);
   const hasTemplateLineRemovals = useMemo(
     () => pageHasHiddenTemplateLines(page, values),
     [page, values],
   );
   useFormPageSheetFloorLock(
     sheetRef,
-    templateLinePage && !fixedPageLayout,
+    sheetFloorLock && !fixedPageLayout,
     hasTemplateLineRemovals,
     values,
   );
@@ -429,6 +432,7 @@ function FormPageCanvasInner({
                     readOnly={readOnly}
                     context={context ?? null}
                     totalPages={totalPages}
+                    powerSuppliesStacked={hasPowerSuppliesPage}
                     bindingText={
                       element.kind === 'text' && element.binding
                         ? resolveFormBinding(element.binding, context ?? null, template)

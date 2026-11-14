@@ -12,6 +12,7 @@ import {
   migrateFormInspectionEmergencyLightingLegendPage,
   migrateFormInspectionIdrRowGaps,
   migrateFormInspectionPowerSupplyLayout,
+  reconcileBuiltinFormInspectionDocument,
   syncFormDocumentInspectionDate,
   syncFormDocumentProjectNumber,
   validateFormInspectionDocument,
@@ -84,6 +85,21 @@ function toInspection(row: InspectionRow): Inspection {
     row.template_kind === 'builtin' || row.template_kind === 'custom'
       ? row.template_kind
       : null;
+  let document = parseInspectionDocument(row.document);
+  if (
+    templateKind === 'builtin' &&
+    row.template_id &&
+    isFormInspectionDocument(document)
+  ) {
+    const builtin = builtinTemplates.getBuiltinTemplate(row.template_id);
+    if (builtin) {
+      document = reconcileBuiltinFormInspectionDocument(
+        document,
+        builtin.seedId,
+        builtin.form,
+      );
+    }
+  }
   return {
     id: row.id,
     clientId: row.client_id,
@@ -94,7 +110,7 @@ function toInspection(row: InspectionRow): Inspection {
     title: row.title,
     status: row.status as Inspection['status'],
     inspector: row.inspector,
-    document: parseInspectionDocument(row.document),
+    document,
     inspectedAt: row.inspected_at,
     projectNumber: row.project_number ?? '',
     cadence: row.cadence,
