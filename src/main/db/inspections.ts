@@ -262,16 +262,16 @@ export function createInspectionFromTemplate(input: CreateInspectionInput): Insp
       ),
       inspectedAt,
     );
-    defaultTitle = `${builtin.name} — ${client.name}`;
+    defaultTitle = `${builtin.name} - ${client.name}`;
   } else {
     const template = templateRegistry.getTemplate(input.templateId, input.templateKind);
     if (!template) throw new Error(`Template not found: ${input.templateKind}:${input.templateId}`);
     document = inspectionSnapshotFromTemplate(template.document, {
       clientId: input.clientId,
-      title: input.title?.trim() || `${template.name} — ${client.name}`,
+      title: input.title?.trim() || `${template.name} - ${client.name}`,
       inspectionDate: inspectedAt,
     });
-    defaultTitle = `${template.name} — ${client.name}`;
+    defaultTitle = `${template.name} - ${client.name}`;
   }
 
   const title = input.title?.trim() || defaultTitle;
@@ -334,12 +334,11 @@ export function createInspectionFromPdfExport(
 ): Inspection {
   const src = payload.inspection;
 
-  let clientId = src.clientId;
-  const existingClient = getDatabase()
-    .prepare('SELECT id FROM clients WHERE id = ?')
-    .get(clientId) as { id: string } | undefined;
+  const incomingName = payload.client?.name?.trim() || src.clientName?.trim() || '';
+  const matchedClient = clients.findExistingClientForImport(src.clientId, incomingName);
+  let clientId = matchedClient?.id ?? src.clientId;
 
-  if (!existingClient) {
+  if (!matchedClient) {
     if (payload.client && payload.client.id) {
       // Auto-create from embedded client snapshot (export schema v2). No DB migration.
       const created = clients.ensureClientFromExport(payload.client);
@@ -520,6 +519,48 @@ export function duplicateInspection(sourceId: string): Inspection {
       updatedAt: now,
     });
 
+  return getInspection(id)!;
+}
+
+/**
+ * Move an inspection to a different client. Only the client link changes —
+ * form field values (including address) are left exactly as stored.
+ */
+export function reassignInspection(id: string, newClientId: string): Inspection {
+  const existing = getInspection(id);
+  if (!existing) throw new Error(`Inspection not found: ${id}`);
+  if (existing.clientId === newClientId) return existing;
+
+  const client = getDatabase()
+    .prepare('SELECT id FROM clients WHERE id = ?')
+    .get(newClientId) as { id: string } | undefined;
+  if (!client) throw new Error(`Client not found: ${newClientId}`);
+
+  let document: InspectionDocument = existing.document;
+  if (isFormInspectionDocument(document)) {
+    document = { ...document, clientId: newClientId };
+  } else {
+    document = {
+      ...document,
+      meta: { ...document.meta, clientId: newClientId },
+    };
+  }
+
+  const now = new Date().toISOString();
+  const result = getDatabase()
+    .prepare(
+      `UPDATE inspections
+         SET client_id = @clientId, document = @document, updated_at = @updatedAt
+       WHERE id = @id`,
+    )
+    .run({
+      id,
+      clientId: newClientId,
+      document: JSON.stringify(document),
+      updatedAt: now,
+    });
+
+  if (result.changes === 0) throw new Error(`Inspection not found: ${id}`);
   return getInspection(id)!;
 }
 

@@ -1,0 +1,486 @@
+/* Scoped styles for the Custom Template A4 Studio (src/renderer/features/customTemplates/). */
+
+.ct-studio-viewport {
+  background:
+    radial-gradient(circle at 50% 0%, rgb(249 115 22 / 0.05), transparent 60%),
+    rgb(0 0 0 / 0.14);
+}
+
+[data-theme='light'] .ct-studio-viewport {
+  background:
+    radial-gradient(circle at 50% 0%, rgb(232 93 4 / 0.06), transparent 60%),
+    rgb(15 23 42 / 0.045);
+}
+
+/* ==========================================================================
+   A4 Paper Sheet — Locked Physical Proportions & Printable Area
+   ========================================================================== */
+
+.ct-a4-sheet {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 6px;
+  user-select: none;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* Default dark-theme paper tokens (matching .form-page-sheet) */
+  --ct-paper-bg: #161514;
+  --ct-paper-border: rgb(255 255 255 / 0.12);
+  --ct-paper-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.04),
+    0 16px 40px rgb(0 0 0 / 0.5);
+  --ct-ink-primary: #f5f5f4;
+  --ct-ink-secondary: #d6d3d1;
+  --ct-ink-muted: #a8a29e;
+  --ct-ink-faint: #78716c;
+  --ct-surface-card: rgb(28 25 23 / 0.85);
+  --ct-surface-subtle: rgb(255 255 255 / 0.03);
+  --ct-surface-input: rgb(12 10 9 / 0.65);
+  --ct-line-strong: rgb(148 163 184 / 0.36);
+  --ct-line-soft: rgb(148 163 184 / 0.22);
+  --ct-table-head-bg: linear-gradient(180deg, rgb(41 37 36 / 0.95) 0%, rgb(28 25 23 / 0.95) 100%);
+  --ct-table-head-text: #e7e5e4;
+  --ct-banner-bg: linear-gradient(90deg, rgb(249 115 22 / 0.16) 0%, rgb(38 38 38 / 0.65) 100%);
+  --ct-dot-minor: rgb(255 255 255 / 0.15);
+  --ct-dot-major: rgb(249 115 22 / 0.28);
+  --ct-printable-guide: rgb(255 255 255 / 0.12);
+
+  background: var(--ct-paper-bg);
+  color: var(--ct-ink-primary);
+  border: 1px solid var(--ct-paper-border);
+  box-shadow: var(--ct-paper-shadow);
+}
+
+[data-theme='light'] .ct-a4-sheet,
+.ct-a4-sheet.ct-a4-sheet--paper-white {
+  --ct-paper-bg: #ffffff;
+  --ct-paper-border: #d4d4d8;
+  --ct-paper-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.04),
+    0 12px 32px rgb(15 23 42 / 0.12);
+  --ct-ink-primary: #171717;
+  --ct-ink-secondary: #334155;
+  --ct-ink-muted: #64748b;
+  --ct-ink-faint: #94a3b8;
+  --ct-surface-card: #f8fafc;
+  --ct-surface-subtle: #f1f5f9;
+  --ct-surface-input: #ffffff;
+  --ct-line-strong: #94a3b8;
+  --ct-line-soft: #cbd5e1;
+  --ct-table-head-bg: linear-gradient(180deg, #f8fafc 0%, #e8eef4 100%);
+  --ct-table-head-text: #1e293b;
+  --ct-banner-bg: linear-gradient(90deg, rgb(249 115 22 / 0.12) 0%, #f1f5f9 100%);
+  --ct-dot-minor: rgb(100 116 139 / 0.28);
+  --ct-dot-major: rgb(234 88 12 / 0.36);
+  --ct-printable-guide: rgb(148 163 184 / 0.45);
+}
+
+/* Printable safe-margin crop marks at the 4 corners of the printable box */
+.ct-crop-corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  border-color: var(--ct-printable-guide);
+}
+.ct-crop-corner--tl {
+  border-top: 1px solid var(--ct-printable-guide);
+  border-left: 1px solid var(--ct-printable-guide);
+}
+.ct-crop-corner--tr {
+  border-top: 1px solid var(--ct-printable-guide);
+  border-right: 1px solid var(--ct-printable-guide);
+}
+.ct-crop-corner--bl {
+  border-bottom: 1px solid var(--ct-printable-guide);
+  border-left: 1px solid var(--ct-printable-guide);
+}
+.ct-crop-corner--br {
+  border-bottom: 1px solid var(--ct-printable-guide);
+  border-right: 1px solid var(--ct-printable-guide);
+}
+
+/* ==========================================================================
+   Dot Grid Layer (14px minor dots, 84px = 6-dot major alignment accents)
+   ========================================================================== */
+
+.ct-dot-grid {
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.ct-dot-grid--visible {
+  outline: 1px dashed var(--ct-printable-guide);
+  outline-offset: 0;
+  background-image:
+    radial-gradient(circle, var(--ct-dot-major) 1.45px, transparent 1.55px),
+    radial-gradient(circle, var(--ct-dot-minor) 1.05px, transparent 1.15px);
+  background-size:
+    84px 84px,
+    14px 14px;
+  background-position:
+    0 0,
+    0 0;
+}
+
+.ct-grid-ghost {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  border-radius: 4px;
+  border: 1.5px dashed #f97316;
+  background: rgb(249 115 22 / 0.11);
+  transition:
+    left 45ms linear,
+    top 45ms linear,
+    width 45ms linear,
+    height 45ms linear;
+}
+
+.ct-grid-ghost--invalid {
+  border-color: #ef4444;
+  background: rgb(239 68 68 / 0.12);
+}
+
+/* ==========================================================================
+   Grid Item Wrapper, Selection Ring & 8-Direction Resize Handles
+   ========================================================================== */
+
+.ct-grid-item {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 4px;
+  transition: box-shadow 120ms ease;
+}
+
+.ct-grid-item--editable:hover {
+  box-shadow: 0 0 0 1px rgb(249 115 22 / 0.45);
+}
+
+.ct-grid-item--selected {
+  z-index: 20;
+  box-shadow:
+    0 0 0 1.5px #f97316,
+    0 6px 20px rgb(0 0 0 / 0.14);
+}
+
+.ct-grid-item--locked.ct-grid-item--selected {
+  box-shadow:
+    0 0 0 1.5px #0ea5e9,
+    0 6px 18px rgb(14 165 233 / 0.14);
+}
+
+.ct-grid-item--overlap {
+  box-shadow: 0 0 0 1.5px #f59e0b !important;
+}
+
+.ct-resize-handle {
+  position: absolute;
+  z-index: 30;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: #ffffff;
+  border: 1.5px solid #f97316;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.28);
+}
+
+.ct-resize-handle:hover {
+  background: #f97316;
+  transform: scale(1.15);
+}
+
+.ct-resize-handle--nw {
+  top: -5px;
+  left: -5px;
+  cursor: nwse-resize;
+}
+.ct-resize-handle--ne {
+  top: -5px;
+  right: -5px;
+  cursor: nesw-resize;
+}
+.ct-resize-handle--sw {
+  bottom: -5px;
+  left: -5px;
+  cursor: nesw-resize;
+}
+.ct-resize-handle--se {
+  bottom: -5px;
+  right: -5px;
+  cursor: nwse-resize;
+}
+.ct-resize-handle--n {
+  top: -5px;
+  left: calc(50% - 7px);
+  width: 14px;
+  height: 7px;
+  cursor: ns-resize;
+}
+.ct-resize-handle--s {
+  bottom: -5px;
+  left: calc(50% - 7px);
+  width: 14px;
+  height: 7px;
+  cursor: ns-resize;
+}
+.ct-resize-handle--w {
+  left: -5px;
+  top: calc(50% - 7px);
+  width: 7px;
+  height: 14px;
+  cursor: ew-resize;
+}
+.ct-resize-handle--e {
+  right: -5px;
+  top: calc(50% - 7px);
+  width: 7px;
+  height: 14px;
+  cursor: ew-resize;
+}
+
+/* ==========================================================================
+   Report-Styled Building Blocks inside A4 Sheet
+   ========================================================================== */
+
+.ct-inline-input {
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  border: 0;
+  outline: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ct-inline-input:focus {
+  background: rgb(249 115 22 / 0.08);
+  border-radius: 2px;
+}
+
+/* Section Banner (heading) */
+.ct-heading-banner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 4px 10px;
+  border-left: 3.5px solid #f97316;
+  border-top: 1px solid var(--ct-line-soft);
+  border-right: 1px solid var(--ct-line-soft);
+  border-bottom: 1px solid var(--ct-line-soft);
+  border-radius: 3px;
+  background: var(--ct-banner-bg);
+  color: var(--ct-ink-primary);
+  overflow: hidden;
+}
+
+/* Checklist Panel (matches Sprinkler / ULC report checklists) */
+.ct-checklist-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--ct-line-strong);
+  border-radius: 4px;
+  background: var(--ct-surface-input);
+  overflow: hidden;
+  font-size: 10.5px;
+  line-height: 1.25;
+}
+
+.ct-panel-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 3px 8px;
+  background: var(--ct-table-head-bg);
+  border-bottom: 1px solid var(--ct-line-strong);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ct-table-head-text);
+  flex-shrink: 0;
+}
+
+.ct-report-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.ct-report-th {
+  padding: 3px 6px;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--ct-line-strong);
+  border-right: 1px solid var(--ct-line-soft);
+  background: var(--ct-surface-subtle);
+  color: var(--ct-ink-secondary);
+}
+
+.ct-report-th:last-child {
+  border-right: 0;
+}
+
+.ct-report-th--pass {
+  background: #1b6b2f;
+  color: #ffffff;
+  text-align: center;
+}
+
+.ct-report-th--fail {
+  background: #9b1c1c;
+  color: #ffffff;
+  text-align: center;
+}
+
+.ct-report-th--na {
+  background: #334155;
+  color: #ffffff;
+  text-align: center;
+}
+
+.ct-report-td {
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--ct-line-soft);
+  border-right: 1px solid var(--ct-line-soft);
+  color: var(--ct-ink-primary);
+  vertical-align: middle;
+}
+
+.ct-report-td:last-child {
+  border-right: 0;
+}
+
+.ct-check-box-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--ct-line-strong);
+  border-radius: 2px;
+  background: var(--ct-paper-bg);
+}
+
+/* Data / Equipment Table (matches .rrg-panel) */
+.ct-data-table-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--ct-line-strong);
+  border-radius: 4px;
+  background: var(--ct-surface-input);
+  overflow: hidden;
+  font-size: 10.5px;
+}
+
+.ct-accent-strip {
+  height: 3px;
+  width: 100%;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #f97316 0%, #ea580c 100%);
+}
+
+.ct-accent-strip--danger {
+  background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
+}
+
+/* Labeled Data Field (matches .irc-field) */
+.ct-field-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  height: 100%;
+  padding: 4px 6px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.ct-field-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ct-ink-secondary);
+  flex-shrink: 0;
+}
+
+.ct-field-input-well {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--ct-line-strong);
+  border-radius: 3px;
+  background: var(--ct-surface-input);
+  padding: 4px 7px;
+  font-size: 10.5px;
+  color: var(--ct-ink-muted);
+  overflow: hidden;
+}
+
+/* Ruled Write-On Notes (matches .ln-panel) */
+.ct-lined-notes-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--ct-line-strong);
+  border-radius: 4px;
+  background: var(--ct-surface-input);
+  overflow: hidden;
+}
+
+.ct-lined-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: #1e3a5f;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.ct-lined-notes-rows {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 2px 8px 4px;
+}
+
+.ct-lined-rule {
+  width: 100%;
+  border-bottom: 1px solid var(--ct-line-strong);
+  min-height: 14px;
+}
+
+/* Technician Sign-off */
+.ct-signoff-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--ct-line-strong);
+  border-radius: 4px;
+  background: var(--ct-surface-card);
+  overflow: hidden;
+}

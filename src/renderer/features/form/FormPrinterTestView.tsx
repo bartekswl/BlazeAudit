@@ -72,17 +72,19 @@ function ChoiceCell({
 }
 
 function ChoiceCells({
+  elementId,
   rowId,
   rowValue,
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   rowId: string;
   rowValue: { choice: PrinterTestChoice | null };
   readOnly?: boolean;
   onChoice: (choice: PrinterTestChoice | null) => void;
 }) {
-  const groupName = `prt-${rowId}`;
+  const groupName = `prt-${elementId}-${rowId}`;
 
   return (
     <>
@@ -146,10 +148,12 @@ function InfoRow({
 }
 
 export function FormPrinterTestView({
+  elementId,
   value,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (next: PrinterTestValue) => void;
@@ -260,6 +264,7 @@ export function FormPrinterTestView({
                     <EditableRowText rowId={row.id} text={row.text} className="prt-desc-text" />
                   </td>
                   <ChoiceCells
+                    elementId={elementId}
                     rowId={row.id}
                     rowValue={rowValue}
                     readOnly={readOnly}

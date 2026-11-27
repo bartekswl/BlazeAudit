@@ -76,19 +76,21 @@ function ChoiceCell({
 }
 
 function ChoiceCells({
+  elementId,
   rowId,
   rowValue,
   mode,
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   rowId: string;
   rowValue: { choice: FsrcChoice | null };
   mode: FsrcRowDef['choiceMode'];
   readOnly?: boolean;
   onChoice: (choice: FsrcChoice | null) => void;
 }) {
-  const groupName = `fsrc-${rowId}`;
+  const groupName = `fsrc-${elementId}-${rowId}`;
 
   if (mode === 'record-fields') {
     return <td colSpan={3} className="fsrc-td fsrc-td--choice-block" aria-hidden="true" />;
@@ -233,6 +235,7 @@ function fsrcChoosableIds(variant: FsrcChoice): string[] {
 }
 
 function renderFsrcTableRows(
+  elementId: string,
   documentValue: unknown,
   data: FireSignalReceivingCentreInterconnectionValue,
   readOnly: boolean | undefined,
@@ -265,6 +268,7 @@ function renderFsrcTableRows(
             <EditableRowText rowId={subItem.id} text={subItem.text} className="fsrc-desc-text" />
           </td>
           <ChoiceCells
+            elementId={elementId}
             rowId={subItem.id}
             rowValue={data.checklist[subItem.id] ?? { choice: null }}
             mode={row.choiceMode}
@@ -314,6 +318,7 @@ function renderFsrcTableRows(
           ) : null}
         </td>
         <ChoiceCells
+          elementId={elementId}
           rowId={row.id}
           rowValue={rowValue}
           mode={row.choiceMode}
@@ -326,10 +331,12 @@ function renderFsrcTableRows(
 }
 
 export function FormFireSignalReceivingCentreInterconnectionView({
+  elementId,
   value: rawValue,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (next: FireSignalReceivingCentreInterconnectionValue) => void;
@@ -427,7 +434,7 @@ export function FormFireSignalReceivingCentreInterconnectionView({
               </ChoiceColumnHeader>
             </tr>
           </thead>
-          <tbody>{renderFsrcTableRows(rawValue, data, readOnly, emit)}</tbody>
+          <tbody>{renderFsrcTableRows(elementId, rawValue, data, readOnly, emit)}</tbody>
         </table>
       </div>
 

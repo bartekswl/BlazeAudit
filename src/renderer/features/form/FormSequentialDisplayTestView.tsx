@@ -72,17 +72,19 @@ function ChoiceCell({
 }
 
 function ChoiceCells({
+  elementId,
   rowId,
   rowValue,
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   rowId: string;
   rowValue: { choice: SequentialDisplayTestChoice | null };
   readOnly?: boolean;
   onChoice: (choice: SequentialDisplayTestChoice | null) => void;
 }) {
-  const groupName = `asd-${rowId}`;
+  const groupName = `asd-${elementId}-${rowId}`;
 
   return (
     <>
@@ -146,10 +148,12 @@ function InfoRow({
 }
 
 export function FormSequentialDisplayTestView({
+  elementId,
   value,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (next: SequentialDisplayTestValue) => void;
@@ -266,6 +270,7 @@ export function FormSequentialDisplayTestView({
                     <EditableRowText rowId={row.id} text={row.text} className="asd-desc-text" />
                   </td>
                   <ChoiceCells
+                    elementId={elementId}
                     rowId={row.id}
                     rowValue={rowValue}
                     readOnly={readOnly}

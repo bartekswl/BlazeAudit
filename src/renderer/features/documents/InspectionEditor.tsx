@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
-import { Copy, FileDown, Undo2 } from 'lucide-react';
+import { Copy, FileDown, Undo2, Users } from 'lucide-react';
 
 import { CADENCE_PRESETS, cadenceLabel, type CadencePreset } from '../../../shared/cadence';
 
@@ -11,14 +11,16 @@ import { setBlockValue } from '../../../shared/document';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
 import { formatDateTimeCompact } from '../../../shared/dates';
 import { isFormInspectionDocument, isBlockDocument } from '../../../shared/form';
+import type { Client } from '../../../shared/types';
 
 import { BlockFillIn } from './BlockFillIn';
 import { FormInspectionEditor } from './FormInspectionEditor';
+import { ReassignClientDialog } from './ReassignClientDialog';
 import { useRegisterDocumentOutline } from './DocumentOutlineContext';
 import { useDocumentAutosave } from './useDocumentAutosave';
 import { useDocumentUndoHotkey, useDocumentUndoStack } from './useDocumentUndoStack';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { LoadingOverlay } from '../../components/LoadingOverlay';
+import { LoadingOverlay, PdfExportOverlay } from '../../components/LoadingOverlay';
 
 const compactInputCls =
   'w-full min-w-0 rounded border border-white/10 bg-neutral-950 px-2 py-1 text-xs text-neutral-100 outline-none focus:border-flame-500';
@@ -126,6 +128,12 @@ function BlockInspectionEditorInner({
   const [pendingDuplicate, setPendingDuplicate] = useState(false);
 
   const [duplicating, setDuplicating] = useState(false);
+
+  const [reassignOpen, setReassignOpen] = useState(false);
+
+  const [reassignClients, setReassignClients] = useState<Client[]>([]);
+
+  const [reassigning, setReassigning] = useState(false);
 
   const inspectionIdRef = useRef(inspection.id);
 
@@ -346,6 +354,43 @@ function BlockInspectionEditorInner({
     }
   }, [inspection.id, isDirty, onSaved, save]);
 
+  const openReassign = useCallback(async () => {
+    setError(null);
+    try {
+      setReassignClients(await window.blazeaudit.clients.list());
+      setReassignOpen(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load clients.');
+    }
+  }, []);
+
+  const confirmReassign = useCallback(
+    async (clientId: string) => {
+      setReassigning(true);
+      setError(null);
+      try {
+        if (isDirty) {
+          const ok = await save();
+          if (!ok) throw new Error('Save failed before reassign.');
+        }
+        const updated = await window.blazeaudit.inspections.reassign(inspection.id, clientId);
+        setDocument((prev) =>
+          prev.meta.clientId === updated.clientId
+            ? prev
+            : { ...prev, meta: { ...prev.meta, clientId: updated.clientId } },
+        );
+        setReassignOpen(false);
+        onSaved(updated);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to reassign document.');
+        throw e;
+      } finally {
+        setReassigning(false);
+      }
+    },
+    [inspection.id, isDirty, onSaved, save],
+  );
+
   useDocumentAutosave(
     () => {
       void save();
@@ -405,12 +450,23 @@ function BlockInspectionEditorInner({
 
 
 
+  const pdfExportRunRef = useRef(0);
+
+  const cancelPdfExport = useCallback(() => {
+    pdfExportRunRef.current += 1;
+    setExportingPdf(false);
+    void window.blazeaudit.inspections.cancelPdfExport();
+  }, []);
+
   const exportPdf = async () => {
     setPdfMessage(null);
     setError(null);
 
     const targetPath = await window.blazeaudit.inspections.pickPdfPath(inspection.id);
     if (!targetPath) return;
+
+    const runId = pdfExportRunRef.current + 1;
+    pdfExportRunRef.current = runId;
 
     flushSync(() => {
       setExportingPdf(true);
@@ -426,14 +482,18 @@ function BlockInspectionEditorInner({
         undefined,
         targetPath,
       );
+      if (pdfExportRunRef.current !== runId) return;
 
       if (result.saved) {
         setPdfMessage(`PDF saved to ${result.filePath}`);
       }
     } catch (e) {
+      if (pdfExportRunRef.current !== runId) return;
       setError(e instanceof Error ? e.message : 'PDF export failed.');
     } finally {
-      setExportingPdf(false);
+      if (pdfExportRunRef.current === runId) {
+        setExportingPdf(false);
+      }
     }
   };
 
@@ -444,9 +504,10 @@ function BlockInspectionEditorInner({
     <div className="relative flex h-full min-h-0 flex-col gap-2">
 
       {exportingPdf ? (
-        <LoadingOverlay label="Exporting PDF…" />
+        <PdfExportOverlay label="Creating PDF..." onCancel={cancelPdfExport} />
       ) : null}
       {duplicating ? <LoadingOverlay label="Duplicating report…" /> : null}
+      {reassigning ? <LoadingOverlay label="Reassigning…" /> : null}
       {pendingDuplicate ? (
         <ConfirmDialog
           title="Duplicate report?"
@@ -463,6 +524,15 @@ function BlockInspectionEditorInner({
           <p>All other content stays the same.</p>
         </ConfirmDialog>
       ) : null}
+      {reassignOpen ? (
+        <ReassignClientDialog
+          clients={reassignClients}
+          currentClientId={inspection.clientId}
+          documentTitle={title}
+          onClose={() => setReassignOpen(false)}
+          onReassign={confirmReassign}
+        />
+      ) : null}
 
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
 
@@ -470,13 +540,23 @@ function BlockInspectionEditorInner({
 
           <button
             type="button"
-            disabled={duplicating || saveState === 'saving'}
+            disabled={duplicating || reassigning || saveState === 'saving'}
             onClick={() => setPendingDuplicate(true)}
             className="inline-flex items-center gap-1.5 rounded-md border border-flame-500/30 bg-flame-500/10 px-2.5 py-1 text-xs text-flame-300 hover:bg-flame-500/20 disabled:opacity-50"
             title="Create a copy of this report with today's date"
           >
             <Copy className="size-3.5" />
             Duplicate Report
+          </button>
+          <button
+            type="button"
+            disabled={duplicating || reassigning || saveState === 'saving'}
+            onClick={() => void openReassign()}
+            className="inline-flex items-center gap-1.5 rounded-md border border-flame-500/30 bg-flame-500/10 px-2.5 py-1 text-xs text-flame-300 hover:bg-flame-500/20 disabled:opacity-50"
+            title="Assign this report to a different client. Address and other form fields stay as written."
+          >
+            <Users className="size-3.5" />
+            Change Client
           </button>
 
           <span

@@ -18,6 +18,11 @@ export function registerInspectionsIpc(): void {
     inspections.duplicateInspection(id),
   );
 
+  ipcMain.handle(
+    IpcChannels.inspectionsReassign,
+    (_event, id: string, clientId: string) => inspections.reassignInspection(id, clientId),
+  );
+
   ipcMain.handle(IpcChannels.inspectionsUpdate, (_event, id: string, input: InspectionInput) =>
     inspections.updateInspection(id, input),
   );
@@ -47,6 +52,11 @@ export function registerInspectionsIpc(): void {
       return exportInspectionPdf(id, html, targetPath);
     },
   );
+
+  ipcMain.handle(IpcChannels.inspectionsCancelPdfExport, async () => {
+    const { cancelActivePdfExport } = await import('../pdf/printHtmlWindow');
+    cancelActivePdfExport();
+  });
 
   ipcMain.handle(IpcChannels.inspectionsInspectPdfImport, async () => {
     const { inspectInspectionPdfImport } = await import('../pdf/importInspectionPdf');

@@ -33,6 +33,10 @@ import { renderDataCommunicationLinkFaultToleranceHtml } from '../../shared/form
 import { renderFieldDeviceTestingLegendHtml } from '../../shared/form/fieldDeviceTestingLegendHtml';
 import { renderFieldDeviceTestingNotesHtml } from '../../shared/form/fieldDeviceTestingNotesHtml';
 import { renderIndividualDeviceRecordHtml } from '../../shared/form/individualDeviceRecordHtml';
+import { renderReportGridHtml } from '../../shared/form/reportGridHtml';
+import { EMERGENCY_LIGHTING_DEVICE_LEGEND_COLUMNS } from '../../shared/form/emergencyLightingDeviceLegend';
+import { EMERGENCY_LIGHTING_INSPECTION_RECORD_COLUMNS } from '../../shared/form/emergencyLightingInspectionRecord';
+import { FIRE_EXTINGUISHER_TEST_RECORD_COLUMNS } from '../../shared/form/fireExtinguisherTestRecord';
 import { renderCircuitFaultToleranceTestSheetHtml } from '../../shared/form/circuitFaultToleranceTestSheetHtml';
 import { renderDocumentationHtml } from '../../shared/form/documentationHtml';
 import { renderRecommendationsHtml, renderTestingNotesHtml } from '../../shared/form/linedNotesHtml';
@@ -208,6 +212,12 @@ function renderElementHtml(
       return framed(renderIndividualDeviceRecordHtml(value), true);
     case 'circuitFaultToleranceTestSheet':
       return framed(renderCircuitFaultToleranceTestSheetHtml(value), true);
+    case 'emergencyLightingDeviceLegend':
+      return framed(renderReportGridHtml(EMERGENCY_LIGHTING_DEVICE_LEGEND_COLUMNS, value), true);
+    case 'emergencyLightingInspectionRecord':
+      return framed(renderReportGridHtml(EMERGENCY_LIGHTING_INSPECTION_RECORD_COLUMNS, value), true);
+    case 'fireExtinguisherTestRecord':
+      return framed(renderReportGridHtml(FIRE_EXTINGUISHER_TEST_RECORD_COLUMNS, value), true);
     default:
       return '';
   }

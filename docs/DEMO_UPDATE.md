@@ -5,8 +5,9 @@ and pulling them in via the in-app **Update** tab.
 
 ## How updates work (short)
 
-- The app **does not** go online on its own. Nothing checks GitHub until the tester opens
-  **Update** and clicks **Check for updates**.
+- A **demo** install checks GitHub as soon as it opens. If a newer release exists, it
+  downloads that installer and restarts into it. No click on **Update** is required.
+- Any other install still waits until someone opens **Update** and clicks **Check for updates**.
 - **Check** compares the installed version (from `package.json` at build time) to
   `latest.yml` on GitHub Releases.
 - **Update** downloads changed blocks of the installer (blockmap diff when possible),

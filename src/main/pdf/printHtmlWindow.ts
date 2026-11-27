@@ -15,6 +15,24 @@ import path from 'node:path';
 let printWindow: BrowserWindow | null = null;
 let queue: Promise<void> = Promise.resolve();
 let warmed = false;
+let cancelSeq = 0;
+
+export class PdfExportCancelledError extends Error {
+  constructor() {
+    super('PDF export cancelled.');
+    this.name = 'PdfExportCancelledError';
+  }
+}
+
+export function getPdfExportCancelSeq(): number {
+  return cancelSeq;
+}
+
+export function isPdfExportCancelledError(error: unknown): boolean {
+  if (error instanceof PdfExportCancelledError) return true;
+  const msg = error instanceof Error ? error.message : String(error ?? '');
+  return /PDF export cancelled/i.test(msg);
+}
 
 function createPrintWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -94,6 +112,7 @@ export async function loadPrintHtml(win: BrowserWindow, html: string): Promise<s
 
 /** Run exclusive work against the shared print window. */
 export async function withPrintWindow<T>(run: (win: BrowserWindow) => Promise<T>): Promise<T> {
+  const tokenAtStart = cancelSeq;
   const previous = queue;
   let release!: () => void;
   queue = new Promise<void>((resolve) => {
@@ -101,9 +120,17 @@ export async function withPrintWindow<T>(run: (win: BrowserWindow) => Promise<T>
   });
 
   await previous;
+  if (cancelSeq !== tokenAtStart) {
+    release();
+    throw new PdfExportCancelledError();
+  }
   const win = getPrintWindow();
   try {
-    return await run(win);
+    const result = await run(win);
+    if (cancelSeq !== tokenAtStart) {
+      throw new PdfExportCancelledError();
+    }
+    return result;
   } catch (error) {
     try {
       if (!win.isDestroyed()) win.destroy();
@@ -112,10 +139,19 @@ export async function withPrintWindow<T>(run: (win: BrowserWindow) => Promise<T>
     }
     printWindow = null;
     warmed = false;
+    if (cancelSeq !== tokenAtStart) {
+      throw new PdfExportCancelledError();
+    }
     throw error;
   } finally {
     release();
   }
+}
+
+/** Immediately abort any active or queued PDF print job and tear down a frozen print window. */
+export function cancelActivePdfExport(): void {
+  cancelSeq += 1;
+  disposePrintWindow();
 }
 
 /** Pre-create and warm the print window so the first export skips cold start. */

@@ -132,11 +132,6 @@ export function openBackupForAccount(file: Buffer, localKeyX: string): OpenedBac
   }
 }
 
-/** @deprecated Prefer openBackupForAccount — kept for narrow call sites. */
-export function decryptBackupEntries(file: Buffer, keyX: string): PackedEntry[] {
-  return openBackupForAccount(file, keyX).entries;
-}
-
 export function compareBackupRecency(
   backupDataStamp: string,
   localDataStamp: string,

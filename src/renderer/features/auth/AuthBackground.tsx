@@ -16,13 +16,14 @@ export function AuthBackground() {
         <defs>
           <linearGradient id={line} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="rgb(249 115 22)" stopOpacity="0" />
-            <stop offset="35%" stopColor="rgb(249 115 22)" stopOpacity="0.55" />
-            <stop offset="70%" stopColor="rgb(56 189 248)" stopOpacity="0.35" />
+            <stop offset="32%" stopColor="rgb(251 146 60)" stopOpacity="0.78" />
+            <stop offset="68%" stopColor="rgb(56 189 248)" stopOpacity="0.52" />
             <stop offset="100%" stopColor="rgb(56 189 248)" stopOpacity="0" />
           </linearGradient>
           <linearGradient id={line2} x1="0%" y1="100%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="rgb(234 88 12)" stopOpacity="0" />
-            <stop offset="40%" stopColor="rgb(251 146 60)" stopOpacity="0.45" />
+            <stop offset="42%" stopColor="rgb(251 146 60)" stopOpacity="0.68" />
+            <stop offset="78%" stopColor="rgb(14 165 233)" stopOpacity="0.42" />
             <stop offset="100%" stopColor="rgb(14 165 233)" stopOpacity="0" />
           </linearGradient>
         </defs>
@@ -30,7 +31,7 @@ export function AuthBackground() {
           className="ba-auth-bg__sweep ba-auth-bg__sweep--1"
           fill="none"
           stroke={`url(#${line})`}
-          strokeWidth="1.25"
+          strokeWidth="1.65"
         >
           <path d="M-80 620 C 180 520, 320 480, 520 500 S 880 620, 1280 420" />
           <path d="M-40 680 C 220 560, 400 540, 600 560 S 960 680, 1320 480" />
@@ -40,7 +41,7 @@ export function AuthBackground() {
           className="ba-auth-bg__sweep ba-auth-bg__sweep--2"
           fill="none"
           stroke={`url(#${line2})`}
-          strokeWidth="1"
+          strokeWidth="1.35"
         >
           <path d="M-60 200 C 200 280, 380 300, 560 260 S 920 120, 1280 180" />
           <path d="M-100 260 C 160 340, 420 360, 640 300 S 980 160, 1340 220" />
@@ -52,19 +53,43 @@ export function AuthBackground() {
         </g>
         <circle
           className="ba-auth-bg__pulse ba-auth-bg__pulse--flame"
-          cx="780"
-          cy="360"
-          r="120"
+          cx="600"
+          cy="390"
+          r="135"
           fill="none"
-          strokeWidth="1"
+          strokeWidth="1.4"
         />
         <circle
           className="ba-auth-bg__pulse ba-auth-bg__pulse--sky ba-auth-bg__pulse--delay"
-          cx="780"
-          cy="360"
-          r="180"
+          cx="600"
+          cy="390"
+          r="210"
           fill="none"
-          strokeWidth="1"
+          strokeWidth="1.25"
+        />
+        <circle
+          className="ba-auth-bg__pulse ba-auth-bg__pulse--flame ba-auth-bg__pulse--delay-2"
+          cx="600"
+          cy="390"
+          r="295"
+          fill="none"
+          strokeWidth="1.1"
+        />
+        <circle
+          className="ba-auth-bg__orbit ba-auth-bg__pulse--flame"
+          cx="270"
+          cy="230"
+          r="92"
+          fill="none"
+          strokeWidth="1.15"
+        />
+        <circle
+          className="ba-auth-bg__orbit ba-auth-bg__pulse--sky ba-auth-bg__pulse--delay"
+          cx="930"
+          cy="560"
+          r="115"
+          fill="none"
+          strokeWidth="1.15"
         />
       </svg>
     </div>

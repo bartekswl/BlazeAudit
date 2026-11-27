@@ -10,12 +10,16 @@ const GITHUB_OWNER = 'bartekswl';
 const GITHUB_REPO = 'BlazeAudit';
 const INSTALLER_NAME = 'BlazeAudit-Setup';
 
+export function installerFileName(version: string): string {
+  return `${INSTALLER_NAME}-${version}.exe`;
+}
+
 export function rollbackInstallerUrl(version: string): string {
-  return `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${version}/${INSTALLER_NAME}-${version}.exe`;
+  return `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${version}/${installerFileName(version)}`;
 }
 
 export function rollbackInstallerPath(cacheDir: string, version: string): string {
-  return path.join(cacheDir, `${INSTALLER_NAME}-${version}.exe`);
+  return path.join(cacheDir, installerFileName(version));
 }
 
 type ProgressHandler = (status: Extract<UpdateStatus, { phase: 'downloading' }>) => void;

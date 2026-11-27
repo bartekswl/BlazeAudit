@@ -554,6 +554,9 @@ export function useFormFieldClipboard(
         addToSelection(el, additive);
         return;
       }
+      // Checklist / legend rows use data-ba-line-row + template-line hide — never this path.
+      if (tr.hasAttribute(BA_LINE_ROW)) return;
+      clearLineRowHighlights(selectedLineRowsRef.current);
       markSelected(fieldsInRow(tr), additive);
     },
     [addToSelection, markSelected],
@@ -720,22 +723,27 @@ export function useFormFieldClipboard(
     if (el) setFieldText(el, value);
   }, [orderedSelected, flash, targetEditable, markSelected]);
 
-  // Select-mode picking (cells only — template lines use the dedicated line handler).
+  // Cell select + content-table Line Select (IDR / CFTS / ADC / report grids).
+  // Checklist / legend rows with data-ba-line-row are owned by the template-line handler below
+  // (capture + stopPropagation) — this path must never select or tag those rows.
   useEffect(() => {
-    if (selectMode !== 'cell') return;
+    if (selectMode !== 'cell' && selectMode !== 'line') return;
 
     const root = rootRef.current;
     if (!root) return;
+    const lineMode = selectMode === 'line';
 
     madeSelectionRef.current = false;
 
     const onPointerDown = (event: PointerEvent) => {
       const field = resolveField(event.target);
       if (!field) return;
+      // Template/checklist rows: leave to the capture-phase line handler.
+      if (lineMode && rowOf(field)?.hasAttribute(BA_LINE_ROW)) return;
       event.preventDefault();
       dragRef.current = true;
       const additive = event.ctrlKey || event.metaKey;
-      if (event.altKey) {
+      if (lineMode || event.altKey) {
         selectEntireRow(field, additive);
         return;
       }
@@ -745,6 +753,7 @@ export function useFormFieldClipboard(
     const onDblClick = (event: MouseEvent) => {
       const field = resolveField(event.target);
       if (!field) return;
+      if (rowOf(field)?.hasAttribute(BA_LINE_ROW)) return;
       event.preventDefault();
       selectEntireRow(field, event.ctrlKey || event.metaKey);
     };
@@ -757,6 +766,15 @@ export function useFormFieldClipboard(
       }
       const field = resolveField(event.target);
       if (!field) return;
+      if (lineMode) {
+        const tr = rowOf(field);
+        if (!tr || tr.hasAttribute(BA_LINE_ROW)) return;
+        const rowFields = fieldsInRow(tr);
+        if (rowFields.every((f) => selectedRef.current.has(f))) return;
+        clearLineRowHighlights(selectedLineRowsRef.current);
+        markSelected(rowFields, true);
+        return;
+      }
       if (selectedRef.current.has(field)) return;
       selectedRef.current.add(field);
       field.classList.add(SELECTED_CLASS);
@@ -767,7 +785,7 @@ export function useFormFieldClipboard(
 
     const onPointerUp = () => {
       dragRef.current = false;
-      if (selectMode === 'cell' && madeSelectionRef.current && selectedRef.current.size > 0) {
+      if (madeSelectionRef.current && selectedRef.current.size > 0) {
         endSelectMode();
       }
     };
@@ -786,7 +804,8 @@ export function useFormFieldClipboard(
     };
   }, [selectMode, rootRef, addToSelection, selectEntireRow, markSelected, sync, endSelectMode]);
 
-  // Line select: template / legend rows (inputs + fixed row text).
+  // Line select: checklist / legend template rows only (data-ba-line-row + hide/clear).
+  // Content tables fall through to the fieldsInRow picker above — do not add this attr to IDR.
   useEffect(() => {
     if (selectMode !== 'line') return;
 
@@ -827,6 +846,7 @@ export function useFormFieldClipboard(
         return;
       }
 
+      // Content-table field: let the bubble picker run selectEntireRow / fieldsInRow.
       if (resolveField(target)) return;
 
       const insideFormPage =

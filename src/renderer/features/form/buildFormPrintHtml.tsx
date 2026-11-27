@@ -2759,6 +2759,36 @@ const PRINT_OVERRIDES = `
     padding-right: 0.08rem !important;
     overflow: hidden !important;
   }
+  .form-print-root .rrg-panel--elr .rrg-th[data-col='serviceRequired'] {
+    padding-left: 0.02rem !important;
+    padding-right: 0.02rem !important;
+  }
+  .form-print-root .rrg-panel--elr .rrg-th[data-col='serviceRequired'] .rrg-th-label {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+  }
+  .form-print-root .rrg-panel--elr .rrg-td[data-col='serviceRequired'] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .form-print-root .rrg-panel--elr .rrg-th[data-col='floorNumber'],
+  .form-print-root .rrg-panel--elr .rrg-th[data-col='voltage'] {
+    font-size: 0.4rem !important;
+    letter-spacing: 0 !important;
+    padding-left: 0.02rem !important;
+    padding-right: 0.02rem !important;
+  }
+  .form-print-root .rrg-panel--elr .rrg-th[data-col='floorNumber'] .rrg-th-label,
+  .form-print-root .rrg-panel--elr .rrg-th[data-col='voltage'] .rrg-th-label {
+    font-size: 0.4rem !important;
+    letter-spacing: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+  }
   .form-print-root .rrg-table {
     height: 100% !important;
   }

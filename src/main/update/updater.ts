@@ -5,6 +5,8 @@ import path from 'node:path';
 import { IpcChannels } from '../../shared/ipc';
 import type { RollbackInfo, UpdateStatus } from '../../shared/update';
 import { sanitizeReleaseNotes } from '../../shared/update';
+import { isDemoBuild } from '../demo/isDemoBuild';
+import { isNewerVersion, listNewerReleases, type ReleaseOffer } from './latestRelease';
 import { downloadRollbackInstaller, spawnSilentInstall } from './rollback';
 import { readUpdateState, syncUpdateStateOnStartup } from './updateState';
 
@@ -26,19 +28,6 @@ function cleanUpdaterCache(): void {
   } catch (error) {
     console.warn('[update] Could not clear updater cache:', error);
   }
-}
-
-function isNewerVersion(current: string, other: string): boolean {
-  const parse = (v: string) => v.split('.').map((part) => Number.parseInt(part, 10) || 0);
-  const a = parse(current);
-  const b = parse(other);
-  for (let i = 0; i < Math.max(a.length, b.length); i++) {
-    const av = a[i] ?? 0;
-    const bv = b[i] ?? 0;
-    if (av > bv) return true;
-    if (av < bv) return false;
-  }
-  return false;
 }
 
 function releaseNotesToText(notes: UpdateInfo['releaseNotes']): string | null {
@@ -63,6 +52,11 @@ let wired = false;
 let installScheduled = false;
 /** Target version for the in-flight download (not the installed app version). */
 let pendingDownloadVersion = '';
+/**
+ * Set when more than one release is ahead. The download then fetches that
+ * installer directly so the app skips intermediate versions.
+ */
+let directUpdate: ReleaseOffer | null = null;
 
 function showUpdatingToast(): void {
   if (!Notification.isSupported()) return;
@@ -142,6 +136,41 @@ function rollbackInfo(): RollbackInfo {
   };
 }
 
+async function installReleaseDirect(offer: ReleaseOffer): Promise<void> {
+  installScheduled = false;
+  pendingDownloadVersion = offer.version;
+  const installerPath = await downloadRollbackInstaller(offer.version, updaterCacheDir(), (status) =>
+    broadcast(status),
+  );
+  broadcast({ phase: 'downloaded', version: offer.version, notes: offer.notes });
+  setTimeout(() => installAndQuit(offer.version, installerPath), 400);
+}
+
+/**
+ * Demo installs (jackpps) should not wait on the Update tab.
+ * If GitHub has a newer release, download it and restart into it.
+ */
+export function installLatestUpdateOnLaunch(): void {
+  if (!app.isPackaged || !isDemoBuild()) return;
+  void installLatestUpdateIfAny();
+}
+
+async function installLatestUpdateIfAny(): Promise<void> {
+  try {
+    const newer = await listNewerReleases(app.getVersion());
+    if (newer.length === 0) return;
+    if (newer.length > 1) {
+      directUpdate = newer[0];
+      await installReleaseDirect(newer[0]);
+      return;
+    }
+    const result = await autoUpdater.checkForUpdates();
+    if (result?.isUpdateAvailable) await autoUpdater.downloadUpdate();
+  } catch (err) {
+    console.warn('[update] Startup update skipped:', err);
+  }
+}
+
 export function registerUpdateIpc(): void {
   if (app.isPackaged) {
     syncUpdateStateOnStartup();
@@ -165,15 +194,66 @@ export function registerUpdateIpc(): void {
       });
       return;
     }
+    directUpdate = null;
     try {
-      await autoUpdater.checkForUpdates();
+      const newer = await listNewerReleases(app.getVersion());
+      if (newer.length === 0) {
+        broadcast({ phase: 'not-available', version: app.getVersion() });
+        return;
+      }
+      // One release ahead keeps the blockmap download. Several ahead must
+      // install the newest installer, not the next version in line.
+      if (newer.length === 1) {
+        await autoUpdater.checkForUpdates();
+        return;
+      }
+      directUpdate = newer[0];
+      pendingDownloadVersion = newer[0].version;
+      broadcast({
+        phase: 'available',
+        version: newer[0].version,
+        notes: newer[0].notes,
+        fullDownload: true,
+      });
     } catch (err) {
-      broadcast({ phase: 'error', message: err instanceof Error ? err.message : 'Could not check for updates.' });
+      console.warn('[update] Could not list releases, using built-in updater:', err);
+      try {
+        await autoUpdater.checkForUpdates();
+      } catch (checkErr) {
+        broadcast({
+          phase: 'error',
+          message: checkErr instanceof Error ? checkErr.message : 'Could not check for updates.',
+        });
+      }
     }
   });
 
   ipcMain.handle(IpcChannels.updateDownload, async () => {
     try {
+      let newer: ReleaseOffer[] | null = null;
+      try {
+        newer = await listNewerReleases(app.getVersion());
+      } catch (err) {
+        console.warn('[update] Could not refresh release list before download:', err);
+      }
+      if (newer && newer.length > 1) {
+        directUpdate = newer[0];
+        await installReleaseDirect(newer[0]);
+        return;
+      }
+      if (directUpdate) {
+        await installReleaseDirect(newer && newer.length > 0 ? newer[0] : directUpdate);
+        return;
+      }
+      if (
+        newer &&
+        newer.length === 1 &&
+        pendingDownloadVersion &&
+        pendingDownloadVersion !== newer[0].version
+      ) {
+        await installReleaseDirect(newer[0]);
+        return;
+      }
       await autoUpdater.downloadUpdate();
     } catch (err) {
       broadcast({ phase: 'error', message: err instanceof Error ? err.message : 'Download failed.' });

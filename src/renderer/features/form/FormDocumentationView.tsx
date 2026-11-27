@@ -99,19 +99,21 @@ function ChoiceCell({
 }
 
 function ChoiceCells({
+  elementId,
   rowId,
   naDisabled,
   rowValue,
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   rowId: string;
   naDisabled?: boolean;
   rowValue: { choice: DocumentationChoice | null };
   readOnly?: boolean;
   onChoice: (choice: DocumentationChoice | null) => void;
 }) {
-  const groupName = `doc-${rowId}`;
+  const groupName = `doc-${elementId}-${rowId}`;
 
   return (
     <>
@@ -240,11 +242,13 @@ function DocRuledNotes({
 }
 
 function DocumentationISection({
+  elementId,
   documentValue,
   data,
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   documentValue: unknown;
   data: DocumentationValue;
   readOnly?: boolean;
@@ -278,6 +282,7 @@ function DocumentationISection({
           >
             <SubitemDescription item={item} />
             <ChoiceCells
+              elementId={elementId}
               rowId={item.id}
               naDisabled={item.naDisabled}
               rowValue={rowValue}
@@ -292,10 +297,12 @@ function DocumentationISection({
 }
 
 export function FormDocumentationView({
+  elementId,
   value: rawValue,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (value: unknown) => void;
@@ -398,6 +405,7 @@ export function FormDocumentationView({
                     }
                   />
                   <ChoiceCells
+                    elementId={elementId}
                     rowId={row.id}
                     naDisabled={row.naDisabled}
                     rowValue={rowValue}
@@ -409,6 +417,7 @@ export function FormDocumentationView({
             })}
 
             <DocumentationISection
+              elementId={elementId}
               documentValue={rawValue}
               data={data}
               readOnly={readOnly}

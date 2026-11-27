@@ -73,3 +73,5 @@ export * from './sprinklerTables';
 export * from './rowTextOverrides';
 export * from './formPageHeader';
 export * from './formPageSize';
+export * from './readContent/applyReadPages';
+export * from './readContent/ocrTypes';

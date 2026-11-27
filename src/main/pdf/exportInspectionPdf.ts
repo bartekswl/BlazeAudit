@@ -4,6 +4,10 @@ import { buildPdfInspectionExport } from '../../shared/pdf';
 import { clients, inspections, resolveDocumentContext } from '../db';
 import { appendExportPayloadToPdf } from './embed';
 import { pickPdfSavePath } from './pickPdfSavePath';
+import {
+  getPdfExportCancelSeq,
+  isPdfExportCancelledError,
+} from './printHtmlWindow';
 import { printMixedOrientationHtmlToPdf } from './printMixedOrientationHtml';
 import { renderInspectionHtmlForExport } from './renderInspectionHtmlForExport';
 
@@ -39,8 +43,17 @@ export async function exportInspectionPdf(
     prebuiltHtml ??
     renderInspectionHtmlForExport(inspection, context.client, context, exportPayload);
 
-  const pdf = await printMixedOrientationHtmlToPdf(html);
-  const withEmbed = appendExportPayloadToPdf(pdf, exportPayload);
-  await fs.writeFile(filePath, withEmbed);
-  return { saved: true as const, filePath };
+  const token = getPdfExportCancelSeq();
+  try {
+    const pdf = await printMixedOrientationHtmlToPdf(html);
+    if (getPdfExportCancelSeq() !== token) return { saved: false as const };
+    const withEmbed = appendExportPayloadToPdf(pdf, exportPayload);
+    await fs.writeFile(filePath, withEmbed);
+    return { saved: true as const, filePath };
+  } catch (error) {
+    if (isPdfExportCancelledError(error) || getPdfExportCancelSeq() !== token) {
+      return { saved: false as const };
+    }
+    throw error;
+  }
 }

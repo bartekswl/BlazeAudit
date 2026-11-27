@@ -2,8 +2,8 @@ import { memo, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import type { Block, BlockPath } from '../../../shared/document';
 import { insertBlock, markChecklistsNaInTree, updateBlock } from '../../../shared/document';
 import { docAnchorId } from '../../../shared/document/outline';
-import { blockTypeLabel } from '../templates/blockCatalog';
-import { inputCls } from '../templates/BlockList';
+import { inputCls } from '../../lib/inputCls';
+import { blockTypeLabel } from '../customTemplates/blockCatalog';
 import { InsertSectionDivider, SectionAddBlockBar } from './DocumentStructureControls';
 import { TableFillIn } from './TableFillIn';
 

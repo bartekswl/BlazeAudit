@@ -12,11 +12,11 @@ import { registerNameBadgesIpc } from './ipc/nameBadges';
 import { registerCalendarTasksIpc } from './ipc/calendarTasks';
 import { registerAuthIpc } from './ipc/auth';
 import { provisionDemoIfNeeded } from './demo/provisionDemo';
-import { registerUpdateIpc } from './update/updater';
+import { installLatestUpdateOnLaunch, registerUpdateIpc } from './update/updater';
+import { registerReadContentIpc } from './ipc/readContent';
 import { closeDatabase } from './db/connection';
 import { disposePrintWindow, warmPrintWindow } from './pdf/printHtmlWindow';
 import { IpcChannels } from '../shared/ipc';
-import { buildBootSplashHtml } from '../shared/bootSplash';
 
 // Dev/preview: never write under the real AppData profile. Keep all Electron
 // runtime files (cache, prefs, etc.) inside the repo. Packaged builds only use
@@ -44,14 +44,6 @@ process.on('message', (message) => {
     win.webContents.reload();
   }
 });
-
-// Instant, network-free splash painted before the real app (dev server or
-// dist/index.html) loads — keeps the spinner in sync with the window
-// appearing, even if the real page takes a moment (e.g. cold dev-server
-// compile). Mirrors the boot markup/styles in index.html so the swap to the
-// real page is visually seamless.
-const BOOT_SPLASH_HTML = buildBootSplashHtml();
-const BOOT_SPLASH_URL = `data:text/html;charset=UTF-8,${encodeURIComponent(BOOT_SPLASH_HTML)}`;
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -89,8 +81,8 @@ function createMainWindow(): BrowserWindow {
   };
 
   win.once('ready-to-show', revealWindow);
-  // Safety net in case the splash itself is ever slow to paint.
-  setTimeout(revealWindow, 250);
+  // Safety net in case first paint is ever delayed.
+  setTimeout(revealWindow, 450);
 
   const emitMaximizeState = () => {
     win.webContents.send(IpcChannels.windowMaximizeChanged, win.isMaximized());
@@ -109,20 +101,16 @@ function createMainWindow(): BrowserWindow {
     if (process.platform !== 'darwin') app.quit();
   });
 
-  // Paint the spinner instantly (no network round-trip), then swap in the
-  // real app once it's ready. The window's backgroundColor + identical boot
-  // markup keep this swap invisible.
-  win.webContents.once('did-finish-load', () => {
-    if (devServerUrl) {
-      void win.loadURL(devServerUrl);
-      if (process.env.BLAZE_OPEN_DEVTOOLS === '1') {
-        win.webContents.openDevTools({ mode: 'detach' });
-      }
-    } else {
-      void win.loadFile(path.join(dirname, '../../dist/index.html'));
+  // Load index.html directly so the inline #app-boot-loader paints once in a
+  // single document — eliminating the splash -> app page navigation flicker.
+  if (devServerUrl) {
+    void win.loadURL(devServerUrl);
+    if (process.env.BLAZE_OPEN_DEVTOOLS === '1') {
+      win.webContents.openDevTools({ mode: 'detach' });
     }
-  });
-  void win.loadURL(BOOT_SPLASH_URL);
+  } else {
+    void win.loadFile(path.join(dirname, '../../dist/index.html'));
+  }
 
   return win;
 }
@@ -140,6 +128,8 @@ void app.whenReady().then(async () => {
   registerNameBadgesIpc();
   registerCalendarTasksIpc();
   registerUpdateIpc();
+  installLatestUpdateOnLaunch();
+  registerReadContentIpc();
   createMainWindow();
 
   // Pre-warm Chromium print host after UI is up so first PDF export skips cold start.

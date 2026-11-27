@@ -161,27 +161,30 @@ function ChoiceCell({
 }
 
 function ChoiceCells({
+  elementId,
   rowId,
   choice,
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   rowId: string;
   choice: EmergencyPowerSupplyTestChoice | null;
   readOnly?: boolean;
   onChoice: (choice: EmergencyPowerSupplyTestChoice | null) => void;
 }) {
+  const groupName = `epst-${elementId}-${rowId}`;
   return (
     <>
       {(['yes', 'no', 'na'] as const).map((variant) => (
         <ChoiceCell
           key={variant}
           choice={choice}
-          groupName={`epst-${rowId}`}
+          groupName={groupName}
           readOnly={readOnly}
           variant={variant}
           onSelect={() => onChoice(variant)}
-        onClear={() => onChoice(null)}
+          onClear={() => onChoice(null)}
         />
       ))}
     </>
@@ -340,11 +343,14 @@ function MeasureRows({
 }
 
 export function FormEmergencyPowerSupplyTestView({
+  elementId,
   value: rawValue,
   readOnly,
   powerSuppliesStacked,
   onChange,
 }: {
+  /** Unique per form instance — scopes radio `name`s across multi-page docs. */
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   /** Page 9: 22.4 + 22.5 share one sheet — compact row O so P–S and generator stay visible. */
@@ -509,6 +515,7 @@ export function FormEmergencyPowerSupplyTestView({
                   ) : null}
                 </td>
                 <ChoiceCells
+                  elementId={elementId}
                   rowId={`test-${opt.id}`}
                   choice={choice}
                   readOnly={readOnly}
@@ -537,6 +544,7 @@ export function FormEmergencyPowerSupplyTestView({
           <EditableRowText rowId={row.id} text={row.text} className="epst-desc-text" />
         </td>
         <ChoiceCells
+          elementId={elementId}
           rowId={row.id}
           choice={rowValue.choice}
           readOnly={readOnly}
@@ -574,6 +582,7 @@ export function FormEmergencyPowerSupplyTestView({
                   <EditableRowText rowId={row.id} text={row.text} className="epst-desc-text" />
                 </td>
                 <ChoiceCells
+                  elementId={elementId}
                   rowId={row.id}
                   choice={rowValue.choice}
                   readOnly={readOnly}
@@ -718,7 +727,7 @@ export function FormEmergencyPowerSupplyTestView({
                   <input
                     type="radio"
                     className="epst-spec-radio"
-                    name="epst-nbc-time"
+                    name={`epst-${elementId}-nbc-time`}
                     checked={data.nbcAlarmTime === opt.id}
                     onChange={() => publish(setEmergencyPowerSupplyNbcAlarmTime(data, opt.id))}
                   />

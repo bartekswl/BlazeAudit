@@ -36,7 +36,7 @@ export function InsertLinePopup({
       data-ba-insert-line-popup=""
       role="dialog"
       aria-label="Insert rows below"
-      className="fixed z-[80] w-[15.5rem] rounded-lg border border-[var(--ba-border)] bg-[var(--ba-surface-elevated)] p-3 shadow-xl"
+      className="fixed z-[80] w-[15.5rem] rounded-lg border border-[rgb(120_72_58_/_0.45)] bg-[rgb(72_42_36_/_0.78)] p-3 shadow-xl backdrop-blur-sm"
       style={{ top, left }}
     >
       <div className="mb-2 flex items-start justify-between gap-2">

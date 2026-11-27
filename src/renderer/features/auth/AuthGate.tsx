@@ -29,10 +29,19 @@ const SetPasswordScreen = lazy(() =>
 const UNLOCK_MS = 280;
 const APP_ENTER_MS = 280;
 const LOCK_MS = 320;
-const BOOT_FADE_MS = 120;
+const BOOT_FADE_MS = 220;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function hideDomBootLoader(): void {
+  const el = document.getElementById('app-boot-loader');
+  if (el) el.classList.add('app-boot-loader--hide');
+}
+
+function removeDomBootLoader(): void {
+  document.getElementById('app-boot-loader')?.remove();
 }
 
 export function AuthGate() {
@@ -48,12 +57,14 @@ export function AuthGate() {
     // Resolve light/dark under the boot overlay before revealing login/app.
     await prepareBootTheme();
     releaseBootTheme();
-    // One frame so theme paints under the overlay, then fade out.
-    await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => resolve());
-    });
     setBootOverlay('hiding');
+    // One frame so TitleBar + theme paint under the persistent #app-boot-loader, then fade out.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+    hideDomBootLoader();
     await delay(BOOT_FADE_MS);
+    removeDomBootLoader();
     setBootOverlay('hidden');
   }, []);
 
@@ -135,6 +146,7 @@ export function AuthGate() {
           } catch (revealErr) {
             console.error('[AuthGate] boot reveal failed', revealErr);
             releaseBootTheme();
+            removeDomBootLoader();
             setBootOverlay('hidden');
           }
         }

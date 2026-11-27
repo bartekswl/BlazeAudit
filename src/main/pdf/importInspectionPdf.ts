@@ -32,11 +32,13 @@ function previewFromPayload(
   const src = payload.inspection;
   const preferredId = exportInspectionId(payload);
   const existingInspection = preferredId ? inspections.getInspection(preferredId) : null;
-  const existingClient = clients.getClient(src.clientId);
+  const incomingName =
+    payload.client?.name?.trim() || src.clientName?.trim() || '';
+  const existingClient = clients.findExistingClientForImport(src.clientId, incomingName);
   const clientName =
+    existingClient?.name?.trim() ||
     existingInspection?.clientName?.trim() ||
-    payload.client?.name?.trim() ||
-    src.clientName?.trim() ||
+    incomingName ||
     'Unknown client';
   const documentTitle =
     existingInspection?.title?.trim() || src.title?.trim() || 'Imported inspection';
@@ -45,7 +47,7 @@ function previewFromPayload(
     filePath,
     needsNewClient: !existingClient,
     clientName,
-    clientId: src.clientId,
+    clientId: existingClient?.id ?? src.clientId,
     documentTitle,
     hasClientSnapshot: Boolean(payload.client?.id),
     documentAlreadyExists: Boolean(existingInspection),

@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { FileDown, ImagePlus, Plus, Trash2, UserRound } from 'lucide-react';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { InlineLoader, LoadingOverlay } from '../../components/LoadingOverlay';
+import { InlineLoader, PdfExportOverlay } from '../../components/LoadingOverlay';
 import { cn } from '../../lib/cn';
 import {
   NAME_BADGE_MAX_EMPLOYEES,
@@ -219,6 +219,14 @@ export function NameBadgesScreen() {
     [printSlots, badgesPerPage],
   );
 
+  const exportRunRef = useRef(0);
+
+  const cancelExport = useCallback(() => {
+    exportRunRef.current += 1;
+    setExporting(false);
+    void window.blazeaudit.inspections.cancelPdfExport();
+  }, []);
+
   const handleExport = async () => {
     const filename = businessName.trim()
       ? `${businessName.trim()}-name-badges`
@@ -226,6 +234,9 @@ export function NameBadgesScreen() {
     // Pick the save path before HTML/PDF work so Cancel is instant.
     const targetPath = await window.blazeaudit.nameBadges.pickPdfPath(filename);
     if (!targetPath) return;
+
+    const runId = exportRunRef.current + 1;
+    exportRunRef.current = runId;
 
     flushSync(() => {
       setExporting(true);
@@ -241,9 +252,12 @@ export function NameBadgesScreen() {
         badgesPerPage,
         pages,
       });
+      if (exportRunRef.current !== runId) return;
       await window.blazeaudit.nameBadges.exportPdf(html, filename, targetPath);
     } finally {
-      setExporting(false);
+      if (exportRunRef.current === runId) {
+        setExporting(false);
+      }
     }
   };
 
@@ -253,7 +267,7 @@ export function NameBadgesScreen() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-5 overflow-y-auto">
-      {exporting ? <LoadingOverlay label="Generating PDF…" /> : null}
+      {exporting ? <PdfExportOverlay label="Creating PDF..." onCancel={cancelExport} /> : null}
       <section className="ba-panel flex shrink-0 flex-wrap items-center justify-between gap-4 p-4">
         <div>
           <h2 className="text-base font-semibold text-[var(--ba-text-primary)]">Print settings</h2>

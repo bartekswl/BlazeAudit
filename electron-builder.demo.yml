@@ -3,6 +3,14 @@ extends: electron-builder.yml
 productName: BlazeAudit Demo
 
 extraResources:
+  - from: resources/app-icon.png
+    to: app-icon.png
+  - from: resources/titlebar-icon.png
+    to: titlebar-icon.png
+  - from: resources/app-icon.ico
+    to: app-icon.ico
+  - from: resources/ocr
+    to: ocr
   - from: resources/demo
     to: demo
 

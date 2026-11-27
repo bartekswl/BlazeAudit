@@ -12,6 +12,7 @@ import {
   walkFormElements,
   type FormInspectionDocument,
 } from '../../shared/form';
+import { clientNameMatchScore } from '../../shared/clientNameMatch';
 import type { Client, ClientInput } from '../../shared/types';
 import { getDatabase } from './connection';
 
@@ -113,6 +114,34 @@ export function listClients(): Client[] {
     .prepare('SELECT * FROM clients ORDER BY name COLLATE NOCASE ASC')
     .all() as ClientRow[];
   return rows.map(toClient);
+}
+
+/**
+ * Id first. If that client is not in this database, a name where most of the
+ * words match. Two equally good name matches are left unmatched.
+ */
+export function findExistingClientForImport(preferredId: string, name: string): Client | null {
+  const byId = preferredId.trim() ? getClient(preferredId.trim()) : null;
+  if (byId) return byId;
+
+  const incoming = name.trim();
+  if (!incoming) return null;
+
+  let best: Client | null = null;
+  let bestScore = 0;
+  let tied = false;
+  for (const client of listClients()) {
+    const score = clientNameMatchScore(incoming, client.name);
+    if (score < 0.5) continue;
+    if (score > bestScore) {
+      best = client;
+      bestScore = score;
+      tied = false;
+    } else if (score === bestScore && client.id !== best?.id) {
+      tied = true;
+    }
+  }
+  return tied ? null : best;
 }
 
 export function getClient(id: string): Client | null {
@@ -241,9 +270,13 @@ function rewriteInspectionTitleForClientRename(
   oldName: string,
   newName: string,
 ): string {
-  const suffix = ` — ${oldName}`;
-  if (title.endsWith(suffix)) {
-    return `${title.slice(0, -suffix.length)} — ${newName}`;
+  const dashSuffix = ` - ${oldName}`;
+  if (title.endsWith(dashSuffix)) {
+    return `${title.slice(0, -dashSuffix.length)} - ${newName}`;
+  }
+  const legacyEmDashSuffix = ` — ${oldName}`;
+  if (title.endsWith(legacyEmDashSuffix)) {
+    return `${title.slice(0, -legacyEmDashSuffix.length)} - ${newName}`;
   }
   if (title === oldName) return newName;
   return title;

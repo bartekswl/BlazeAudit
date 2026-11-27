@@ -139,9 +139,7 @@ function TechnicianBlock({
           <span className="aff-cell-value">{displayIdentification || '\u00a0'}</span>
         </div>
         <div className="aff-cell aff-cell--date">
-          {!tech.inspectorId ? (
-            <span className="aff-cell-value">{'\u00a0'}</span>
-          ) : readOnly ? (
+          {readOnly ? (
             <span className="aff-cell-value">
               {tech.date ? formatMmDdYyFromIso(tech.date) || formatInspectionDateLabel(tech.date) : '\u00a0'}
             </span>

@@ -72,17 +72,19 @@ function ChoiceCell({
 }
 
 function ChoiceCells({
+  elementId,
   rowId,
   rowValue,
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   rowId: string;
   rowValue: { choice: RemoteTroubleSignalUnitTestChoice | null };
   readOnly?: boolean;
   onChoice: (choice: RemoteTroubleSignalUnitTestChoice | null) => void;
 }) {
-  const groupName = `rtsu-${rowId}`;
+  const groupName = `rtsu-${elementId}-${rowId}`;
 
   return (
     <>
@@ -146,10 +148,12 @@ function InfoRow({
 }
 
 export function FormRemoteTroubleSignalUnitTestView({
+  elementId,
   value,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (next: RemoteTroubleSignalUnitTestValue) => void;
@@ -260,6 +264,7 @@ export function FormRemoteTroubleSignalUnitTestView({
                     <EditableRowText rowId={row.id} text={row.text} className="rtsu-desc-text" />
                   </td>
                   <ChoiceCells
+                    elementId={elementId}
                     rowId={row.id}
                     rowValue={rowValue}
                     readOnly={readOnly}

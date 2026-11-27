@@ -12,7 +12,7 @@ import {
   validateInspectionDate,
 } from '../../shared/dates';
 import { cn } from '../lib/cn';
-import { inputCls } from '../features/templates/BlockList';
+import { inputCls } from '../lib/inputCls';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const POPUP_WIDTH_COMPACT = 256;

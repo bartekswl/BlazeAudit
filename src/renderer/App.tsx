@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, lazy, Suspense, type ReactNode } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 
 import { ChevronLeft, ChevronRight, Pin, PinOff } from 'lucide-react';
 
@@ -13,7 +13,8 @@ import type { DocumentDetailBreadcrumb, DocumentsBootState } from './features/do
 
 import type { SettingsScrollTarget } from './features/settings/SettingsScreen';
 
-import type { TemplateDetailBreadcrumb } from './features/templates/TemplatesScreen';
+import type { BuiltinTemplateDetailBreadcrumb } from './features/builtinTemplates/BuiltinTemplatesScreen';
+import type { CustomTemplateDetailBreadcrumb } from './features/customTemplates/CustomTemplatesScreen';
 
 import { DocumentOutlineProvider } from './features/documents/DocumentOutlineContext';
 import { navItems, type NavId } from './navigation';
@@ -25,7 +26,10 @@ import { DashboardScreen } from './features/dashboard/DashboardScreen';
 // form-editor stack — is split into separate chunks.
 const loadCustomersScreen = () => import('./features/customers/CustomersScreen');
 const loadDocumentsScreen = () => import('./features/documents/DocumentsScreen');
-const loadTemplatesScreen = () => import('./features/templates/TemplatesScreen');
+const loadBuiltinTemplatesScreen = () =>
+  import('./features/builtinTemplates/BuiltinTemplatesScreen');
+const loadCustomTemplatesScreen = () =>
+  import('./features/customTemplates/CustomTemplatesScreen');
 const loadCalendarScreen = () => import('./features/calendar/CalendarScreen');
 const loadNameBadgesScreen = () => import('./features/nameBadges/NameBadgesScreen');
 const loadDatabaseScreen = () => import('./features/database/DatabaseScreen');
@@ -44,8 +48,11 @@ const DocumentOutlineRail = lazy(() =>
     default: m.DocumentOutlineRail,
   })),
 );
-const TemplatesScreen = lazy(() =>
-  loadTemplatesScreen().then((m) => ({ default: m.TemplatesScreen })),
+const BuiltinTemplatesScreen = lazy(() =>
+  loadBuiltinTemplatesScreen().then((m) => ({ default: m.BuiltinTemplatesScreen })),
+);
+const CustomTemplatesScreen = lazy(() =>
+  loadCustomTemplatesScreen().then((m) => ({ default: m.CustomTemplatesScreen })),
 );
 const CalendarScreen = lazy(() =>
   loadCalendarScreen().then((m) => ({ default: m.CalendarScreen })),
@@ -76,7 +83,8 @@ const backgroundLoaders = [
   loadSettingsScreen,
   loadSupportScreen,
   () => import('./features/documents/NewInspectionDialog'),
-  loadTemplatesScreen,
+  loadBuiltinTemplatesScreen,
+  loadCustomTemplatesScreen,
   () => import('./features/documents/InspectionEditor'),
 ];
 
@@ -89,25 +97,6 @@ function waitForIdle(): Promise<void> {
     }
   });
 }
-
-const screens: Record<
-  Exclude<
-    NavId,
-    | 'customers'
-    | 'builtinTemplates'
-    | 'customTemplates'
-    | 'documents'
-    | 'nameBadges'
-    | 'calendar'
-    | 'database'
-    | 'update'
-    | 'settings'
-    | 'support'
-  >,
-  ReactNode
-> = {
-  dashboard: null,
-};
 
 
 
@@ -150,11 +139,11 @@ export default function App() {
 
   );
 
-  const [templateBreadcrumb, setTemplateBreadcrumb] = useState<TemplateDetailBreadcrumb | null>(
+  const [builtinTemplateBreadcrumb, setBuiltinTemplateBreadcrumb] =
+    useState<BuiltinTemplateDetailBreadcrumb | null>(null);
 
-    null,
-
-  );
+  const [customTemplateBreadcrumb, setCustomTemplateBreadcrumb] =
+    useState<CustomTemplateDetailBreadcrumb | null>(null);
 
   const [documentBreadcrumb, setDocumentBreadcrumb] = useState<DocumentDetailBreadcrumb | null>(
 
@@ -171,7 +160,8 @@ export default function App() {
   const customerBackRef = useRef<(() => void) | null>(null);
   const customerResetRef = useRef<(() => void) | null>(null);
 
-  const templateBackRef = useRef<(() => void) | null>(null);
+  const builtinTemplateBackRef = useRef<(() => void) | null>(null);
+  const customTemplateBackRef = useRef<(() => void) | null>(null);
 
   const documentBackRef = useRef<(() => void) | null>(null);
 
@@ -196,12 +186,14 @@ export default function App() {
 
     }
 
-    if (activeId !== 'customTemplates' && activeId !== 'builtinTemplates') {
+    if (activeId !== 'builtinTemplates') {
+      setBuiltinTemplateBreadcrumb(null);
+      builtinTemplateBackRef.current = null;
+    }
 
-      setTemplateBreadcrumb(null);
-
-      templateBackRef.current = null;
-
+    if (activeId !== 'customTemplates') {
+      setCustomTemplateBreadcrumb(null);
+      customTemplateBackRef.current = null;
     }
 
   }, [activeId]);
@@ -242,9 +234,8 @@ export default function App() {
       // Re-clicking the active menu tile returns to that section's root list.
       if (id === 'customers') customerResetRef.current?.();
       else if (id === 'documents') documentBackRef.current?.();
-      else if (id === 'builtinTemplates' || id === 'customTemplates') {
-        templateBackRef.current?.();
-      }
+      else if (id === 'builtinTemplates') builtinTemplateBackRef.current?.();
+      else if (id === 'customTemplates') customTemplateBackRef.current?.();
       return;
     }
     setActiveId(id);
@@ -252,12 +243,14 @@ export default function App() {
 
 
 
-  const handleTemplateDetailChange = (detail: TemplateDetailBreadcrumb | null) => {
+  const handleBuiltinTemplateDetailChange = (detail: BuiltinTemplateDetailBreadcrumb | null) => {
+    setBuiltinTemplateBreadcrumb(detail);
+    builtinTemplateBackRef.current = detail?.onBack ?? null;
+  };
 
-    setTemplateBreadcrumb(detail);
-
-    templateBackRef.current = detail?.onBack ?? null;
-
+  const handleCustomTemplateDetailChange = (detail: CustomTemplateDetailBreadcrumb | null) => {
+    setCustomTemplateBreadcrumb(detail);
+    customTemplateBackRef.current = detail?.onBack ?? null;
   };
 
 
@@ -399,8 +392,7 @@ export default function App() {
 
               </div>
 
-            ) : (activeId === 'builtinTemplates' || activeId === 'customTemplates') &&
-              templateBreadcrumb ? (
+            ) : activeId === 'builtinTemplates' && builtinTemplateBreadcrumb ? (
 
               <div className="flex min-w-0 items-center gap-2">
 
@@ -408,7 +400,7 @@ export default function App() {
 
                   type="button"
 
-                  onClick={() => templateBackRef.current?.()}
+                  onClick={() => builtinTemplateBackRef.current?.()}
 
                   className={headerBackBtnCls}
 
@@ -426,13 +418,13 @@ export default function App() {
 
                     type="button"
 
-                    onClick={() => templateBackRef.current?.()}
+                    onClick={() => builtinTemplateBackRef.current?.()}
 
                     className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
 
                   >
 
-                    {activeId === 'builtinTemplates' ? 'Built-in Templates' : 'Custom Templates'}
+                    Built-in Templates
 
                   </button>
 
@@ -440,7 +432,55 @@ export default function App() {
 
                   <span className="truncate font-semibold text-[var(--ba-text-primary)]">
 
-                    {templateBreadcrumb.templateName}
+                    {builtinTemplateBreadcrumb.templateName}
+
+                  </span>
+
+                </nav>
+
+              </div>
+
+            ) : activeId === 'customTemplates' && customTemplateBreadcrumb ? (
+
+              <div className="flex min-w-0 items-center gap-2">
+
+                <button
+
+                  type="button"
+
+                  onClick={() => customTemplateBackRef.current?.()}
+
+                  className={headerBackBtnCls}
+
+                >
+
+                  <ChevronLeft className="size-3.5" aria-hidden />
+
+                  Back
+
+                </button>
+
+                <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1 text-base">
+
+                  <button
+
+                    type="button"
+
+                    onClick={() => customTemplateBackRef.current?.()}
+
+                    className="shrink-0 font-semibold text-[var(--ba-text-muted)] transition-colors hover:text-[var(--ba-text-primary)]"
+
+                  >
+
+                    Custom Templates
+
+                  </button>
+
+                  <ChevronRight className="size-3.5 shrink-0 text-[var(--ba-text-faint)]" aria-hidden />
+
+                  <span className="truncate font-semibold text-[var(--ba-text-primary)]">
+
+                    {customTemplateBreadcrumb.templateName}
 
                   </span>
 
@@ -569,10 +609,7 @@ export default function App() {
 
               <Suspense fallback={screenModuleFallback}>
                 <div className="flex h-full min-h-0 flex-1 flex-col">
-                  <TemplatesScreen
-                    variant="built-in"
-                    onDetailChange={handleTemplateDetailChange}
-                  />
+                  <BuiltinTemplatesScreen onDetailChange={handleBuiltinTemplateDetailChange} />
                 </div>
               </Suspense>
 
@@ -580,10 +617,7 @@ export default function App() {
 
               <Suspense fallback={screenModuleFallback}>
                 <div className="flex h-full min-h-0 flex-1 flex-col">
-                  <TemplatesScreen
-                    variant="custom"
-                    onDetailChange={handleTemplateDetailChange}
-                  />
+                  <CustomTemplatesScreen onDetailChange={handleCustomTemplateDetailChange} />
                 </div>
               </Suspense>
 
@@ -633,16 +667,12 @@ export default function App() {
                 <SupportScreen />
               </Suspense>
 
-            ) : activeId === 'dashboard' ? (
+            ) : (
 
               <DashboardScreen
                 onOpenInspection={(inspectionId) => openDocuments({ inspectionId })}
                 onOpenCalendar={() => setActiveId('calendar')}
               />
-
-            ) : (
-
-              screens[activeId]
 
             )}
 

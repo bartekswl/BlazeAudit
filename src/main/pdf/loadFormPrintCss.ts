@@ -105,6 +105,25 @@ const PDF_PRINT_OVERRIDES = `
     height: 100%;
   }
 
+  .form-page-sheet .form-print-grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 8pt;
+  }
+  .form-page-sheet .form-print-grid th,
+  .form-page-sheet .form-print-grid td {
+    border: 0.6pt solid #222;
+    padding: 2pt 3pt;
+    vertical-align: top;
+    word-wrap: break-word;
+  }
+  .form-page-sheet .form-print-grid th {
+    font-size: 6.5pt;
+    text-align: center;
+    background: #f3f3f3;
+  }
+
   /* Chromium printToPDF: keep flex/grid dividers visible */
   .form-page-sheet .ulc-s1-panel,
   .form-page-sheet .ulc-s1-top,

@@ -73,17 +73,19 @@ function ChoiceCell({
 }
 
 function ChoiceCells({
+  elementId,
   rowId,
   rowValue,
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   rowId: string;
   rowValue: { choice: VoiceCommunicationTestChoice | null };
   readOnly?: boolean;
   onChoice: (choice: VoiceCommunicationTestChoice | null) => void;
 }) {
-  const groupName = `vct-${rowId}`;
+  const groupName = `vct-${elementId}-${rowId}`;
 
   return (
     <>
@@ -143,10 +145,12 @@ function InfoRow({
 }
 
 export function FormVoiceCommunicationTestView({
+  elementId,
   value: rawValue,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (value: VoiceCommunicationTestValue) => void;
@@ -258,6 +262,7 @@ export function FormVoiceCommunicationTestView({
                     <EditableRowText rowId={row.id} text={row.text} className="vct-desc-text" />
                   </td>
                   <ChoiceCells
+                    elementId={elementId}
                     rowId={row.id}
                     rowValue={rowValue}
                     readOnly={readOnly}

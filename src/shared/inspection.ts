@@ -63,7 +63,8 @@ export interface InspectionInput {
 
 /**
  * List/breadcrumb display name: strip the ULC code from the template portion,
- * keep " — Client" (e.g. "Annual Fire Alarm Test — Acme Building").
+ * keep " - Client" (e.g. "Annual Fire Alarm Test - Acme Building").
+ * Also normalizes legacy " — Client" titles to " - Client".
  * If the stored title has no client suffix, `clientName` is appended when provided.
  */
 export function shortInspectionDisplayName(
@@ -73,12 +74,33 @@ export function shortInspectionDisplayName(
   const trimmed = title.trim();
   if (!trimmed) return trimmed;
 
+  const trimmedClient = clientName?.trim() ?? '';
+
   let head = trimmed;
-  let clientSuffix = '';
-  if (trimmed.includes(' — ')) {
+  let clientPart = '';
+  if (trimmedClient && trimmed.endsWith(` - ${trimmedClient}`)) {
+    head = trimmed.slice(0, -` - ${trimmedClient}`.length).trim();
+    clientPart = trimmedClient;
+  } else if (trimmedClient && trimmed.endsWith(` — ${trimmedClient}`)) {
+    head = trimmed.slice(0, -` — ${trimmedClient}`.length).trim();
+    clientPart = trimmedClient;
+  } else if (trimmed.includes(' — ')) {
     const idx = trimmed.lastIndexOf(' — ');
     head = trimmed.slice(0, idx).trim();
-    clientSuffix = trimmed.slice(idx);
+    clientPart = trimmed.slice(idx + 3).trim();
+  } else {
+    const cleaned = trimmed
+      .replace(/\s*-\s*ULC\s*536:2019\s*\(\s*2024\s*\)/gi, '')
+      .replace(/\s*ULC\s*536:2019\s*\(\s*2024\s*\)/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+    if (cleaned.includes(' - ')) {
+      const idx = cleaned.lastIndexOf(' - ');
+      head = cleaned.slice(0, idx).trim();
+      clientPart = cleaned.slice(idx + 3).trim();
+    } else {
+      head = cleaned;
+    }
   }
 
   const testName =
@@ -88,9 +110,8 @@ export function shortInspectionDisplayName(
       .replace(/\s{2,}/g, ' ')
       .trim() || head;
 
-  if (clientSuffix) return `${testName}${clientSuffix}`;
-  const client = clientName?.trim();
-  if (client) return `${testName} — ${client}`;
+  if (clientPart) return `${testName} - ${clientPart}`;
+  if (trimmedClient) return `${testName} - ${trimmedClient}`;
   return testName;
 }
 

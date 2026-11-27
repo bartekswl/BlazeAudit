@@ -9,7 +9,7 @@ import {
   validateProvince,
 } from '../../../shared/address';
 import { BUSINESS_PROFILE_LIMITS, type BusinessProfileInput, type Inspector } from '../../../shared/profile';
-import { inputCls } from '../templates/BlockList';
+import { inputCls } from '../../lib/inputCls';
 import { CompanyLogoMark } from '../../components/CompanyLogoMark';
 import { InlineLoader } from '../../components/LoadingOverlay';
 

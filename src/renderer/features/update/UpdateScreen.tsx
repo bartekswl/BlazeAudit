@@ -146,7 +146,9 @@ export function UpdateScreen() {
                   Update available — v{status.version}
                 </p>
                 <p className="mt-0.5 text-xs text-[var(--ba-text-muted)]">
-                  Download size is small — only the changed parts are fetched.
+                  {status.fullDownload
+                    ? 'Installs the latest release in one step. Your data stays in place.'
+                    : 'Download size is small — only the changed parts are fetched.'}
                 </p>
               </div>
               <button type="button" className="ba-btn-primary" onClick={() => setConfirmOpen(true)}>

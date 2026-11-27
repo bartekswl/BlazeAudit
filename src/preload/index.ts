@@ -35,6 +35,8 @@ import type {
 } from '../shared/profile';
 import type { NameBadge, NameBadgeInput } from '../shared/nameBadges';
 import type { CalendarTask, CalendarTaskInput } from '../shared/calendarTasks';
+import type { PenRead } from '../shared/form/readContent/applyReadPages';
+import type { OcrPage } from '../shared/form/readContent/ocrTypes';
 import type { RollbackInfo, UpdateStatus } from '../shared/update';
 import type { Client, ClientInput } from '../shared/types';
 import type {
@@ -178,6 +180,8 @@ const api = {
       ipcRenderer.invoke(IpcChannels.inspectionsCreate, input),
     duplicate: (id: string): Promise<Inspection> =>
       ipcRenderer.invoke(IpcChannels.inspectionsDuplicate, id),
+    reassign: (id: string, clientId: string): Promise<Inspection> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsReassign, id, clientId),
     update: (id: string, input: InspectionInput): Promise<Inspection> =>
       ipcRenderer.invoke(IpcChannels.inspectionsUpdate, id, input),
     remove: (id: string): Promise<void> => ipcRenderer.invoke(IpcChannels.inspectionsDelete, id),
@@ -198,6 +202,22 @@ const api = {
       targetPath?: string,
     ): Promise<{ saved: false } | { saved: true; filePath: string }> =>
       ipcRenderer.invoke(IpcChannels.inspectionsExportPdf, id, html, targetPath),
+    cancelPdfExport: (): Promise<void> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsCancelPdfExport),
+    readContent: (): Promise<{ pages: OcrPage[]; sources: string[] } | null> =>
+      ipcRenderer.invoke(IpcChannels.inspectionsReadContent),
+    readHandwriting: (
+      jobs: {
+        scanIndex: number;
+        filePath: string;
+        flatten?: boolean;
+        ocrPage?: OcrPage;
+        anchors?: Record<string, readonly [number, number]>;
+        boxes: { key: string; x: number; y: number; w: number; h: number; allowed?: string }[];
+        marks?: { key: string; yes: { x: number; y: number; w: number; h: number }; no: { x: number; y: number; w: number; h: number } }[];
+        checks?: { key: string; x: number; y: number; w: number; h: number }[];
+      }[],
+    ): Promise<PenRead[]> => ipcRenderer.invoke(IpcChannels.inspectionsReadHandwriting, jobs),
     inspectPdfImport: (): Promise<
       | { canceled: true }
       | {

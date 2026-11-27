@@ -72,17 +72,19 @@ function ChoiceCell({
 }
 
 function ChoiceCells({
+  elementId,
   rowId,
   rowValue,
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   rowId: string;
   rowValue: { choice: AnnunciatorDeviceTestChoice | null };
   readOnly?: boolean;
   onChoice: (choice: AnnunciatorDeviceTestChoice | null) => void;
 }) {
-  const groupName = `artu-${rowId}`;
+  const groupName = `artu-${elementId}-${rowId}`;
 
   return (
     <>
@@ -146,10 +148,12 @@ function InfoRow({
 }
 
 export function FormAnnunciatorDeviceTestView({
+  elementId,
   value,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (next: AnnunciatorDeviceTestValue) => void;
@@ -267,6 +271,7 @@ export function FormAnnunciatorDeviceTestView({
                     <EditableRowText rowId={row.id} text={row.text} className="artu-desc-text" />
                   </td>
                   <ChoiceCells
+                    elementId={elementId}
                     rowId={row.id}
                     rowValue={rowValue}
                     readOnly={readOnly}

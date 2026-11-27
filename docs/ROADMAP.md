@@ -141,6 +141,7 @@ stubbed in earlier phases.)
 
 ## Backlog / later
 
+- Move a saved report onto a different existing client. The report is already linked by client id, so this is an update of that link (and the client id stored in the document). No schema change. There is no button for it yet.
 - Default fire-inspection templates shipped with the app.
 - Template import/export between machines.
 - Auto-update for installed app.

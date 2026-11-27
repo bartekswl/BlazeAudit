@@ -2,7 +2,7 @@
 export type UpdateStatus =
   | { phase: 'idle' }
   | { phase: 'checking' }
-  | { phase: 'available'; version: string; notes: string | null }
+  | { phase: 'available'; version: string; notes: string | null; fullDownload?: boolean }
   | { phase: 'not-available'; version: string }
   | {
       phase: 'downloading';

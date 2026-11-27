@@ -102,10 +102,12 @@ function InfoRow({
 }
 
 export function FormPowerSupplyInspectionView({
+  elementId,
   value: rawValue,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (value: unknown) => void;
@@ -213,7 +215,7 @@ export function FormPowerSupplyInspectionView({
                     <ChoiceCell
                       key={variant}
                       choice={rowValue.choice}
-                      groupName={`psi-${row.id}`}
+                      groupName={`psi-${elementId}-${row.id}`}
                       readOnly={readOnly}
                       variant={variant}
                       onSelect={() => publish(setPowerSupplyInspectionChoice(data, row.id, variant))}

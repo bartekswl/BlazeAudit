@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import type { Block, BlockPath, BlockType } from '../../../shared/document';
 import { insertBlock } from '../../../shared/document';
-import { BLOCK_CATALOG } from '../templates/blockCatalog';
-import { inputCls } from '../templates/BlockList';
+import { inputCls } from '../../lib/inputCls';
+import { BLOCK_CATALOG } from '../customTemplates/blockCatalog';
 
 export function InsertSectionDivider({ onInsert }: { onInsert: () => void }) {
   return (

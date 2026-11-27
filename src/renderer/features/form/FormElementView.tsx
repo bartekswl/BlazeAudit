@@ -440,6 +440,7 @@ function FormElementBody({
     case 'yesNoSummary':
       return (
         <FormYesNoSummaryView
+          elementId={element.id}
           items={element.items}
           value={value}
           readOnly={readOnly}
@@ -500,6 +501,7 @@ function FormElementBody({
     case 'documentation':
       return (
         <FormDocumentationView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -508,6 +510,7 @@ function FormElementBody({
     case 'controlUnitTest':
       return (
         <FormControlUnitTestView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -516,6 +519,7 @@ function FormElementBody({
     case 'controlUnitRecord':
       return (
         <FormControlUnitRecordView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -524,6 +528,7 @@ function FormElementBody({
     case 'voiceCommunicationTest':
       return (
         <FormVoiceCommunicationTestView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -532,6 +537,7 @@ function FormElementBody({
     case 'powerSupplyInspection':
       return (
         <FormPowerSupplyInspectionView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -540,6 +546,7 @@ function FormElementBody({
     case 'emergencyPowerSupplyTest':
       return (
         <FormEmergencyPowerSupplyTestView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           powerSuppliesStacked={powerSuppliesStacked}
@@ -549,6 +556,7 @@ function FormElementBody({
     case 'annunciatorDeviceTest':
       return (
         <FormAnnunciatorDeviceTestView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -557,6 +565,7 @@ function FormElementBody({
     case 'sequentialDisplayTest':
       return (
         <FormSequentialDisplayTestView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -565,6 +574,7 @@ function FormElementBody({
     case 'remoteTroubleSignalUnitTest':
       return (
         <FormRemoteTroubleSignalUnitTestView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -573,6 +583,7 @@ function FormElementBody({
     case 'printerTest':
       return (
         <FormPrinterTestView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -581,6 +592,7 @@ function FormElementBody({
     case 'ancillaryDeviceCircuitTest':
       return (
         <FormAncillaryDeviceCircuitTestView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -589,6 +601,7 @@ function FormElementBody({
     case 'fireSignalReceivingCentreInterconnection':
       return (
         <FormFireSignalReceivingCentreInterconnectionView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}
@@ -597,6 +610,7 @@ function FormElementBody({
     case 'dataCommunicationLinkFaultTolerance':
       return (
         <FormDataCommunicationLinkFaultToleranceView
+          elementId={element.id}
           value={value}
           readOnly={readOnly}
           onChange={onChange}

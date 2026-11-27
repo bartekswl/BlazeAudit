@@ -72,6 +72,7 @@ function ChoiceCell({
 }
 
 function ChoiceCells({
+  elementId,
   rowId,
   rowValue,
   yesDisabled,
@@ -79,6 +80,7 @@ function ChoiceCells({
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   rowId: string;
   rowValue: { choice: ControlUnitRecordChoice | null };
   yesDisabled?: boolean;
@@ -86,7 +88,7 @@ function ChoiceCells({
   readOnly?: boolean;
   onChoice: (choice: ControlUnitRecordChoice | null) => void;
 }) {
-  const groupName = `cur-${rowId}`;
+  const groupName = `cur-${elementId}-${rowId}`;
 
   if (yesDisabled && noDisabled) {
     return (
@@ -162,10 +164,12 @@ function InfoRow({
 }
 
 export function FormControlUnitRecordView({
+  elementId,
   value: rawValue,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (value: ControlUnitRecordValue) => void;
@@ -280,6 +284,7 @@ export function FormControlUnitRecordView({
                     )}
                   </td>
                   <ChoiceCells
+                    elementId={elementId}
                     rowId={row.id}
                     rowValue={rowValue}
                     yesDisabled={row.yesDisabled}

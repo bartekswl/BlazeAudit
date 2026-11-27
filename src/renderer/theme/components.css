@@ -184,40 +184,56 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.85;
+  opacity: 0.96;
 }
 
 .ba-auth-bg__sweep--1 {
-  animation: ba-auth-sweep 12s linear infinite;
+  will-change: transform;
+  opacity: 0.94;
+  animation: ba-auth-sweep-1 14s ease-in-out infinite alternate;
   transform-origin: center;
 }
 
 .ba-auth-bg__sweep--2 {
-  animation: ba-auth-sweep 18s linear infinite reverse;
+  will-change: transform;
+  opacity: 0.88;
+  animation: ba-auth-sweep-2 19s ease-in-out infinite alternate-reverse;
   transform-origin: center;
 }
 
 .ba-auth-bg__grid {
-  stroke: rgb(249 115 22 / 0.14);
-  opacity: 0.45;
-  animation: ba-auth-grid-pulse 6s ease-in-out infinite;
+  stroke: rgb(249 115 22 / 0.16);
+  opacity: 0.36;
 }
 
 .ba-auth-bg__pulse {
-  animation: ba-auth-ring 5.5s ease-out infinite;
-  transform-origin: 780px 360px;
+  will-change: transform, opacity;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ba-auth-ring 5.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.ba-auth-bg__orbit {
+  will-change: transform, opacity;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ba-auth-orbit 11s ease-in-out infinite alternate;
 }
 
 .ba-auth-bg__pulse--flame {
-  stroke: rgb(249 115 22 / 0.22);
+  stroke: rgb(249 115 22 / 0.48);
 }
 
 .ba-auth-bg__pulse--sky {
-  stroke: rgb(56 189 248 / 0.14);
+  stroke: rgb(56 189 248 / 0.34);
 }
 
 .ba-auth-bg__pulse--delay {
-  animation-delay: 1.8s;
+  animation-delay: 1.85s;
+}
+
+.ba-auth-bg__pulse--delay-2 {
+  animation-delay: 3.65s;
 }
 
 /* Light auth ? orange / blue (matches app light theme) */
@@ -370,17 +386,21 @@
   }
 }
 
-@keyframes ba-auth-sweep {
+@keyframes ba-auth-sweep-1 {
   from {
-    transform: translateX(-2%);
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 0.95;
+    transform: translate3d(-4.5%, -1.6%, 0) scaleY(0.97);
   }
   to {
-    transform: translateX(2%);
-    opacity: 0.55;
+    transform: translate3d(4.5%, 1.6%, 0) scaleY(1.03);
+  }
+}
+
+@keyframes ba-auth-sweep-2 {
+  from {
+    transform: translate3d(-4%, 1.4%, 0) scaleY(1.03);
+  }
+  to {
+    transform: translate3d(4%, -1.4%, 0) scaleY(0.97);
   }
 }
 
@@ -396,15 +416,29 @@
 
 @keyframes ba-auth-ring {
   0% {
-    transform: scale(0.72);
-    opacity: 0.55;
+    transform: scale(0.58);
+    opacity: 0;
   }
-  70% {
-    opacity: 0.12;
+  18% {
+    opacity: 0.78;
+  }
+  72% {
+    opacity: 0.28;
   }
   100% {
-    transform: scale(1.35);
+    transform: scale(1.52);
     opacity: 0;
+  }
+}
+
+@keyframes ba-auth-orbit {
+  from {
+    transform: translate3d(-24px, -16px, 0) scale(0.92);
+    opacity: 0.32;
+  }
+  to {
+    transform: translate3d(26px, 18px, 0) scale(1.12);
+    opacity: 0.62;
   }
 }
 
@@ -531,8 +565,31 @@ tr.ba-row-selected > td {
   text-shadow: 0 1px 10px rgb(255 255 255 / 0.8);
 }
 
-/* Boot overlay always keeps the dark login graphic (even if light theme already painted). */
-.app-boot-overlay .ba-auth-bg__base {
+[data-theme='light'] .ba-loading-overlay .ba-loading-brand__audit-path {
+  fill: #1c1917;
+}
+
+[data-theme='light'] .ba-loading-overlay .ba-loading-brand__badge {
+  border-color: rgb(232 93 4 / 0.32);
+  background: rgb(255 237 213 / 0.65);
+  color: #c2410c;
+  opacity: 0.85;
+}
+
+[data-theme='light'] .ba-loading-overlay .ba-loading-brand__sub {
+  color: #57534e;
+  opacity: 0.55;
+}
+
+[data-theme='light'] .ba-loading-overlay .ba-loading-photo {
+  mix-blend-mode: normal;
+  opacity: 0.2;
+  filter: saturate(1.05) contrast(1.04);
+}
+
+/* Boot overlay and 3/4 PDF export window always keep the dark studio wash (even in light theme). */
+.app-boot-overlay .ba-auth-bg__base,
+.ba-pdf-export-window .ba-auth-bg__base {
   background:
     radial-gradient(ellipse 70% 55% at 8% -5%, rgb(249 115 22 / 0.28), transparent 55%),
     radial-gradient(ellipse 60% 50% at 92% 8%, rgb(14 165 233 / 0.18), transparent 52%),
@@ -540,32 +597,39 @@ tr.ba-row-selected > td {
     linear-gradient(165deg, #0c0a09 0%, #09090b 42%, #0a0f14 100%);
 }
 
-.app-boot-overlay .ba-auth-bg__glow--a {
+.app-boot-overlay .ba-auth-bg__glow--a,
+.ba-pdf-export-window .ba-auth-bg__glow--a {
   background: rgb(249 115 22 / 0.22);
 }
 
-.app-boot-overlay .ba-auth-bg__glow--b {
+.app-boot-overlay .ba-auth-bg__glow--b,
+.ba-pdf-export-window .ba-auth-bg__glow--b {
   background: rgb(14 165 233 / 0.16);
 }
 
-.app-boot-overlay .ba-auth-bg__glow--c {
+.app-boot-overlay .ba-auth-bg__glow--c,
+.ba-pdf-export-window .ba-auth-bg__glow--c {
   background: rgb(194 65 12 / 0.18);
 }
 
-.app-boot-overlay .ba-auth-bg__lines {
-  opacity: 0.85;
+.app-boot-overlay .ba-auth-bg__lines,
+.ba-pdf-export-window .ba-auth-bg__lines {
+  opacity: 0.96;
 }
 
-.app-boot-overlay .ba-auth-bg__grid {
-  stroke: rgb(249 115 22 / 0.14);
+.app-boot-overlay .ba-auth-bg__grid,
+.ba-pdf-export-window .ba-auth-bg__grid {
+  stroke: rgb(249 115 22 / 0.16);
 }
 
-.app-boot-overlay .ba-auth-bg__pulse--flame {
-  stroke: rgb(249 115 22 / 0.22);
+.app-boot-overlay .ba-auth-bg__pulse--flame,
+.ba-pdf-export-window .ba-auth-bg__pulse--flame {
+  stroke: rgb(249 115 22 / 0.48);
 }
 
-.app-boot-overlay .ba-auth-bg__pulse--sky {
-  stroke: rgb(56 189 248 / 0.14);
+.app-boot-overlay .ba-auth-bg__pulse--sky,
+.ba-pdf-export-window .ba-auth-bg__pulse--sky {
+  stroke: rgb(56 189 248 / 0.34);
 }
 
 .app-boot-overlay .boot-loader {
@@ -3759,6 +3823,41 @@ input[type='date']:not(:disabled):not([readonly])::-webkit-calendar-picker-indic
   line-height: 1.08;
   padding-left: 0.08rem;
   padding-right: 0.08rem;
+}
+
+.rrg-panel--elr .rrg-th[data-col='serviceRequired'] {
+  padding-left: 0.02rem;
+  padding-right: 0.02rem;
+}
+
+.rrg-panel--elr .rrg-th[data-col='serviceRequired'] .rrg-th-label {
+  padding-left: 0;
+  padding-right: 0;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
+.rrg-panel--elr .rrg-td[data-col='serviceRequired'] {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.rrg-panel--elr .rrg-th[data-col='floorNumber'],
+.rrg-panel--elr .rrg-th[data-col='voltage'] {
+  font-size: 0.4rem;
+  letter-spacing: 0;
+  padding-left: 0.02rem;
+  padding-right: 0.02rem;
+}
+
+.rrg-panel--elr .rrg-th[data-col='floorNumber'] .rrg-th-label,
+.rrg-panel--elr .rrg-th[data-col='voltage'] .rrg-th-label {
+  font-size: 0.4rem;
+  letter-spacing: 0;
+  padding-left: 0;
+  padding-right: 0;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 
 .rrg-panel--elr .rrg-accent-bar {

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '../lib/cn';
 import { AuthBackground } from '../features/auth/AuthBackground';
+import { LoadingBrandPhotos } from './LoadingBrandBackdrop';
 import { TitleBar } from './TitleBar';
 import { StartupLoader } from './StartupLoader';
 
@@ -19,7 +20,9 @@ export function AppFrame({
   bootOverlay?: BootOverlayPhase;
 }) {
   const showChrome = bootOverlay !== 'visible';
-  const showOverlay = bootOverlay !== 'hidden';
+  const hasPersistentDomLoader =
+    typeof document !== 'undefined' && document.getElementById('app-boot-loader') !== null;
+  const showOverlay = bootOverlay !== 'hidden' && !hasPersistentDomLoader;
 
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-[var(--ba-app-bg)]">
@@ -34,8 +37,9 @@ export function AppFrame({
           aria-busy={bootOverlay === 'visible'}
         >
           <AuthBackground />
+          <LoadingBrandPhotos />
           <div className="relative z-10 [-webkit-app-region:no-drag]">
-            <StartupLoader inline />
+            <StartupLoader inline branded />
           </div>
         </div>
       ) : null}

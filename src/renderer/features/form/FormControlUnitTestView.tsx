@@ -78,17 +78,19 @@ function ChoiceCell({
 }
 
 function ChoiceCells({
+  elementId,
   rowId,
   rowValue,
   readOnly,
   onChoice,
 }: {
+  elementId: string;
   rowId: string;
   rowValue: { choice: ControlUnitTestChoice | null };
   readOnly?: boolean;
   onChoice: (choice: ControlUnitTestChoice | null) => void;
 }) {
-  const groupName = `cut-${rowId}`;
+  const groupName = `cut-${elementId}-${rowId}`;
 
   return (
     <>
@@ -196,10 +198,12 @@ function InfoRow({
 }
 
 export function FormControlUnitTestView({
+  elementId,
   value: rawValue,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (value: ControlUnitTestValue) => void;
@@ -338,6 +342,7 @@ export function FormControlUnitTestView({
                     <EditableRowText rowId={row.id} text={row.text} className="cut-desc-text" />
                   </td>
                   <ChoiceCells
+                    elementId={elementId}
                     rowId={row.id}
                     rowValue={rowValue}
                     readOnly={readOnly}

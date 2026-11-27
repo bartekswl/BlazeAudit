@@ -71,6 +71,9 @@ export default defineConfig(({ command }) => {
                 'electron-updater',
                 // CJS package — Vite ESM interop breaks (__extends undefined).
                 'pdf-lib',
+                // Keep WASM runtime external so ort-wasm-simd-threaded.wasm resolves cleanly.
+                'onnxruntime-web',
+                'onnxruntime-web/wasm',
               ],
               output: { format: 'es', entryFileNames: 'index.js' },
             },

@@ -8,9 +8,11 @@ import {
   BetweenVerticalStart,
   MousePointer2,
   Rows3,
+  ScanText,
   Scissors,
   TriangleAlert,
   Undo2,
+  Users,
 } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { CADENCE_PRESETS, type CadencePreset } from '../../../shared/cadence';
@@ -33,6 +35,8 @@ import {
   syncFormDocumentInspectionDate,
   syncFormDocumentProjectNumber,
   extractFormDocumentProjectNumber,
+  applyScannedPages,
+  planHandwriting,
   migrateFormInspectionPowerSupplyLayout,
   migrateFormInspectionIdrRowGaps,
   migrateFormInspectionEmergencyLightingLegendPage,
@@ -50,6 +54,7 @@ import {
 import { mergeElementValuePatch } from '../../../shared/form/rowTextOverrides';
 import type { Inspection, InspectionStatus } from '../../../shared/inspection';
 import { formatDateTimeCompact } from '../../../shared/dates';
+import type { Client } from '../../../shared/types';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useRegisterFormOutline } from './DocumentOutlineContext';
 import { useDocumentAutosave } from './useDocumentAutosave';
@@ -57,12 +62,13 @@ import { useDocumentUndoHotkey, useDocumentUndoStack } from './useDocumentUndoSt
 import { FormPageCanvas, type FormPageExtraControlsConfig } from '../form/FormPageCanvas';
 import { FormPageViewport } from '../form/FormPageViewport';
 import { collectLinedNotesVisibleLines } from '../form/collectLinedNotesVisibleLines';
-import { LoadingOverlay } from '../../components/LoadingOverlay';
+import { LoadingOverlay, PdfExportOverlay } from '../../components/LoadingOverlay';
 import {
   insertEmptyRowsViaDom,
   useFormFieldClipboard,
 } from './useFormFieldClipboard';
 import { InsertLinePopup } from './InsertLinePopup';
+import { ReassignClientDialog } from './ReassignClientDialog';
 
 type PendingPageRemove =
   | { kind: 'idr'; pageIndex: number }
@@ -135,6 +141,8 @@ function FormInspectionEditorInner({
   const [exportingPdf, setExportingPdf] = useState(false);
   const [pdfMessage, setPdfMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [readNotice, setReadNotice] = useState<string | null>(null);
+  const [readingContent, setReadingContent] = useState(false);
   const [isDirty, setIsDirty] = useState(() => {
     const migrated = migrateFormInspectionEmergencyLightingLegendPage(
       migrateFormInspectionIdrRowGaps(migrateFormInspectionPowerSupplyLayout(formDocInitial)),
@@ -148,6 +156,9 @@ function FormInspectionEditorInner({
   const [pendingPageRemove, setPendingPageRemove] = useState<PendingPageRemove | null>(null);
   const [pendingDuplicate, setPendingDuplicate] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
+  const [reassignOpen, setReassignOpen] = useState(false);
+  const [reassignClients, setReassignClients] = useState<Client[]>([]);
+  const [reassigning, setReassigning] = useState(false);
   const [pendingDateChange, setPendingDateChange] = useState<string | null>(null);
   const [pendingTemplateLineClear, setPendingTemplateLineClear] =
     useState<TemplateLineClearRequest | null>(null);
@@ -326,6 +337,85 @@ function FormInspectionEditorInner({
       setDuplicating(false);
     }
   }, [inspection.id, isDirty, onSaved, save]);
+
+  const openReassign = useCallback(async () => {
+    setError(null);
+    try {
+      setReassignClients(await window.blazeaudit.clients.list());
+      setReassignOpen(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load clients.');
+    }
+  }, []);
+
+  const confirmReassign = useCallback(
+    async (clientId: string) => {
+      setReassigning(true);
+      setError(null);
+      try {
+        if (isDirty) {
+          const ok = await save();
+          if (!ok) throw new Error('Save failed before reassign.');
+        }
+        const updated = await window.blazeaudit.inspections.reassign(inspection.id, clientId);
+        setFormDoc((prev) =>
+          prev.clientId === updated.clientId ? prev : { ...prev, clientId: updated.clientId },
+        );
+        setContext(await window.blazeaudit.inspections.resolveContext(updated.id));
+        setReassignOpen(false);
+        onSaved(updated);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to reassign document.');
+        throw e;
+      } finally {
+        setReassigning(false);
+      }
+    },
+    [inspection.id, isDirty, onSaved, save],
+  );
+
+  const readContent = useCallback(async () => {
+    setError(null);
+    setReadNotice(null);
+    setReadingContent(true);
+    try {
+      const scanned = await window.blazeaudit.inspections.readContent();
+      if (!scanned) return;
+      const jobs = planHandwriting(formDocRef.current, scanned.pages).flatMap((job) => {
+        const filePath = scanned.sources[job.scanIndex] ?? '';
+        if (!/\.(png|jpe?g|bmp|tiff?)$/i.test(filePath)) return [];
+        return [{
+          scanIndex: job.scanIndex,
+          filePath,
+          flatten: job.flatten,
+          ocrPage: scanned.pages[job.scanIndex],
+          anchors: job.anchors,
+          boxes: job.boxes,
+          marks: job.marks,
+          checks: job.checks,
+        }];
+      });
+      const reads = jobs.length > 0 ? await window.blazeaudit.inspections.readHandwriting(jobs) : [];
+      const result = applyScannedPages(formDocRef.current, scanned.pages, reads);
+      recordUndo('read-content');
+      setFormDoc(result.document);
+      const focusSectionId = result.focusSectionId;
+      if (focusSectionId) {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => scrollToFormSection(focusSectionId));
+        });
+      }
+      const readProject = extractFormDocumentProjectNumber(result.document);
+      if (!projectNumber.trim() && readProject) setProjectNumber(readProject);
+      setIsDirty(true);
+      setSaveState((state) => (state === 'saved' ? 'idle' : state));
+      setReadNotice(result.summary);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not read that document.');
+    } finally {
+      setReadingContent(false);
+    }
+  }, [projectNumber, recordUndo]);
 
   const markDirty = useCallback(() => {
     setIsDirty(true);
@@ -557,12 +647,24 @@ function FormInspectionEditorInner({
     [context?.template?.code, context?.template?.title, context?.template?.name],
   );
 
+  const pdfExportRunRef = useRef(0);
+
+  const cancelPdfExport = useCallback(() => {
+    pdfExportRunRef.current += 1;
+    setExportingPdf(false);
+    void window.blazeaudit.inspections.cancelPdfExport();
+  }, []);
+
   const exportPdf = async () => {
     setPdfMessage(null);
+    setError(null);
     // Prefetch the print builder while the user picks a save path.
     const buildModulePromise = import('../form/buildFormPrintHtml');
     const targetPath = await window.blazeaudit.inspections.pickPdfPath(inspection.id);
     if (!targetPath) return;
+
+    const runId = pdfExportRunRef.current + 1;
+    pdfExportRunRef.current = runId;
 
     // Force the overlay to paint before heavy HTML/PDF work blocks the UI.
     flushSync(() => {
@@ -574,8 +676,10 @@ function FormInspectionEditorInner({
     try {
       // Persist first so the PDF embed JSON matches the visible report.
       await save();
+      if (pdfExportRunRef.current !== runId) return;
       const linedNotesVisibleLines = collectLinedNotesVisibleLines();
       const { buildFormPrintHtml } = await buildModulePromise;
+      if (pdfExportRunRef.current !== runId) return;
       const latest = formDocRef.current;
       const printHtml = await buildFormPrintHtml({
         form: latest.form,
@@ -591,16 +695,21 @@ function FormInspectionEditorInner({
         title,
         linedNotesVisibleLines,
       });
+      if (pdfExportRunRef.current !== runId) return;
       const result = await window.blazeaudit.inspections.exportPdf(
         inspection.id,
         printHtml,
         targetPath,
       );
+      if (pdfExportRunRef.current !== runId) return;
       if (result.saved) setPdfMessage(`Exported to ${result.filePath}`);
     } catch (e) {
+      if (pdfExportRunRef.current !== runId) return;
       setError(e instanceof Error ? e.message : 'PDF export failed.');
     } finally {
-      setExportingPdf(false);
+      if (pdfExportRunRef.current === runId) {
+        setExportingPdf(false);
+      }
     }
   };
 
@@ -613,8 +722,9 @@ function FormInspectionEditorInner({
 
   return (
     <div className="relative flex h-full min-h-0 flex-col gap-2">
-      {exportingPdf ? <LoadingOverlay label="Exporting PDF…" /> : null}
+      {exportingPdf ? <PdfExportOverlay label="Creating PDF..." onCancel={cancelPdfExport} /> : null}
       {duplicating ? <LoadingOverlay label="Duplicating report…" /> : null}
+      {reassigning ? <LoadingOverlay label="Reassigning…" /> : null}
       {pendingDuplicate ? (
         <ConfirmDialog
           title="Duplicate report?"
@@ -630,6 +740,15 @@ function FormInspectionEditorInner({
           </p>
           <p>All other content stays the same.</p>
         </ConfirmDialog>
+      ) : null}
+      {reassignOpen ? (
+        <ReassignClientDialog
+          clients={reassignClients}
+          currentClientId={inspection.clientId}
+          documentTitle={title}
+          onClose={() => setReassignOpen(false)}
+          onReassign={confirmReassign}
+        />
       ) : null}
       {pendingTemplateLineClear != null ? (
         <ConfirmDialog
@@ -688,6 +807,7 @@ function FormInspectionEditorInner({
         </ConfirmDialog>
       ) : null}
       {error && <div className="ba-alert ba-alert--error shrink-0">{error}</div>}
+      {readNotice && <div className="ba-alert ba-alert--success shrink-0">{readNotice}</div>}
       {pdfMessage && <div className="ba-alert ba-alert--success shrink-0">{pdfMessage}</div>}
 
       {metaPinned ? (
@@ -807,16 +927,38 @@ function FormInspectionEditorInner({
         className="flex shrink-0 flex-wrap items-center justify-between gap-1 py-0.5"
         data-ba-clipboard-toolbar=""
       >
-        <button
-          type="button"
-          disabled={duplicating || saveState === 'saving'}
-          onClick={() => setPendingDuplicate(true)}
-          className={toolbarBtnCls}
-          title="Create a copy of this report with today's date"
-        >
-          <Copy className="size-3" />
-          Duplicate Report
-        </button>
+        <div className="flex flex-wrap items-center gap-1">
+          <button
+            type="button"
+            disabled={duplicating || reassigning || saveState === 'saving'}
+            onClick={() => setPendingDuplicate(true)}
+            className={toolbarBtnCls}
+            title="Create a copy of this report with today's date"
+          >
+            <Copy className="size-3" />
+            Duplicate Report
+          </button>
+          <button
+            type="button"
+            disabled={duplicating || reassigning || saveState === 'saving'}
+            onClick={() => void openReassign()}
+            className={toolbarBtnCls}
+            title="Assign this report to a different client. Address and other form fields stay as written."
+          >
+            <Users className="size-3" />
+            Change Client
+          </button>
+          <button
+            type="button"
+            disabled={readingContent || saveState === 'saving'}
+            onClick={() => void readContent()}
+            className={toolbarBtnCls}
+            title="Read handwriting from a photo or scan of this BlazeAudit form. Undo reverses it."
+          >
+            <ScanText className="size-3" />
+            {readingContent ? 'Reading…' : 'Read Content'}
+          </button>
+        </div>
         <div className="flex flex-wrap items-center justify-end gap-1">
           <button
             type="button"
@@ -866,7 +1008,7 @@ function FormInspectionEditorInner({
             title={
               lineSelectMode
                 ? 'Exit line select mode'
-                : 'Select entire table rows (click / drag). Cut shifts rows up; Backspace clears in place.'
+                : 'Content tables: select whole data rows (click / drag; Cut shifts up). Checklist / legend lines: remove or clear pre-printed rows.'
             }
             aria-pressed={lineSelectMode}
           >

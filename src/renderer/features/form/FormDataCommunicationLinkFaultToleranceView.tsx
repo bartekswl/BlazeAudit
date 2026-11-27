@@ -107,12 +107,14 @@ function InfoRow({
 }
 
 function DclftPanel({
+  elementId,
   blockId,
   block,
   documentValue,
   readOnly,
   onEmit,
 }: {
+  elementId: string;
   blockId: DclftBlockId;
   block: DclftBlockValue;
   documentValue: unknown;
@@ -225,7 +227,7 @@ function DclftPanel({
               const lineId = `${blockId}.${row.id}`;
               if (isLogicalTemplateLineCollapsed(documentValue, lineId)) return null;
               const rowValue = block.checklist[row.id] ?? { choice: null };
-              const groupName = `dclft-${blockId}-${row.id}`;
+              const groupName = `dclft-${elementId}-${blockId}-${row.id}`;
               return (
                 <tr
                   key={row.id}
@@ -289,10 +291,12 @@ function DclftPanel({
 }
 
 export function FormDataCommunicationLinkFaultToleranceView({
+  elementId,
   value: rawValue,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (next: unknown) => void;
@@ -308,6 +312,7 @@ export function FormDataCommunicationLinkFaultToleranceView({
   return (
     <div className="dclft-stack">
       <DclftPanel
+        elementId={elementId}
         blockId="primary"
         block={value.primary}
         documentValue={rawValue}
@@ -315,6 +320,7 @@ export function FormDataCommunicationLinkFaultToleranceView({
         onEmit={emit}
       />
       <DclftPanel
+        elementId={elementId}
         blockId="additional"
         block={value.additional}
         documentValue={rawValue}

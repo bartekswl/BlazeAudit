@@ -20,6 +20,8 @@ asarUnpack:
   - '**/node_modules/better-sqlite3-multiple-ciphers/**'
   - '**/node_modules/@node-rs/argon2/**'
   - '**/node_modules/@node-rs/argon2-*/**'
+  - '**/node_modules/onnxruntime-web/dist/*.wasm'
+  - '**/node_modules/onnxruntime-web/dist/*.mjs'
 
 # Keep the runtime window icon available at process.resourcesPath/app-icon.png
 # (see resolveAppIconPath in src/main/index.ts).
@@ -30,6 +32,8 @@ extraResources:
     to: titlebar-icon.png
   - from: resources/app-icon.ico
     to: app-icon.ico
+  - from: resources/ocr
+    to: ocr
 
 win:
   target:

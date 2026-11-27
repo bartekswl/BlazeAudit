@@ -96,10 +96,12 @@ function OperationCell({
 }
 
 export function FormAncillaryDeviceCircuitTestView({
+  elementId,
   value: rawValue,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   value: unknown;
   readOnly?: boolean;
   onChange?: (next: AncillaryDeviceCircuitTestValue) => void;
@@ -238,7 +240,7 @@ export function FormAncillaryDeviceCircuitTestView({
                 </td>
                 <OperationCell
                   choice={row.operationConfirmed}
-                  groupName={`adc-op-${rowIndex}`}
+                  groupName={`adc-op-${elementId}-${rowIndex}`}
                   readOnly={readOnly}
                   variant="yes"
                   onSelect={() =>
@@ -250,7 +252,7 @@ export function FormAncillaryDeviceCircuitTestView({
                 />
                 <OperationCell
                   choice={row.operationConfirmed}
-                  groupName={`adc-op-${rowIndex}`}
+                  groupName={`adc-op-${elementId}-${rowIndex}`}
                   readOnly={readOnly}
                   variant="no"
                   onSelect={() =>

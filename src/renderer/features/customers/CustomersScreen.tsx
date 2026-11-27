@@ -26,7 +26,7 @@ import { ListPagination } from '../../components/ListPagination';
 import { paginateItems } from '../../lib/pagination';
 import { CustomerDetailScreen } from './CustomerDetailScreen';
 import { filterClients } from './filterClients';
-import { inputCls } from '../templates/BlockList';
+import { inputCls } from '../../lib/inputCls';
 
 const InspectionEditor = lazy(() =>
   import('../documents/InspectionEditor').then((module) => ({ default: module.InspectionEditor })),

@@ -102,11 +102,13 @@ function ChoiceCell({
 }
 
 export function FormYesNoSummaryView({
+  elementId,
   items,
   value: rawValue,
   readOnly,
   onChange,
 }: {
+  elementId: string;
   items: YesNoSummaryItem[];
   value: unknown;
   readOnly?: boolean;
@@ -153,7 +155,7 @@ export function FormYesNoSummaryView({
           {items.map((item) => {
             if (isLogicalTemplateLineCollapsed(rawValue, item.id)) return null;
             const row = value[item.id] ?? { choice: null };
-            const groupName = `yns-${item.id}`;
+            const groupName = `yns-${elementId}-${item.id}`;
             const choice = row.choice;
             return (
               <tr
